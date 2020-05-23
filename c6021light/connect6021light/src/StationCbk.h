@@ -8,14 +8,15 @@
  */
 class StationCbk : public RR32Can::StationCbk {
  public:
-  RR32Can::Locomotive* getLoco(RR32Can::Locomotive::Uid_t uid) override{ return nullptr;};
+  RR32Can::Locomotive* getLoco(RR32Can::Locomotive::Uid_t uid) override { return nullptr; };
 
   /**
    * \brief Set the velocity of the loco with the given UID.
    *
    * Should have no effect, if the engine is not known.
    */
-  void setLocoVelocity(RR32Can::Locomotive::Uid_t engineUid, RR32Can::Velocity_t velocity) override{};
+  void setLocoVelocity(RR32Can::Locomotive::Uid_t engineUid,
+                       RR32Can::Velocity_t velocity) override{};
 
   /**
    * \brief Unconditionally set the velocity of the currently controlled engine
