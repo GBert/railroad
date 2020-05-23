@@ -22,6 +22,14 @@ uint8_t AccessoryMsg::getTurnoutAddr() const {
   return addr;
 }
 
+AccessoryMsg AccessoryMsg::makeResponse() const {
+  AccessoryMsg response;
+  response.destination = source >> 1;  // Shift Source address to destination space.
+  response.source = destination << 1;  // Shift destination address to source space.
+  response.data = data;
+  return response;
+}
+
 void AccessoryMsg::print() const {
   Serial.print('[');
   Serial.print(destination, BIN);

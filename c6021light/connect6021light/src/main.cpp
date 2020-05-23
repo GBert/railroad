@@ -59,13 +59,7 @@ void setup() {
 void loop() {
   if (messageReceived) {
     // Craft a response
-    MarklinI2C::Messages::AccessoryMsg response;
-    response.destination = lastMsg.source >> 1;  // guesswork: shift by 1. Observation: Keyboard
-                                                 // that sent with 20 gets its response on 10.
-    response.source =
-        lastMsg.destination
-        << 1;  // guesswork: shift by 1. Observation: Central that received on 0x7F sends from 0xFE
-    response.data = lastMsg.data;
+    MarklinI2C::Messages::AccessoryMsg response = lastMsg.makeResponse();
     SendMessage(response);
     messageReceived = false;
   }

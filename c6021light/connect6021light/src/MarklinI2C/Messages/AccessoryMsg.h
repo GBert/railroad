@@ -12,8 +12,8 @@
 namespace MarklinI2C {
 namespace Messages {
 
-/*
- * \brief Class AccessoryMsg
+/**
+ * \brief Class representing an accessory switch packet on I2C.
  */
 class AccessoryMsg {
  public:
@@ -21,14 +21,9 @@ class AccessoryMsg {
   AccessoryMsg(uint8_t destination, uint8_t source, uint8_t data)
       : destination(destination), source(source), data(data){};
 
-  // uint8_t getSource() const { return source; }
-
   uint8_t getSender() const { return (source & 0b00011110) >> 1; }
 
-  // uint8_t getDestination() const { return destination; }
-
   /// Obtian the de-masked decoder output address.
-
   uint8_t getDecoderOutput() const;
 
   /**
@@ -43,6 +38,12 @@ class AccessoryMsg {
   uint8_t getPower() const { return (data & kDataPowerMask) >> 3; }
 
   void print() const;
+
+  /**
+   * \brief Assume that this message is a request message from a keyboard and
+   * create a response message for the keyboard.
+   */
+  AccessoryMsg makeResponse() const;
 
   uint8_t destination = 0;
   uint8_t source = 0;
