@@ -8,11 +8,17 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include <CAN.h>
+#include "Hal.h"
+#include "StationCbk.h"
 
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 
+#include "RR32Can/RR32Can.h"
+#include "config.h"
+
 // ******** CAN Stuff ********
+Hal hal;
+StationCbk stationCbk;
 
 // ******** I2C Stuff ********
 constexpr const uint8_t myAddr = MarklinI2C::kCentralAddr;
@@ -63,13 +69,9 @@ void setup() {
   Wire.onReceive(receiveEvent);  // register event
 
   // Setup CAN
-  Serial.print(F("Init Can: "));
-  if (!CAN.begin(250E3)) {
-    Serial.println(F(" failed."));
-    while (1);
-  } else {
-    Serial.println(F(" success."));
-  }
+  hal.begin();
+
+  RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, hal);
 
   Serial.println(F("Ready!"));
 }
@@ -87,38 +89,5 @@ void loop() {
   }
 
   // Process CAN
-  int packetSize = CAN.parsePacket();
-
-  if (packetSize > 0) {
-    // received a packet
-    Serial.print("Received ");
-
-    if (CAN.packetExtended()) {
-      Serial.print("extended ");
-    }
-
-    if (CAN.packetRtr()) {
-      // Remote transmission request, packet contains no data
-      Serial.print("RTR ");
-    }
-
-    Serial.print("packet with id 0x");
-    Serial.print(CAN.packetId(), HEX);
-
-    if (CAN.packetRtr()) {
-      Serial.print(" and requested length ");
-      Serial.println(CAN.packetDlc());
-    } else {
-      Serial.print(" and length ");
-      Serial.println(packetSize);
-
-      // only print packet data for non-RTR packets
-      while (CAN.available()) {
-        Serial.print((char)CAN.read());
-      }
-      Serial.println();
-    }
-
-    Serial.println();
-  }
+  hal.loop();
 }
