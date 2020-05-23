@@ -8,7 +8,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include <MCP2515.h>
+#include <CAN.h>
 
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 
@@ -34,21 +34,6 @@ void SendMessage(const MarklinI2C::Messages::AccessoryMsg& msg) {
   Wire.write(msg.data);
   Wire.endTransmission();
   Serial.println(F("Response sent."));
-}
-
-void print(const tCAN& msg) {
-  Serial.print(F("Id: "));
-  Serial.print(msg.id, HEX);
-  Serial.print(F(" Rtr: "));
-  Serial.print(msg.header.rtr, HEX);
-  Serial.print(F(" DTC: "));
-  Serial.print(msg.header.length, HEX);
-  Serial.print(F(" Data:"));
-  for (uint8_t i = 0; i < msg.header.length; ++i) {
-    Serial.print(' ');
-    Serial.print(msg.data[i], HEX);
-  }
-  Serial.print(';');
 }
 
 /**
@@ -79,7 +64,12 @@ void setup() {
 
   // Setup CAN
   Serial.print(F("Init Can: "));
-  Serial.println(mcp2515_init(3 /* 250 kbit */), HEX);
+  if (!CAN.begin(250E3)) {
+    Serial.println(F(" failed."));
+    while (1);
+  } else {
+    Serial.println(F(" success."));
+  }
 
   Serial.println(F("Ready!"));
 }
@@ -97,14 +87,38 @@ void loop() {
   }
 
   // Process CAN
-  if (mcp2515_check_message()) {
-    Serial.println(F("CAN message pending:"));
-    tCAN canmsg;
-    if (mcp2515_get_message(&canmsg)) {
-      print(canmsg);
-      Serial.println(F("Received CAN message."));
-    } else {
-      Serial.println(F("Error receiving CAN message."));
+  int packetSize = CAN.parsePacket();
+
+  if (packetSize > 0) {
+    // received a packet
+    Serial.print("Received ");
+
+    if (CAN.packetExtended()) {
+      Serial.print("extended ");
     }
+
+    if (CAN.packetRtr()) {
+      // Remote transmission request, packet contains no data
+      Serial.print("RTR ");
+    }
+
+    Serial.print("packet with id 0x");
+    Serial.print(CAN.packetId(), HEX);
+
+    if (CAN.packetRtr()) {
+      Serial.print(" and requested length ");
+      Serial.println(CAN.packetDlc());
+    } else {
+      Serial.print(" and length ");
+      Serial.println(packetSize);
+
+      // only print packet data for non-RTR packets
+      while (CAN.available()) {
+        Serial.print((char)CAN.read());
+      }
+      Serial.println();
+    }
+
+    Serial.println();
   }
 }
