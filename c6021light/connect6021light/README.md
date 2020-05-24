@@ -3,6 +3,13 @@
 Project to equip an Arduino Uno + CANdiy shield to serve as a drop-in-replacement for a 6021
 Central Unit for connecting Keyboards (only!) to CAN.
 
+## Safety Notes
+
+Power Off commands cannot be fully translated from I2C to CAN. There is a heuristic in place to
+find the decoder address to use for a Power Off command. However, this heuristic can be tricked
+and a power off command may not be sent. Please make sure to independently limit the Power On time
+of accessories.
+
 ## Notes on Supply Power
 
 The Keyboard operates on 8V. Note that its power draw is quite significant at about 120mA for a
