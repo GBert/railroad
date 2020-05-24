@@ -1,6 +1,7 @@
 #ifndef __STATIONCBK_H__
 #define __STATIONCBK_H__
 
+#include "Hal.h"
 #include "RR32Can/StationCbk.h"
 
 /*
@@ -8,6 +9,8 @@
  */
 class StationCbk : public RR32Can::StationCbk {
  public:
+  void begin(Hal& hal);
+
   RR32Can::Locomotive* getLoco(RR32Can::Locomotive::Uid_t uid) override { return nullptr; };
 
   /**
@@ -33,6 +36,9 @@ class StationCbk : public RR32Can::StationCbk {
    * \brief Called when an accessory packet was received.
    */
   void OnAccessoryPacket(RR32Can::TurnoutPacket& packet) override;
+
+ private:
+  Hal* hal = nullptr;
 };
 
 #endif  // __STATIONCBK_H__

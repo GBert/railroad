@@ -22,6 +22,26 @@ uint8_t AccessoryMsg::getTurnoutAddr() const {
   return addr;
 }
 
+void AccessoryMsg::setTurnoutAddr(uint8_t addr) {
+  {
+    this->destination = addr & 0xF0;
+    this->destination >>= 3;
+    this->destination &= 0b00100000;
+  }
+  {
+    uint8_t decoderAddrPart = addr & 0x0C;
+    decoderAddrPart <<= 2;
+    decoderAddrPart &= kDataUpperAddrMask;
+    this->data |= decoderAddrPart;
+  }
+  {
+    uint8_t decoderOutput = addr & 0x03;
+    decoderOutput <<= 1;
+    decoderOutput &= kDataLowerAddrMask;
+    this->data |= decoderOutput;
+  }
+}
+
 AccessoryMsg AccessoryMsg::makeResponse() const {
   AccessoryMsg response;
   response.destination = source >> 1;  // Shift Source address to destination space.

@@ -26,6 +26,8 @@ class Hal : public RR32Can::StationTxCbk {
   const MarklinI2C::Messages::AccessoryMsg& getI2cMessage() const { return i2cMsg; }
   void consumeI2cMessage() { i2cMessageReceived = false; }
 
+  MarklinI2C::Messages::AccessoryMsg prepareI2cMessage();
+
   /**
    * \brief Send a given message over I2C.
    */

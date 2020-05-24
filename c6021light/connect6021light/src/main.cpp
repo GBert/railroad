@@ -32,6 +32,7 @@ void setup() {
   hal.begin(myAddr);
 
   // Tie callbacks together
+  stationCbk.begin(hal);
   RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, hal);
 
   Serial.println(F("Ready!"));
@@ -57,6 +58,5 @@ void loop() {
     hal.consumeI2cMessage();
   }
 
-  // Process CAN
-  // TODO
+  // Process CAN: Done through callbacks.
 }

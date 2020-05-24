@@ -109,3 +109,9 @@ void Hal::SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) {
   Wire.endTransmission();
   Serial.println(F("I2C message sent."));
 }
+
+MarklinI2C::Messages::AccessoryMsg Hal::prepareI2cMessage() {
+  MarklinI2C::Messages::AccessoryMsg msg;
+  msg.source = i2cLocalAddr;
+  return msg;
+}
