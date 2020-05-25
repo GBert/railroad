@@ -8,12 +8,13 @@
 #ifdef ARDUINO
 #include <hal/ArduinoUnoHal.h>
 using Hal_t = hal::ArduinoUnoHal;
-#elif defined(LIBOPENCM3)
+#elif defined(libopencm3)
 #include <hal/LibOpencm3Hal.h>
 using Hal_t = hal::LibOpencm3Hal;
 #endif
 
 #include "RR32Can/StlAdapter.h"
+#include "hal/PrintfAb.h"
 
 #include "StationCbk.h"
 
@@ -35,7 +36,7 @@ constexpr const uint8_t myAddr = MarklinI2C::kCentralAddr;
 
 void setup() {
   // Setup Serial
-  Serial.println(F("Connect6021Light Initializing..."));
+  MYPRINTF("Connect6021Light Initializing...");
 
   // Setup I2C & CAN
   halImpl.begin(myAddr);
@@ -44,7 +45,7 @@ void setup() {
   stationCbk.begin(halImpl);
   RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, halImpl);
 
-  Serial.println(F("Ready!"));
+  MYPRINTF("Ready!");
 }
 
 /**
@@ -96,3 +97,13 @@ void loop() {
 
   // Process CAN: Done through callbacks.
 }
+
+#ifdef libopencm3
+int main(void) {
+  setup();
+  while (1) {
+    loop();
+  }
+  return 0;
+}
+#endif

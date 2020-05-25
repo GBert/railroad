@@ -53,6 +53,8 @@ AccessoryMsg AccessoryMsg::makeResponse() const {
 }
 
 void AccessoryMsg::print() const {
+#ifdef ARDUINO
+  // Actual output currently available on Arduino only.
   Serial.print('[');
   Serial.print(destination, BIN);
   Serial.print(' ');
@@ -98,6 +100,7 @@ void AccessoryMsg::print() const {
   }
 
   Serial.println();
+#endif
 }
 
 }  // namespace Messages
