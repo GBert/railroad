@@ -1,5 +1,7 @@
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 
+#include "RR32Can/StlAdapter.h"
+
 namespace MarklinI2C {
 namespace Messages {
 

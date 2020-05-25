@@ -5,9 +5,16 @@
 // Note that this sketch is not robust against other messages. Recieving engine control messages
 // Will likely require a reboot of the uC.
 
-#include <Arduino.h>
+#ifdef ARDUINO
+#include <hal/ArduinoUnoHal.h>
+using Hal_t = hal::ArduinoUnoHal;
+#elif defined(LIBOPENCM3)
+#include <hal/LibOpencm3Hal.h>
+using Hal_t = hal::LibOpencm3Hal;
+#endif
 
-#include "Hal.h"
+#include "RR32Can/StlAdapter.h"
+
 #include "StationCbk.h"
 
 #include "MarklinI2C/Messages/AccessoryMsg.h"
@@ -16,7 +23,7 @@
 #include "config.h"
 
 // ******** Variables and Constans********
-Hal hal;
+Hal_t halImpl;
 StationCbk stationCbk;
 
 uint8_t lastPowerOnTurnoutAddr;
@@ -28,15 +35,14 @@ constexpr const uint8_t myAddr = MarklinI2C::kCentralAddr;
 
 void setup() {
   // Setup Serial
-  Serial.begin(115200);  // start serial for output
   Serial.println(F("Connect6021Light Initializing..."));
 
   // Setup I2C & CAN
-  hal.begin(myAddr);
+  halImpl.begin(myAddr);
 
   // Tie callbacks together
-  stationCbk.begin(hal);
-  RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, hal);
+  stationCbk.begin(halImpl);
+  RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, halImpl);
 
   Serial.println(F("Ready!"));
 }
@@ -54,14 +60,14 @@ bool sameDecoder(uint8_t left, uint8_t right) {
  * \brief When a message was received, create and send a response message.
  */
 void loop() {
-  hal.loop();
+  halImpl.loop();
 
   // Process I2C
-  if (hal.i2cAvailable()) {
-    const MarklinI2C::Messages::AccessoryMsg& request = hal.getI2cMessage();
+  if (halImpl.i2cAvailable()) {
+    const MarklinI2C::Messages::AccessoryMsg& request = halImpl.getI2cMessage();
     MarklinI2C::Messages::AccessoryMsg response =
         request.makeResponse();  // TODO: Response should be influenced by the CAN side of things.
-    hal.SendI2CMessage(response);
+    halImpl.SendI2CMessage(response);
 
     // If this is a power ON packet: Send directly to CAN
     if (request.getPower()) {
@@ -85,7 +91,7 @@ void loop() {
       }
     }
 
-    hal.consumeI2cMessage();  // Free the input buffer
+    halImpl.consumeI2cMessage();  // Free the input buffer
   }
 
   // Process CAN: Done through callbacks.

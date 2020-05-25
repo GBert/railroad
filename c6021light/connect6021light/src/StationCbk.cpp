@@ -1,11 +1,13 @@
 #include "StationCbk.h"
 
+#ifdef ARDUINO
 #include "Arduino.h"
+#endif
 
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 #include "RR32Can/Constants.h"
 
-void StationCbk::begin(Hal& hal) { this->hal = &hal; }
+void StationCbk::begin(hal::HalBase& hal) { this->hal = &hal; }
 
 void StationCbk::OnAccessoryPacket(RR32Can::TurnoutPacket& packet) {
   // TODO: Send via I2C

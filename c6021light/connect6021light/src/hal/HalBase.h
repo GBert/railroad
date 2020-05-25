@@ -1,26 +1,17 @@
-#ifndef __HAL_H__
-#define __HAL_H__
+#ifndef __HAL__HALBASE_H__
+#define __HAL__HALBASE_H__
 
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 #include "RR32Can/StationTxCbk.h"
 
-/*
- * \brief Class Hal
- */
-class Hal : public RR32Can::StationTxCbk {
- public:
-  ///
-  void begin(uint8_t i2caddr) {
-    i2cLocalAddr = i2caddr;
-    beginI2c();
-    beginCan();
-  }
+namespace hal {
 
-  /// Receive Packet from CAN and forward to station.
-  void loop() {
-    loopI2c();
-    loopCan();
-  }
+/*
+ * \brief Class HalBase
+ */
+class HalBase : public RR32Can::StationTxCbk {
+ public:
+  void begin(uint8_t i2caddr) { i2cLocalAddr = i2caddr; }
 
   bool i2cAvailable() const { return i2cMessageReceived; }
   const MarklinI2C::Messages::AccessoryMsg& getI2cMessage() const { return i2cMsg; }
@@ -31,21 +22,10 @@ class Hal : public RR32Can::StationTxCbk {
   /**
    * \brief Send a given message over I2C.
    */
-  void SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg);
+  virtual void SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) = 0;
 
- private:
-  /// Transmit Packet on CAN
-  void SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) override;
-
-  void beginI2c();
-  void beginCan();
-
-  void loopCan();
-  void loopI2c();
-
+ protected:
   static uint8_t i2cLocalAddr;
-
-  static void receiveEvent(int howMany);
 
   /// Whether a message was received (i.e., lastMsg has valid contents).
   static bool i2cMessageReceived;
@@ -54,4 +34,6 @@ class Hal : public RR32Can::StationTxCbk {
   static MarklinI2C::Messages::AccessoryMsg i2cMsg;
 };
 
-#endif  // __HAL_H__
+}  // namespace hal
+
+#endif  // __HAL__HALBASE_H__

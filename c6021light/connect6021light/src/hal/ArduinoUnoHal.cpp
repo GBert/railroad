@@ -1,41 +1,40 @@
-#include "Hal.h"
+#ifdef ARDUINO
 
 #include <CAN.h>
 #include <Wire.h>
+#include <hal/ArduinoUnoHal.h>
 #include "RR32Can/RR32Can.h"
 
-uint8_t Hal::i2cLocalAddr;
-bool Hal::i2cMessageReceived;
-MarklinI2C::Messages::AccessoryMsg Hal::i2cMsg;
+namespace hal {
 
 /**
  * \brief Callback when a message is received.
  */
-void Hal::receiveEvent(int howMany) {
+void ArduinoUnoHal::receiveEvent(int howMany) {
   if (howMany != 2) {
     Serial.println(F("I2C message with incorrect number of bytes."));
     Wire.flush();
   }
 
-  if (!Hal::i2cMessageReceived) {
-    Hal::i2cMsg.destination = Hal::i2cLocalAddr;
-    Hal::i2cMsg.source = Wire.read();
-    Hal::i2cMsg.data = Wire.read();
+  if (!ArduinoUnoHal::i2cMessageReceived) {
+    ArduinoUnoHal::i2cMsg.destination = ArduinoUnoHal::i2cLocalAddr;
+    ArduinoUnoHal::i2cMsg.source = Wire.read();
+    ArduinoUnoHal::i2cMsg.data = Wire.read();
     Serial.println(F("I2C Message received."));
-    Hal::i2cMsg.print();
-    Hal::i2cMessageReceived = true;
+    ArduinoUnoHal::i2cMsg.print();
+    ArduinoUnoHal::i2cMessageReceived = true;
   } else {
     Serial.println(F("I2C RX Buffer full, lost message."));
   }
 }
 
-void Hal::beginI2c() {
+void ArduinoUnoHal::beginI2c() {
   i2cMessageReceived = false;
   Wire.begin(i2cLocalAddr);
-  Wire.onReceive(Hal::receiveEvent);
+  Wire.onReceive(ArduinoUnoHal::receiveEvent);
 }
 
-void Hal::beginCan() {
+void ArduinoUnoHal::beginCan() {
   Serial.print(F("Init Can: "));
   if (!CAN.begin(250E3)) {
     Serial.println(F(" failed."));
@@ -46,9 +45,9 @@ void Hal::beginCan() {
   }
 }
 
-void Hal::loopI2c() {}
+void ArduinoUnoHal::loopI2c() {}
 
-void Hal::loopCan() {
+void ArduinoUnoHal::loopCan() {
   int packetSize = CAN.parsePacket();
 
   if (packetSize > 0) {
@@ -94,7 +93,7 @@ void Hal::loopCan() {
   }
 }
 
-void Hal::SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) {
+void ArduinoUnoHal::SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) {
   CAN.beginExtendedPacket(id.makeIdentifier(), data.dlc, false);
   for (uint8_t i = 0; i < data.dlc; ++i) {
     CAN.write(data.data[i]);
@@ -102,7 +101,7 @@ void Hal::SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) {
   CAN.endPacket();
 }
 
-void Hal::SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) {
+void ArduinoUnoHal::SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) {
   Wire.beginTransmission(msg.destination);
   Wire.write(msg.source);
   Wire.write(msg.data);
@@ -110,8 +109,6 @@ void Hal::SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) {
   Serial.println(F("I2C message sent."));
 }
 
-MarklinI2C::Messages::AccessoryMsg Hal::prepareI2cMessage() {
-  MarklinI2C::Messages::AccessoryMsg msg;
-  msg.source = i2cLocalAddr;
-  return msg;
-}
+}  // namespace hal
+
+#endif
