@@ -13,6 +13,7 @@ class LibOpencm3Hal : public HalBase {
   ///
   void begin(uint8_t i2caddr) {
     HalBase::begin(i2caddr);
+    beginClock();
     beginSerial();
     beginI2c();
     beginCan();
@@ -33,6 +34,7 @@ class LibOpencm3Hal : public HalBase {
   /// Transmit Packet on CAN
   void SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) override;
 
+  void beginClock();
   void beginSerial();
   void beginI2c();
   void beginCan();

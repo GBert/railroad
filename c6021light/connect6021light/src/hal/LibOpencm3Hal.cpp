@@ -7,27 +7,54 @@
 
 #include <stdio.h>
 
+#include <errno.h>
+#include <unistd.h>
+
+extern "C" {
+/* _write code taken from example at
+ * https://github.com/libopencm3/libopencm3-examples/blob/master/examples/stm32/l1/stm32l-discovery/button-irq-printf-lowpower/main.c
+ */
+int _write(int file, char* ptr, int len) {
+  int i;
+
+  if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+    for (i = 0; i < len; i++) {
+      if (ptr[i] == '\n') {
+        usart_send_blocking(USART1, '\r');
+      }
+      usart_send_blocking(USART1, ptr[i]);
+    }
+    return i;
+  }
+  errno = EIO;
+  return -1;
+}
+}
+
 namespace hal {
 
-void LibOpencm3Hal::beginSerial() {
+void LibOpencm3Hal::beginClock() {
+  // Enable the overall clock.
+  rcc_clock_setup_in_hse_8mhz_out_72mhz();
+  
   // Enable the UART clock
   rcc_periph_clock_enable(RCC_USART1);
-  // We need a brief delay before we can access UART config registers
-  __asm__("nop");
-  __asm__("nop");
-  __asm__("nop");
-  // Disable the UART while we mess with its settings
+  
+  // Enable the I2C clock
+  //rcc_periph_clock_enable(RCC_I2C1);
+
+  // Enable the CAN clock
+  //rcc_periph_clock_enable(RCC_CAN1);
+
+}
+
+void LibOpencm3Hal::beginSerial() {
   usart_disable(USART1);
-  // Configure the UART clock source as precision internal oscillator
-  // usart_clock_from_piosc();
-  // Set communication parameters
   usart_set_baudrate(USART1, 115200);
   usart_set_databits(USART1, 8);
   usart_set_parity(USART1, USART_PARITY_NONE);
   usart_set_stopbits(USART1, 1);
-  // Enable SW Flow Control
   usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
-  // Now that we're done messing with the settings, enable the UART
   usart_enable(USART1);
 }
 
