@@ -1,4 +1,4 @@
-#ifdef LIBOPENCM3
+#ifdef PLATFORMIO_FRAMEWORK_libopencm3
 
 #include "hal/LibOpencm3Hal.h"
 

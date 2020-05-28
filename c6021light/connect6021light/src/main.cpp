@@ -8,7 +8,7 @@
 #ifdef ARDUINO
 #include <hal/ArduinoUnoHal.h>
 using Hal_t = hal::ArduinoUnoHal;
-#elif defined(libopencm3)
+#elif defined(PLATFORMIO_FRAMEWORK_libopencm3)
 #include <hal/LibOpencm3Hal.h>
 using Hal_t = hal::LibOpencm3Hal;
 #endif
@@ -98,7 +98,7 @@ void loop() {
   // Process CAN: Done through callbacks.
 }
 
-#ifdef libopencm3
+#ifdef PLATFORMIO_FRAMEWORK_libopencm3
 int main(void) {
   setup();
   while (1) {
