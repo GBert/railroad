@@ -1,7 +1,7 @@
 #ifndef __HAL__LIBOPENCM3HAL_H__
 #define __HAL__LIBOPENCM3HAL_H__
 
-#include "Hal/HalBase.h"
+#include "hal/HalBase.h"
 
 namespace hal {
 

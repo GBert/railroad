@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "Hal/HalBase.h"
+#include "hal/HalBase.h"
 
 namespace hal {
 
