@@ -17,6 +17,21 @@ single device.
 
 The I2C bus operates at 5V.
 
+## Notes on libopencm3 and PlatformIO
+
+The current release of libopencm3 used by PlatformIO is quite outdated (from 2015, at the time of writing). Google turns up several issue reports.
+
+The only way that has worked for me is the one outlined in [https://github.com/platformio/platform-ststm32/issues/218]. My approach on Ubuntu 20.04 was:
+* Attempt a build with PlatformIO. This build wil fail but it creates all the folders needed for PlatformIO to acces libopencm3.
+* Get the prerequisites for building libopencm3
+* Get https://github.com/libopencm3/libopencm3-miniblink [This commit](https://github.com/libopencm3/libopencm3-miniblink/commit/2893202586a3841311c25e75329c4b549e15fba1)
+ at the time of writing.
+* Completely build the miniblink example.
+* Copy the built libopencm3 over the one that PlatformIO uses: cp libopencm3-miniblink/libopencm3/* ~/.platformio/packages/framework-libopencm3
+* Build again using PlatformIO. This build should work.
+
+Suggestions for getting a GNU Make-based build with libopencm3 working *without* breaking the PlatformIO-based Arduino-AVR build are welcome.
+
 ## I2C Messages
 
 Devices communicate over I2C. The system is multi-master, i.e., any device that has data to send

@@ -4,6 +4,7 @@
 
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>
+#include <libopencm3/stm32/i2c.h>
 
 #include <stdio.h>
 
@@ -41,7 +42,7 @@ void LibOpencm3Hal::beginClock() {
   rcc_periph_clock_enable(RCC_USART1);
   
   // Enable the I2C clock
-  //rcc_periph_clock_enable(RCC_I2C1);
+  rcc_periph_clock_enable(RCC_I2C1);
 
   // Enable the CAN clock
   //rcc_periph_clock_enable(RCC_CAN1);
@@ -58,7 +59,16 @@ void LibOpencm3Hal::beginSerial() {
   usart_enable(USART1);
 }
 
-void LibOpencm3Hal::beginI2c() { printf("LibOpencm3Hal::beginI2C: Implement me!"); }
+void LibOpencm3Hal::beginI2c() { 
+  i2c_reset(I2C1);
+  i2c_peripheral_disable(I2C1);
+
+  //i2c_set_standard_mode(I2C1);
+  i2c_set_speed(I2C1, i2c_speed_sm_100k, I2C_CR2_FREQ_36MHZ);
+  i2c_set_own_7bit_slave_address(I2C1, this->i2cLocalAddr);
+  i2c_peripheral_enable(I2C1);
+  i2c_enable_ack(I2C1);
+ }
 
 
 void LibOpencm3Hal::beginCan() {
