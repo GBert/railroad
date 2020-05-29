@@ -30,6 +30,8 @@ class LibOpencm3Hal : public HalBase {
    */
   void SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) override;
 
+  static void i2cEvInt(void);
+
  private:
   /// Transmit Packet on CAN
   void SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) override;
@@ -42,7 +44,7 @@ class LibOpencm3Hal : public HalBase {
   void loopCan();
   void loopI2c();
 
-  static void receiveEvent(int howMany);
+  static volatile uint_fast8_t bytesRead;
 };
 
 }  // namespace hal

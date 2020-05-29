@@ -18,6 +18,22 @@ namespace Messages {
 class AccessoryMsg {
  public:
   AccessoryMsg(){};
+
+  AccessoryMsg(const AccessoryMsg&) = default;
+  AccessoryMsg& operator=(const AccessoryMsg&) = default;
+
+  AccessoryMsg(volatile const AccessoryMsg& other)
+      : destination(other.destination), source(other.source), data(other.data) {}
+  AccessoryMsg& operator=(volatile const AccessoryMsg& other) {
+    this->destination = other.destination;
+    this->source = other.source;
+    this->data = other.data;
+    return *this;
+  }
+
+  AccessoryMsg(AccessoryMsg&&) = default;
+  AccessoryMsg& operator=(AccessoryMsg&&) = default;
+
   AccessoryMsg(uint8_t destination, uint8_t source, uint8_t data)
       : destination(destination), source(source), data(data){};
 

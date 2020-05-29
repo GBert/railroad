@@ -65,7 +65,7 @@ void loop() {
 
   // Process I2C
   if (halImpl.i2cAvailable()) {
-    const MarklinI2C::Messages::AccessoryMsg& request = halImpl.getI2cMessage();
+    MarklinI2C::Messages::AccessoryMsg request = halImpl.getI2cMessage();
     MarklinI2C::Messages::AccessoryMsg response =
         request.makeResponse();  // TODO: Response should be influenced by the CAN side of things.
     halImpl.SendI2CMessage(response);
