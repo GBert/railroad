@@ -28,10 +28,10 @@ class HalBase : public RR32Can::StationTxCbk {
   static uint8_t i2cLocalAddr;
 
   /// Whether a message was received (i.e., lastMsg has valid contents).
-  static bool i2cMessageReceived;
+  static volatile bool i2cMessageReceived;
 
   /// The last message that was received over i2c.
-  static MarklinI2C::Messages::AccessoryMsg i2cMsg;
+  static volatile MarklinI2C::Messages::AccessoryMsg i2cMsg;
 };
 
 }  // namespace hal
