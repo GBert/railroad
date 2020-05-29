@@ -32,6 +32,19 @@ The only way that has worked for me is the one outlined in [https://github.com/p
 
 Suggestions for getting a GNU Make-based build with libopencm3 working *without* breaking the PlatformIO-based Arduino-AVR build are welcome.
 
+### Windows-Approach
+
+* Install a MinGW Base Toolchain. [Get it here](http://www.mingw.org/wiki/Getting_Started).
+    * The installer installs a package manager.
+    * The Package "mingw32-base-bin" contains everything you need (and a lot more).
+* Get a git checkout of libopencm3.
+* build libopencm3 from the PlatfomIO shell using the installed mingw32-make.exe.
+    * The build will first generate a bunch of headers.
+    * The build will fail when compiling the source code, as it cannot find the compiler. This is fine. The generated headers is all that we needed.
+* Replace the PlatformIO-delivered libopencm3 with the newer sources
+    * cp -r libopencm3/* ~/.platformio/packages/framework-libopencm3
+* Now the build from PlatformIO works.
+
 ## I2C Messages
 
 Devices communicate over I2C. The system is multi-master, i.e., any device that has data to send
