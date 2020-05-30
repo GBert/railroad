@@ -20,10 +20,7 @@ class LibOpencm3Hal : public HalBase {
   }
 
   /// Receive Packet from CAN and forward to station.
-  void loop() {
-    loopI2c();
-    loopCan();
-  }
+  void loop() { loopCan(); }
 
   /**
    * \brief Send a given message over I2C.
@@ -42,7 +39,6 @@ class LibOpencm3Hal : public HalBase {
   void beginCan();
 
   void loopCan();
-  void loopI2c();
 
   static volatile uint_fast8_t bytesRead;
 };

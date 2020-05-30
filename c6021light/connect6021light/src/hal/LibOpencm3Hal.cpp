@@ -44,7 +44,7 @@ void LibOpencm3Hal::beginClock() {
 
   // Enable GPIO Pin Banks used for GPIO or alternate functions
   rcc_periph_clock_enable(RCC_GPIOA);
-  // rcc_periph_clock_enable(RCC_GPIOB);
+  rcc_periph_clock_enable(RCC_GPIOB);
   // rcc_periph_clock_enable(RCC_GPIOC);
   // Enable Clock for alternate functions
   rcc_periph_clock_enable(RCC_AFIO);
@@ -78,11 +78,21 @@ void LibOpencm3Hal::beginSerial() {
 }
 
 void LibOpencm3Hal::beginI2c() {
-  i2c_reset(I2C1);
   i2c_peripheral_disable(I2C1);
+  i2c_reset(I2C1);
+
+  gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,
+                GPIO_I2C1_SCL | GPIO_I2C1_SDA);
+  gpio_set(GPIOB, GPIO_I2C1_SCL | GPIO_I2C1_SDA);
 
   // Basic I2C configuration
-  i2c_set_speed(I2C1, i2c_speed_sm_100k, I2C_CR2_FREQ_36MHZ);
+  // i2c_set_speed(I2C1, i2c_speed_sm_100k, I2C_CR2_FREQ_36MHZ);
+  i2c_set_standard_mode(I2C1);
+  i2c_set_clock_frequency(I2C1, I2C_CR2_FREQ_36MHZ);
+  i2c_set_trise(I2C1, 36);
+  i2c_set_dutycycle(I2C1, I2C_CCR_DUTY_DIV2);
+  i2c_set_ccr(I2C1, 180);
+
   i2c_set_own_7bit_slave_address(I2C1, this->i2cLocalAddr);
 
   // Set I2C IRQ to support slave mode
@@ -159,15 +169,19 @@ void LibOpencm3Hal::i2cEvInt(void) {
 
 void LibOpencm3Hal::beginCan() {}
 
-void LibOpencm3Hal::loopI2c() { printf("LibOpencm3Hal::loopI2C: Implement me!"); }
-
 void LibOpencm3Hal::loopCan() { printf("LibOpencm3Hal::loopCan: Implement me!"); }
 
 void LibOpencm3Hal::SendI2CMessage(MarklinI2C::Messages::AccessoryMsg const& msg) {
   uint8_t databytes[2];
   databytes[0] = msg.source;
   databytes[1] = msg.data;
-  i2c_transfer7(I2C1, msg.destination, databytes, 2, nullptr, 0);
+  // i2c_transfer7(I2C1, msg.destination, databytes, 2, nullptr, 0);
+  // i2c_wait_busy(I2C1);
+  i2c_send_start(I2C1);
+  i2c_send_7bit_address(I2C1, msg.destination, I2C_WRITE);
+  i2c_send_data(I2C1, msg.source);
+  i2c_send_data(I2C1, msg.data);
+  i2c_send_stop(I2C1);
 }
 
 void LibOpencm3Hal::SendPacket(RR32Can::Identifier const& id, RR32Can::Data const& data) {
