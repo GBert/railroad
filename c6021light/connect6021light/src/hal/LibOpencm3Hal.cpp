@@ -3,6 +3,7 @@
 #include "hal/LibOpencm3Hal.h"
 
 #include <libopencm3/cm3/nvic.h>
+#include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/i2c.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>
@@ -41,6 +42,13 @@ void LibOpencm3Hal::beginClock() {
   // Enable the overall clock.
   rcc_clock_setup_in_hse_8mhz_out_72mhz();
 
+  // Enable GPIO Pin Banks used for GPIO or alternate functions
+  rcc_periph_clock_enable(RCC_GPIOA);
+  // rcc_periph_clock_enable(RCC_GPIOB);
+  // rcc_periph_clock_enable(RCC_GPIOC);
+  // Enable Clock for alternate functions
+  rcc_periph_clock_enable(RCC_AFIO);
+
   // Enable the UART clock
   rcc_periph_clock_enable(RCC_USART1);
 
@@ -53,11 +61,19 @@ void LibOpencm3Hal::beginClock() {
 
 void LibOpencm3Hal::beginSerial() {
   usart_disable(USART1);
+
+  // Enable the USART TX Pin in the GPIO controller
+  gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_TX);
+
+  // Set Serial speed
   usart_set_baudrate(USART1, 115200);
   usart_set_databits(USART1, 8);
   usart_set_parity(USART1, USART_PARITY_NONE);
-  usart_set_stopbits(USART1, 1);
+  usart_set_stopbits(USART1, USART_STOPBITS_1);
   usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
+
+  // Enable Serial TX
+  usart_set_mode(USART1, USART_MODE_TX);
   usart_enable(USART1);
 }
 
