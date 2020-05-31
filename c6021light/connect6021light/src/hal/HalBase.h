@@ -15,7 +15,7 @@ class HalBase : public RR32Can::StationTxCbk {
 
   bool i2cAvailable() const { return i2cMessageReceived; }
   const volatile MarklinI2C::Messages::AccessoryMsg& getI2cMessage() const { return i2cMsg; }
-  void consumeI2cMessage() { i2cMessageReceived = false; }
+  virtual void consumeI2cMessage() { i2cMessageReceived = false; }
 
   MarklinI2C::Messages::AccessoryMsg prepareI2cMessage();
 

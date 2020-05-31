@@ -98,6 +98,7 @@ void LibOpencm3Hal::beginI2c() {
   // Set I2C IRQ to support slave mode
   bytesRead = 0;
   nvic_enable_irq(NVIC_I2C1_EV_IRQ);
+  i2c_enable_interrupt(I2C1, I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN);
 
   i2c_peripheral_enable(I2C1);
   i2c_enable_ack(I2C1);
@@ -123,7 +124,9 @@ void LibOpencm3Hal::i2cEvInt(void) {
   // Address matched (Slave)
   if (sr1 & I2C_SR1_ADDR) {
     bytesRead = 1;
-    HalBase::i2cMsg.destination = HalBase::i2cLocalAddr;
+    if (!HalBase::i2cMessageReceived) {
+      HalBase::i2cMsg.destination = HalBase::i2cLocalAddr;
+    }
     // Clear the ADDR sequence by reading SR2.
     sr2 = I2C_SR2(I2C1);
     (void)sr2;
@@ -132,16 +135,20 @@ void LibOpencm3Hal::i2cEvInt(void) {
   else if (sr1 & I2C_SR1_RxNE) {
     switch (bytesRead) {
       case 1:
-        HalBase::i2cMsg.source = i2c_get_data(I2C1);
+        if (!HalBase::i2cMessageReceived) {
+          HalBase::i2cMsg.source = i2c_get_data(I2C1);
+        }
         ++bytesRead;
         break;
       case 2:
-        HalBase::i2cMsg.data = i2c_get_data(I2C1);
+        if (!HalBase::i2cMessageReceived) {
+          HalBase::i2cMsg.data = i2c_get_data(I2C1);
+        }
         ++bytesRead;
         break;
       default:
         // Ignore reading byte 0 or bytes past 2
-        return;
+        break;
     }
   }
   // Transmit buffer empty & Data byte transfer not finished
@@ -169,7 +176,7 @@ void LibOpencm3Hal::i2cEvInt(void) {
 
 void LibOpencm3Hal::beginCan() {}
 
-void LibOpencm3Hal::loopCan() { printf("LibOpencm3Hal::loopCan: Implement me!"); }
+void LibOpencm3Hal::loopCan() { printf("LibOpencm3Hal::loopCan: Implement me! Read %d bytes.\n", bytesRead); }
 
 void LibOpencm3Hal::SendI2CMessage(MarklinI2C::Messages::AccessoryMsg const& msg) {
   uint8_t databytes[2];

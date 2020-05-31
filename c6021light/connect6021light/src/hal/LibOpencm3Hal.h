@@ -22,6 +22,11 @@ class LibOpencm3Hal : public HalBase {
   /// Receive Packet from CAN and forward to station.
   void loop() { loopCan(); }
 
+  void consumeI2cMessage() {
+    bytesRead = 0;
+    HalBase::consumeI2cMessage();
+  }
+
   /**
    * \brief Send a given message over I2C.
    */
