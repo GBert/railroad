@@ -112,11 +112,6 @@ extern "C" void i2c1_ev_isr(void) { LibOpencm3Hal::i2cEvInt(); }
 void LibOpencm3Hal::i2cEvInt(void) {
   // ISR appears to be called once per I2C byte received
 
-  if (HalBase::i2cMessageReceived) {
-    // Already a message received - abort
-    return;
-  }
-
   uint32_t sr1, sr2;
 
   sr1 = I2C_SR1(I2C1);
