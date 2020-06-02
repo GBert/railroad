@@ -34,6 +34,8 @@ class LibOpencm3Hal : public HalBase {
 
   static void i2cEvInt(void);
 
+  static volatile bool canAvailable;
+
  private:
   /// Transmit Packet on CAN
   void SendPacket(const RR32Can::Identifier& id, const RR32Can::Data& data) override;

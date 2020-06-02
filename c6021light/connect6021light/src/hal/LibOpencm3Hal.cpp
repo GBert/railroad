@@ -3,6 +3,7 @@
 #include "hal/LibOpencm3Hal.h"
 
 #include <libopencm3/cm3/nvic.h>
+#include <libopencm3/stm32/can.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/i2c.h>
 #include <libopencm3/stm32/rcc.h>
@@ -12,6 +13,8 @@
 
 #include <errno.h>
 #include <unistd.h>
+
+#include "RR32Can/RR32Can.h"
 
 extern "C" {
 /* _write code taken from example at
@@ -40,6 +43,8 @@ volatile uint_fast8_t LibOpencm3Hal::bytesRead;
 volatile uint_fast8_t LibOpencm3Hal::bytesSent;
 volatile MarklinI2C::Messages::AccessoryMsg LibOpencm3Hal::i2cTxMsg;
 
+volatile bool LibOpencm3Hal::canAvailable;
+
 void LibOpencm3Hal::beginClock() {
   // Enable the overall clock.
   rcc_clock_setup_in_hse_8mhz_out_72mhz();
@@ -58,7 +63,7 @@ void LibOpencm3Hal::beginClock() {
   rcc_periph_clock_enable(RCC_I2C1);
 
   // Enable the CAN clock
-  // rcc_periph_clock_enable(RCC_CAN1);
+  rcc_periph_clock_enable(RCC_CAN1);
 }
 
 void LibOpencm3Hal::beginSerial() {
@@ -193,10 +198,66 @@ void LibOpencm3Hal::i2cEvInt(void) {
   }
 }
 
-void LibOpencm3Hal::beginCan() {}
+void usb_lp_can_rx0_isr(void) { LibOpencm3Hal::canAvailable = true; }
+
+void LibOpencm3Hal::beginCan() {
+  canAvailable = false;
+
+  AFIO_MAPR |= AFIO_MAPR_CAN1_REMAP_PORTB;
+
+  /* Configure CAN pin: RX (input pull-up) */
+  gpio_set_mode(GPIO_BANK_CAN1_PB_RX, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO_CAN1_PB_RX);
+  gpio_set(GPIO_BANK_CAN1_PB_RX, GPIO_CAN1_PB_RX);
+
+  /* Configure CAN pin: TX */
+  gpio_set_mode(GPIO_BANK_CAN1_PB_TX, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
+                GPIO_CAN1_PB_TX);
+
+  /* NVIC setup */
+  nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ);
+  nvic_set_priority(NVIC_USB_LP_CAN_RX0_IRQ, 1);
+
+  /* Reset CAN */
+  can_reset(CAN1);
+
+  /* defaultt CAN setting 250 kBaud */
+
+  if (can_init(CAN1, false, true, false, false, false, false, CAN_BTR_SJW_1TQ, CAN_BTR_TS1_13TQ,
+               CAN_BTR_TS2_2TQ, 9, false, false)) {
+    /* Die because we failed to initialize. */
+    printf("CAN failed to initialize.\n");
+    while (1) __asm__("nop");
+  }
+
+  /* CAN filter 0 init. */
+  can_filter_id_mask_32bit_init(CAN1, 0, /* Filter ID */
+                                0,       /* CAN ID */
+                                0,       /* CAN ID mask */
+                                0,       /* FIFO assignment (here: FIFO0) */
+                                true);   /* Enable the filter. */
+
+  /* Enable CAN RX interrupt. */
+  can_enable_irq(CAN1, CAN_IER_FMPIE0);
+}
 
 void LibOpencm3Hal::loopCan() {
-  printf("LibOpencm3Hal::loopCan: Implement me! Read %d bytes.\n", bytesRead);
+  if (canAvailable) {
+    uint32_t packetId;
+    RR32Can::Data data;
+
+    {
+      bool ext;
+      bool rtr;
+      uint32_t fmi;
+
+      can_receive(CAN1, 0, true, &packetId, &ext, &rtr, &fmi, &data.dlc, data.data);
+      canAvailable = false;
+    }
+
+    RR32Can::Identifier rr32id = RR32Can::Identifier::GetIdentifier(packetId);
+
+    RR32Can::RR32Can.HandlePacket(rr32id, data);
+  }
 }
 
 void LibOpencm3Hal::SendI2CMessage(MarklinI2C::Messages::AccessoryMsg const& msg) {
@@ -208,7 +269,8 @@ void LibOpencm3Hal::SendI2CMessage(MarklinI2C::Messages::AccessoryMsg const& msg
 }
 
 void LibOpencm3Hal::SendPacket(RR32Can::Identifier const& id, RR32Can::Data const& data) {
-  printf("LibOpencm3Hal::SendPacket: Implement me!");
+  uint32_t packetId = id.makeIdentifier();
+  can_transmit(CAN1, packetId, true, false, data.dlc, const_cast<uint8_t*>(data.data));
 }
 
 }  // namespace hal
