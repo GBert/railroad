@@ -46,6 +46,9 @@ class LibOpencm3Hal : public HalBase {
   void loopCan();
 
   static volatile uint_fast8_t bytesRead;
+  static volatile uint_fast8_t bytesSent;
+
+  static volatile MarklinI2C::Messages::AccessoryMsg i2cTxMsg;
 };
 
 }  // namespace hal

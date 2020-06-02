@@ -37,6 +37,8 @@ int _write(int file, char* ptr, int len) {
 namespace hal {
 
 volatile uint_fast8_t LibOpencm3Hal::bytesRead;
+volatile uint_fast8_t LibOpencm3Hal::bytesSent;
+volatile MarklinI2C::Messages::AccessoryMsg LibOpencm3Hal::i2cTxMsg;
 
 void LibOpencm3Hal::beginClock() {
   // Enable the overall clock.
@@ -116,18 +118,29 @@ void LibOpencm3Hal::i2cEvInt(void) {
 
   sr1 = I2C_SR1(I2C1);
 
-  // Address matched (Slave)
-  if (sr1 & I2C_SR1_ADDR) {
-    bytesRead = 1;
-    if (!HalBase::i2cMessageReceived) {
-      HalBase::i2cMsg.destination = HalBase::i2cLocalAddr;
-    }
+  if (sr1 & I2C_SR1_SB) {
+    // Refrence Manual: EV5 (Master)
+    bytesSent = 1;
+    i2c_send_7bit_address(I2C1, i2cTxMsg.destination, I2C_WRITE);
+  } else
+      // Address matched (Slave)
+      if (sr1 & I2C_SR1_ADDR) {
+    // Refrence Manual: EV6 (Master)/EV1 (Slave)
+
     // Clear the ADDR sequence by reading SR2.
     sr2 = I2C_SR2(I2C1);
-    (void)sr2;
+
+    if (!(sr2 & I2C_SR2_MSL)) {
+      // Reference Manual: EV1
+      bytesRead = 1;
+      if (!HalBase::i2cMessageReceived) {
+        HalBase::i2cMsg.destination = HalBase::i2cLocalAddr;
+      }
+    }
   }
   // Receive buffer not empty
   else if (sr1 & I2C_SR1_RxNE) {
+    // Reference Manual: EV2
     switch (bytesRead) {
       case 1:
         if (!HalBase::i2cMessageReceived) {
@@ -148,12 +161,26 @@ void LibOpencm3Hal::i2cEvInt(void) {
   }
   // Transmit buffer empty & Data byte transfer not finished
   else if ((sr1 & I2C_SR1_TxE) && !(sr1 & I2C_SR1_BTF)) {
+    // EV8, 8_1
     // send dummy data to master in MSB order
-    i2c_send_data(I2C1, 0xBF);
+    switch (bytesSent) {
+      case 1:
+        i2c_send_data(I2C1, i2cTxMsg.source);
+        break;
+      case 2:
+        i2c_send_data(I2C1, i2cTxMsg.data);
+        break;
+      default:
+        // EV 8_2
+        i2c_send_stop(I2C1);
+        break;
+    }
+    ++bytesSent;
   }
   // done by master by sending STOP
   // this event happens when slave is in Recv mode at the end of communication
   else if (sr1 & I2C_SR1_STOPF) {
+    // Reference Manual: EV3
     i2c_peripheral_enable(I2C1);
     if (bytesRead == 3) {
       HalBase::i2cMessageReceived = true;
@@ -163,31 +190,25 @@ void LibOpencm3Hal::i2cEvInt(void) {
   else if (sr1 & I2C_SR1_AF) {
     //(void) I2C_SR1(I2C1);
     I2C_SR1(I2C1) &= ~(I2C_SR1_AF);
-    if (bytesRead == 3) {
-      HalBase::i2cMessageReceived = true;
-    }
   }
 }
 
 void LibOpencm3Hal::beginCan() {}
 
-void LibOpencm3Hal::loopCan() { printf("LibOpencm3Hal::loopCan: Implement me! Read %d bytes.\n", bytesRead); }
+void LibOpencm3Hal::loopCan() {
+  printf("LibOpencm3Hal::loopCan: Implement me! Read %d bytes.\n", bytesRead);
+}
 
 void LibOpencm3Hal::SendI2CMessage(MarklinI2C::Messages::AccessoryMsg const& msg) {
-  uint8_t databytes[2];
-  databytes[0] = msg.source;
-  databytes[1] = msg.data;
-  // i2c_transfer7(I2C1, msg.destination, databytes, 2, nullptr, 0);
-  // i2c_wait_busy(I2C1);
+  bytesSent = 0;
+  i2cTxMsg.destination = msg.destination;
+  i2cTxMsg.source = msg.source;
+  i2cTxMsg.data = msg.data;
   i2c_send_start(I2C1);
-  i2c_send_7bit_address(I2C1, msg.destination, I2C_WRITE);
-  i2c_send_data(I2C1, msg.source);
-  i2c_send_data(I2C1, msg.data);
-  i2c_send_stop(I2C1);
 }
 
 void LibOpencm3Hal::SendPacket(RR32Can::Identifier const& id, RR32Can::Data const& data) {
-  printf("LibOpencm3Hal::SendI2CMessage: Implement me!");
+  printf("LibOpencm3Hal::SendPacket: Implement me!");
 }
 
 }  // namespace hal
