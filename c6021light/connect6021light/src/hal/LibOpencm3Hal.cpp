@@ -44,6 +44,7 @@ volatile uint_fast8_t LibOpencm3Hal::bytesSent;
 volatile MarklinI2C::Messages::AccessoryMsg LibOpencm3Hal::i2cTxMsg;
 
 volatile bool LibOpencm3Hal::canAvailable;
+volatile LibOpencm3Hal::CanMsg LibOpencm3Hal::canRxMsg;
 
 void LibOpencm3Hal::beginClock() {
   // Enable the overall clock.
@@ -198,7 +199,27 @@ void LibOpencm3Hal::i2cEvInt(void) {
   }
 }
 
-void usb_lp_can_rx0_isr(void) { LibOpencm3Hal::canAvailable = true; }
+extern "C" void usb_lp_can_rx0_isr(void) { LibOpencm3Hal::canRxInt(); }
+
+void LibOpencm3Hal::canRxInt() {
+  uint32_t packetId;
+
+  bool ext;
+  bool rtr;
+  uint32_t fmi;
+  uint8_t dlc;
+  uint8_t data[8];
+
+  can_receive(CAN1, 0, true, &packetId, &ext, &rtr, &fmi, &dlc, data);
+
+  LibOpencm3Hal::canRxMsg.data.dlc = dlc;
+  for (int i = 0; i < dlc; ++i) {
+    LibOpencm3Hal::canRxMsg.data.data[i] = data[i];
+  }
+  LibOpencm3Hal::canRxMsg.id = packetId;  // RR32Can::Identifier::GetIdentifier(packetId);
+
+  LibOpencm3Hal::canAvailable = true;
+}
 
 void LibOpencm3Hal::beginCan() {
   canAvailable = false;
@@ -242,21 +263,14 @@ void LibOpencm3Hal::beginCan() {
 
 void LibOpencm3Hal::loopCan() {
   if (canAvailable) {
-    uint32_t packetId;
+    RR32Can::Identifier rr32id = RR32Can::Identifier::GetIdentifier(canRxMsg.id);
     RR32Can::Data data;
-
-    {
-      bool ext;
-      bool rtr;
-      uint32_t fmi;
-
-      can_receive(CAN1, 0, true, &packetId, &ext, &rtr, &fmi, &data.dlc, data.data);
-      canAvailable = false;
+    data.dlc = canRxMsg.data.dlc;
+    for (int i = 0; i < canRxMsg.data.dlc; ++i) {
+      data.data[i] = canRxMsg.data.data[i];
     }
-
-    RR32Can::Identifier rr32id = RR32Can::Identifier::GetIdentifier(packetId);
-
     RR32Can::RR32Can.HandlePacket(rr32id, data);
+    canAvailable = false;
   }
 }
 

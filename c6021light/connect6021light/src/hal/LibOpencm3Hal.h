@@ -10,6 +10,12 @@ namespace hal {
  */
 class LibOpencm3Hal : public HalBase {
  public:
+  typedef struct {
+    // RR32Can::Identifier id;
+    uint32_t id;
+    RR32Can::Data data;
+  } CanMsg;
+
   ///
   void begin(uint8_t i2caddr) {
     HalBase::begin(i2caddr);
@@ -33,6 +39,7 @@ class LibOpencm3Hal : public HalBase {
   void SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg) override;
 
   static void i2cEvInt(void);
+  static void canRxInt(void);
 
   static volatile bool canAvailable;
 
@@ -51,6 +58,8 @@ class LibOpencm3Hal : public HalBase {
   static volatile uint_fast8_t bytesSent;
 
   static volatile MarklinI2C::Messages::AccessoryMsg i2cTxMsg;
+
+  static volatile CanMsg canRxMsg;
 };
 
 }  // namespace hal
