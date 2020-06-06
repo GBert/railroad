@@ -45,7 +45,7 @@ void setup() {
   stationCbk.begin(halImpl);
   RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, halImpl);
 
-  MYPRINTF("Ready!");
+  MYPRINTF("Ready!\n");
 }
 
 /**
@@ -65,6 +65,7 @@ void loop() {
 
   // Process I2C
   if (halImpl.i2cAvailable()) {
+    printf("I2C RX.\n"); // This printf influences the timing and works around an issue where the response on I2C is sent too quickly.
     MarklinI2C::Messages::AccessoryMsg request = halImpl.getI2cMessage();
     MarklinI2C::Messages::AccessoryMsg response =
         request.makeResponse();  // TODO: Response should be influenced by the CAN side of things.
