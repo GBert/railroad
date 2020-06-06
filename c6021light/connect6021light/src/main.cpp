@@ -65,11 +65,9 @@ void loop() {
 
   // Process I2C
   if (halImpl.i2cAvailable()) {
-    printf("I2C RX.\n"); // This printf influences the timing and works around an issue where the response on I2C is sent too quickly.
     MarklinI2C::Messages::AccessoryMsg request = halImpl.getI2cMessage();
     MarklinI2C::Messages::AccessoryMsg response =
         request.makeResponse();  // TODO: Response should be influenced by the CAN side of things.
-    halImpl.SendI2CMessage(response);
 
     // If this is a power ON packet: Send directly to CAN
     if (request.getPower()) {
@@ -92,6 +90,25 @@ void loop() {
             request.getPower());
       }
     }
+
+    // Note: Transmission of the I2C message is done fairly late. This is a workaround for an
+    // apparent timing problem in the 6040 device in combination with fast processors such as
+    // the STM32. The problem is not observable with, e.g., an Atmega328p + SPI-connected CAN.
+    //
+    // According to
+    // https://www.analog.com/en/technical-articles/i2c-timing-definition-and-specification-guide-part-2.html#
+    // there is a minimum bus free time (time between an I2C Stop Condition and the subsequent
+    // Start Condition) of 4.7us. When the response is transmitted at the start of this function,
+    // the observable bus free time is 4.5us, which seems to somehow confuse the 6040. The response
+    // message is acknowledged but does not register, as the 6040 retries its request about once
+    // every 1.5s.
+    //
+    // Transmitting on CAN *before* transmitting on I2C leads to a bus free time of ~9us, which
+    // seems to be fine for the 6040.
+    //
+    // As a further improvement, the timing could be made explicit using timestamps of the
+    // incoming message.
+    halImpl.SendI2CMessage(response);
 
     halImpl.consumeI2cMessage();  // Free the input buffer
   }
