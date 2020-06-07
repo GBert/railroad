@@ -1,5 +1,3 @@
-#ifdef ARDUINO
-
 #include <CAN.h>
 #include <Wire.h>
 #include <hal/ArduinoUnoHal.h>
@@ -110,5 +108,3 @@ void ArduinoUnoHal::SendI2CMessage(const MarklinI2C::Messages::AccessoryMsg& msg
 }
 
 }  // namespace hal
-
-#endif

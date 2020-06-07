@@ -1,5 +1,3 @@
-#ifdef PLATFORMIO_FRAMEWORK_libopencm3
-
 #include "hal/LibOpencm3Hal.h"
 
 #include <libopencm3/cm3/nvic.h>
@@ -288,5 +286,3 @@ void LibOpencm3Hal::SendPacket(RR32Can::Identifier const& id, RR32Can::Data cons
 }
 
 }  // namespace hal
-
-#endif
