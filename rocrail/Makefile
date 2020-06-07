@@ -7,8 +7,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rocrail
-PKG_REV:=593ab728e2
-PKG_VERSION:=n746
+PKG_REV:=746b7e6fac
+PKG_VERSION:=n778
 PKG_RELEASE:=
 
 PKG_SOURCE_PROTO:=git
@@ -76,6 +76,17 @@ endef
 
 define Package/rocrail-cs-mbus/description
  Maerklin CS2/MS2 CAN-Bus (e.g. SocketCAN)
+endef
+
+define Package/rocrail-cs-p50
+  SECTION:=utils
+  CATEGORY:=Utilities
+  TITLE:=Command Station p50
+  DEPENDS:=rocrail
+endef
+
+define Package/rocrail-cs-p50/description
+ Command Station p50
 endef
 
 define Package/rocrail-cs-srcp
@@ -187,6 +198,11 @@ define Package/rocrail-cs-mbus/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/unxbin/mbus.so $(1)/opt/rocrail
 endef
 
+define Package/rocrail-cs-p50/install
+	$(INSTALL_DIR) $(1)/opt/rocrail
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/unxbin/p50.so $(1)/opt/rocrail
+endef
+
 define Package/rocrail-cs-rclink/install
 	$(INSTALL_DIR) $(1)/opt/rocrail
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/unxbin/rclink.so $(1)/opt/rocrail
@@ -258,6 +274,7 @@ $(eval $(call BuildPackage,rocnetnode))
 $(eval $(call BuildPackage,rocweb))
 $(eval $(call BuildPackage,rocrail-mqtt))
 $(eval $(call BuildPackage,rocrail-cs-mbus))
+$(eval $(call BuildPackage,rocrail-cs-p50))
 $(eval $(call BuildPackage,rocrail-cs-rclink))
 $(eval $(call BuildPackage,rocrail-cs-srcp))
 $(eval $(call BuildPackage,rocrail-cs-wmz21))

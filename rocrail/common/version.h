@@ -1,11 +1,43 @@
 const int revisionnr = 
-746
+778
 ;
 const char* commithash = 
-"593ab728e2bfea385166d33c18a4fdd00e214c29";
+"746b7e6fac8487c0293c3d59da936cdaed35f8f3";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"778 2020-06-07 13:23:13 +0200 easciiutils: added stdint header\n" \
+"777 2020-06-07 10:18:55 +0200 installwx: set version 3\n" \
+"776 2020-06-07 08:02:45 +0200 block: reject virtual slave block in case its defined as slave of itself\n" \
+"775 2020-06-07 07:50:20 +0200 mbus: trace level change for verify\n" \
+"774 2020-06-04 15:21:06 +0200 guiframe: fix for looking up the loco block; skip reserved blocks\n" \
+"773 2020-06-04 10:08:57 +0200 rasciiutils: WIP\n" \
+"772 2020-06-03 15:30:18 +0200 guiframe: fix for mapping loco to block in case its also in a virtual block\n" \
+"771 2020-06-03 10:27:28 +0200 block: free action on reset block reservation\n" \
+"770 2020-06-03 10:12:23 +0200 renderer: fix for new SVG objects in case size > 32\n" \
+"769 2020-06-03 09:03:21 +0200 model: restore reservation after init blocks\n" \
+"768 2020-06-02 10:16:39 +0200 guiframe: fix for crash on right click train image\n" \
+"767 2020-06-01 11:58:20 +0200 cardlg: fx range extended to 32\n" \
+"766 2020-05-31 08:32:01 +0200 dialogs: time unit labels (wip)\n" \
+"765 2020-05-31 08:03:32 +0200 trackpicker: revert\n" \
+"764 2020-05-30 18:10:48 +0200 trackpickerdlg: block correction\n" \
+"763 2020-05-30 18:02:21 +0200 trackpickerdlg: block fix\n" \
+"762 2020-05-30 10:39:18 +0200 locdialog: time unit lables added\n" \
+"761 2020-05-30 10:08:17 +0200 car: 32 functions support\n" \
+"760 2020-05-30 08:07:35 +0200 model,loc: restore reservation after processing the occupancy file\n" \
+"759 2020-05-28 15:46:07 +0200 rocdigs make file: p50 added\n" \
+"758 2020-05-28 14:20:31 +0200 cbus: wio support (wip)\n" \
+"757 2020-05-27 15:49:08 +0200 cbus: WIO support\n" \
+"756 2020-05-25 08:52:18 +0200 text: fix for mvtrainlen variable\n" \
+"755 2020-05-24 08:19:43 +0200 model: generate unregistered sensor option added\n" \
+"754 2020-05-23 12:21:54 +0200 cv: use default spinctrl size\n" \
+"753 2020-05-23 08:51:45 +0200 rocrailinidialog: service tab time units added\n" \
+"752 2020-05-23 08:45:45 +0200 rocrailinidialog: automatic tab time units added\n" \
+"751 2020-05-22 15:05:12 +0200 rocs userial: regard ENOTTY also as device error\n" \
+"750 2020-05-22 11:30:36 +0200 loc: isState extended with schedule ID\n" \
+"749 2020-05-22 09:39:16 +0200 textdialog: max slider range minimal value reduced\n" \
+"748 2020-05-22 08:10:32 +0200 wiodlg: railcom cutout option\n" \
+"747 2020-05-21 07:40:51 +0200 model: revert clean up prev_* attributes\n" \
 "746 2020-05-20 08:14:54 +0200 lieth: trace corrections\n" \
 "745 2020-05-20 08:06:06 +0200 lieth: trace fix at disconnect\n" \
 "744 2020-05-19 14:57:43 +0200 car: adjust function group in case of mapping\n" \
