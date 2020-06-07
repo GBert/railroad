@@ -21,11 +21,11 @@ using Hal_t = hal::LibOpencm3Hal;
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 
 #include "RR32Can/RR32Can.h"
-#include "config.h"
+#include "RR32Can_config.h"
 
 // ******** Variables and Constans********
 Hal_t halImpl;
-StationCbk stationCbk;
+AccessoryCbk accessoryCbk;
 
 uint8_t lastPowerOnTurnoutAddr;
 uint8_t lastPowerOnDirection;
@@ -42,8 +42,12 @@ void setup() {
   halImpl.begin(myAddr);
 
   // Tie callbacks together
-  stationCbk.begin(halImpl);
-  RR32Can::RR32Can.begin(RR32CanUUID, stationCbk, halImpl);
+  accessoryCbk.begin(halImpl);
+
+  RR32Can::Station::CallbackStruct callbacks;
+  callbacks.tx = &halImpl;
+  callbacks.accessory = &accessoryCbk;
+  RR32Can::RR32Can.begin(RR32CanUUID, callbacks);
 
   MYPRINTF("Ready!\n");
 }

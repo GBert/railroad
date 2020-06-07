@@ -2,14 +2,14 @@
 #define __HAL__HALBASE_H__
 
 #include "MarklinI2C/Messages/AccessoryMsg.h"
-#include "RR32Can/StationTxCbk.h"
+#include "RR32Can/callback/TxCbk.h"
 
 namespace hal {
 
 /*
  * \brief Class HalBase
  */
-class HalBase : public RR32Can::StationTxCbk {
+class HalBase : public RR32Can::callback::TxCbk {
  public:
   void begin(uint8_t i2caddr) { i2cLocalAddr = i2caddr; }
 

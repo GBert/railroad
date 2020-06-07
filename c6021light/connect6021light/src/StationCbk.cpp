@@ -5,9 +5,9 @@
 #include "MarklinI2C/Messages/AccessoryMsg.h"
 #include "RR32Can/Constants.h"
 
-void StationCbk::begin(hal::HalBase& hal) { this->hal = &hal; }
+void AccessoryCbk::begin(hal::HalBase& hal) { this->hal = &hal; }
 
-void StationCbk::OnAccessoryPacket(RR32Can::TurnoutPacket& packet) {
+void AccessoryCbk::OnAccessoryPacket(RR32Can::TurnoutPacket& packet) {
   MYPRINTF("Got an Accessory packet!");
 
   if (hal == nullptr) {
