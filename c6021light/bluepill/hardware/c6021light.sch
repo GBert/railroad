@@ -5,9 +5,9 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "C6021 Light"
-Date "2020-06-05"
-Rev "0.9"
-Comp ""
+Date "2020-06-09"
+Rev "1.0"
+Comp "Damian Philipp / Gerhard Bertelsmann"
 Comment1 ""
 Comment2 ""
 Comment3 ""
@@ -220,7 +220,7 @@ U 1 1 5EDB8D27
 P 6075 1175
 F 0 "C5" H 5900 1250 50  0000 L CNN
 F 1 "100n" H 5850 1100 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm" H 6113 1025 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 6113 1025 50  0001 C CNN
 F 3 "~" H 6075 1175 50  0001 C CNN
 	1    6075 1175
 	1    0    0    -1  
@@ -248,7 +248,7 @@ U 1 1 5EDF17B7
 P 8725 1000
 F 0 "J7" V 8643 1080 50  0000 L CNN
 F 1 "Conn_01x02" V 8688 1080 50  0001 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 8725 1000 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 8725 1000 50  0001 C CNN
 F 3 "~" H 8725 1000 50  0001 C CNN
 	1    8725 1000
 	-1   0    0    1   
@@ -414,7 +414,7 @@ U 1 1 5EF96570
 P 2000 5875
 F 0 "J10" V 2100 5775 50  0000 L CNN
 F 1 "Conn_01x02" V 1963 5955 50  0001 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 2000 5875 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 2000 5875 50  0001 C CNN
 F 3 "~" H 2000 5875 50  0001 C CNN
 	1    2000 5875
 	0    -1   -1   0   
@@ -444,7 +444,7 @@ U 1 1 5EDB76A5
 P 6375 1175
 F 0 "C6" H 6425 1250 50  0000 L CNN
 F 1 "100n" H 6425 1100 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm" H 6413 1025 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 6413 1025 50  0001 C CNN
 F 3 "~" H 6375 1175 50  0001 C CNN
 	1    6375 1175
 	1    0    0    -1  
@@ -455,7 +455,7 @@ U 1 1 5EFD069A
 P 1300 7275
 F 0 "C10" H 1415 7321 50  0000 L CNN
 F 1 "100nF" H 1415 7230 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D3.0mm_W2.0mm_P2.50mm" H 1338 7125 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 1338 7125 50  0001 C CNN
 F 3 "~" H 1300 7275 50  0001 C CNN
 	1    1300 7275
 	1    0    0    -1  
@@ -479,7 +479,7 @@ U 1 1 5F0056EC
 P 2300 6875
 F 0 "R14" H 2370 6921 50  0000 L CNN
 F 1 "3k3" V 2300 6800 50  0000 L CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 2230 6875 50  0001 C CNN
+F 2 "w_pth_resistors:RC03" V 2230 6875 50  0001 C CNN
 F 3 "~" H 2300 6875 50  0001 C CNN
 	1    2300 6875
 	1    0    0    -1  
@@ -490,7 +490,7 @@ U 1 1 5F005971
 P 2450 6275
 F 0 "R15" H 2520 6321 50  0000 L CNN
 F 1 "3k3" V 2450 6200 50  0000 L CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 2380 6275 50  0001 C CNN
+F 2 "w_pth_resistors:RC03" V 2380 6275 50  0001 C CNN
 F 3 "~" H 2450 6275 50  0001 C CNN
 	1    2450 6275
 	1    0    0    -1  
@@ -569,7 +569,7 @@ U 1 1 5F085251
 P 8325 675
 F 0 "J6" V 8243 755 50  0000 L CNN
 F 1 "Conn_01x02" V 8288 755 50  0001 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 8325 675 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 8325 675 50  0001 C CNN
 F 3 "~" H 8325 675 50  0001 C CNN
 	1    8325 675 
 	0    -1   -1   0   
@@ -757,23 +757,12 @@ Wire Wire Line
 Text Label 3625 2725 0    50   ~ 0
 LN_RX
 $Comp
-L Connector:RJ12 J30
-U 1 1 5F4D9B61
-P 10700 5225
-F 0 "J30" H 10725 5725 50  0000 R CNN
-F 1 "Loconet" H 10875 5550 50  0000 R CNN
-F 2 "Connector_RJ:RJ12_Amphenol_54601" V 10700 5250 50  0001 C CNN
-F 3 "~" V 10700 5250 50  0001 C CNN
-	1    10700 5225
-	-1   0    0    1   
-$EndComp
-$Comp
 L Connector_Generic:Conn_01x02 J11
 U 1 1 5F5534A8
 P 2950 5975
 F 0 "J11" V 3050 5875 50  0000 L CNN
 F 1 "Conn_01x02" V 2913 6055 50  0001 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 2950 5975 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 2950 5975 50  0001 C CNN
 F 3 "~" H 2950 5975 50  0001 C CNN
 	1    2950 5975
 	1    0    0    -1  
@@ -788,7 +777,7 @@ U 1 1 5EF8ADE4
 P 2100 6275
 F 0 "R13" H 2170 6321 50  0000 L CNN
 F 1 "120" V 2100 6200 50  0000 L CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 2030 6275 50  0001 C CNN
+F 2 "w_pth_resistors:RC03" V 2030 6275 50  0001 C CNN
 F 3 "~" H 2100 6275 50  0001 C CNN
 	1    2100 6275
 	1    0    0    -1  
@@ -842,7 +831,7 @@ NoConn ~ 1925 4450
 NoConn ~ 1925 4050
 NoConn ~ 1925 3850
 NoConn ~ 1925 3650
-NoConn ~ 1925 3450
+NoConn ~ 1925 5050
 Wire Wire Line
 	1925 3750 2200 3750
 Wire Wire Line
@@ -853,7 +842,6 @@ Wire Wire Line
 	1925 4950 2200 4950
 Wire Wire Line
 	1225 3550 1225 3650
-Connection ~ 1225 3550
 Wire Wire Line
 	1225 3650 1225 3750
 Connection ~ 1225 3650
@@ -894,28 +882,26 @@ Wire Wire Line
 	1225 4850 1225 4950
 Connection ~ 1225 4850
 Wire Wire Line
-	1225 4950 1225 5100
+	1225 4950 1225 5050
 Connection ~ 1225 4950
 $Comp
 L power:GND #PWR0117
 U 1 1 5EE50DE0
-P 1225 5100
-F 0 "#PWR0117" H 1225 4850 50  0001 C CNN
-F 1 "GND" H 1230 4927 50  0000 C CNN
-F 2 "" H 1225 5100 50  0001 C CNN
-F 3 "" H 1225 5100 50  0001 C CNN
-	1    1225 5100
+P 1225 5150
+F 0 "#PWR0117" H 1225 4900 50  0001 C CNN
+F 1 "GND" H 1230 4977 50  0000 C CNN
+F 2 "" H 1225 5150 50  0001 C CNN
+F 3 "" H 1225 5150 50  0001 C CNN
+	1    1225 5150
 	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	1225 3450 1225 3550
 $Comp
 L Device:C C4
 U 1 1 5F6CD270
 P 2250 2650
 F 0 "C4" H 2300 2725 50  0000 L CNN
 F 1 "100n" H 2300 2575 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm" H 2288 2500 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 2288 2500 50  0001 C CNN
 F 3 "~" H 2250 2650 50  0001 C CNN
 	1    2250 2650
 	1    0    0    -1  
@@ -931,7 +917,7 @@ U 1 1 5F71FCB7
 P 1500 2650
 F 0 "C3" H 1525 2725 50  0000 L CNN
 F 1 "100n" H 1525 2575 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm" H 1538 2500 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 1538 2500 50  0001 C CNN
 F 3 "~" H 1500 2650 50  0001 C CNN
 	1    1500 2650
 	1    0    0    -1  
@@ -1076,7 +1062,7 @@ U 1 1 5FA36EFB
 P 7550 3925
 F 0 "C7" H 7350 3975 50  0000 L CNN
 F 1 "100n" H 7325 3850 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm" H 7588 3775 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 7588 3775 50  0001 C CNN
 F 3 "~" H 7550 3925 50  0001 C CNN
 	1    7550 3925
 	1    0    0    -1  
@@ -1109,7 +1095,7 @@ U 1 1 5FA39973
 P 7875 3925
 F 0 "C8" H 7675 3975 50  0000 L CNN
 F 1 "100n" H 7650 3850 50  0000 L CNN
-F 2 "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm" H 7913 3775 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm" H 7913 3775 50  0001 C CNN
 F 3 "~" H 7875 3925 50  0001 C CNN
 	1    7875 3925
 	1    0    0    -1  
@@ -1254,11 +1240,7 @@ $EndComp
 Wire Wire Line
 	9725 5275 9775 5275
 Wire Wire Line
-	10300 5225 10175 5225
-Wire Wire Line
 	10175 5225 10175 5275
-Wire Wire Line
-	10175 5325 10300 5325
 Wire Wire Line
 	10175 5275 10125 5275
 Connection ~ 10175 5275
@@ -1332,8 +1314,6 @@ Wire Wire Line
 	8975 5275 8975 5325
 Wire Wire Line
 	8975 5625 8975 5675
-NoConn ~ 10300 5025
-NoConn ~ 10300 5525
 Wire Wire Line
 	7775 5375 7650 5375
 Connection ~ 7775 5375
@@ -1409,26 +1389,6 @@ Wire Wire Line
 	9375 5275 9375 5825
 Wire Wire Line
 	9375 6225 9375 6275
-Wire Wire Line
-	10300 5425 10250 5425
-Wire Wire Line
-	10250 5425 10250 5125
-Wire Wire Line
-	10250 5125 10300 5125
-Wire Wire Line
-	10250 5425 10250 5675
-Connection ~ 10250 5425
-$Comp
-L power:GND #PWR0145
-U 1 1 5FE9BB7A
-P 10250 5675
-F 0 "#PWR0145" H 10250 5425 50  0001 C CNN
-F 1 "GND" H 10255 5502 50  0000 C CNN
-F 2 "" H 10250 5675 50  0001 C CNN
-F 3 "" H 10250 5675 50  0001 C CNN
-	1    10250 5675
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	8400 5475 8425 5475
 $Comp
@@ -1799,7 +1759,7 @@ U 1 1 605C1441
 P 6075 6800
 F 0 "J51" H 6025 6325 50  0000 L CNN
 F 1 "Conn_01x06" H 6155 6701 50  0001 L CNN
-F 2 "Connector_PinHeader_2.00mm:PinHeader_1x06_P2.00mm_Vertical" H 6075 6800 50  0001 C CNN
+F 2 "Connector_PinHeader_1.27mm:PinHeader_1x06_P1.27mm_Vertical" H 6075 6800 50  0001 C CNN
 F 3 "~" H 6075 6800 50  0001 C CNN
 	1    6075 6800
 	1    0    0    -1  
@@ -1847,11 +1807,9 @@ CTS
 NoConn ~ 6475 6575
 Wire Notes Line
 	250  5600 6975 5600
-Wire Notes Line
-	6975 4350 11200 4350
 Text Notes 6450 5850 0    50   ~ 0
 optional\nDebug UART
-Text Notes 10550 4600 0    50   ~ 0
+Text Notes 9525 4600 0    50   ~ 0
 optional\nLoconet
 Wire Wire Line
 	8925 1400 8925 1000
@@ -2141,7 +2099,7 @@ U 1 1 5EF5F739
 P 2325 4150
 F 0 "J4" V 2243 3962 50  0000 R CNN
 F 1 "Conn_01x02" V 2198 3962 50  0001 R CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 2325 4150 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 2325 4150 50  0001 C CNN
 F 3 "~" H 2325 4150 50  0001 C CNN
 	1    2325 4150
 	0    -1   -1   0   
@@ -2231,17 +2189,15 @@ Wire Wire Line
 	1425 4450 1225 4450
 Wire Wire Line
 	1425 4350 1225 4350
-Wire Wire Line
-	1425 3450 1225 3450
 $Comp
 L Connector_Generic:Conn_02x16_Row_Letter_First J3
 U 1 1 5EE1C5CE
-P 1625 4250
-F 0 "J3" H 1675 5075 50  0000 C CNN
-F 1 "Conn_02x16_Row_Letter_First" H 1675 5076 50  0001 C CNN
-F 2 "Connector_DIN:DIN41612_B2_2x16_Female_Vertical_THT" H 1625 4250 50  0001 C CNN
-F 3 "~" H 1625 4250 50  0001 C CNN
-	1    1625 4250
+P 1625 4350
+F 0 "J3" H 1675 5175 50  0000 C CNN
+F 1 "Conn_02x16_Row_Letter_First" H 1675 5176 50  0001 C CNN
+F 2 "Connector_DIN:DIN41612_B2_2x16_Female_Vertical_THT" H 1625 4350 50  0001 C CNN
+F 3 "~" H 1625 4350 50  0001 C CNN
+	1    1625 4350
 	1    0    0    1   
 $EndComp
 Wire Wire Line
@@ -2388,4 +2344,184 @@ Wire Wire Line
 	6500 3125 6500 3625
 Wire Wire Line
 	6500 3625 6350 3625
+Text Label 10600 4225 0    50   ~ 0
+LN
+$Comp
+L power:+12V #PWR0163
+U 1 1 5F098754
+P 10325 3225
+F 0 "#PWR0163" H 10325 3075 50  0001 C CNN
+F 1 "+12V" H 10340 3398 50  0000 C CNN
+F 2 "" H 10325 3225 50  0001 C CNN
+F 3 "" H 10325 3225 50  0001 C CNN
+	1    10325 3225
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10450 3425 10450 3375
+Wire Wire Line
+	10800 4225 10450 4225
+Wire Wire Line
+	10800 4075 10800 4225
+Wire Wire Line
+	10450 3875 10450 3925
+Connection ~ 10450 3875
+Wire Wire Line
+	10500 3875 10450 3875
+Wire Wire Line
+	10450 3825 10450 3875
+Wire Wire Line
+	10800 3625 10800 3675
+Connection ~ 10800 3625
+Wire Wire Line
+	10800 3625 10750 3625
+Wire Wire Line
+	10800 3575 10800 3625
+$Comp
+L Device:R R42
+U 1 1 5EED5B79
+P 10800 3425
+F 0 "R42" V 10700 3350 50  0000 L CNN
+F 1 "10k" V 10800 3350 50  0000 L CNN
+F 2 "w_pth_resistors:RC03" V 10730 3425 50  0001 C CNN
+F 3 "~" H 10800 3425 50  0001 C CNN
+	1    10800 3425
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R41
+U 1 1 5EED4E9C
+P 10450 4075
+F 0 "R41" V 10350 4000 50  0000 L CNN
+F 1 "47" V 10450 4025 50  0000 L CNN
+F 2 "w_pth_resistors:RC03" V 10380 4075 50  0001 C CNN
+F 3 "~" H 10450 4075 50  0001 C CNN
+	1    10450 4075
+	-1   0    0    1   
+$EndComp
+$Comp
+L Transistor_BJT:BC547 Q32
+U 1 1 5EE82FD6
+P 10700 3875
+F 0 "Q32" H 10891 3921 50  0000 L CNN
+F 1 "BC547" H 10891 3830 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 10900 3800 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/BC/BC547.pdf" H 10700 3875 50  0001 L CNN
+	1    10700 3875
+	1    0    0    -1  
+$EndComp
+$Comp
+L Transistor_BJT:BC547 Q31
+U 1 1 5EE81C3B
+P 10550 3625
+F 0 "Q31" H 10741 3671 50  0000 L CNN
+F 1 "BC547" H 10741 3580 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 10750 3550 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/BC/BC547.pdf" H 10550 3625 50  0001 L CNN
+	1    10550 3625
+	-1   0    0    -1  
+$EndComp
+Text Label 10175 5225 0    50   ~ 0
+LN
+$Comp
+L power:GND #PWR0145
+U 1 1 5FE9BB7A
+P 10250 5675
+F 0 "#PWR0145" H 10250 5425 50  0001 C CNN
+F 1 "GND" H 10255 5502 50  0000 C CNN
+F 2 "" H 10250 5675 50  0001 C CNN
+F 3 "" H 10250 5675 50  0001 C CNN
+	1    10250 5675
+	1    0    0    -1  
+$EndComp
+Connection ~ 10250 5425
+Wire Wire Line
+	10250 5425 10250 5675
+Wire Wire Line
+	10250 5125 10475 5125
+Wire Wire Line
+	10250 5425 10250 5125
+Wire Wire Line
+	10475 5425 10250 5425
+Wire Wire Line
+	10175 5325 10475 5325
+Wire Wire Line
+	10475 5225 10175 5225
+$Comp
+L Connector_Generic:Conn_01x02 J31
+U 1 1 5F0FF03F
+P 10125 3375
+F 0 "J31" H 10300 3475 50  0000 C CNN
+F 1 "Conn_01x02" H 10043 3141 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 10125 3375 50  0001 C CNN
+F 3 "~" H 10125 3375 50  0001 C CNN
+	1    10125 3375
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	10450 3375 10325 3375
+Connection ~ 10450 3375
+Wire Wire Line
+	10450 3375 10450 3275
+Wire Wire Line
+	10450 3275 10800 3275
+Wire Wire Line
+	10325 3225 10325 3275
+Wire Notes Line
+	6975 4375 9825 4375
+Wire Notes Line
+	9825 4375 9825 2900
+Wire Notes Line
+	9825 2900 11225 2900
+Text Notes 9875 4025 0    50   ~ 0
+15mA\nStromquelle
+Wire Wire Line
+	1425 5050 1225 5050
+Connection ~ 1225 5050
+Wire Wire Line
+	1225 5050 1225 5150
+$Comp
+L Connector:RJ12 J30
+U 1 1 5F4D9B61
+P 10875 5225
+F 0 "J30" H 10900 5725 50  0000 R CNN
+F 1 "Loconet" H 11050 5550 50  0000 R CNN
+F 2 "Connector_RJ:RJ12_Amphenol_54601" V 10875 5250 50  0001 C CNN
+F 3 "~" V 10875 5250 50  0001 C CNN
+	1    10875 5225
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	10475 5025 10375 5025
+Wire Wire Line
+	10375 5025 10375 5525
+Wire Wire Line
+	10375 5525 10475 5525
+$Comp
+L Connector_Generic:Conn_01x02 J32
+U 1 1 5EE98DB5
+P 10575 4675
+F 0 "J32" H 10655 4667 50  0000 L CNN
+F 1 "Conn_01x02" H 10655 4576 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical_NB" H 10575 4675 50  0001 C CNN
+F 3 "~" H 10575 4675 50  0001 C CNN
+	1    10575 4675
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+12V #PWR0164
+U 1 1 5EE99FAA
+P 10375 4625
+F 0 "#PWR0164" H 10375 4475 50  0001 C CNN
+F 1 "+12V" H 10390 4798 50  0000 C CNN
+F 2 "" H 10375 4625 50  0001 C CNN
+F 3 "" H 10375 4625 50  0001 C CNN
+	1    10375 4625
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10375 4625 10375 4675
+Wire Wire Line
+	10375 4775 10375 5025
+Connection ~ 10375 5025
 $EndSCHEMATC
