@@ -26,103 +26,90 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/ObjectIdentifier.h"
 #include "Languages.h"
 #include "WebServer/HtmlTag.h"
+#include "WebServer/HtmlTagInputHidden.h"
+#include "WebServer/HtmlTagInputText.h"
 
 namespace WebServer
 {
 	class HtmlTagSelect : public HtmlTag
 	{
-		private:
-			const std::string commandID;
-
 		public:
 			HtmlTagSelect() = delete;
 
-			HtmlTagSelect(const std::string& name, const std::map<std::string,std::string>& options, const std::string& defaultValue = "");
-			HtmlTagSelect(const std::string& name, const std::map<std::string,Languages::TextSelector>& options, const std::string& defaultValue = "");
+			HtmlTagSelect(const std::string& name,
+				const std::map<std::string,std::string>& options,
+				const std::string& defaultValue = "");
 
-			HtmlTagSelect(const std::string& name, const std::map<std::string,DataModel::ObjectIdentifier>& options, const DataModel::ObjectIdentifier& defaultValue = DataModel::ObjectIdentifier())
-			:	HtmlTag("select"),
-			 	commandID("s_" + name)
-			{
-				AddAttribute("name", name);
-				AddId(commandID);
-
-				for (auto& option : options)
-				{
-					HtmlTag optionTag("option");
-					optionTag.AddAttribute("value", option.second);
-					optionTag.AddContent(option.first);
-					if (option.second == defaultValue)
-					{
-						optionTag.AddAttribute("selected");
-					}
-					AddChildTag(optionTag);
-				}
-			}
+			HtmlTagSelect(const std::string& name,
+				const std::map<std::string,DataModel::ObjectIdentifier>& options,
+				const DataModel::ObjectIdentifier& defaultValue = DataModel::ObjectIdentifier());
 
 			template<typename T>
-			HtmlTagSelect(const std::string& name, const std::map<std::string,T>& options, const int defaultValue = 0)
-			:	HtmlTag("select"),
-			 	commandID("s_" + name)
+			HtmlTagSelect(const std::string& name,
+				const std::map<std::string,T>& options,
+				const int defaultValue = 0) // This can not be Type T, because it would be ambiguous with previous declaration
+			:	HtmlTagSelect(name)
 			{
-				AddAttribute("name", name);
-				AddId(commandID);
-
-				for (auto option : options)
+				for (auto& option : options)
 				{
-					HtmlTag optionTag("option");
-					optionTag.AddAttribute("value", std::to_string(option.second));
-					optionTag.AddContent(option.first);
-					if (option.second == defaultValue)
-					{
-						optionTag.AddAttribute("selected");
-					}
-					AddChildTag(optionTag);
+					AddOption(std::to_string(option.second), option.first, option.second == defaultValue);
 				}
+				CheckDefaultKeyValue();
 			}
 
 			// T2 must be implicitly convertible to Languages::TextSelector
 			template<typename T1, typename T2>
-			HtmlTagSelect(const std::string& name, const std::map<T1,T2>& options, T1 defaultValue = 0)
-			:	HtmlTag("select"),
-			 	commandID("s_" + name)
+			HtmlTagSelect(const std::string& name,
+				const std::map<T1,T2>& options,
+				const T1 defaultValue = 0)
+			:	HtmlTagSelect(name)
 			{
-				AddAttribute("name", name);
-				AddId(commandID);
-
 				for (auto& option : options)
 				{
-					HtmlTag optionTag("option");
-					optionTag.AddAttribute("value", std::to_string(option.first));
-					optionTag.AddContent(Languages::GetText(option.second));
-					if (option.first == defaultValue)
-					{
-						optionTag.AddAttribute("selected");
-					}
-					AddChildTag(optionTag);
+					AddOption(std::to_string(option.first), Languages::GetText(option.second), option.first == defaultValue);
 				}
+				CheckDefaultKeyValue();
 			}
 
 			template<typename T>
-			HtmlTagSelect(const std::string& name, const std::map<T,std::string>& options, T defaultValue = 0)
-			:	HtmlTag("select"),
-			 	commandID("s_" + name)
+			HtmlTagSelect(const std::string& name,
+				const std::map<T,std::string>& options,
+				const T defaultValue = 0)
+			:	HtmlTagSelect(name)
 			{
-				AddAttribute("name", name);
-				AddId(commandID);
-
-				for (auto option : options)
+				for (auto& option : options)
 				{
-					HtmlTag optionTag("option");
-					optionTag.AddAttribute("value", std::to_string(option.first));
-					optionTag.AddContent(option.second);
-					if (option.first == defaultValue)
-					{
-						optionTag.AddAttribute("selected");
-					}
-					AddChildTag(optionTag);
+					AddOption(std::to_string(option.first), option.second, option.first == defaultValue);
 				}
+				CheckDefaultKeyValue();
 			}
+
+			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value = "") override
+			{
+				childTags[0].AddAttribute(name, value);
+				return *this;
+			}
+
+		private:
+			HtmlTagSelect(const std::string& name);
+
+			void AddOption(const std::string& key,
+				const std::string& value,
+				const bool defaultKeyValue);
+
+			void CheckDefaultKeyValue();
+
+			inline void SetDefaultKeyValue(const std::string& key,
+				const std::string& value)
+			{
+				childTags[0].AddAttribute("value", key);
+				childTags[1].AddAttribute("value", value);
+			}
+
+			const std::string commandID;
+			bool defaultKeyValueFound;
+			std::string defaultKey;
+			std::string defaultValue;
 	};
 } // namespace WebServer
 

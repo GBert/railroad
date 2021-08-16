@@ -18,14 +18,17 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include "Utils/Utils.h"
 #include "WebServer/HtmlTagInput.h"
+
+using std::string;
 
 namespace WebServer
 {
-	HtmlTagInput::HtmlTagInput(const std::string& type,
-		const std::string& name,
-		const std::string& value,
-		const bool disabled)
+	HtmlTagInput::HtmlTagInput(const string& type,
+		const string& name,
+		const string& value,
+		const Style style)
 	:	HtmlTag("input")
 	{
 		AddAttribute("type", type);
@@ -33,17 +36,20 @@ namespace WebServer
 		AddId(name);
 		if (value.size() > 0)
 		{
-			std::string modifiedValue = value;
-			Utils::Utils::ReplaceString(modifiedValue, "\"", "&quot;");
-			Utils::Utils::ReplaceString(modifiedValue, "'", "&apos;");
-			Utils::Utils::ReplaceString(modifiedValue, "&", "&amp;");
-			Utils::Utils::ReplaceString(modifiedValue, "<", "&lt;");
-			Utils::Utils::ReplaceString(modifiedValue, ">", "&gt;");
-			AddAttribute("value", modifiedValue);
+			AddAttribute("value", Utils::Utils::HtmlEncode(value));
 		}
-		if (disabled)
+		switch(style)
 		{
-			AddAttribute("disabled");
+			case StyleDisabled:
+				AddAttribute("disabled");
+				break;
+
+			case StyleReadOnly:
+				AddAttribute("readonly");
+				break;
+
+			default:
+				break;
 		}
 	}
 } // namespace WebServer

@@ -1,3 +1,53 @@
+function copyValueToInput(key, value, elementId)
+{
+	removeClass('d_' + elementId, 'show');
+
+	var textElement = document.getElementById('skip_' + elementId);
+	if (!textElement)
+	{
+		return;
+	}
+	textElement.value = value;
+
+	var keyElement = document.getElementById(elementId);
+	if (!keyElement)
+	{
+		return;
+	}
+	keyElement.value = key;
+	keyElement.onchange();
+}
+
+window.addEventListener('click', function(event) {
+	for (const select of document.querySelectorAll('.dropdown'))
+	{
+		if (!select.contains(event.target))
+		{
+			select.classList.remove('show');
+		}
+	}
+}, true);
+
+function removeClass(elementId, name)
+{
+	var element = document.getElementById(elementId);
+	if (!element)
+	{
+		return;
+	}
+	element.classList.remove(name);
+}
+
+function toggleClass(elementId, name)
+{
+	var element = document.getElementById(elementId);
+	if (!element)
+	{
+		return;
+	}
+	element.classList.toggle(name);
+}
+
 function modifierKeyPressed(event)
 {
 	return (event.shiftKey || event.ctrlKey || event.altKey);
@@ -150,7 +200,7 @@ function onChangeLocoFunctionType(nr)
 	{
 		return false;
 	}
-	var locoFunctionIcon = document.getElementById('s_f' + nr + '_icon');
+	var locoFunctionIcon = document.getElementById('s_f' + nr + '_icon_container');
 	if (!locoFunctionIcon)
 	{
 		return false;
@@ -1083,7 +1133,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'booster')
 	{
-		elementName = 'b_booster';
+		elementName = 'skip_booster';
 		var on = argumentMap.get('on');
 		setToggleButton(elementName, on);
 	}
@@ -1098,13 +1148,13 @@ function dataUpdate(event)
 	}
 	else if (command == 'locofunction')
 	{
-		elementName = 'b_locofunction_' + argumentMap.get('loco') + '_' + argumentMap.get('function');
+		elementName = 'skip_locofunction_' + argumentMap.get('loco') + '_' + argumentMap.get('function');
 		var on = argumentMap.get('on');
 		setToggleButton(elementName, on);
 	}
 	else if (command == 'locoorientation')
 	{
-		elementName = 'b_locoorientation_' + argumentMap.get('loco');
+		elementName = 'skip_locoorientation_' + argumentMap.get('loco');
 		var on = argumentMap.get('orientation');
 		setToggleButton(elementName, on);
 	}
@@ -1613,6 +1663,11 @@ function submitEditForm()
 		if (formElement == undefined)
 		{
 			break;
+		}
+		if (formElement.name.substr(0, 5) == "skip_")
+		{
+			++i;
+			continue;
 		}
 		if (i > 0)
 		{

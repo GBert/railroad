@@ -20,6 +20,8 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <string>
 
+#include "DataModel/Feedback.h"
+#include "Manager.h"
 #include "Hardware/Protocols/DccPpEx.h"
 
 using std::string;
@@ -141,6 +143,137 @@ namespace Hardware
 			buffer += to_string(orientation);
 			buffer += ">";
 			SendInternal(buffer);
+		}
+
+		void DccPpEx::FeedbackDelete(const FeedbackID feedbackID,
+			__attribute__((unused)) const std::string& name)
+		{
+			string buffer("<S ");
+			buffer += to_string(feedbackID);
+			buffer += "><E>";
+			SendInternal(buffer);
+		}
+
+		void DccPpEx::FeedbackSettings(const FeedbackID feedbackID,
+			__attribute__((unused)) const std::string& name)
+		{
+			string buffer("<S ");
+			buffer += to_string(feedbackID);
+			buffer += " ";
+			buffer += to_string(feedbackID);
+			buffer += " 1><E>";
+			SendInternal(buffer);
+		}
+
+		void DccPpEx::Receiver()
+		{
+			Utils::Utils::SetThreadName("DCC++EX");
+			logger->Info(Languages::TextReceiverThreadStarted);
+			while (true)
+			{
+				string buffer;
+				const bool ret = ReceiveData(buffer);
+				if (!ret)
+				{
+					break;
+				}
+				Parse(buffer);
+			}
+			logger->Info(Languages::TextTerminatingReceiverThread);
+		}
+
+		bool DccPpEx::ReceiveData(string& buffer)
+		{
+			size_t size = 0;
+			while (size == 0 || buffer[size - 1] != '>')
+			{
+				if (!run)
+				{
+					return false;
+				}
+				const bool ret = ReceiveInternal(buffer);
+				if (!ret)
+				{
+					return ret;
+				}
+				size = buffer.size();
+			}
+			return true;
+		}
+
+		void DccPpEx::Parse(const string& buffer)
+		{
+			unsigned int pos = 0;
+			while (true)
+			{
+				if (buffer[pos] != '<')
+				{
+					return;
+				}
+
+				++pos;
+				if (pos > buffer.size())
+				{
+					return;
+				}
+				switch(buffer[pos])
+				{
+					case 'Q':
+					{
+						// pin is high
+						const FeedbackPin pin = ParseInt(buffer, pos);
+						logger->Info(Languages::TextFeedbackChange, pin & 0x000F, pin >> 4, Languages::GetText(Languages::TextOn));
+						manager->FeedbackState(controlID, pin, DataModel::Feedback::FeedbackStateOccupied);
+						break;
+					}
+
+					case 'q':
+					{
+						// pin is low
+						const FeedbackPin pin = ParseInt(buffer, pos);
+						logger->Info(Languages::TextFeedbackChange, pin & 0x000F, pin >> 4, Languages::GetText(Languages::TextOff));
+						manager->FeedbackState(controlID, pin, DataModel::Feedback::FeedbackStateFree);
+						break;
+					}
+
+					default:
+						// other answers do not matter
+						break;
+				}
+
+				do
+				{
+					++pos;
+				}
+				while (buffer.size() >= pos && buffer[pos] != '>');
+
+				if (buffer.size() >= pos)
+				{
+					return;
+				}
+			}
+		}
+
+		unsigned int DccPpEx::ParseInt(const string& buffer, unsigned int& pos)
+		{
+			int out = 0;
+			while (buffer.size() > pos)
+			{
+				const char c = buffer[pos];
+				if (c == ' ')
+				{
+					++pos;
+					continue;
+				}
+				if (c >= '0' && c <= '9')
+				{
+					break;
+				}
+				out *= 10;
+				out += c - '0';
+				++pos;
+			}
+			return out;
 		}
 	} // namespace
 } // namespace

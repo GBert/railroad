@@ -55,7 +55,7 @@ namespace DataModel
 
 			inline std::string Serialize() const
 			{
-				return GetObjectTypeAsString() + "=" + std::to_string(objectID);
+				return GetObjectTypeAsString() + "=" + GetObjectIdAsString();
 			}
 
 			bool Deserialize(const std::map<std::string,std::string>& arguments);
@@ -86,7 +86,7 @@ namespace DataModel
 
 			inline operator std::string() const
 			{
-				return GetObjectTypeAsString() + std::to_string(objectID);
+				return GetObjectTypeAsString() + GetObjectIdAsString();
 			}
 
 			inline void Clear()

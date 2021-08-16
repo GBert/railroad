@@ -34,9 +34,12 @@ namespace WebServer
 			HtmlTagInputText& operator=(const HtmlTagInputText&) = delete;
 
 			HtmlTagInputText(const std::string& name,
-				const std::string& value,
-				const bool disabled)
-			:	HtmlTagInput("text", name, value, disabled)
+				const std::string& value = "",
+				const HtmlTagInput::Style style = HtmlTagInput::StyleNone)
+			:	HtmlTagInput("text",
+					name,
+					value,
+					style)
 			{
 			}
 	};

@@ -93,9 +93,9 @@ namespace WebServer
 	void WebClient::Worker()
 	{
 		Utils::Utils::SetThreadName("WebClient");
-		logger->Info(Languages::TextHttpConnectionOpen, id);
+		logger->Debug(Languages::TextHttpConnectionOpened, id);
 		WorkerImpl();
-		logger->Info(Languages::TextHttpConnectionClose, id);
+		logger->Debug(Languages::TextHttpConnectionClosed, id);
 		terminated = true;
 	}
 
@@ -106,7 +106,7 @@ namespace WebServer
 
 		while (run && keepalive)
 		{
-			const int BufferSize = 4096;
+			const int BufferSize = 8192;
 			char buffer[BufferSize];
 			memset(buffer, 0, BufferSize);
 
@@ -119,6 +119,7 @@ namespace WebServer
 				{
 					if (errno != ETIMEDOUT)
 					{
+						logger->Debug(Languages::TextHttpConnectionErrorReadingData, id, strerror(errno));
 						return;
 					}
 					if (run == false)
@@ -1609,11 +1610,11 @@ namespace WebServer
 			string fNrString = "f" + nrString;
 			fDiv.AddChildTag(HtmlTagLabel("F" + nrString, fNrString + "_type"));
 
-			DataModel::LocoFunctionType type = locoFunctions[nr].type;
+			const DataModel::LocoFunctionType type = locoFunctions[nr].type;
 			DataModel::LocoFunctionIcon icon = locoFunctions[nr].icon;
 			DataModel::LocoFunctionTimer timer = locoFunctions[nr].timer;
 
-			fDiv.AddChildTag(HtmlTagSelect(fNrString + "_type", functionTypes, type).AddAttribute("onclick", "onChangeLocoFunctionType(" + nrString + ");return false;"));
+			fDiv.AddChildTag(HtmlTagSelect(fNrString + "_type", functionTypes, type).AddAttribute("onchange", "onChangeLocoFunctionType(" + nrString + ");return false;"));
 			HtmlTagSelect selectIcon(fNrString + "_icon", functionIcons, icon);
 			HtmlTagInputInteger inputTimer(fNrString + "_timer", timer, 1, 255);
 			if (type == LocoFunctionTypeNone)

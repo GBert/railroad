@@ -22,9 +22,8 @@ body {
 	width: calc(100% - 252px);
 }
 
-.loco_selector select,
-.layer_selector select {
-	width: 100%;
+.layer_selector {
+	width: calc(100% - 252px);
 }
 
 .loco {
@@ -410,14 +409,6 @@ label {
 	width: 40px;
 }
 
-.function_line select {
-	width: 200px;
-}
-
-.function_line input {
-	width: 30px;
-}
-
 .function_line .div_integer {
 	width: 80px;
 }
@@ -430,7 +421,7 @@ label {
 	width: 120px;
 }
 
-.narrow_label select {
+.narrow_label .dropdown {
 	width: 450px;
 }
 
@@ -442,32 +433,99 @@ label {
 	width: 15px;
 }
 
-.select_track {
-	width: 150px;
+input {
+	display: inline-block;
+	width: 240px;
 }
 
-.select_orientation {
-	width: 100px;
-}
-
-.select_relation_id {
-	width: 270px;
-}
-
-.select_relation_objecttype,
-.select_relation_state {
-	width: 100px;
-}
-
-input,
-select {
+.dropdowncontainer {
+	position: relative;
+	display: inline-block;
 	width: 250px;
 }
 
-select,
-option {
-	background-color: #555;
-	color: white;
+.dropdowncontainer input {
+	width: calc(100% - 10px);
+}
+
+.select_track,
+.select_track .dropdown {
+	width: 160px;
+}
+
+.select_orientation,
+.select_orientation .dropdown {
+	width: 80px;
+}
+
+.select_relation_objecttype,
+.select_relation_objecttype .dropdown {
+	width: 100px;
+}
+
+.select_relation_id,
+.select_relation_id .dropdown {
+	width: 300px;
+}
+
+.select_relation_state,
+.select_relation_state .dropdown {
+	width: 80px;
+}
+
+.layer_selector .dropdowncontainer {
+	width: 100%;
+}
+
+.dropdown {
+	width: 0;
+	display: block;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	visibility: hidden;
+	opacity: 0;
+	max-height: 210px;
+	overflow-y: auto;
+}
+
+.dropdownentry {
+	background-color: #aaa;
+	color: black;
+	position: relative;
+	display: block;
+	width: 0;
+	height: 0;
+	padding: 0;
+	margin: 0;
+	z-index: 2;
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.dropdownentry:hover {
+	background-color: #ccc;
+}
+
+.dropdown.show,
+.dropdown.show .dropdownentry {
+	visibility: visible;
+	pointer-events: all;
+	opacity: 1;
+}
+
+.dropdown.show {
+	width: 100%;
+}
+
+.dropdown.show .dropdownentry {
+	height: 14px;
+	padding: 4px;
+	width: calc(100% - 10px);
 }
 
 .status {
@@ -590,6 +648,7 @@ button:active {
 .button_off .button_on,
 .button_on .button_off {
 	display: none;
+	visibility: hidden;
 }
 
 .sound1 {

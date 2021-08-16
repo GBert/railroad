@@ -33,10 +33,20 @@ namespace WebServer
 			HtmlTagInput(const HtmlTagInput&) = delete;
 			HtmlTagInput& operator=(const HtmlTagInput&) = delete;
 
+			enum Style
+			{
+				StyleNone = 0,
+				StyleDisabled = 1,
+				StyleReadOnly = 2
+			};
+
 			HtmlTagInput(const std::string& type,
 				const std::string& name,
 				const std::string& value = "",
-				const bool disabled = false);
+				const Style style = StyleNone);
+
+		private:
+			std::string PrepareValue(const std::string& value);
 	};
 } // namespace WebServer
 

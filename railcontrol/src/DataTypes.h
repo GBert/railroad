@@ -165,7 +165,7 @@ enum HardwareType : uint8_t
 	HardwareTypeVirtual = 1,
 	HardwareTypeCS2Udp = 2,
 	HardwareTypeM6051 = 3,
-	HardwareTypeRM485 = 4,
+	// HardwareTypeRM485 = 4, // not used anymore, but still reserved for old configurations
 	HardwareTypeOpenDcc = 5,
 	HardwareTypeHsi88 = 6,
 	HardwareTypeZ21 = 7,

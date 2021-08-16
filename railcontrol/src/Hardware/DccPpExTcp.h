@@ -47,7 +47,9 @@ namespace Hardware
 		private:
 			Network::TcpConnection connection;
 
-			void Send(const std::string& buffer) override;
+			bool Send(const std::string& buffer) override;
+
+			bool Receive(std::string& buffer) override;
 
 			static const unsigned short Port = 2560;
 	};

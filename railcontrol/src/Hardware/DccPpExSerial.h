@@ -47,6 +47,8 @@ namespace Hardware
 		private:
 			Network::Serial serialLine;
 
-			void Send(const std::string& buffer) override;
+			bool Send(const std::string& buffer) override;
+
+			bool Receive(std::string& buffer) override;
 	};
 } // namespace

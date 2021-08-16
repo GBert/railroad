@@ -32,18 +32,29 @@ namespace Hardware
 		logger->Info(Languages::TextStarting, GetFullName());
 	}
 
-	void DccPpExSerial::Send(const std::string& buffer)
+	bool DccPpExSerial::Send(const std::string& buffer)
 	{
 		if (!serialLine.IsConnected())
 		{
-			return;
+			return false;
 		}
-		if (serialLine.Send(buffer) == -1)
+
+		bool ret = serialLine.Send(buffer) != -1;
+		if (!ret)
 		{
 			logger->Error(Languages::TextUnableToSendDataToControl);
 		}
 
-		std::string dummy;
-		serialLine.Receive(dummy);
+		return ret;
+	}
+
+	bool DccPpExSerial::Receive(std::string& buffer)
+	{
+		bool ret = serialLine.Receive(buffer);
+		if (!ret)
+		{
+			logger->Error(Languages::TextUnableToReceiveData);
+		}
+		return ret;
 	}
 } // namespace

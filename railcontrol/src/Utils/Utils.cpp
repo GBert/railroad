@@ -123,6 +123,17 @@ namespace Utils
 		return output;
 	}
 
+	string Utils::HtmlEncode(const string& value)
+	{
+		string modifiedValue = value;
+		ReplaceString(modifiedValue, "&", "&amp;");
+		ReplaceString(modifiedValue, "\"", "&quot;");
+		ReplaceString(modifiedValue, "'", "&apos;");
+		ReplaceString(modifiedValue, "<", "&lt;");
+		ReplaceString(modifiedValue, ">", "&gt;");
+		return modifiedValue;
+	}
+
 	const std::string& Utils::GetStringMapEntry(const std::map<std::string, std::string>& map, const std::string& key, const std::string& defaultValue)
 	{
 		if (map.count(key) == 0)

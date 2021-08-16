@@ -132,7 +132,6 @@ namespace WebServer
 		hardwareList["Märklin Central Station 2/3 (CS2/CS3) UDP"] = HardwareTypeCS2Udp;
 		hardwareList["Märklin Interface 6050/6051"] = HardwareTypeM6051;
 		hardwareList["OpenDCC Z1"] = HardwareTypeOpenDcc;
-		hardwareList["RM485"] = HardwareTypeRM485;
 		hardwareList["Roco Z21"] = HardwareTypeZ21;
 		hardwareList["Tams MasterControl"] = HardwareTypeMasterControl;
 		hardwareList["Tams MasterControl 2"] = HardwareTypeMasterControl2;

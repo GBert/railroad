@@ -39,14 +39,23 @@ namespace Hardware
 		}
 	}
 
-	void DccPpExTcp::Send(const string& buffer)
+	bool DccPpExTcp::Send(const string& buffer)
 	{
-		if (connection.Send(buffer) == -1)
+		const bool ret = connection.Send(buffer) != -1;
+		if (!ret)
 		{
 			logger->Error(Languages::TextUnableToSendDataToControl);
 		}
+		return ret;
+	}
 
-		std::string dummy;
-		connection.Receive(dummy);
+	bool DccPpExTcp::Receive(string& buffer)
+	{
+		const bool ret =  connection.Receive(buffer);
+		if (!ret)
+		{
+			logger->Error(Languages::TextUnableToReceiveData);
+		}
+		return ret;
 	}
 } // namespace

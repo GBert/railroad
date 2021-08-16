@@ -46,6 +46,7 @@ namespace Utils
 			static std::string StringBeforeDelimiter(const std::string& input, const std::string& delimiter);
 			static std::string UrlDecode(const std::string& value);
 			static std::string UrlEncode(const std::string& value);
+			static std::string HtmlEncode(const std::string& value);
 
 			static inline bool IsMapEntrySet(const std::map<std::string,std::string>& map, const std::string& key)
 			{

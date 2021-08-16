@@ -34,24 +34,10 @@ namespace WebServer
 		public:
 			HtmlTagSelectWithLabel() = delete;
 
-			HtmlTagSelectWithLabel(const std::string& name, const Languages::TextSelector label, const std::map<std::string,Languages::TextSelector>& options, const std::string& defaultValue = "")
-			:	HtmlTag("div")
-			{
-				HtmlTag::AddClass("input_select_with_label");
-				AddChildTag(HtmlTagLabel(label, "s_" + name));
-				AddChildTag(HtmlTagSelect(name, options, defaultValue));
-			}
-
-			HtmlTagSelectWithLabel(const std::string& name, const Languages::TextSelector label, const std::map<std::string,DataModel::ObjectIdentifier>& options, const DataModel::ObjectIdentifier& defaultValue = DataModel::ObjectIdentifier())
-			:	HtmlTag("div")
-			{
-				HtmlTag::AddClass("input_select_with_label");
-				AddChildTag(HtmlTagLabel(label, "s_" + name));
-				AddChildTag(HtmlTagSelect(name, options, defaultValue));
-			}
-
-			template<typename T>
-			HtmlTagSelectWithLabel(const std::string& name, const Languages::TextSelector label, const std::map<std::string,T>& options, const int defaultValue = 0)
+			inline HtmlTagSelectWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const std::map<std::string,DataModel::ObjectIdentifier>& options,
+				const DataModel::ObjectIdentifier& defaultValue = DataModel::ObjectIdentifier())
 			:	HtmlTag("div")
 			{
 				HtmlTag::AddClass("input_select_with_label");
@@ -60,7 +46,10 @@ namespace WebServer
 			}
 
 			template<typename T>
-			HtmlTagSelectWithLabel(const std::string& name, const Languages::TextSelector label, const std::map<T,Languages::TextSelector>& options, const T defaultValue = 0)
+			HtmlTagSelectWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const std::map<std::string,T>& options,
+				const int defaultValue = 0)
 			:	HtmlTag("div")
 			{
 				HtmlTag::AddClass("input_select_with_label");
@@ -69,7 +58,10 @@ namespace WebServer
 			}
 
 			template<typename T>
-			HtmlTagSelectWithLabel(const std::string& name, const Languages::TextSelector label, const std::map<T,std::string>& options, T defaultValue = 0)
+			HtmlTagSelectWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const std::map<T,Languages::TextSelector>& options,
+				const T defaultValue = 0)
 			:	HtmlTag("div")
 			{
 				HtmlTag::AddClass("input_select_with_label");
@@ -78,7 +70,10 @@ namespace WebServer
 			}
 
 			template<typename T>
-			HtmlTagSelectWithLabel(const std::string& name, const std::string& label, const std::map<T,std::string>& options, T defaultValue = 0)
+			HtmlTagSelectWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const std::map<T,std::string>& options,
+				const T defaultValue = 0)
 			:	HtmlTag("div")
 			{
 				HtmlTag::AddClass("input_select_with_label");
@@ -86,7 +81,21 @@ namespace WebServer
 				AddChildTag(HtmlTagSelect(name, options, defaultValue));
 			}
 
-			virtual ~HtmlTagSelectWithLabel() {}
+			template<typename T>
+			HtmlTagSelectWithLabel(const std::string& name,
+				const std::string& label,
+				const std::map<T,std::string>& options,
+				const T defaultValue = 0)
+			:	HtmlTag("div")
+			{
+				HtmlTag::AddClass("input_select_with_label");
+				AddChildTag(HtmlTagLabel(label, "s_" + name));
+				AddChildTag(HtmlTagSelect(name, options, defaultValue));
+			}
+
+			virtual ~HtmlTagSelectWithLabel()
+			{
+			}
 
 			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{

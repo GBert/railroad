@@ -39,14 +39,16 @@ namespace WebServer
 			inline HtmlTagInputTextWithLabel(const std::string& name,
 				const Languages::TextSelector label,
 				const std::string& value = "",
-				const bool disabled = false)
+				const HtmlTagInput::Style style = HtmlTagInput::StyleNone)
 			:	HtmlTag()
 			{
 				AddChildTag(HtmlTagLabel(label, name));
-				AddChildTag(HtmlTagInputText(name, value, disabled));
+				AddChildTag(HtmlTagInputText(name, value, style));
 			}
 
-			virtual ~HtmlTagInputTextWithLabel() {}
+			virtual ~HtmlTagInputTextWithLabel()
+			{
+			}
 
 			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{

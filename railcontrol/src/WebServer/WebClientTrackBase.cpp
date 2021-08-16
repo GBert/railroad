@@ -85,7 +85,7 @@ namespace WebServer
 
 		if (cluster != nullptr)
 		{
-			automodeContent.AddChildTag(HtmlTagInputTextWithLabel("cluster", Languages::TextCluster, cluster->GetName(), true));
+			automodeContent.AddChildTag(HtmlTagInputTextWithLabel("cluster", Languages::TextCluster, cluster->GetName(), HtmlTagInput::StyleDisabled));
 		}
 		return automodeContent;
 	}

@@ -22,43 +22,85 @@ along with RailControl; see the file LICENCE. If not see
 
 namespace WebServer
 {
-	HtmlTagSelect::HtmlTagSelect(const std::string& name, const std::map<std::string,std::string>& options, const std::string& defaultValue)
-	:	HtmlTag("select"),
-	 	commandID("s_" + name)
+	HtmlTagSelect::HtmlTagSelect(const std::string& name,
+		const std::map<std::string,std::string>& options,
+		const std::string& defaultValue)
+	:	HtmlTagSelect(name)
 	{
-		AddAttribute("name", name);
-		AddId(commandID);
-
 		for (auto& option : options)
 		{
-			HtmlTag optionTag("option");
-			optionTag.AddAttribute("value", option.first);
-			optionTag.AddContent(option.second);
-			if (option.first.compare(defaultValue) == 0)
-			{
-				optionTag.AddAttribute("selected");
-			}
-			AddChildTag(optionTag);
+			AddOption(option.first, option.second, option.first == defaultValue);
 		}
+		CheckDefaultKeyValue();
 	}
 
-	HtmlTagSelect::HtmlTagSelect(const std::string& name, const std::map<std::string,Languages::TextSelector>& options, const std::string& defaultValue)
-	:	HtmlTag("select"),
-	 	commandID("s_" + name)
+	HtmlTagSelect::HtmlTagSelect(const std::string& name,
+		const std::map<std::string,DataModel::ObjectIdentifier>& options,
+		const DataModel::ObjectIdentifier& defaultValue)
+	:	HtmlTagSelect(name)
 	{
-		AddAttribute("name", name);
-		AddId(commandID);
-
 		for (auto& option : options)
 		{
-			HtmlTag optionTag("option");
-			optionTag.AddAttribute("value", option.first);
-			optionTag.AddContent(Languages::GetText(option.second));
-			if (option.first.compare(defaultValue) == 0)
-			{
-				optionTag.AddAttribute("selected");
-			}
-			AddChildTag(optionTag);
+			AddOption(option.second, option.first, option.second == defaultValue);
 		}
+		CheckDefaultKeyValue();
+	}
+
+	HtmlTagSelect::HtmlTagSelect(const std::string& name)
+	:	HtmlTag("div"),
+		commandID("s_" + name),
+		defaultKeyValueFound(false)
+	{
+		AddId(commandID + "_container");
+		AddClass("dropdowncontainer");
+
+		HtmlTagInputHidden hidden(name, "");
+		hidden.AddId(commandID);
+		AddChildTag(hidden);
+
+		HtmlTagInputText text("skip_" + commandID);
+		text.AddId("skip_" + commandID);
+		text.AddAttribute("onclick", "toggleClass('d_" + commandID + "', 'show'); return false;");
+		text.AddAttribute("readonly");
+		AddChildTag(text);
+
+		HtmlTag dropDown("div");
+		dropDown.AddClass("dropdown");
+		dropDown.AddId("d_" + commandID);
+		AddChildTag(dropDown);
+	}
+
+	void HtmlTagSelect::AddOption(const std::string& key,
+		const std::string& value,
+		const bool defaultKeyValue)
+	{
+		defaultKeyValueFound |= defaultKeyValue;
+		if (defaultKeyValue || defaultKey.length() == 0)
+		{
+			defaultKey = key;
+			defaultValue = value;
+		}
+
+		HtmlTag optionTag("div");
+		optionTag.AddAttribute("key", key);
+		optionTag.AddClass("dropdownentry");
+		optionTag.AddContent(value);
+		if (defaultKeyValue)
+		{
+			SetDefaultKeyValue(key, value);
+			optionTag.AddClass("selected_option");
+		}
+		optionTag.AddAttribute("onclick", "copyValueToInput('" + key + "', '" + value + "', '" + commandID + "');");
+		childTags[2].AddChildTag(optionTag);
+	}
+
+	void HtmlTagSelect::CheckDefaultKeyValue()
+	{
+		if (defaultKeyValueFound)
+		{
+			return;
+		}
+
+		SetDefaultKeyValue(defaultKey, defaultValue);
 	}
 } // namespace WebServer

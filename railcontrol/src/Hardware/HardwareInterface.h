@@ -200,6 +200,16 @@ namespace Hardware
 			{
 			}
 
+			virtual void FeedbackDelete(__attribute__((unused)) const FeedbackID feedbackID,
+				__attribute__((unused)) const std::string& name)
+			{
+			}
+
+			virtual void FeedbackSettings(__attribute__((unused)) const FeedbackID feedbackID,
+				__attribute__((unused)) const std::string& name)
+			{
+			}
+
 		protected:
 			virtual void AccessoryOnOrOff(__attribute__((unused)) const Protocol protocol,
 				__attribute__((unused)) const Address address,

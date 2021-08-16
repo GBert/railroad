@@ -108,8 +108,6 @@ Hardware/Protocols/Z21.h
 Hardware/Protocols/Z21FeedbackCache.h
 Hardware/Protocols/Z21LocoCache.h
 Hardware/Protocols/Z21TurnoutCache.h
-Hardware/RM485.cpp
-Hardware/RM485.h
 Hardware/RedBox.h
 Hardware/Rektor.h
 Hardware/TwinCenter.h

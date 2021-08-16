@@ -25,7 +25,7 @@ namespace WebServer
 {
 	HtmlTagButton::HtmlTagButton(const std::string& value, const std::string& command, const std::string& toolTipText)
 	:	HtmlTag(),
-		commandID("b_" + command)
+		commandID("skip_" + command)
 	{
 		HtmlTag buttonTag("button");
 		buttonTag.AddClass("button");

@@ -41,6 +41,7 @@ namespace Hardware
 				{
 					return CapabilityLoco
 						| CapabilityAccessory
+						| CapabilityFeedback
 						| CapabilityProgram
 						| CapabilityProgramDccDirectWrite
 						| CapabilityProgramDccPomLocoWrite;
@@ -92,6 +93,12 @@ namespace Hardware
 					const CvNumber cv,
 					const CvValue value) override;
 
+				void FeedbackDelete(const FeedbackID feedbackID,
+					const std::string& name) override;
+
+				void FeedbackSettings(const FeedbackID feedbackID,
+					const std::string& name) override;
+
 			protected:
 				inline DccPpEx(const HardwareParams* params,
 				    const std::string& fullName,
@@ -99,12 +106,16 @@ namespace Hardware
 				:	HardwareInterface(params->GetManager(),
 						params->GetControlID(),
 						fullName,
-						shortName)
+						shortName),
+					run(true)
 				{
+					receiverThread = std::thread(&DccPpEx::Receiver, this);
 				}
 
 				virtual ~DccPpEx()
 				{
+					run = false;
+					receiverThread.join();
 				}
 
 			private:
@@ -119,14 +130,35 @@ namespace Hardware
 				void ProgramWriteProgram(const CvNumber cv,
 					const CvValue value);
 
-				inline void SendInternal(const std::string& buffer)
+				inline bool SendInternal(const std::string& buffer)
 				{
 					logger->Hex(buffer);
-					Send(buffer);
+					return Send(buffer);
 				}
-				virtual void Send(const std::string& buffer) = 0;
+
+				inline bool ReceiveInternal(std::string& buffer)
+				{
+					const bool ret = Receive(buffer);
+					logger->Hex(buffer);
+					return ret;
+				}
+
+				virtual bool Send(const std::string& buffer) = 0;
+
+				virtual bool Receive(std::string& buffer) = 0;
+
+				void Receiver();
+
+				bool ReceiveData(std::string& buffer);
+
+				void Parse(const std::string& buffer);
+
+				unsigned int ParseInt(const std::string& buffer, unsigned int& pos);
 
 				DccPpExLocoCache locoCache;
+
+				volatile bool run;
+				std::thread receiverThread;
 		};
 	} // namespace
 } // namespace

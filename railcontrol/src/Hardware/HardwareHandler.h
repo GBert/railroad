@@ -130,6 +130,10 @@ namespace Hardware
 			void ProgramRead(const ProgramMode mode, const Address address, const CvNumber cv) override;
 			void ProgramWrite(const ProgramMode mode, const Address address, const CvNumber cv, const CvValue value) override;
 
+			void FeedbackDelete(const FeedbackID feedbackID, const std::string& name) override;
+
+			void FeedbackSettings(const FeedbackID feedbackID, const std::string& name) override;
+
 			void AddUnmatchedLocos(std::map<std::string,DataModel::LocoConfig>& list) const override;
 			std::map<std::string,DataModel::LocoConfig> GetUnmatchedLocos(const std::string& matchKey) const override;
 			std::map<std::string,DataModel::LocoConfig> GetAllLocos() const override;
