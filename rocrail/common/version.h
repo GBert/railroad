@@ -1,11 +1,19 @@
 const int revisionnr = 
-1709
+1717
 ;
 const char* commithash = 
-"112205f8d4530e3a0839762c76b2c04c7040ba3d";
+"c2c1ee8b4e8a54395a16993336bbf17bf05531b5";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1717 2021-08-18 18:36:11 +0200 mbus,virtual: set index in response in case of write\n" \
+"1716 2021-08-18 18:10:52 +0200 mfx decspecs from Stephan\n" \
+"1715 2021-08-18 08:02:24 +0200 translation merge: de, fr, nl, sl\n" \
+"1714 2021-08-18 07:28:08 +0200 print: pre select landscape\n" \
+"1713 2021-08-17 18:54:20 +0200 mfx3: update (Stephan)\n" \
+"1712 2021-08-17 08:31:20 +0200 locdialog: sort CV table regarding index\n" \
+"1711 2021-08-16 22:07:56 +0200 decspec: mfx by Stephan\n" \
+"1710 2021-08-16 18:14:33 +0200 rocpro: set CV description on save\n" \
 "1709 2021-08-16 16:29:15 +0200 car: fx attribute added for sync clients\n" \
 "1708 2021-08-15 11:08:53 +0200 modbus: ulink\n" \
 "1707 2021-08-15 08:10:46 +0200 rocpro: readall with index fixes\n" \
