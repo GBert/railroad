@@ -1,18 +1,10 @@
 /*
- * Copyright (C) 2021 Gerhard Bertelsmann
- * All rights reserved.
- * 
- * XpressNet device driver is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as published
- * by the Free Software Foundation. 
- * 
- * XpressNet device driver is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along
- * with XpressNet device driver. If not, see http://www.gnu.org/licenses/
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <info@gerhard-bertelsmann.de> wrote this file. As long as you retain this
+ * notice you can do whatever you want with this stuff. If we meet some day,
+ * and you think this stuff is worth it, you can buy me a beer in return
+ * 2021 Gerhard Bertelsmann
+ * ----------------------------------------------------------------------------
  */
 
 #include <linux/cdev.h>
@@ -146,14 +138,13 @@ static int __init xpn_device_init(void) {
 	printk(KERN_ALERT "Failed to register device class\n");
 	goto CLASSDEV_EXIT;
     }
-    printk(KERN_INFO "XPNChar: device class registered\n");
 
     xpncharDevice = device_create(xpncharClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
     if (IS_ERR(xpncharDevice)) {
 	printk(KERN_ALERT "Failed to create the device\n");
 	goto CHARDEV_EXIT;
     }
-    printk(KERN_INFO "XPNChar: device class created\n");
+    printk(KERN_INFO "XPNChar: device class registered and created\n");
 
     return 0;
 
@@ -169,9 +160,9 @@ EXIT:
 
 static void xpn_device_exit(void) {
     gpio_free(direction_pin);
-    device_destroy(xpncharClass, MKDEV(majorNumber, 0));	// remove the device
-    class_destroy(xpncharClass);	// remove the device class
-    unregister_chrdev(majorNumber, DEVICE_NAME);	// unregister the major number
+    device_destroy(xpncharClass, MKDEV(majorNumber, 0));
+    class_destroy(xpncharClass);
+    unregister_chrdev(majorNumber, DEVICE_NAME);
 }
 
 module_init(xpn_device_init);
