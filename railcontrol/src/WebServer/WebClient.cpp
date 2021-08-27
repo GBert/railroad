@@ -2590,16 +2590,27 @@ namespace WebServer
 		HtmlTag content;
 		content.AddChildTag(HtmlTag("h1").AddContent(Languages::TextFeedbacks));
 		HtmlTag table("table");
-		const map<string,DataModel::Feedback*> feedbackList = manager.FeedbackListByName();
+		const map<string,DataModel::FeedbackConfig> feedbackList = manager.FeedbackConfigByName();
 		map<string,string> feedbackArgument;
 		for (auto& feedback : feedbackList)
 		{
+			const DataModel::FeedbackConfig& feedbackConfig = feedback.second;
 			HtmlTag row("tr");
 			row.AddChildTag(HtmlTag("td").AddContent(feedback.first));
-			const string& feedbackIdString = to_string(feedback.second->GetID());
+			const FeedbackID feedbackId = feedbackConfig.GetFeedbackId();
+			const string& feedbackIdString = to_string(feedbackId);
 			feedbackArgument["feedback"] = feedbackIdString;
-			row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextEdit, "feedbackedit_list_" + feedbackIdString, feedbackArgument)));
-			row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextDelete, "feedbackaskdelete_" + feedbackIdString, feedbackArgument)));
+			if (feedbackId == LocoNone)
+			{
+				feedbackArgument["control"] = to_string(feedbackConfig.GetControlId());
+				feedbackArgument["matchkey"] = feedbackConfig.GetMatchKey();
+				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextImport, "feedbackedit_list_" + feedbackIdString, feedbackArgument)));
+			}
+			else
+			{
+				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextEdit, "feedbackedit_list_" + feedbackIdString, feedbackArgument)));
+				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextDelete, "feedbackaskdelete_" + feedbackIdString, feedbackArgument)));
+			}
 			table.AddChildTag(row);
 		}
 		content.AddChildTag(HtmlTag("div").AddClass("popup_content").AddChildTag(table));

@@ -123,11 +123,6 @@ namespace DataModel
 				return matchKey;
 			}
 
-			inline void SetMatchKey(const std::string& matchKey)
-			{
-				this->matchKey = matchKey;
-			}
-
 			inline bool IsInUse() const
 			{
 				return isInUse;

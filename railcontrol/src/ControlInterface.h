@@ -27,6 +27,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/AccessoryBase.h"
 #include "DataModel/AccessoryConfig.h"
 #include "DataModel/Feedback.h"
+#include "DataModel/FeedbackConfig.h"
 #include "DataModel/LocoConfig.h"
 #include "DataModel/LocoFunctions.h"
 #include "DataTypes.h"
@@ -332,12 +333,6 @@ class ControlInterface
 			return out;
 		}
 
-		virtual std::map<std::string,DataModel::LocoConfig> GetAllLocos() const
-		{
-			std::map<std::string,DataModel::LocoConfig> out;
-			return out;
-		}
-
 		virtual DataModel::LocoConfig GetLocoByMatchKey(__attribute__((unused)) const std::string& matchKey) const
 		{
 			return DataModel::LocoConfig();
@@ -356,6 +351,21 @@ class ControlInterface
 		virtual DataModel::AccessoryConfig GetAccessoryByMatchKey(__attribute__((unused)) const std::string& matchKey) const
 		{
 			return DataModel::AccessoryConfig();
+		}
+
+		virtual void AddUnmatchedFeedbacks(__attribute__((unused)) std::map<std::string,DataModel::FeedbackConfig>& list) const
+		{
+		}
+
+		virtual std::map<std::string,DataModel::FeedbackConfig> GetUnmatchedFeedbacks(__attribute__((unused)) const std::string& matchKey) const
+		{
+			std::map<std::string,DataModel::FeedbackConfig> out;
+			return out;
+		}
+
+		virtual DataModel::FeedbackConfig GetFeedbackByMatchKey(__attribute__((unused)) const std::string& matchKey) const
+		{
+			return DataModel::FeedbackConfig();
 		}
 
 	private:

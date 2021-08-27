@@ -200,6 +200,21 @@ namespace Hardware
 			{
 			}
 
+			virtual const std::map<std::string,Hardware::FeedbackCacheEntry>& GetFeedbackDatabase() const
+			{
+				return emptyFeedbackDatabase;
+			}
+
+			virtual DataModel::FeedbackConfig GetFeedbackByMatchKey(__attribute__((unused)) const std::string& matchKey) const
+			{
+				return DataModel::FeedbackConfig();
+			}
+
+			virtual void SetFeedbackIdOfMatchKey(__attribute__((unused)) const FeedbackID feedbackId,
+				__attribute__((unused)) const std::string& matchKey)
+			{
+			}
+
 			virtual void FeedbackDelete(__attribute__((unused)) const FeedbackID feedbackID,
 				__attribute__((unused)) const std::string& name)
 			{
@@ -237,6 +252,7 @@ namespace Hardware
 			const std::string shortName;
 			std::map<std::string,Hardware::LocoCacheEntry> emptyLocoDatabase;
 			std::map<std::string,Hardware::AccessoryCacheEntry> emptyAccessoryDatabase;
+			std::map<std::string,Hardware::FeedbackCacheEntry> emptyFeedbackDatabase;
 	};
 } // namespace
 

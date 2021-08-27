@@ -90,7 +90,7 @@ namespace WebServer
 			SetDefaultKeyValue(key, value);
 			optionTag.AddClass("selected_option");
 		}
-		optionTag.AddAttribute("onclick", "copyValueToInput('" + key + "', '" + value + "', '" + commandID + "');");
+		optionTag.AddAttribute("onclick", "selectValue('" + key + "', '" + value + "', '" + commandID + "');");
 		childTags[2].AddChildTag(optionTag);
 	}
 

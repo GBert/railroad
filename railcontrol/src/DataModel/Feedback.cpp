@@ -39,6 +39,7 @@ namespace DataModel
 		str += ";pin=" + to_string(pin);
 		str += ";inverted=" + to_string(inverted);
 		str += ";state=" + to_string(stateCounter > 0);
+		str += ";matchkey=" + matchKey;
 		str += ";" + relatedObject.Serialize();
 		return str;
 	}
@@ -60,6 +61,7 @@ namespace DataModel
 		pin = Utils::Utils::GetIntegerMapEntry(arguments, "pin");
 		inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted", false);
 		stateCounter = Utils::Utils::GetBoolMapEntry(arguments, "state", FeedbackStateFree) ? MaxStateCounter : 0;
+		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		relatedObject.Deserialize(arguments);
 		return true;
 	}
@@ -141,6 +143,15 @@ namespace DataModel
 		}
 		manager->FeedbackPublishState(this);
 		UpdateTrackState(FeedbackStateFree);
+	}
+
+	Feedback& Feedback::operator=(const Hardware::FeedbackCacheEntry& feedback)
+	{
+		SetControlID(feedback.GetControlID());
+		SetPin(feedback.GetPin());
+		SetName(feedback.GetName());
+		SetMatchKey(feedback.GetMatchKey());
+		return *this;
 	}
 } // namespace DataModel
 

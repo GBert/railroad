@@ -51,7 +51,8 @@ namespace Hardware
 			readBufferLength(0),
 			readBufferPosition(0),
 			locoCache(params->GetControlID(), params->GetManager()),
-			accessoryCache(params->GetControlID(), params->GetManager())
+			accessoryCache(params->GetControlID(), params->GetManager()),
+			feedbackCache(params->GetControlID(), params->GetManager())
 		{
 			logger->Info(Languages::TextStarting, GetFullName());
 			std::memset(feedbackMemory, 0, MaxFeedbackModules);
@@ -378,6 +379,10 @@ namespace Hardware
 			int feedbackId = ParseInt();
 			Address address = feedbackId - MinFeedbackModuleId;
 			SendActivateUpdates(feedbackId);
+
+			FeedbackCacheEntry cacheEntry(feedbackCache.GetControlId());
+			cacheEntry.SetMatchKey(feedbackId);
+			cacheEntry.SetPin(address);
 			logger->Info(Languages::TextFoundFeedbackModuleInEcosDatabase, address);
 		}
 

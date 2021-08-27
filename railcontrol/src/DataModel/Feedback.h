@@ -26,6 +26,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataTypes.h"
 #include "DataModel/ObjectIdentifier.h"
 #include "DataModel/LayoutItem.h"
+#include "Hardware/FeedbackCache.h"
 #include "Languages.h"
 
 class Manager;
@@ -71,6 +72,11 @@ namespace DataModel
 			std::string Serialize() const override;
 
 			bool Deserialize(const std::string& serialized) override;
+
+			inline bool IsInUse() const
+			{
+				return IsRelatedObjectSet();
+			}
 
 			inline std::string GetLayoutType() const override
 			{
@@ -149,6 +155,23 @@ namespace DataModel
 				return track;
 			}
 
+			inline void SetMatchKey(const std::string& matchKey)
+			{
+				this->matchKey = matchKey;
+			}
+
+			inline void ClearMatchKey()
+			{
+				matchKey.clear();
+			}
+
+			inline std::string GetMatchKey() const
+			{
+				return matchKey;
+			}
+
+			Feedback& operator=(const Hardware::FeedbackCacheEntry& loco);
+
 		private:
 			void UpdateTrack();
 			void UpdateTrackState(const FeedbackState state);
@@ -163,6 +186,7 @@ namespace DataModel
 			unsigned char stateCounter;
 			static const unsigned char MaxStateCounter = 10;
 			mutable std::mutex updateMutex;
+			std::string matchKey;
 	};
 
 } // namespace DataModel

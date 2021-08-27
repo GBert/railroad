@@ -151,7 +151,8 @@ namespace DataModel
 			return false;
 		}
 
-		if (ObjectType2() == ObjectTypeLoco)
+		const ObjectType objectType2 = ObjectType2();
+		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause)
 		{
 			return true;
 		}
@@ -181,7 +182,8 @@ namespace DataModel
 			return false;
 		}
 
-		if (ObjectType2() == ObjectTypeLoco)
+		const ObjectType objectType2 = ObjectType2();
+		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause)
 		{
 			return true;
 		}

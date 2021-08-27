@@ -20,8 +20,12 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include "DataModel/AccessoryConfig.h"
+#include "DataModel/FeedbackConfig.h"
+#include "DataModel/LocoConfig.h"
 #include "Hardware/Capabilities.h"
 #include "Hardware/AccessoryCache.h"
+#include "Hardware/FeedbackCache.h"
 #include "Hardware/HardwareInterface.h"
 #include "Hardware/HardwareParams.h"
 #include "Hardware/LocoCache.h"
@@ -49,6 +53,7 @@ namespace Hardware
 						| Hardware::CapabilityFeedback
 						| Hardware::CapabilityLocoDatabase
 						| Hardware::CapabilityAccessoryDatabase
+						| Hardware::CapabilityFeedbackDatabase
 					;
 				}
 
@@ -124,6 +129,21 @@ namespace Hardware
 				inline virtual void SetAccessoryIdentifierOfMatchKey(const DataModel::ObjectIdentifier objectIdentifier, const std::string& matchKey) override
 				{
 					accessoryCache.SetObjectIdentifier(objectIdentifier, matchKey);
+				}
+
+				inline virtual const std::map<std::string, Hardware::FeedbackCacheEntry>& GetFeedbackDatabase() const override
+				{
+					return feedbackCache.GetAll();
+				}
+
+				inline virtual DataModel::FeedbackConfig GetFeedbackByMatchKey(const std::string& matchKey) const override
+				{
+					return DataModel::FeedbackConfig(feedbackCache.Get(matchKey));
+				}
+
+				inline virtual void SetFeedbackIdOfMatchKey(const FeedbackID feedbackId, const std::string& matchKey) override
+				{
+					feedbackCache.SetFeedbackId(feedbackId, matchKey);
 				}
 
 				static const char* const CommandActivateBoosterUpdates;
@@ -263,6 +283,7 @@ namespace Hardware
 
 				LocoCache locoCache;
 				AccessoryCache accessoryCache;
+				FeedbackCache feedbackCache;
 
 				static const int MinLocoId = 1000;
 				static const int OffsetLocoAddress = 999;

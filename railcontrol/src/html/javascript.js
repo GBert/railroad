@@ -1,6 +1,22 @@
-function copyValueToInput(key, value, elementId)
+function selectValue(key, value, elementId)
 {
-	removeClass('d_' + elementId, 'show');
+	var dropdown = document.getElementById('d_' + elementId);
+	if (!dropdown)
+	{
+		return;
+	}
+	dropdown.classList.remove('show');
+	var dropdownElements = dropdown.childNodes;
+	for (var i = 0; i < dropdownElements.length; ++i)
+	{
+		var element = dropdownElements[i];
+		element.classList.remove('selected_option');
+		var attributes = element.attributes;
+		if (attributes.key.value == key)
+		{
+			element.classList.add('selected_option');
+		}
+	}
 
 	var textElement = document.getElementById('skip_' + elementId);
 	if (!textElement)
@@ -27,16 +43,6 @@ window.addEventListener('click', function(event) {
 		}
 	}
 }, true);
-
-function removeClass(elementId, name)
-{
-	var element = document.getElementById(elementId);
-	if (!element)
-	{
-		return;
-	}
-	element.classList.remove(name);
-}
 
 function toggleClass(elementId, name)
 {

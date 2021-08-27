@@ -507,6 +507,7 @@ input {
 	font-size: 12px;
 }
 
+.dropdownentry.selected_option,
 .dropdownentry:hover {
 	background-color: #ccc;
 }

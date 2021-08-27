@@ -31,6 +31,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "ControlInterface.h"
 #include "DataModel/AccessoryConfig.h"
 #include "DataModel/DataModel.h"
+#include "DataModel/FeedbackConfig.h"
 #include "DataModel/LocoConfig.h"
 #include "Hardware/HardwareParams.h"
 #include "Hardware/LocoCache.h"
@@ -226,6 +227,8 @@ class Manager
 		const std::map<std::string,DataModel::Feedback*> FeedbackListByName() const;
 		const std::map<std::string,FeedbackID> FeedbacksOfTrack(const DataModel::ObjectIdentifier& identifier) const;
 
+		const std::map<std::string,DataModel::FeedbackConfig> FeedbackConfigByName() const;
+
 		bool FeedbackSave(FeedbackID feedbackID,
 			const std::string& name,
 			const DataModel::LayoutItem::Visible visible,
@@ -244,6 +247,15 @@ class Manager
 		{
 			return feedbacks.count(feedbackID) == 1;
 		}
+
+		DataModel::Feedback* GetFeedbackByMatchKey(const ControlID controlId, const std::string& matchKey) const;
+
+		void FeedbackRemoveMatchKey(const FeedbackID feedbackId);
+
+		void FeedbackReplaceMatchKey(const FeedbackID feedbackId, const std::string& newMatchKey);
+
+		const std::map<std::string,DataModel::FeedbackConfig> GetUnmatchedFeedbacksOfControl(const ControlID controlId,
+			const std::string& matchKey) const;
 
 		// track
 		DataModel::Track* GetTrack(const TrackID trackID) const;

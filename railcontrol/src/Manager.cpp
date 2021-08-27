@@ -1500,6 +1500,25 @@ const std::string& Manager::GetFeedbackName(const FeedbackID feedbackID) const
 	return feedbacks.at(feedbackID)->GetName();
 }
 
+const map<string,DataModel::FeedbackConfig> Manager::FeedbackConfigByName() const
+{
+	map<string,DataModel::FeedbackConfig> out;
+	{
+		std::lock_guard<std::mutex> guard(feedbackMutex);
+		for (auto& feedback : feedbacks)
+		{
+			out[feedback.second->GetName()] = *(feedback.second);
+		}
+	}
+	std::lock_guard<std::mutex> guard(controlMutex);
+	for (auto& control : controls)
+	{
+		control.second->AddUnmatchedFeedbacks(out);
+	}
+
+	return out;
+}
+
 bool Manager::FeedbackSave(FeedbackID feedbackID,
 	const std::string& name,
 	const Visible visible,
@@ -1654,6 +1673,54 @@ bool Manager::FeedbackDelete(const FeedbackID feedbackID,
 	}
 	delete feedback;
 	return true;
+}
+
+Feedback* Manager::GetFeedbackByMatchKey(const ControlID controlId, const string& matchKey) const
+{
+	std::lock_guard<std::mutex> guard(feedbackMutex);
+	for (auto& feedback : feedbacks)
+	{
+		Feedback* feedbackConfig = feedback.second;
+		if (feedbackConfig->GetControlID() == controlId && feedbackConfig->GetMatchKey().compare(matchKey) == 0)
+		{
+			return feedback.second;
+		}
+	}
+	return nullptr;
+}
+
+void Manager::FeedbackRemoveMatchKey(const FeedbackID feedbackId)
+{
+	Feedback* feedback = GetFeedback(feedbackId);
+	if (feedback == nullptr)
+	{
+		return;
+	}
+	feedback->ClearMatchKey();
+}
+
+void Manager::FeedbackReplaceMatchKey(const FeedbackID feedbackId, const std::string& newMatchKey)
+{
+	Feedback* feedback = GetFeedback(feedbackId);
+	if (feedback == nullptr)
+	{
+		return;
+	}
+	feedback->SetMatchKey(newMatchKey);
+}
+
+const map<string,FeedbackConfig> Manager::GetUnmatchedFeedbacksOfControl(const ControlID controlId,
+	const std::string& matchKey) const
+{
+	ControlInterface* control = GetControl(controlId);
+	map<string,FeedbackConfig> out;
+	if (control == nullptr || !control->CanHandle(Hardware::CapabilityFeedbackDatabase))
+	{
+		return out;
+	}
+	out = control->GetUnmatchedFeedbacks(matchKey);
+	out[""].SetName("");
+	return out;
 }
 
 /***************************

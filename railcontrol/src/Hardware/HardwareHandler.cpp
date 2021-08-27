@@ -577,23 +577,6 @@ namespace Hardware
 		return out;
 	}
 
-	std::map<std::string,DataModel::LocoConfig> HardwareHandler::GetAllLocos() const
-	{
-		std::map<std::string,DataModel::LocoConfig> out;
-		if (instance == nullptr)
-		{
-			return out;
-		}
-
-		const std::map<std::string,Hardware::LocoCacheEntry>& database = instance->GetLocoDatabase();
-		for (auto& entry : database)
-		{
-			const Hardware::LocoCacheEntry& loco = entry.second;
-			out[loco.GetName()] = loco;
-		}
-		return out;
-	}
-
 	DataModel::LocoConfig HardwareHandler::GetLocoByMatchKey(const std::string& match) const
 	{
 		if (instance == nullptr)
@@ -653,6 +636,55 @@ namespace Hardware
 			return DataModel::AccessoryConfig();
 		}
 		return instance->GetAccessoryByMatchKey(match);
+	}
+
+	void HardwareHandler::AddUnmatchedFeedbacks(std::map<std::string,DataModel::FeedbackConfig>& list) const
+	{
+		if (instance == nullptr)
+		{
+			return;
+		}
+
+		const std::map<std::string,Hardware::FeedbackCacheEntry>& database = instance->GetFeedbackDatabase();
+		for (auto& entry : database)
+		{
+			const Hardware::FeedbackCacheEntry& feedback = entry.second;
+			if (feedback.GetFeedbackID() != FeedbackNone)
+			{
+				continue;
+			}
+			list[feedback.GetName() + " (" + instance->GetShortName() + ")"] = feedback;
+		}
+	}
+
+	std::map<std::string,DataModel::FeedbackConfig> HardwareHandler::GetUnmatchedFeedbacks(const std::string& matchKey) const
+	{
+		std::map<std::string,DataModel::FeedbackConfig> out;
+		if (instance == nullptr)
+		{
+			return out;
+		}
+
+		const std::map<std::string,Hardware::FeedbackCacheEntry>& database = instance->GetFeedbackDatabase();
+		for (auto& entry : database)
+		{
+			const Hardware::FeedbackCacheEntry& feedback = entry.second;
+			if (feedback.GetFeedbackID() != FeedbackNone && feedback.GetMatchKey().size() && feedback.GetMatchKey() != matchKey)
+			{
+				continue;
+			}
+			out[feedback.GetName()] = feedback;
+		}
+		return out;
+	}
+
+	DataModel::FeedbackConfig HardwareHandler::GetFeedbackByMatchKey(const std::string& match) const
+	{
+		if (instance == nullptr)
+		{
+			return DataModel::FeedbackConfig();
+		}
+		return instance->GetFeedbackByMatchKey(match);
 	}
 
 	void HardwareHandler::ArgumentTypesOfHardwareTypeAndHint(const HardwareType hardwareType, std::map<unsigned char,ArgumentType>& arguments, std::string& hint)

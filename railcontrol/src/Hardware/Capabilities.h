@@ -44,10 +44,9 @@ namespace Hardware
 		CapabilityProgramDccPomLocoWrite       = 0x00002000,
 		CapabilityProgramDccPomAccessoryRead   = 0x00004000,
 		CapabilityProgramDccPomAccessoryWrite  = 0x00008000,
-
 		CapabilityLocoDatabase                 = 0x00010000,
 		CapabilityAccessoryDatabase            = 0x00020000,
-//		CapabilityFeedbackDatabase             = 0x00040000,
+		CapabilityFeedbackDatabase             = 0x00040000,
 	};
 
 	inline Capabilities operator& (const Capabilities c1, const Capabilities c2)

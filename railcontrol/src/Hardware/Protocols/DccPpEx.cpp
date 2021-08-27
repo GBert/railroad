@@ -191,11 +191,7 @@ namespace Hardware
 				{
 					return false;
 				}
-				const bool ret = ReceiveInternal(buffer);
-				if (!ret)
-				{
-					return ret;
-				}
+				ReceiveInternal(buffer);
 				size = buffer.size();
 			}
 			return true;

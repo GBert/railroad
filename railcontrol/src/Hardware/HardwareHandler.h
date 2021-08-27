@@ -136,12 +136,15 @@ namespace Hardware
 
 			void AddUnmatchedLocos(std::map<std::string,DataModel::LocoConfig>& list) const override;
 			std::map<std::string,DataModel::LocoConfig> GetUnmatchedLocos(const std::string& matchKey) const override;
-			std::map<std::string,DataModel::LocoConfig> GetAllLocos() const override;
 			DataModel::LocoConfig GetLocoByMatchKey(__attribute__((unused)) const std::string& match) const override;
 
 			void AddUnmatchedAccessories(std::map<std::string,DataModel::AccessoryConfig>& list) const override;
 			std::map<std::string,DataModel::AccessoryConfig> GetUnmatchedAccessories(const std::string& matchKey) const override;
 			DataModel::AccessoryConfig GetAccessoryByMatchKey(__attribute__((unused)) const std::string& match) const override;
+
+			void AddUnmatchedFeedbacks(std::map<std::string,DataModel::FeedbackConfig>& list) const override;
+			std::map<std::string,DataModel::FeedbackConfig> GetUnmatchedFeedbacks(const std::string& matchKey) const override;
+			DataModel::FeedbackConfig GetFeedbackByMatchKey(__attribute__((unused)) const std::string& match) const override;
 
 			static void ArgumentTypesOfHardwareTypeAndHint(const HardwareType hardwareType, std::map<unsigned char,ArgumentType>& arguments, std::string& hint);
 

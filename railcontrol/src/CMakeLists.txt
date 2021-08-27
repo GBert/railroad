@@ -27,6 +27,7 @@ DataModel/Cluster.h
 DataModel/DataModel.h
 DataModel/Feedback.cpp
 DataModel/Feedback.h
+DataModel/FeedbackConfig.h
 DataModel/HardwareHandle.cpp
 DataModel/HardwareHandle.h
 DataModel/Layer.h
@@ -77,6 +78,8 @@ Hardware/DccPpExSerial.h
 Hardware/DccPpExTcp.cpp
 Hardware/DccPpExTcp.h
 Hardware/Ecos.h
+Hardware/FeedbackCache.cpp
+Hardware/FeedbackCache.h
 Hardware/HardwareHandler.cpp
 Hardware/HardwareHandler.h
 Hardware/HardwareInterface.h
