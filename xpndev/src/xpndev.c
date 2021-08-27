@@ -1,18 +1,10 @@
 /*
- * Copyright (C) 2021 Gerhard Bertelsmann
- * All rights reserved.
- * 
- * XpressNet device driver is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as published
- * by the Free Software Foundation. 
- * 
- * XpressNet device driver is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details. 
- * 
- * You should have received a copy of the GNU General Public License along
- * with XpressNet device driver. If not, see http://www.gnu.org/licenses/
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <info@gerhard-bertelsmann.de> wrote this file. As long as you retain this
+ * notice you can do whatever you want with this stuff. If we meet some day,
+ * and you think this stuff is worth it, you can buy me a beer in return
+ * 2021 Gerhard Bertelsmann
+ * ----------------------------------------------------------------------------
  */
 
 #include <linux/cdev.h>
@@ -25,8 +17,13 @@
 
 static DEFINE_MUTEX(xpnchar_mutex);
 
+/* BPi CAN PH2 -> GPIO 226 */
+static uint32_t direction_pin = 226;
+module_param(direction_pin, int, S_IRUSR);
+MODULE_PARM_DESC(direction_pin, "direction pin");
+
 static int majorNumber;
-#define  DEVICE_NAME "xpnchar"
+#define  DEVICE_NAME "xpn"
 #define  CLASS_NAME  "xpn"
 
 static struct class *xpncharClass = NULL;
@@ -36,14 +33,13 @@ struct xpn_device_data {
     struct cdev cdev;
     /* my data starts here */
     size_t size;
-    uint8_t buffer[256];
+    uint8_t write_buffer[256];
+    uint8_t read_buffer[256];
 };
 
 struct xpn_device_data xpn_data;
 
 // static DEFINE_SPINLOCK(xpn_lock);
-/* BPi CAN PH2 -> GPIO 226 */
-// static uint16_t direction_pin = 226;
 
 static long xpndev_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
     return 0;
@@ -52,7 +48,6 @@ static long xpndev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 static int xpn_open(struct inode *inode, struct file *file) {
     struct xpn_device_data *xpn_data;
     xpn_data = container_of(inode->i_cdev, struct xpn_device_data, cdev);
-
 
     printk(KERN_INFO "open\n");
 
@@ -73,14 +68,15 @@ static int xpn_release(struct inode *inode, struct file *file) {
 
 static int xpn_read(struct file *file, char __user * user_buffer, size_t size, loff_t * offset) {
     struct xpn_device_data *xpn_data = (struct xpn_device_data *)file->private_data;
-    ssize_t len = min(xpn_data->size - *offset, size);
+    // ssize_t len = min(xpn_data->size - *offset, size);
+    ssize_t len = 0;
 
     printk(KERN_INFO "read\n");
-    if (len <= 0)
-	return 0;
+    //if (len <= 0)
+    //  return 0;
 
     /* read data from my_data->buffer to user buffer */
-    if (copy_to_user(user_buffer, xpn_data->buffer + *offset, len))
+    if (copy_to_user(user_buffer, xpn_data->read_buffer + *offset, len))
 	return -EFAULT;
 
     *offset += len;
@@ -89,17 +85,19 @@ static int xpn_read(struct file *file, char __user * user_buffer, size_t size, l
 
 static int xpn_write(struct file *file, const char __user * user_buffer, size_t size, loff_t * offset) {
     struct xpn_device_data *xpn_data = (struct xpn_device_data *)file->private_data;
-    ssize_t len = min(xpn_data->size - *offset, size);
-
-    printk(KERN_INFO "write len=%d\n", len);
-    if (len <= 0)
-	return 0;
+    size_t len = 256;
 
     /* read data from user buffer to my_data->buffer */
-    if (copy_from_user(xpn_data->buffer + *offset, user_buffer, len))
+    printk(KERN_INFO "write: %d\n", size);
+
+    if (size < len) {
+	len = size;
+    }
+
+    if (copy_from_user(xpn_data->write_buffer, user_buffer, len))
 	return -EFAULT;
 
-    *offset += len;
+    // *offset += len;
     return len;
 }
 
@@ -113,38 +111,58 @@ struct file_operations fops = {
 };
 
 static int __init xpn_device_init(void) {
+    int ret;
+
+    ret = gpio_request(direction_pin, "direction pin");
+    if (ret) {
+	printk(KERN_ALERT "XPNChar: can't get direction PIN %d\n", direction_pin);
+	goto EXIT;
+    }
+
+    ret = gpio_direction_output(direction_pin, 1);
+    if (ret) {
+	printk(KERN_ALERT "XPNChar: can't set direction PIN %d to output\n", direction_pin);
+	goto GPIO_EXIT;
+    }
+    printk(KERN_INFO "XPNChar: use pin %d for RS485 D/RE\n", direction_pin);
+
     majorNumber = register_chrdev(0, DEVICE_NAME, &fops);
     if (majorNumber < 0) {
 	printk(KERN_ALERT "XPNChar failed to register a major number\n");
-	return majorNumber;
+	goto GPIO_EXIT;
     }
     printk(KERN_INFO "XPNChar: registered with major number %d\n", majorNumber);
 
     xpncharClass = class_create(THIS_MODULE, CLASS_NAME);
     if (IS_ERR(xpncharClass)) {
-	unregister_chrdev(majorNumber, DEVICE_NAME);
 	printk(KERN_ALERT "Failed to register device class\n");
-	return PTR_ERR(xpncharClass);
+	goto CLASSDEV_EXIT;
     }
-    printk(KERN_INFO "XPNChar: device class registered\n");
 
     xpncharDevice = device_create(xpncharClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
     if (IS_ERR(xpncharDevice)) {
-	class_destroy(xpncharClass);
-	unregister_chrdev(majorNumber, DEVICE_NAME);
 	printk(KERN_ALERT "Failed to create the device\n");
-	return PTR_ERR(xpncharDevice);
+	goto CHARDEV_EXIT;
     }
-    printk(KERN_INFO "XPNChar: device class created\n");
+    printk(KERN_INFO "XPNChar: device class registered and created\n");
 
     return 0;
+
+CHARDEV_EXIT:
+    class_destroy(xpncharClass);
+CLASSDEV_EXIT:
+    unregister_chrdev(majorNumber, DEVICE_NAME);
+GPIO_EXIT:
+    gpio_free(direction_pin);
+EXIT:
+    return ret;
 }
 
 static void xpn_device_exit(void) {
-    // gpio_free(direction_pin);
-    device_destroy(xpncharClass, MKDEV(majorNumber, 0));	// remove the device
-    class_destroy(xpncharClass);	// remove the device class
-    unregister_chrdev(majorNumber, DEVICE_NAME);	// unregister the major number
+    gpio_free(direction_pin);
+    device_destroy(xpncharClass, MKDEV(majorNumber, 0));
+    class_destroy(xpncharClass);
+    unregister_chrdev(majorNumber, DEVICE_NAME);
 }
 
 module_init(xpn_device_init);

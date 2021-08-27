@@ -1,11 +1,13 @@
 const int revisionnr = 
-1729
+1731
 ;
 const char* commithash = 
-"d527538a53fd0476e49b801aeb280f754deb64dc";
+"aa96a74ccc2aa9382c20ba3dd0df112035839e90";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1731 2021-08-27 13:00:28 +0200 item,planpanel,actionsctrldlg: fix for clipboard under macOS\n" \
+"1730 2021-08-26 19:06:07 +0200 posseldlg: fix for onCancel\n" \
 "1729 2021-08-25 08:33:34 +0200 cam.py: center mjpg image in html\n" \
 "1728 2021-08-24 09:57:19 +0200 wiopi: f8 for CAM on/off, servo onboard init\n" \
 "1727 2021-08-23 14:18:22 +0200 guiframe: set default loco grid cell text color to black in case of gray background\n" \
