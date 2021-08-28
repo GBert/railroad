@@ -1131,7 +1131,7 @@ namespace WebServer
 
 	HtmlTag WebClient::HtmlTagMatchKeyProtocolLoco(const ControlID controlId,
 		const string& selectedMatchKey,
-		const Protocol selectedProtocol)
+		const Protocol selectedProtocol) const
 	{
 		HtmlTag content;
 		map<string,LocoConfig> matchKeyMap = manager.GetUnmatchedLocosOfControl(controlId, selectedMatchKey);
@@ -1143,13 +1143,22 @@ namespace WebServer
 
 	HtmlTag WebClient::HtmlTagMatchKeyProtocolAccessory(const ControlID controlId,
 		const string& selectedMatchKey,
-		const Protocol selectedProtocol)
+		const Protocol selectedProtocol) const
 	{
 		HtmlTag content;
 		map<string,AccessoryConfig> matchKeyMap = manager.GetUnmatchedAccessoriesOfControl(controlId, selectedMatchKey);
 		content.AddChildTag(WebClientStatic::HtmlTagMatchKey(matchKeyMap, selectedMatchKey));
 		map<string,Protocol> protocolMap = manager.AccessoryProtocolsOfControl(controlId);
 		content.AddChildTag(WebClientStatic::HtmlTagProtocol(protocolMap, selectedProtocol));
+		return content;
+	}
+
+	HtmlTag WebClient::HtmlTagMatchKeyFeedback(const ControlID controlId,
+		const string& selectedMatchKey) const
+	{
+		HtmlTag content;
+		map<string,FeedbackConfig> matchKeyMap = manager.GetUnmatchedFeedbacksOfControl(controlId, selectedMatchKey);
+		content.AddChildTag(WebClientStatic::HtmlTagMatchKey(matchKeyMap, selectedMatchKey));
 		return content;
 	}
 
@@ -2492,6 +2501,7 @@ namespace WebServer
 		FeedbackID feedbackID = Utils::Utils::GetIntegerMapEntry(arguments, "feedback", FeedbackNone);
 		string name = Languages::GetText(Languages::TextNew);
 		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "controlid", manager.GetPossibleControlForFeedback());
+		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		FeedbackPin pin = Utils::Utils::GetIntegerMapEntry(arguments, "pin", 0);
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
@@ -2511,10 +2521,12 @@ namespace WebServer
 		bool inverted = false;
 		if (feedbackID > FeedbackNone)
 		{
+			// existing feedback
 			const DataModel::Feedback* feedback = manager.GetFeedback(feedbackID);
 			if (feedback != nullptr)
 			{
 				name = feedback->GetName();
+				matchKey = feedback->GetMatchKey();
 				controlId = feedback->GetControlID();
 				pin = feedback->GetPin();
 				inverted = feedback->GetInverted();
@@ -2524,6 +2536,18 @@ namespace WebServer
 				posz = feedback->GetPosZ();
 			}
 		}
+		else if (controlId > ControlNone)
+		{
+			// feedback from hardware database
+			const DataModel::FeedbackConfig feedback = manager.GetFeedbackOfConfigByMatchKey(controlId, matchKey);
+			if (feedback.GetControlId() == controlId && feedback.GetMatchKey() == matchKey)
+			{
+				name = feedback.GetName();
+				pin = feedback.GetPin();
+			}
+		}
+		// else new feedback
+
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 
@@ -2542,6 +2566,7 @@ namespace WebServer
 		mainContent.AddClass("tab_content");
 		mainContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
 		mainContent.AddChildTag(HtmlTagControlFeedback(controlId, "feedback", feedbackID));
+		mainContent.AddChildTag(HtmlTagMatchKeyFeedback(controlId, matchKey));
 		mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("pin", Languages::TextPin, pin, 1, 4096));
 		mainContent.AddChildTag(HtmlTagInputCheckboxWithLabel("inverted", Languages::TextInverted, "true", inverted));
 		formContent.AddChildTag(mainContent);
@@ -2559,6 +2584,7 @@ namespace WebServer
 		FeedbackID feedbackID = Utils::Utils::GetIntegerMapEntry(arguments, "feedback", FeedbackNone);
 		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
 		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
+		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		FeedbackPin pin = static_cast<FeedbackPin>(Utils::Utils::GetIntegerMapEntry(arguments, "pin", FeedbackPinNone));
 		bool inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted");
 		DataModel::LayoutItem::Visible visible = static_cast<Visible>(Utils::Utils::GetBoolMapEntry(arguments, "visible", DataModel::LayoutItem::VisibleNo));
@@ -2566,7 +2592,17 @@ namespace WebServer
 		LayoutPosition posY = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
 		string result;
-		if (!manager.FeedbackSave(feedbackID, name, visible, posX, posY, posZ, controlId, pin, inverted, result))
+		if (!manager.FeedbackSave(feedbackID,
+			name,
+			visible,
+			posX,
+			posY,
+			posZ,
+			controlId,
+			matchKey,
+			pin,
+			inverted,
+			result))
 		{
 			ReplyResponse(ResponseError, result);
 			return;
@@ -2600,7 +2636,7 @@ namespace WebServer
 			const FeedbackID feedbackId = feedbackConfig.GetFeedbackId();
 			const string& feedbackIdString = to_string(feedbackId);
 			feedbackArgument["feedback"] = feedbackIdString;
-			if (feedbackId == LocoNone)
+			if (feedbackId == FeedbackNone)
 			{
 				feedbackArgument["control"] = to_string(feedbackConfig.GetControlId());
 				feedbackArgument["matchkey"] = feedbackConfig.GetMatchKey();

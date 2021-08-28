@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include "DataModel/Feedback.h"
 #include "Hardware/FeedbackCache.h"
 #include "Manager.h"
 

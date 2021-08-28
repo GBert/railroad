@@ -181,7 +181,10 @@ namespace WebServer
 
 			HtmlTag HtmlTagMatchKeyProtocolAccessory(const ControlID controlID,
 				const std::string& selectedMatchKey,
-				const Protocol selectedProtocol);
+				const Protocol selectedProtocol) const;
+
+			HtmlTag HtmlTagMatchKeyFeedback(const ControlID controlID,
+				const std::string& selectedMatchKey) const;
 
 		private:
 			void InterpretClientRequest(const std::deque<std::string>& lines, std::string& method, std::string& uri, std::string& protocol, std::map<std::string,std::string>& arguments, std::map<std::string,std::string>& headers);
@@ -191,9 +194,10 @@ namespace WebServer
 			void DeliverFileInternal(FILE* f, const char* realFile, const std::string& file);
 			HtmlTag HtmlTagLocoSelector(const unsigned int selector) const;
 			HtmlTag HtmlTagLayerSelector() const;
+
 			HtmlTag HtmlTagMatchKeyProtocolLoco(const ControlID controlID,
 				const std::string& selectedMatchKey,
-				const Protocol selectedProtocol);
+				const Protocol selectedProtocol) const;
 
 			HtmlTag HtmlTagPosition(const DataModel::LayoutItem::LayoutPosition posx,
 				const DataModel::LayoutItem::LayoutPosition posy,

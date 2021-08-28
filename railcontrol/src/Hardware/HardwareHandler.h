@@ -132,6 +132,7 @@ namespace Hardware
 
 			void FeedbackDelete(const FeedbackID feedbackID, const std::string& name) override;
 
+			// FIXME: matchKey is missing
 			void FeedbackSettings(const FeedbackID feedbackID, const std::string& name) override;
 
 			void AddUnmatchedLocos(std::map<std::string,DataModel::LocoConfig>& list) const override;

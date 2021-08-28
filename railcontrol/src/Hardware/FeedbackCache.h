@@ -37,7 +37,7 @@ namespace Hardware
 
 			inline FeedbackCacheEntry(const ControlID controlId)
 			:	controlId(controlId),
-				locoId(FeedbackNone),
+				feedbackId(FeedbackNone),
 				pin(FeedbackPinNone),
 				matchKey("")
 			{
@@ -50,12 +50,12 @@ namespace Hardware
 
 			inline FeedbackID GetFeedbackID() const
 			{
-				return locoId;
+				return feedbackId;
 			}
 
-			inline void SetFeedbackID(const FeedbackID locoId)
+			inline void SetFeedbackID(const FeedbackID feedbackId)
 			{
-				this->locoId = locoId;
+				this->feedbackId = feedbackId;
 			}
 
 			inline const std::string& GetName() const
@@ -95,7 +95,7 @@ namespace Hardware
 
 		private:
 			const ControlID controlId;
-			FeedbackID locoId;
+			FeedbackID feedbackId;
 			std::string name;
 			FeedbackPin pin;
 			std::string matchKey;

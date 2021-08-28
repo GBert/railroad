@@ -236,6 +236,7 @@ class Manager
 			const DataModel::LayoutItem::LayoutPosition posY,
 			const DataModel::LayoutItem::LayoutPosition posZ,
 			const ControlID controlID,
+			const std::string& matchKey,
 			const FeedbackPin pin,
 			const bool inverted,
 			std::string& result);
@@ -247,6 +248,8 @@ class Manager
 		{
 			return feedbacks.count(feedbackID) == 1;
 		}
+
+		DataModel::FeedbackConfig GetFeedbackOfConfigByMatchKey(const ControlID controlId, const std::string& matchKey) const;
 
 		DataModel::Feedback* GetFeedbackByMatchKey(const ControlID controlId, const std::string& matchKey) const;
 

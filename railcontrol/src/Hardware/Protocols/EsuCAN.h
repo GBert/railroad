@@ -290,7 +290,7 @@ namespace Hardware
 				static const int MinAccessoryId = 20000;
 				static const int OffsetAccessoryAddress = 19999;
 				static const int MinFeedbackModuleId = 100;
-				static const int OffsetFeedbackModuleAddress = 100;
+				static const int OffsetFeedbackModuleAddress = 99;
 		};
 	} // namespace
 } // namespace

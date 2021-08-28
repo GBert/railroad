@@ -1429,7 +1429,7 @@ void Manager::FeedbackState(const ControlID controlID, const FeedbackPin pin, co
 	logger->Info(Languages::TextAddingFeedback, name);
 	string result;
 
-	FeedbackSave(FeedbackNone, name, DataModel::LayoutItem::VisibleNo, 0, 0, 0, controlID, pin, false, result);
+	FeedbackSave(FeedbackNone, name, DataModel::LayoutItem::VisibleNo, 0, 0, 0, controlID, "", pin, false, result);
 }
 
 void Manager::FeedbackState(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state)
@@ -1526,6 +1526,7 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 	const LayoutPosition posY,
 	const LayoutPosition posZ,
 	const ControlID controlID,
+	const string& matchKey,
 	const FeedbackPin pin,
 	const bool inverted,
 	string& result)
@@ -1556,6 +1557,7 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 	feedback->SetPosY(posY);
 	feedback->SetPosZ(posZ);
 	feedback->SetControlID(controlID);
+	feedback->SetMatchKey(matchKey);
 	feedback->SetPin(pin);
 	feedback->SetInverted(inverted);
 
@@ -1673,6 +1675,16 @@ bool Manager::FeedbackDelete(const FeedbackID feedbackID,
 	}
 	delete feedback;
 	return true;
+}
+
+FeedbackConfig Manager::GetFeedbackOfConfigByMatchKey(const ControlID controlId, const string& matchKey) const
+{
+	ControlInterface* control = GetControl(controlId);
+	if (control == nullptr)
+	{
+		return FeedbackConfig();
+	}
+	return control->GetFeedbackByMatchKey(matchKey);
 }
 
 Feedback* Manager::GetFeedbackByMatchKey(const ControlID controlId, const string& matchKey) const

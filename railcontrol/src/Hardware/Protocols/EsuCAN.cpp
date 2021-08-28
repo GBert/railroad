@@ -39,7 +39,7 @@ namespace Hardware
 		const char* const EsuCAN::CommandActivateBoosterUpdates = "request(1,view)\n";
 		const char* const EsuCAN::CommandQueryLocos = "queryObjects(10,name)\n";
 		const char* const EsuCAN::CommandQueryAccessories = "queryObjects(11,name1,name2,name3)\n";
-		const char* const EsuCAN::CommandQueryFeedbacks = "queryObjects(26)\n";
+		const char* const EsuCAN::CommandQueryFeedbacks = "queryObjects(26,ports)\n";
 
 		EsuCAN::EsuCAN(const HardwareParams* params, const std::string& controlName)
 		:	HardwareInterface(params->GetManager(),
@@ -295,6 +295,8 @@ namespace Hardware
 		{
 			const unsigned int locoId = ParseInt();
 			const Address address = locoId - OffsetLocoAddress;
+			SendActivateUpdates(locoId);
+
 			string name;
 			while (true)
 			{
@@ -311,7 +313,6 @@ namespace Hardware
 					name = value;
 				}
 			}
-			SendActivateUpdates(locoId);
 
 			LocoCacheEntry cacheEntry(locoCache.GetControlId());
 			cacheEntry.SetMatchKey(locoId);
@@ -327,7 +328,9 @@ namespace Hardware
 		{
 			const unsigned int accessoryId = ParseInt();
 			const Address address = accessoryId - OffsetAccessoryAddress;
-			string name1;
+			SendActivateUpdates(accessoryId);
+
+			string name;
 			string name2;
 			string name3;
 			while (true)
@@ -342,7 +345,7 @@ namespace Hardware
 
 				if (option.compare("name1") == 0)
 				{
-					name1 = value;
+					name = value;
 				}
 				else if (option.compare("name2") == 0)
 				{
@@ -353,13 +356,12 @@ namespace Hardware
 					name3 = value;
 				}
 			}
-			SendActivateUpdates(accessoryId);
 
 			AccessoryCacheEntry cacheEntry(accessoryCache.GetControlId());
 			cacheEntry.SetMatchKey(accessoryId);
 			cacheEntry.SetProtocol(ProtocolServer);
 			cacheEntry.SetAddress(address);
-			string name = name1;
+
 			if (name2.size())
 			{
 				name += " " + name2;
@@ -371,19 +373,48 @@ namespace Hardware
 			cacheEntry.SetName(name);
 			accessoryCache.Save(cacheEntry);
 
-			logger->Info(Languages::TextFoundAccessoryInEcosDatabase, address, name1, name2, name3);
+			logger->Info(Languages::TextFoundAccessoryInEcosDatabase, address, name, name2, name3);
 		}
 
 		void EsuCAN::ParseFeedbackData()
 		{
-			int feedbackId = ParseInt();
-			Address address = feedbackId - MinFeedbackModuleId;
-			SendActivateUpdates(feedbackId);
+			const int moduleId = ParseInt();
+			const int moduleIdHuman = moduleId - OffsetFeedbackModuleAddress;
+			const int moduleIdMachine = moduleId - OffsetFeedbackModuleAddress - 1;
+			SendActivateUpdates(moduleId);
+
+			int ports = 0;
+			string name;
+			while (true)
+			{
+				string option;
+				string value;
+				ParseOption(option, value);
+				if (option.size() == 0)
+				{
+					break;
+				}
+
+				if (option.compare("ports") == 0)
+				{
+					ports = Utils::Utils::StringToInteger(value, 16);
+					name = "Module " + Utils::Utils::ToStringWithLeadingZeros(moduleIdHuman, 3) + " Pin ";
+				}
+			}
 
 			FeedbackCacheEntry cacheEntry(feedbackCache.GetControlId());
-			cacheEntry.SetMatchKey(feedbackId);
-			cacheEntry.SetPin(address);
-			logger->Info(Languages::TextFoundFeedbackModuleInEcosDatabase, address);
+			for (int pinOfModule = 1; pinOfModule <= ports; ++pinOfModule)
+			{
+				int pin = (moduleIdMachine * 16) + pinOfModule;
+				const string pinAsText = Utils::Utils::ToStringWithLeadingZeros(pinOfModule, 2);
+				cacheEntry.SetMatchKey(to_string(moduleId) + "/" + pinAsText);
+				cacheEntry.SetFeedbackID(FeedbackNone);
+				cacheEntry.SetPin(pin);
+				cacheEntry.SetName(name + pinAsText);
+				feedbackCache.Save(cacheEntry);
+			}
+
+			logger->Info(Languages::TextFoundFeedbackModuleInEcosDatabase, moduleIdHuman);
 		}
 
 		void EsuCAN::ParseOption(string& option, string& value)
