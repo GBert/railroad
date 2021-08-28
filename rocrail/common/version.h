@@ -1,11 +1,12 @@
 const int revisionnr = 
-1731
+1732
 ;
 const char* commithash = 
-"aa96a74ccc2aa9382c20ba3dd0df112035839e90";
+"b6adfc48efdafb7ae18d1eab6c1044f44438d23a";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1732 2021-08-27 17:34:28 +0200 wio: trace correction for version\n" \
 "1731 2021-08-27 13:00:28 +0200 item,planpanel,actionsctrldlg: fix for clipboard under macOS\n" \
 "1730 2021-08-26 19:06:07 +0200 posseldlg: fix for onCancel\n" \
 "1729 2021-08-25 08:33:34 +0200 cam.py: center mjpg image in html\n" \
