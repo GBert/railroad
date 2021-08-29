@@ -20,6 +20,7 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -36,6 +37,7 @@
 #include "read-cs2-config.h"
 #include "subscriber.h"
 #include "utils.h"
+#include "xpn_tty.h"
 #include "z21.h"
 
 #define check_free(a) \
@@ -60,6 +62,7 @@ static char *TCP_FORMATS_STRG	= "->TCP*   CANID 0x%06X   [%d]";
 #define SUBCRIBER_TIMEOUT	20E6
 
 char cs2addr[32] = "127.0.0.1";
+char xpn_tty_interface[32] = {0};
 char config_dir[MAXLINE] = "/www/config/";
 
 static unsigned char MS_POWER_ON[]		= { 0x00, 0x00, 0x03, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
@@ -86,7 +89,7 @@ static unsigned char XPN_X_STORE2[]               = { 0x14, 0x00, 0x16, 0x00, 0x
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
-    fprintf(stderr, "   Version 1.13\n\n");
+    fprintf(stderr, "   Version 1.2\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -p <port>           primary UDP port for the server - default %d\n", PRIMARY_UDP_PORT);
     fprintf(stderr, "         -s <port>           secondary UDP port for the server - default %d\n", SECONDARY_UDP_PORT);
@@ -94,6 +97,7 @@ void print_usage(char *prg) {
 #ifndef NO_CAN
     fprintf(stderr, "         -i <CAN interface>  CAN interface\n");
 #endif
+    fprintf(stderr, "         -t                  use tty interface (e.g. /dev/ttyUSB0)\n");
     fprintf(stderr, "         -x                  enable turnout switching\n");
     fprintf(stderr, "         -f                  running in foreground\n\n");
 }
@@ -789,6 +793,7 @@ int main(int argc, char **argv) {
 #ifndef NO_CAN
     struct sockaddr_can caddr;
 #endif
+    int xpn_tty_fd;
     struct sockaddr_in src_addr;
     fd_set readfds;
     int primary_port = PRIMARY_UDP_PORT;
@@ -797,16 +802,19 @@ int main(int argc, char **argv) {
     char timestamp[16];
     char *loco_file;
     char *magnet_file;
+    struct termios2 xpn_tty_config;
 
 #ifndef NO_CAN
     socklen_t caddrlen = sizeof(caddr);
 #endif
     socklen_t slen = sizeof(src_addr);
 
+    memset(&xpn_tty_config, 0, sizeof(struct termios2));
     memset(&z21_data, 0, sizeof(z21_data));
     memset(&ifr, 0, sizeof(ifr));
+    xpn_tty_fd = 0;
 
-    while ((opt = getopt(argc, argv, "c:p:s:b:g:i:xhf?")) != -1) {
+    while ((opt = getopt(argc, argv, "c:p:s:b:g:i:t:xhf?")) != -1) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
@@ -824,6 +832,9 @@ int main(int argc, char **argv) {
 	    break;
 	case 'g':
 	    strncpy(cs2addr, optarg, sizeof(cs2addr) - 1);
+	    break;
+	case 't':
+	    strncpy(xpn_tty_interface, optarg, sizeof(xpn_tty_interface) - 1);
 	    break;
 	case 'i':
 	    strncpy(ifr.ifr_name, optarg, sizeof(ifr.ifr_name) - 1);
@@ -844,6 +855,15 @@ int main(int argc, char **argv) {
 	    print_usage(basename(argv[0]));
 	    exit(EXIT_FAILURE);
 	}
+    }
+
+    if (xpn_tty_interface[0]) {
+	xpn_tty_fd = open(xpn_tty_interface, O_RDWR);
+	if (xpn_tty_fd < 0) {
+	    fprintf(stderr, "Failed to open %s - %s\n", xpn_tty_interface, strerror(errno));
+	    exit(EXIT_FAILURE);
+	}
+	xpn_tty_init(xpn_tty_fd, &xpn_tty_config);
     }
 
     /* prepare primary UDP socket */
@@ -979,6 +999,10 @@ int main(int argc, char **argv) {
 	    FD_SET(z21_data.sc, &readfds);
 	    max_fds = MAX(MAX(z21_data.sp, z21_data.ss), z21_data.sc);
 	}
+	if (xpn_tty_fd) {
+	    FD_SET(xpn_tty_fd, &readfds);
+	    max_fds = MAX(max_fds, xpn_tty_fd);
+        }
 
 	if (select(max_fds + 1, &readfds, NULL, NULL, NULL) < 0) {
 	    fprintf(stderr, "select error: %s\n", strerror(errno));
@@ -1039,6 +1063,15 @@ int main(int argc, char **argv) {
 		    }
 		}
 	    }
+	}
+	if (FD_ISSET(xpn_tty_fd, &readfds)) {
+	    printf("got tty data\n");
+	    /* we are going to put the data into a standard frame */
+	    ssize_t length = read(xpn_tty_fd, z21_data.udpframe + 4, MAXDG - 4);
+	    to_le16(z21_data.udpframe, (int) length + 2);
+	    z21_data.udpframe[2] = 0x40;
+	    z21_data.udpframe[3] = 0;
+	    check_data_xpn(&z21_data, ret, z21_data.foreground);
 	}
     }
     close(z21_data.sp);

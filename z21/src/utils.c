@@ -62,6 +62,11 @@ uint32_t le32(uint8_t * u) {
     return (u[3] << 24) | (u[2] << 16) | (u[1] << 8) | u[0];
 }
 
+void to_le16(uint8_t * u, uint16_t n) {
+    u[0] = n & 0xff;
+    u[1] = n >> 8;
+}
+
 void usec_sleep(int usec) {
     struct timespec to_wait;
 

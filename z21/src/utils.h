@@ -39,4 +39,6 @@ uint16_t be16(uint8_t * u);
 uint32_t be32(uint8_t * u);
 uint32_t le32(uint8_t * u);
 
+void to_le16(uint8_t * u, uint16_t n);
+
 #endif /* _UTILS_H_ */
