@@ -1,11 +1,12 @@
 const int revisionnr = 
-1732
+1733
 ;
 const char* commithash = 
-"b6adfc48efdafb7ae18d1eab6c1044f44438d23a";
+"c3c6e65698bff63c6a967185292171dd7c360e2f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1733 2021-08-29 08:16:38 +0200 car: provide functions on speed/dir/f0 command\n" \
 "1732 2021-08-27 17:34:28 +0200 wio: trace correction for version\n" \
 "1731 2021-08-27 13:00:28 +0200 item,planpanel,actionsctrldlg: fix for clipboard under macOS\n" \
 "1730 2021-08-26 19:06:07 +0200 posseldlg: fix for onCancel\n" \
