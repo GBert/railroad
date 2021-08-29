@@ -37,7 +37,9 @@
 #include "read-cs2-config.h"
 #include "subscriber.h"
 #include "utils.h"
+#ifndef NO_XPN_TTY
 #include "xpn_tty.h"
+#endif
 #include "z21.h"
 
 #define check_free(a) \
@@ -97,7 +99,9 @@ void print_usage(char *prg) {
 #ifndef NO_CAN
     fprintf(stderr, "         -i <CAN interface>  CAN interface\n");
 #endif
+#ifndef NO_XPN_TTY
     fprintf(stderr, "         -t                  use tty interface (e.g. /dev/ttyUSB0)\n");
+#endif
     fprintf(stderr, "         -x                  enable turnout switching\n");
     fprintf(stderr, "         -f                  running in foreground\n\n");
 }
@@ -793,7 +797,6 @@ int main(int argc, char **argv) {
 #ifndef NO_CAN
     struct sockaddr_can caddr;
 #endif
-    int xpn_tty_fd;
     struct sockaddr_in src_addr;
     fd_set readfds;
     int primary_port = PRIMARY_UDP_PORT;
@@ -802,19 +805,27 @@ int main(int argc, char **argv) {
     char timestamp[16];
     char *loco_file;
     char *magnet_file;
+#ifndef NO_XPN_TTY
+    int xpn_tty_fd;
     struct termios2 xpn_tty_config;
-
+#endif
 #ifndef NO_CAN
     socklen_t caddrlen = sizeof(caddr);
 #endif
     socklen_t slen = sizeof(src_addr);
 
+#ifndef NO_XPN_TTY
     memset(&xpn_tty_config, 0, sizeof(struct termios2));
+    xpn_tty_fd = 0;
+#endif
     memset(&z21_data, 0, sizeof(z21_data));
     memset(&ifr, 0, sizeof(ifr));
-    xpn_tty_fd = 0;
 
+#ifndef NO_XPN_TTY
     while ((opt = getopt(argc, argv, "c:p:s:b:g:i:t:xhf?")) != -1) {
+#else
+    while ((opt = getopt(argc, argv, "c:p:s:b:g:i:xhf?")) != -1) {
+#endif
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
@@ -833,9 +844,11 @@ int main(int argc, char **argv) {
 	case 'g':
 	    strncpy(cs2addr, optarg, sizeof(cs2addr) - 1);
 	    break;
+#ifndef NO_XPN_TTY
 	case 't':
 	    strncpy(xpn_tty_interface, optarg, sizeof(xpn_tty_interface) - 1);
 	    break;
+#endif
 	case 'i':
 	    strncpy(ifr.ifr_name, optarg, sizeof(ifr.ifr_name) - 1);
 	    break;
@@ -857,6 +870,7 @@ int main(int argc, char **argv) {
 	}
     }
 
+#ifndef NO_XPN_TTY
     if (xpn_tty_interface[0]) {
 	xpn_tty_fd = open(xpn_tty_interface, O_RDWR);
 	if (xpn_tty_fd < 0) {
@@ -865,6 +879,7 @@ int main(int argc, char **argv) {
 	}
 	xpn_tty_init(xpn_tty_fd, &xpn_tty_config);
     }
+#endif
 
     /* prepare primary UDP socket */
     z21_data.sp = socket(PF_INET, SOCK_DGRAM, 0);
@@ -999,11 +1014,12 @@ int main(int argc, char **argv) {
 	    FD_SET(z21_data.sc, &readfds);
 	    max_fds = MAX(MAX(z21_data.sp, z21_data.ss), z21_data.sc);
 	}
+#ifndef NO_XPN_TTY
 	if (xpn_tty_fd) {
 	    FD_SET(xpn_tty_fd, &readfds);
 	    max_fds = MAX(max_fds, xpn_tty_fd);
         }
-
+#endif
 	if (select(max_fds + 1, &readfds, NULL, NULL, NULL) < 0) {
 	    fprintf(stderr, "select error: %s\n", strerror(errno));
 	    break;
@@ -1064,6 +1080,7 @@ int main(int argc, char **argv) {
 		}
 	    }
 	}
+#ifndef NO_XPN_TTY
 	if (FD_ISSET(xpn_tty_fd, &readfds)) {
 	    printf("got tty data\n");
 	    /* we are going to put the data into a standard frame */
@@ -1073,6 +1090,7 @@ int main(int argc, char **argv) {
 	    z21_data.udpframe[3] = 0;
 	    check_data_xpn(&z21_data, ret, z21_data.foreground);
 	}
+#endif
     }
     close(z21_data.sp);
     close(z21_data.ss);

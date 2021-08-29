@@ -8,6 +8,8 @@
  *
  */
 
+#ifndef NO_XPN_TTY
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,5 +67,6 @@ int xpn_tty_init(int fd, struct termios2 *config) {
     }
     return EXIT_SUCCESS;
 }
-
-
+#else
+void unsused(void) {}
+#endif
