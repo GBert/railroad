@@ -794,9 +794,6 @@ int main(int argc, char **argv) {
     pthread_t pth;
     int ret, opt, max_fds;
     struct ifreq ifr;
-#ifndef NO_CAN
-    struct sockaddr_can caddr;
-#endif
     struct sockaddr_in src_addr;
     fd_set readfds;
     int primary_port = PRIMARY_UDP_PORT;
@@ -810,6 +807,7 @@ int main(int argc, char **argv) {
     struct termios2 xpn_tty_config;
 #endif
 #ifndef NO_CAN
+    struct sockaddr_can caddr;
     socklen_t caddrlen = sizeof(caddr);
 #endif
     socklen_t slen = sizeof(src_addr);
