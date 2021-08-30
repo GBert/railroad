@@ -27,41 +27,39 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
+#include "xpn_tty.h"
 
 #define XPN_SPEED       62500
 
-int xpn_tty_send(int fd, struct termios2 *config, unsigned char *data, int length) {
-    int ret;
+int xpn_tty_send(struct xpn_tty_t *xpn_tty) {
 
     /* use parity mark for address */
-    config->c_cflag |= PARENB | CMSPAR | PARODD;
-    ioctl(fd, TCSETS2, config);
-    ret = write(fd, data, 1);
-    if (ret < 0) {
+    xpn_tty->config.c_cflag |= PARENB | CMSPAR | PARODD;
+    ioctl(xpn_tty->fd, TCSETS2, xpn_tty->config);
+    if (write(xpn_tty->fd, xpn_tty->data, 1) < 0) {
         fprintf(stderr, "can't write address - %s\n", strerror(errno));
         return EXIT_FAILURE;
     }
 
-    if (length == 1)
+    if (xpn_tty->length == 1)
 	return EXIT_SUCCESS;
 
     /* use parity space for data */
-    config->c_cflag &= ~PARODD;
-    ioctl(fd, TCSETS2, config);
-    ret = write(fd, data + 1, length - 1);
-    if (ret < 0) {
+    xpn_tty->config.c_cflag &= ~PARODD;
+    ioctl(xpn_tty->fd, TCSETS2, xpn_tty->config);
+    if (write(xpn_tty->fd, xpn_tty->data + 1, xpn_tty->length - 1) < 0) {
         fprintf(stderr, "can't write data - %s\n", strerror(errno));
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
 
-int xpn_tty_init(int fd, struct termios2 *config) {
+int xpn_tty_init(struct xpn_tty_t *xpn_tty) {
 
-    config->c_cflag |= BOTHER | CS8 | PARENB | CMSPAR | PARODD;
-    config->c_ispeed = XPN_SPEED;
-    config->c_ospeed = XPN_SPEED;
-    if (ioctl(fd, TCSETS2, &config) < 0) {
+    xpn_tty->config.c_cflag |= BOTHER | CS8 | PARENB | CMSPAR | PARODD;
+    xpn_tty->config.c_ispeed = XPN_SPEED;
+    xpn_tty->config.c_ospeed = XPN_SPEED;
+    if (ioctl(xpn_tty->fd, TCSETS2, xpn_tty->config) < 0) {
         fprintf(stderr, "can't set speed - %s\n", strerror(errno));
         return(EXIT_FAILURE);
     }

@@ -12,7 +12,15 @@
 
 #include <asm/termbits.h>
 
-int xpn_tty_send(int fd, struct termios2 *config, unsigned char *data, int length);
-int xpn_tty_init(int fd, struct termios2 *config);
+struct xpn_tty_t {
+    int fd;
+    struct termios2 config;
+    unsigned char data[32];
+    int length;
+    char interface[32];
+};
+
+int xpn_tty_send(struct xpn_tty_t *xpn_tty);
+int xpn_tty_init(struct xpn_tty_t *xpn_tty);
 
 #endif /* _XPN_TTY_H_ */
