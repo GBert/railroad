@@ -92,6 +92,7 @@ static unsigned char XPN_X_Z21_FIRMWARE_VERSION[] = { 0x09, 0x00, 0x40, 0x00, 0x
 static unsigned char XPN_X_STORE1[]               = { 0x0E, 0x00, 0x12, 0x00, 0x01, 0x00, 0x01, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
 static unsigned char XPN_X_STORE2[]               = { 0x14, 0x00, 0x16, 0x00, 0x19, 0x06, 0x07, 0x01, 0x05, 0x14,
 						      0x88, 0x13, 0x10, 0x27, 0x32, 0x00, 0x50, 0x46, 0x20, 0x4e };
+static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x63, 0x21, 0x03, 0x00, 0x41 };
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
@@ -182,7 +183,15 @@ int send_xpn(unsigned char *data, char *vchar) {
     memcpy(udpxpn, data, length);
     format = UDP_DST_STRG;
     pthread_mutex_lock(&lock);
-    send_z21_clients(udpxpn, format, vchar);
+    if (z21_data.source == XPN_LAN_SOURCE) {
+	send_z21_clients(udpxpn, format, vchar);
+    } else if (z21_data.source == XPN_TTY_SOURCE) {
+	printf("send via tty\n");
+	memcpy(&xpn_tty.data[1], &udpxpn[4], length - 4);
+	xpn_tty.data[0] = 0xe0;
+	xpn_tty.length = length - 3;
+	xpn_tty_send(&xpn_tty);
+    }
     pthread_mutex_unlock(&lock);
     return (EXIT_SUCCESS);
 }
@@ -442,6 +451,13 @@ int check_data_lan_x_header(struct z21_data_t *z21_data, unsigned char *udpframe
     case 0x21:
 	db0 = udpframe[5];
 	switch (db0) {
+	case LAN_X_GET_VERSION:
+	    v_printf(verbose, "LAN_X_GET_VERSION\n");
+	    z21_data->bcf = 0x00000000;
+	    memcpy(xpnframe, XPN_X_VERSION, sizeof(XPN_X_VERSION));
+	    vas_printf(verbose, &vchar, "LAN_X_VERSION\n");
+	    send_xpn(xpnframe, vchar);
+	    break;
 	case LAN_X_GET_STATUS:
 	    v_printf(verbose, "LAN_X_GET_STATUS\n");
 	    memcpy(xpnframe, XPN_X_STATUS_CHANGED, sizeof(XPN_X_STATUS_CHANGED));

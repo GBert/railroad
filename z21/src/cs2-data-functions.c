@@ -40,11 +40,11 @@ struct loco_data_t *create_loco(unsigned int uid) {
 	return 0;
     }
     if (uid > 0xC000)
-	asprintf(&l->name, "Dummy DCC%d", uid);
+	asprintf(&l->name, "Dummy DCC%d\n", uid);
     else if (uid > 0x4000)
-	asprintf(&l->name, "Dummy MFX%d", uid);
+	asprintf(&l->name, "Dummy MFX%d\n", uid);
     else
-	asprintf(&l->name, "Dummy MM%d", uid);
+	asprintf(&l->name, "Dummy MM%d\n", uid);
     l->uid = uid;
 
     HASH_ADD_STR(loco_data, name, l);
