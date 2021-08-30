@@ -35,7 +35,6 @@ int xpn_tty_send(int fd, struct termios2 *config, unsigned char *data, int lengt
 
     /* use parity mark for address */
     config->c_cflag |= PARENB | CMSPAR | PARODD;
-    // ioctl(fd, TCSANOW, config);
     ioctl(fd, TCSETS2, config);
     ret = write(fd, data, 1);
     if (ret < 0) {
@@ -43,16 +42,17 @@ int xpn_tty_send(int fd, struct termios2 *config, unsigned char *data, int lengt
         return EXIT_FAILURE;
     }
 
+    if (length == 1)
+	return EXIT_SUCCESS;
+
     /* use parity space for data */
     config->c_cflag &= ~PARODD;
-    // ioctl(fd, TCSANOW, config);
     ioctl(fd, TCSETS2, config);
     ret = write(fd, data + 1, length - 1);
     if (ret < 0) {
         fprintf(stderr, "can't write data - %s\n", strerror(errno));
         return EXIT_FAILURE;
     }
-    //ioctl(fd, TCSANOW, config);
     return EXIT_SUCCESS;
 }
 
