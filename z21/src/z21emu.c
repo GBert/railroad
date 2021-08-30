@@ -56,6 +56,8 @@ extern struct subscriber_t *subscriber;
 struct xpn_tty_t xpn_tty;
 #endif
 
+static char *XPN_SRC_STRG	= "->XPN                        ";
+static char *XPN_DST_STRG	= "  XPN->                      ";
 static char *UDP_SRC_STRG	= "->UDP    len 0x%04x ID 0x%04x";
 static char *UDP_DST_STRG	= "  UDP->  len 0x%04x ID 0x%04x";
 static char *TCP_FORMAT_STRG_S	= "  TCP->  CANID 0x%06X   [%d]";
@@ -568,9 +570,12 @@ int check_data_xpn(struct z21_data_t *z21_data, int udplength, int verbose) {
 	if (length == 0)
 	   break;
 	header = le16(&z21_data->udpframe[i + 2]);
-	if (verbose)
-	    print_udp_frame(UDP_SRC_STRG, length, &z21_data->udpframe[i]);
-
+	if (verbose) {
+	    if (z21_data->source == XPN_TTY_SOURCE)
+		print_udp_frame(XPN_SRC_STRG, length, &z21_data->udpframe[i]);
+	    else
+		print_udp_frame(UDP_SRC_STRG, length, &z21_data->udpframe[i]);
+	}
 	switch (header) {
 	case LAN_GET_SERIAL_NUMBER:
 	    if (length == 4) {
@@ -1077,6 +1082,7 @@ int main(int argc, char **argv) {
 			    print_net_frame(TCP_FORMATS_STRG, &recvline[i], z21_data.foreground);
 			else
 			    print_net_frame(TCP_FORMAT_STRG, &recvline[i], z21_data.foreground);
+			/* CHECK &recvline[i] ? */
 			check_data_can(&z21_data, &recvline[i], z21_data.foreground);
 		    }
 		}
@@ -1085,13 +1091,15 @@ int main(int argc, char **argv) {
 #ifndef NO_XPN_TTY
 	/* received a packet on XpressNet TTY interface */
 	if (FD_ISSET(xpn_tty.fd, &readfds)) {
-	    printf("got tty data\n");
 	    /* we are going to put the data into a standard frame */
 	    ssize_t length = read(xpn_tty.fd, z21_data.udpframe + 4, MAXDG - 4);
-	    to_le16(z21_data.udpframe, (uint16_t) length + 2);
+	    printf("got tty data - %ld bytes\n", length);
+	    to_le16(z21_data.udpframe, (uint16_t) length + 4);
+	    z21_data.source = XPN_TTY_SOURCE;
 	    z21_data.udpframe[2] = 0x40;
 	    z21_data.udpframe[3] = 0;
-	    check_data_xpn(&z21_data, ret, z21_data.foreground);
+	    check_data_xpn(&z21_data, length + 4, z21_data.foreground);
+	    z21_data.source = XPN_LAN_SOURCE;
 	}
 #endif
     }
