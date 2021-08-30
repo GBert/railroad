@@ -186,10 +186,12 @@ int send_xpn(unsigned char *data, char *vchar) {
     if (z21_data.source == XPN_LAN_SOURCE) {
 	send_z21_clients(udpxpn, format, vchar);
     } else if (z21_data.source == XPN_TTY_SOURCE) {
-	printf("send via tty\n");
+	// printf("send via tty\n");
 	memcpy(&xpn_tty.data[1], &udpxpn[4], length - 4);
-	xpn_tty.data[0] = 0xe0;
+	xpn_tty.data[0] = 0xe1;
 	xpn_tty.length = length - 3;
+	print_udp_frame(XPN_DST_STRG, length - 3, xpn_tty.data);
+	printf("\n");
 	xpn_tty_send(&xpn_tty);
     }
     pthread_mutex_unlock(&lock);
@@ -809,7 +811,7 @@ void *z21_periodic_tasks(void *ptr) {
 	}
 #ifndef NO_XPN_TTY
 	if (xpn_tty.fd) {
-	    xpn_tty.data[0] = 0x40;
+	    xpn_tty.data[0] = 0x41;
 	    xpn_tty.length = 1;
 	    xpn_tty_send(&xpn_tty);
 	}
@@ -1109,7 +1111,7 @@ int main(int argc, char **argv) {
 	if (FD_ISSET(xpn_tty.fd, &readfds)) {
 	    /* we are going to put the data into a standard frame */
 	    ssize_t length = read(xpn_tty.fd, z21_data.udpframe + 4, MAXDG - 4);
-	    printf("got tty data - %ld bytes\n", length);
+	    // printf("got tty data - %ld bytes\n", length);
 	    to_le16(z21_data.udpframe, (uint16_t) length + 4);
 	    z21_data.source = XPN_TTY_SOURCE;
 	    z21_data.udpframe[2] = 0x40;
