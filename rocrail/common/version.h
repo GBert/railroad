@@ -1,11 +1,12 @@
 const int revisionnr = 
-1738
+1739
 ;
 const char* commithash = 
-"cb2efb442b816192e3ff937456b22d99f4ae6217";
+"e14723dc648bb5162fe56c452a8dcdc86c7289d6";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1739 2021-08-31 11:04:02 +0200 rocweb: revert\n" \
 "1738 2021-08-30 16:34:37 +0200 rocweb: fix for show text\n" \
 "1737 2021-08-30 14:58:42 +0200 rocweb: regard text show attribute\n" \
 "1736 2021-08-30 14:17:46 +0200 rocweb: keep background color on event\n" \
