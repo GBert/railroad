@@ -54,10 +54,10 @@ extern struct magnet_data_t *magnet_data;
 extern struct subscriber_t *subscriber;
 #ifndef NO_XPN_TTY
 struct xpn_tty_t xpn_tty;
-#endif
 
-static char *XPN_SRC_STRG	= "->XPN                        ";
 static char *XPN_DST_STRG	= "  XPN->                      ";
+#endif
+static char *XPN_SRC_STRG	= "->XPN                        ";
 static char *UDP_SRC_STRG	= "->UDP    len 0x%04x ID 0x%04x";
 static char *UDP_DST_STRG	= "  UDP->  len 0x%04x ID 0x%04x";
 static char *TCP_FORMAT_STRG_S	= "  TCP->  CANID 0x%06X   [%d]";
@@ -187,12 +187,14 @@ int send_xpn(unsigned char *data, char *vchar) {
 	send_z21_clients(udpxpn, format, vchar);
     } else if (z21_data.source == XPN_TTY_SOURCE) {
 	// printf("send via tty\n");
+#ifndef NO_XPN_TTY
 	memcpy(&xpn_tty.data[1], &udpxpn[4], length - 4);
 	xpn_tty.data[0] = 0xe1;
 	xpn_tty.length = length - 3;
 	print_udp_frame(XPN_DST_STRG, length - 3, xpn_tty.data);
 	printf("\n");
 	xpn_tty_send(&xpn_tty);
+#endif
     }
     pthread_mutex_unlock(&lock);
     return (EXIT_SUCCESS);
