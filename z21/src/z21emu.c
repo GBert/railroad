@@ -52,7 +52,12 @@ struct z21_data_t z21_data;
 extern struct loco_data_t *loco_data, *loco_data_by_uid;
 extern struct magnet_data_t *magnet_data;
 extern struct subscriber_t *subscriber;
+#ifndef NO_XPN_TTY
+struct xpn_tty_t xpn_tty;
+#endif
 
+static char *XPN_SRC_STRG	= "->XPN                        ";
+static char *XPN_DST_STRG	= "  XPN->                      ";
 static char *UDP_SRC_STRG	= "->UDP    len 0x%04x ID 0x%04x";
 static char *UDP_DST_STRG	= "  UDP->  len 0x%04x ID 0x%04x";
 static char *TCP_FORMAT_STRG_S	= "  TCP->  CANID 0x%06X   [%d]";
@@ -64,7 +69,6 @@ static char *TCP_FORMATS_STRG	= "->TCP*   CANID 0x%06X   [%d]";
 #define SUBCRIBER_TIMEOUT	20E6
 
 char cs2addr[32] = "127.0.0.1";
-char xpn_tty_interface[32] = {0};
 char config_dir[MAXLINE] = "/www/config/";
 
 static unsigned char MS_POWER_ON[]		= { 0x00, 0x00, 0x03, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
@@ -88,6 +92,7 @@ static unsigned char XPN_X_Z21_FIRMWARE_VERSION[] = { 0x09, 0x00, 0x40, 0x00, 0x
 static unsigned char XPN_X_STORE1[]               = { 0x0E, 0x00, 0x12, 0x00, 0x01, 0x00, 0x01, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
 static unsigned char XPN_X_STORE2[]               = { 0x14, 0x00, 0x16, 0x00, 0x19, 0x06, 0x07, 0x01, 0x05, 0x14,
 						      0x88, 0x13, 0x10, 0x27, 0x32, 0x00, 0x50, 0x46, 0x20, 0x4e };
+static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x63, 0x21, 0x03, 0x00, 0x41 };
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
@@ -178,7 +183,17 @@ int send_xpn(unsigned char *data, char *vchar) {
     memcpy(udpxpn, data, length);
     format = UDP_DST_STRG;
     pthread_mutex_lock(&lock);
-    send_z21_clients(udpxpn, format, vchar);
+    if (z21_data.source == XPN_LAN_SOURCE) {
+	send_z21_clients(udpxpn, format, vchar);
+    } else if (z21_data.source == XPN_TTY_SOURCE) {
+	// printf("send via tty\n");
+	memcpy(&xpn_tty.data[1], &udpxpn[4], length - 4);
+	xpn_tty.data[0] = 0xe1;
+	xpn_tty.length = length - 3;
+	print_udp_frame(XPN_DST_STRG, length - 3, xpn_tty.data);
+	printf("\n");
+	xpn_tty_send(&xpn_tty);
+    }
     pthread_mutex_unlock(&lock);
     return (EXIT_SUCCESS);
 }
@@ -438,6 +453,13 @@ int check_data_lan_x_header(struct z21_data_t *z21_data, unsigned char *udpframe
     case 0x21:
 	db0 = udpframe[5];
 	switch (db0) {
+	case LAN_X_GET_VERSION:
+	    v_printf(verbose, "LAN_X_GET_VERSION\n");
+	    z21_data->bcf = 0x00000000;
+	    memcpy(xpnframe, XPN_X_VERSION, sizeof(XPN_X_VERSION));
+	    vas_printf(verbose, &vchar, "LAN_X_VERSION\n");
+	    send_xpn(xpnframe, vchar);
+	    break;
 	case LAN_X_GET_STATUS:
 	    v_printf(verbose, "LAN_X_GET_STATUS\n");
 	    memcpy(xpnframe, XPN_X_STATUS_CHANGED, sizeof(XPN_X_STATUS_CHANGED));
@@ -566,9 +588,12 @@ int check_data_xpn(struct z21_data_t *z21_data, int udplength, int verbose) {
 	if (length == 0)
 	   break;
 	header = le16(&z21_data->udpframe[i + 2]);
-	if (verbose)
-	    print_udp_frame(UDP_SRC_STRG, length, &z21_data->udpframe[i]);
-
+	if (verbose) {
+	    if (z21_data->source == XPN_TTY_SOURCE)
+		print_udp_frame(XPN_SRC_STRG, length, &z21_data->udpframe[i]);
+	    else
+		print_udp_frame(UDP_SRC_STRG, length, &z21_data->udpframe[i]);
+	}
 	switch (header) {
 	case LAN_GET_SERIAL_NUMBER:
 	    if (length == 4) {
@@ -784,6 +809,13 @@ void *z21_periodic_tasks(void *ptr) {
 		HASH_DEL(subscriber, sub);
 	    }
 	}
+#ifndef NO_XPN_TTY
+	if (xpn_tty.fd) {
+	    xpn_tty.data[0] = 0x41;
+	    xpn_tty.length = 1;
+	    xpn_tty_send(&xpn_tty);
+	}
+#endif
 	pthread_mutex_unlock(&lock);
 	usec_sleep(1E6);
     }
@@ -794,9 +826,6 @@ int main(int argc, char **argv) {
     pthread_t pth;
     int ret, opt, max_fds;
     struct ifreq ifr;
-#ifndef NO_CAN
-    struct sockaddr_can caddr;
-#endif
     struct sockaddr_in src_addr;
     fd_set readfds;
     int primary_port = PRIMARY_UDP_PORT;
@@ -805,18 +834,14 @@ int main(int argc, char **argv) {
     char timestamp[16];
     char *loco_file;
     char *magnet_file;
-#ifndef NO_XPN_TTY
-    int xpn_tty_fd;
-    struct termios2 xpn_tty_config;
-#endif
 #ifndef NO_CAN
+    struct sockaddr_can caddr;
     socklen_t caddrlen = sizeof(caddr);
 #endif
     socklen_t slen = sizeof(src_addr);
 
 #ifndef NO_XPN_TTY
-    memset(&xpn_tty_config, 0, sizeof(struct termios2));
-    xpn_tty_fd = 0;
+    memset(&xpn_tty, 0, sizeof(struct xpn_tty_t));
 #endif
     memset(&z21_data, 0, sizeof(z21_data));
     memset(&ifr, 0, sizeof(ifr));
@@ -846,7 +871,7 @@ int main(int argc, char **argv) {
 	    break;
 #ifndef NO_XPN_TTY
 	case 't':
-	    strncpy(xpn_tty_interface, optarg, sizeof(xpn_tty_interface) - 1);
+	    strncpy(xpn_tty.interface, optarg, sizeof(xpn_tty.interface) - 1);
 	    break;
 #endif
 	case 'i':
@@ -871,13 +896,13 @@ int main(int argc, char **argv) {
     }
 
 #ifndef NO_XPN_TTY
-    if (xpn_tty_interface[0]) {
-	xpn_tty_fd = open(xpn_tty_interface, O_RDWR);
-	if (xpn_tty_fd < 0) {
-	    fprintf(stderr, "Failed to open %s - %s\n", xpn_tty_interface, strerror(errno));
+    if (xpn_tty.interface[0]) {
+	xpn_tty.fd = open(xpn_tty.interface, O_RDWR);
+	if (xpn_tty.fd < 0) {
+	    fprintf(stderr, "Failed to open %s - %s\n", xpn_tty.interface, strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
-	xpn_tty_init(xpn_tty_fd, &xpn_tty_config);
+	xpn_tty_init(&xpn_tty);
     }
 #endif
 
@@ -1015,9 +1040,9 @@ int main(int argc, char **argv) {
 	    max_fds = MAX(MAX(z21_data.sp, z21_data.ss), z21_data.sc);
 	}
 #ifndef NO_XPN_TTY
-	if (xpn_tty_fd) {
-	    FD_SET(xpn_tty_fd, &readfds);
-	    max_fds = MAX(max_fds, xpn_tty_fd);
+	if (xpn_tty.fd) {
+	    FD_SET(xpn_tty.fd, &readfds);
+	    max_fds = MAX(max_fds, xpn_tty.fd);
         }
 #endif
 	if (select(max_fds + 1, &readfds, NULL, NULL, NULL) < 0) {
@@ -1075,20 +1100,24 @@ int main(int argc, char **argv) {
 			    print_net_frame(TCP_FORMATS_STRG, &recvline[i], z21_data.foreground);
 			else
 			    print_net_frame(TCP_FORMAT_STRG, &recvline[i], z21_data.foreground);
+			/* CHECK &recvline[i] ? */
 			check_data_can(&z21_data, &recvline[i], z21_data.foreground);
 		    }
 		}
 	    }
 	}
 #ifndef NO_XPN_TTY
-	if (FD_ISSET(xpn_tty_fd, &readfds)) {
-	    printf("got tty data\n");
+	/* received a packet on XpressNet TTY interface */
+	if (FD_ISSET(xpn_tty.fd, &readfds)) {
 	    /* we are going to put the data into a standard frame */
-	    ssize_t length = read(xpn_tty_fd, z21_data.udpframe + 4, MAXDG - 4);
-	    to_le16(z21_data.udpframe, (int) length + 2);
+	    ssize_t length = read(xpn_tty.fd, z21_data.udpframe + 4, MAXDG - 4);
+	    // printf("got tty data - %ld bytes\n", length);
+	    to_le16(z21_data.udpframe, (uint16_t) length + 4);
+	    z21_data.source = XPN_TTY_SOURCE;
 	    z21_data.udpframe[2] = 0x40;
 	    z21_data.udpframe[3] = 0;
-	    check_data_xpn(&z21_data, ret, z21_data.foreground);
+	    check_data_xpn(&z21_data, length + 4, z21_data.foreground);
+	    z21_data.source = XPN_LAN_SOURCE;
 	}
 #endif
     }

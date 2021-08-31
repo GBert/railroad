@@ -18,6 +18,8 @@
 #define SECONDARY_UDP_PORT	21106
 #define MAERKLIN_PORT		15731
 #define MAXSIZE			16384
+#define XPN_LAN_SOURCE		0
+#define XPN_TTY_SOURCE		1
 
 #define v_printf(verbose, ...) \
 	do { if ((verbose)) { printf(__VA_ARGS__);} } while (0)
@@ -39,6 +41,7 @@ struct z21_data_t {
     struct sockaddr_in staddr;
     uint32_t ip;
     uint32_t bcf;
+    int source;
     int sp;
     int ss;
     int sc;
