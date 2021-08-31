@@ -1,11 +1,17 @@
 const int revisionnr = 
-1733
+1739
 ;
 const char* commithash = 
-"c3c6e65698bff63c6a967185292171dd7c360e2f";
+"e14723dc648bb5162fe56c452a8dcdc86c7289d6";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1739 2021-08-31 11:04:02 +0200 rocweb: revert\n" \
+"1738 2021-08-30 16:34:37 +0200 rocweb: fix for show text\n" \
+"1737 2021-08-30 14:58:42 +0200 rocweb: regard text show attribute\n" \
+"1736 2021-08-30 14:17:46 +0200 rocweb: keep background color on event\n" \
+"1735 2021-08-30 13:48:34 +0200 rocweb: background color support\n" \
+"1734 2021-08-30 09:06:56 +0200 wio: fix for signal LED porttype\n" \
 "1733 2021-08-29 08:16:38 +0200 car: provide functions on speed/dir/f0 command\n" \
 "1732 2021-08-27 17:34:28 +0200 wio: trace correction for version\n" \
 "1731 2021-08-27 13:00:28 +0200 item,planpanel,actionsctrldlg: fix for clipboard under macOS\n" \
