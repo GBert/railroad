@@ -21,6 +21,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
