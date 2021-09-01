@@ -23,6 +23,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 #include <thread>
 #include <vector>
+#include <unistd.h>
 
 #include "Logger/Logger.h"
 #include "Network/TcpConnection.h"
@@ -34,5 +35,8 @@ namespace Network
 		public:
 			TcpClient() = delete;
 			static TcpConnection GetTcpClientConnection(Logger::Logger* logger, const std::string& host, const unsigned short port);
+
+		private:
+			static int ConnectWithTimeout(int sock, struct sockaddr *addr, socklen_t length);
 	};
 }

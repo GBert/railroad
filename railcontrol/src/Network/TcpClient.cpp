@@ -18,10 +18,10 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
 #include "Network/TcpClient.h"
 
@@ -46,7 +46,7 @@ namespace Network
 	        return TcpConnection(0);
 	    }
 
-	    ok = connect(sock, (struct sockaddr *)&address, sizeof(address));
+	    ok = ConnectWithTimeout(sock, (struct sockaddr *)&address, sizeof(address));
 	    if (ok < 0)
 	    {
 	    	Languages::TextSelector text;
@@ -69,5 +69,74 @@ namespace Network
 	    }
 
 		return TcpConnection(sock);
+	}
+
+	int TcpClient::ConnectWithTimeout(int sock, struct sockaddr *addr, socklen_t length)
+	{
+		// Set non-blocking
+		long arg = fcntl(sock, F_GETFL, nullptr);
+		if (arg < 0)
+		{
+			return -1;
+		}
+		arg |= O_NONBLOCK;
+		if (fcntl(sock, F_SETFL, arg) < 0)
+		{
+			return -1;
+		}
+		// Trying to connect with timeout
+		int ret = connect(sock, addr, length);
+		if (ret < 0)
+		{
+			if (errno != EINPROGRESS)
+			{
+				return -1;
+			}
+			while (true)
+			{
+				fd_set myset;
+				int valopt;
+				socklen_t lon;
+				struct timeval tv;
+				tv.tv_sec = 3;
+				tv.tv_usec = 0;
+				FD_ZERO(&myset);
+				FD_SET(sock, &myset);
+				ret = select(sock + 1, nullptr, &myset, nullptr, &tv);
+				if (ret < 0 && errno == EINTR)
+				{
+					continue;
+				}
+
+				if (ret <= 0)
+				{
+					return -1;
+				}
+
+				// Socket selected for write
+				lon = sizeof(int);
+				if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (void*) (&valopt), &lon) < 0)
+				{
+					return -1;
+				}
+				// Check the value returned...
+				if (valopt)
+				{
+					return -1;
+				}
+				break;
+			}
+		}
+		// Set to blocking mode again...
+		if ((arg = fcntl(sock, F_GETFL, nullptr)) < 0)
+		{
+			return -1;
+		}
+		arg &= (~O_NONBLOCK);
+		if (fcntl(sock, F_SETFL, arg) < 0)
+		{
+			return -1;
+		}
+		return ret;
 	}
 }
