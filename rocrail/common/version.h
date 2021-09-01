@@ -1,11 +1,13 @@
 const int revisionnr = 
-1739
+1741
 ;
 const char* commithash = 
-"e14723dc648bb5162fe56c452a8dcdc86c7289d6";
+"3bb3073730b7c0eb325cad741d333fbdcd446e6d";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1741 2021-08-31 22:18:25 +0200 z21: symbol added for booster system events\n" \
+"1740 2021-08-31 22:16:13 +0200 delete eclipse settings\n" \
 "1739 2021-08-31 11:04:02 +0200 rocweb: revert\n" \
 "1738 2021-08-30 16:34:37 +0200 rocweb: fix for show text\n" \
 "1737 2021-08-30 14:58:42 +0200 rocweb: regard text show attribute\n" \
