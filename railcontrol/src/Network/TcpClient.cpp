@@ -22,6 +22,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include "Network/TcpClient.h"
 
