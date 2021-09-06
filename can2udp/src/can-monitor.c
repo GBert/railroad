@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.17\n\n");
+    fprintf(stderr, "   Version 3.18\n\n");
     fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -314,6 +314,7 @@ char *getLoco(uint8_t * data, char *s) {
 void command_system(struct can_frame *frame) {
     uint32_t uid, response;
     uint16_t sid, wert;
+    static uint16_t crcreg;
     uint8_t modul;
     char s[32];
 
@@ -447,6 +448,15 @@ void command_system(struct can_frame *frame) {
 		break;
 	    case 0x82:
 		printf(GRN " Antwortbyte %d mit Wert 0x%02X", frame->data[6], frame->data[7]);
+		if (frame->data[6] == 0)
+		    crcreg = 0xFF;
+		else if (frame->data[7] == crcreg)
+		    printf(", CRC OK");
+		crcreg ^= (crcreg << 1) ^ (crcreg << 2) ^ frame->data[7];
+		if (crcreg & 0x0100)
+		    crcreg ^= 0x0107;
+		if (crcreg & 0x0200)
+		    crcreg ^= 0x020E;
 		break;
 	    case 0x83:
 		printf(GRN " 1-Bit-Antwort mit ASK %d", frame->data[6]);
