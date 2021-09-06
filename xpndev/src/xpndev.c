@@ -14,6 +14,7 @@
 #include <linux/uaccess.h>
 #include <linux/version.h>
 #include <linux/mutex.h>
+#include "allwinner_tty.h"
 
 static DEFINE_MUTEX(xpnchar_mutex);
 
@@ -112,6 +113,7 @@ struct file_operations fops = {
 
 static int __init xpn_device_init(void) {
     int ret;
+    struct platform_device *pdev;
 
     ret = gpio_request(direction_pin, "direction pin");
     if (ret) {
@@ -146,6 +148,13 @@ static int __init xpn_device_init(void) {
     }
     printk(KERN_INFO "XPNChar: device class registered and created\n");
 
+/*
+    ret = allwinner_probe(pdev);
+    if (ret) {
+        printk(KERN_ALERT "resource mapping error\n");
+        goto CHARDEV_EXIT;
+    }
+*/
     return 0;
 
 CHARDEV_EXIT:

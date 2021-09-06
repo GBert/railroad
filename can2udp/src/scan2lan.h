@@ -9,8 +9,8 @@
 
 /* Thanks to Stefan Krauss and the SocketCAN team
  */
-#ifndef _CAN2LAN_H_
-#define _CAN2LAN_H_
+#ifndef _SCAN2LAN_H_
+#define _SCAN2LAN_H_
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>
@@ -91,5 +91,5 @@ int net_to_net(int net_socket, struct sockaddr *net_addr, unsigned char *netfram
 int frame_to_can(int can_socket, unsigned char *netframe);
 int frame_to_net(int net_socket, struct sockaddr *net_addr, struct can_frame *frame);
 uint16_t CRCCCITT(uint8_t *data, size_t length, uint16_t seed);
-#endif /* _CAN2LAN_H_ */
+#endif /* _SCAN2LAN_H_ */
 
