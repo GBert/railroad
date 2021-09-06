@@ -1,11 +1,15 @@
 const int revisionnr = 
-1741
+1745
 ;
 const char* commithash = 
-"3bb3073730b7c0eb325cad741d333fbdcd446e6d";
+"94a4c571b90dad8af193c13ccd5df86d9831474d";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1745 2021-09-05 14:00:40 +0200 rocpro: popup for readonly CV\n" \
+"1744 2021-09-04 12:07:06 +0200 cardlg: action control substate on/off added\n" \
+"1743 2021-09-03 17:15:55 +0200 locdialog: added substate for functions\n" \
+"1742 2021-09-03 08:13:24 +0200 wiopi: cam resolution set to 16:9 -> 480x270\n" \
 "1741 2021-08-31 22:18:25 +0200 z21: symbol added for booster system events\n" \
 "1740 2021-08-31 22:16:13 +0200 delete eclipse settings\n" \
 "1739 2021-08-31 11:04:02 +0200 rocweb: revert\n" \
