@@ -30,6 +30,8 @@ extern struct timeval last_sent;
 extern char *cs2_configs[][2];
 extern char **page_name;
 
+extern unsigned char netframe[MAXDG];
+
 /* The following macro calls a zlib routine and checks the return
    value. If the return value ("status") is not OK, it prints an error
    message and exits the program. Zlib's error statuses are all less

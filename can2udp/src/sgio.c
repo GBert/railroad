@@ -16,6 +16,8 @@
 #define windowBits 15
 #define GZIP_ENCODING 16
 
+extern unsigned char netframe[MAXDG];
+
 /* The following macro calls a zlib routine and checks the return
    value. If the return value ("status") is not OK, it prints an error
    message and exits the program. Zlib's error statuses are all less

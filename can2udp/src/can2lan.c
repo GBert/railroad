@@ -69,6 +69,10 @@ int ms1_workaround;
 int cs2fake_ping, pidfd, do_loop = 1;
 struct timeval last_sent;
 
+static const int MAXPENDING = 16;       /* max outstanding tcp connections */
+unsigned char netframe[MAXDG];
+unsigned char ec_frame[13];
+
 void signal_handler(int sig) {
     syslog(LOG_WARNING, "got signal %s\n", strsignal(sig));
     do_loop = 0;

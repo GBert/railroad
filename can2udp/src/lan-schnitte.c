@@ -20,6 +20,9 @@ static char *CAN_TCP_FORMAT_STRG = "->CAN > TCP     0x%08X   [%d]";
 
 struct timeval last_sent;
 
+static const int MAXPENDING = 16;	/* max outstanding tcp connections */
+unsigned char netframe[MAXDG];
+
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -t <tcp_port> -i <can interface>\n",
 	    prg);

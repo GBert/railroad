@@ -25,6 +25,10 @@ char config_dir[MAXLINE];
 char config_file[MAXLINE];
 char **page_name;
 
+static const int MAXPENDING = 16;       /* max outstanding tcp connections */
+unsigned char netframe[MAXDG];
+unsigned char ec_frame[13];
+
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
     fprintf(stderr, "   Version 0.95\n\n");
