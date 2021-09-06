@@ -34,16 +34,10 @@ namespace WebServer
 		public:
 			HtmlTagSelectWithLabel() = delete;
 
-			inline HtmlTagSelectWithLabel(const std::string& name,
+			HtmlTagSelectWithLabel(const std::string& name,
 				const Languages::TextSelector label,
 				const std::map<std::string,DataModel::ObjectIdentifier>& options,
-				const DataModel::ObjectIdentifier& defaultValue = DataModel::ObjectIdentifier())
-			:	HtmlTag("div")
-			{
-				HtmlTag::AddClass("input_select_with_label");
-				AddChildTag(HtmlTagLabel(label, "s_" + name));
-				AddChildTag(HtmlTagSelect(name, options, defaultValue));
-			}
+				const DataModel::ObjectIdentifier& defaultValue = DataModel::ObjectIdentifier());
 
 			template<typename T>
 			HtmlTagSelectWithLabel(const std::string& name,
@@ -97,22 +91,11 @@ namespace WebServer
 			{
 			}
 
-			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
-			{
-				childTags[1].AddAttribute(name, value);
-				return *this;
-			}
+			HtmlTag AddAttribute(const std::string& name, const std::string& value = "");
 
-			inline bool IsAttributeSet(const std::string& name)
-			{
-				return childTags[1].IsAttributeSet(name);
-			}
+			bool IsAttributeSet(const std::string& name);
 
-			virtual HtmlTag AddClass(const std::string& _class) override
-			{
-				childTags[1].AddClass(_class);
-				return *this;
-			}
+			HtmlTag AddClass(const std::string& _class);
 	};
 } // namespace WebServer
 

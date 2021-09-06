@@ -200,6 +200,7 @@ WebServer/HtmlTagSelect.cpp
 WebServer/HtmlTagSelect.h
 WebServer/HtmlTagSelectOrientation.h
 WebServer/HtmlTagSelectOrientationWithLabel.h
+WebServer/HtmlTagSelectWithLabel.cpp
 WebServer/HtmlTagSelectWithLabel.h
 WebServer/HtmlTagSignal.cpp
 WebServer/HtmlTagSignal.h

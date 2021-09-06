@@ -84,11 +84,7 @@ namespace WebServer
 				CheckDefaultKeyValue();
 			}
 
-			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value = "") override
-			{
-				childTags[0].AddAttribute(name, value);
-				return *this;
-			}
+			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value = "") override;
 
 		private:
 			HtmlTagSelect(const std::string& name);

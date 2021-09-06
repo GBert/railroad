@@ -70,6 +70,12 @@ namespace WebServer
 		AddChildTag(dropDown);
 	}
 
+	HtmlTag HtmlTagSelect::AddAttribute(const std::string& name, const std::string& value)
+	{
+		childTags[0].AddAttribute(name, value);
+		return *this;
+	}
+
 	void HtmlTagSelect::AddOption(const std::string& key,
 		const std::string& value,
 		const bool defaultKeyValue)
