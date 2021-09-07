@@ -1,11 +1,15 @@
 const int revisionnr = 
-1745
+1749
 ;
 const char* commithash = 
-"94a4c571b90dad8af193c13ccd5df86d9831474d";
+"b0681e1931875b680c063cb47cb7b698e9a6e2e2";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1749 2021-09-07 07:38:48 +0200 SLIM: viewbox added\n" \
+"1748 2021-09-07 07:38:00 +0200 SpDrS60: viewbox added\n" \
+"1747 2021-09-07 07:30:05 +0200 Accessory,Roads: viewbox added\n" \
+"1746 2021-09-06 19:10:14 +0200 SLIM-COLOR: viewbox added for viewing in file explorer/finder\n" \
 "1745 2021-09-05 14:00:40 +0200 rocpro: popup for readonly CV\n" \
 "1744 2021-09-04 12:07:06 +0200 cardlg: action control substate on/off added\n" \
 "1743 2021-09-03 17:15:55 +0200 locdialog: added substate for functions\n" \
