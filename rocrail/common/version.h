@@ -1,11 +1,13 @@
 const int revisionnr = 
-1749
+1751
 ;
 const char* commithash = 
-"b0681e1931875b680c063cb47cb7b698e9a6e2e2";
+"76129a86134749484b0a8837055dd96961558ac4";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1751 2021-09-08 08:01:40 +0200 wiopi: removed board I/O option\n" \
+"1750 2021-09-07 19:13:11 +0200 lodi: extra trace init for windows\n" \
 "1749 2021-09-07 07:38:48 +0200 SLIM: viewbox added\n" \
 "1748 2021-09-07 07:38:00 +0200 SpDrS60: viewbox added\n" \
 "1747 2021-09-07 07:30:05 +0200 Accessory,Roads: viewbox added\n" \
