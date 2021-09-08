@@ -1,11 +1,15 @@
 const int revisionnr = 
-1751
+1755
 ;
 const char* commithash = 
-"76129a86134749484b0a8837055dd96961558ac4";
+"7d6cc15bffd214e344fed6bf04841057e3ea5835";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1755 2021-09-08 11:07:10 +0200 translation added for switch sensor\n" \
+"1754 2021-09-08 11:05:45 +0200 trackpickerdlg: accessory 24, switch sensor added\n" \
+"1753 2021-09-08 11:00:12 +0200 use std green\n" \
+"1752 2021-09-08 10:58:42 +0200 SLIM-COLOR: accessory 24 added for switch sensor\n" \
 "1751 2021-09-08 08:01:40 +0200 wiopi: removed board I/O option\n" \
 "1750 2021-09-07 19:13:11 +0200 lodi: extra trace init for windows\n" \
 "1749 2021-09-07 07:38:48 +0200 SLIM: viewbox added\n" \
