@@ -1,11 +1,12 @@
 const int revisionnr = 
-1755
+1756
 ;
 const char* commithash = 
-"7d6cc15bffd214e344fed6bf04841057e3ea5835";
+"dfbfc57c16ae6ec9742518b89457ac7ecd6d9df0";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1756 2021-09-09 08:08:10 +0200 switch: allow both sensors and field events for position reporting\n" \
 "1755 2021-09-08 11:07:10 +0200 translation added for switch sensor\n" \
 "1754 2021-09-08 11:05:45 +0200 trackpickerdlg: accessory 24, switch sensor added\n" \
 "1753 2021-09-08 11:00:12 +0200 use std green\n" \
