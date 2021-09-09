@@ -125,6 +125,17 @@ namespace DataModel
 				this->selectRouteApproach = selectRouteApproach;
 			}
 
+			inline const std::vector<const Route*> GetRoutes() const
+			{
+				std::vector<const Route*> out;
+				std::lock_guard<std::mutex> Guard(updateMutex);
+				for (auto route : routes)
+				{
+					out.push_back(route);
+				}
+				return out;
+			}
+
 			bool GetValidRoutes(Logger::Logger* logger,
 				const DataModel::Loco* loco,
 				const bool allowLocoTurn,

@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include "DataModel/Route.h"
 #include "DataModel/Track.h"
 #include "WebServer/HtmlTagTrack.h"
 
@@ -37,7 +38,20 @@ namespace WebServer
 		AddOnClickMenuEntry(Languages::TextTurnDirectionOfTravelToLeft, "fireRequestAndForget('/?cmd=trackorientation&orientation=false&" + urlIdentifier + "');", "track_left");
 		AddOnClickMenuEntry(Languages::TextTurnDirectionOfTravelToRight, "fireRequestAndForget('/?cmd=trackorientation&orientation=true&" + urlIdentifier + "');", "track_right");
 		AddOnClickMenuEntry(Languages::TextSetLoco, "loadPopup('/?cmd=tracksetloco&" + urlIdentifier + "');", "track_set");
-		AddOnClickMenuEntry(Languages::TextStartLoco, "fireRequestAndForget('/?cmd=trackstartloco&" + urlIdentifier + "');", "track_start_loco");
+		AddOnClickMenuEntry(Languages::TextStartLocoAutomode, "fireRequestAndForget('/?cmd=trackstartloco&" + urlIdentifier + "');", "track_start_loco");
+		AddOnClickMenuEntry(Languages::TextStartLocoTimetablemode, "fireRequestAndForget('/?cmd=trackstartloco&" + urlIdentifier + "&automodetype=1');", "track_start_loco");
+
+		if (track->GetObjectType() == ObjectTypeTrack)
+		{
+			const std::string trackId = std::to_string(track->GetID());
+			const std::vector<const DataModel::Route*> routes = track->GetRoutes();
+			for (auto route : routes)
+			{
+				const std::string routeId = std::to_string(route->GetID());
+				AddOnClickMenuEntry(route->GetName(), "fireRequestAndForget('/?cmd=locoaddtimetable&track=" + trackId + "&timetable=route" + routeId + "&automodetype=1');", "track_start_loco");
+			}
+		}
+
 		AddOnClickMenuEntry(Languages::TextStopLoco, "fireRequestAndForget('/?cmd=trackstoploco&" + urlIdentifier + "');", "track_stop_loco");
 
 		AddContextMenuEntry(Languages::TextReleaseTrack, "fireRequestAndForget('/?cmd=trackrelease&" + urlIdentifier + "');", "track_release");

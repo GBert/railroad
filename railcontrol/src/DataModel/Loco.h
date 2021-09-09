@@ -323,10 +323,10 @@ namespace DataModel
 			void SetMinThreadPriorityAndThreadName();
 			void AutoMode();
 			void SearchDestinationFirst();
-			void GetDestinationFirst();
+			void GetTimetableDestinationFirst();
 			void PrepareDestinationFirst(Route* const route, const LocoState newState);
 			void SearchDestinationSecond();
-			void GetDestinationSecond();
+			void GetTimetableDestinationSecond();
 			DataModel::Route* GetDestinationFromTimeTable(const TrackBase* const track, const bool allowLocoTurn);
 			void PrepareDestinationSecond(Route* const route, const LocoState newState);
 			DataModel::Route* SearchDestination(const DataModel::TrackBase* const oldToTrack, const bool allowLocoTurn);

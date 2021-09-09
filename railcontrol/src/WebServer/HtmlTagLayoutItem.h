@@ -55,17 +55,22 @@ namespace WebServer
 
 			inline void AddOnClickMenuEntry(const std::string& text)
 			{
-				AddMenuEntry(onClickMenuContentDiv, text);
+				AddMenuTitle(onClickMenuContentDiv, text);
 			}
 
 			inline void AddOnClickMenuEntry(const Languages::TextSelector text, const std::string& onClick, const std::string& className = "")
+			{
+				AddOnClickMenuEntry(Languages::GetText(text), onClick, className);
+			}
+
+			inline void AddOnClickMenuEntry(const std::string& text, const std::string& onClick, const std::string& className = "")
 			{
 				AddMenuEntry(onClickMenuContentDiv, text, onClick, className);
 			}
 
 			inline void AddContextMenuEntry(const std::string& text)
 			{
-				AddMenuEntry(contextMenuContentDiv, text);
+				AddMenuTitle(contextMenuContentDiv, text);
 			}
 
 			inline void AddContextMenuEntry(const Languages::TextSelector text, const std::string& onClick, const std::string& className = "")
@@ -95,11 +100,19 @@ namespace WebServer
 			unsigned int layoutPosY;
 
 		private:
-			static void AddMenuEntry(HtmlTag& menu,
+			static void AddMenuTitle(HtmlTag& menu,
 				const std::string& text);
 
-			static void AddMenuEntry(HtmlTag& menu,
+			static inline void AddMenuEntry(HtmlTag& menu,
 				const Languages::TextSelector text,
+				const std::string& onClick,
+				const std::string& className = "")
+			{
+				AddMenuEntry(menu, Languages::GetText(text), onClick, className);
+			}
+
+			static void AddMenuEntry(HtmlTag& menu,
+				const std::string& text,
 				const std::string& onClick,
 				const std::string& className = "");
 	};

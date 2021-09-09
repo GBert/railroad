@@ -1124,6 +1124,11 @@ namespace WebServer
 	void WebClient::HandleLocoAddTimeTable(const map<string, string>& arguments)
 	{
 		LocoID locoId = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		if (locoId == LocoNone)
+		{
+			TrackID trackId = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
+			locoId = manager.GetLocoIdOfTrack(trackId);
+		}
 		ObjectIdentifier identifier = Utils::Utils::GetStringMapEntry(arguments, "timetable");
 		bool ret = manager.LocoAddTimeTable(locoId, identifier);
 		ReplyHtmlWithHeaderAndParagraph(ret ? "Timetable added" : "Timetable not added");

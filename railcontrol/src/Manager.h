@@ -491,6 +491,12 @@ class Manager
 
 		bool LocoAddTimeTable(const LocoID locoId, DataModel::ObjectIdentifier& identifier);
 
+		inline LocoID GetLocoIdOfTrack(const TrackID trackId)
+		{
+			const DataModel::Track* track = GetTrack(trackId);
+			return (track ? track->GetLoco() : LocoNone);
+		}
+
 		// settings
 		inline DataModel::AccessoryPulseDuration GetDefaultAccessoryDuration() const
 		{

@@ -136,7 +136,7 @@ namespace WebServer
 		AddChildTag(imageDiv);
 	}
 
-	void HtmlTagLayoutItem::AddMenuEntry(HtmlTag& menu,
+	void HtmlTagLayoutItem::AddMenuTitle(HtmlTag& menu,
 		const string& text)
 	{
 		HtmlTag li("li");
@@ -146,7 +146,7 @@ namespace WebServer
 	}
 
 	void HtmlTagLayoutItem::AddMenuEntry(HtmlTag& menu,
-		const Languages::TextSelector text,
+		const string& text,
 		const string& onClick,
 		const string& className)
 	{

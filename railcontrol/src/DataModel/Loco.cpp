@@ -349,7 +349,7 @@ namespace DataModel
 							--wait;
 							break;
 						}
-						GetDestinationFirst();
+						GetTimetableDestinationFirst();
 						break;
 
 					case LocoStateTimetableGetSecond:
@@ -367,7 +367,7 @@ namespace DataModel
 						{
 							break;
 						}
-						GetDestinationSecond();
+						GetTimetableDestinationSecond();
 						break;
 
 					case LocoStateAutomodeRunning:
@@ -423,7 +423,7 @@ namespace DataModel
 		PrepareDestinationFirst(route, LocoStateAutomodeGetSecond);
 	}
 
-	void Loco::GetDestinationFirst()
+	void Loco::GetTimetableDestinationFirst()
 	{
 		if (routeFirst != nullptr)
 		{
@@ -435,7 +435,7 @@ namespace DataModel
 		Route* const route = GetDestinationFromTimeTable(trackFrom, true);
 		if (route == nullptr)
 		{
-			logger->Debug(Languages::TextNoValidRouteFound, GetName());
+			logger->Debug(Languages::TextNoValidTimetableEntryFound, GetName());
 			return;
 		}
 		PrepareDestinationFirst(route, LocoStateTimetableGetSecond);
@@ -512,7 +512,7 @@ namespace DataModel
 		PrepareDestinationSecond(route, LocoStateAutomodeRunning);
 	}
 
-	void Loco::GetDestinationSecond()
+	void Loco::GetTimetableDestinationSecond()
 	{
 		Route* route = GetDestinationFromTimeTable(trackFirst, false);
 		if (route == nullptr)
@@ -540,7 +540,7 @@ namespace DataModel
 		{
 			return nullptr;
 		}
-		logger->Debug("Using route {0} from timetable", route->GetID());
+		logger->Debug(Languages::TextUsingRouteFromTimetable, route->GetID());
 		return route;
 	}
 
@@ -550,7 +550,7 @@ namespace DataModel
 		{
 			case ObjectTypeRoute:
 				timeTableQueue.Enqueue(identifier.GetObjectID());
-				logger->Debug("Add route {0} to timetable", identifier.GetObjectID());
+				logger->Debug(Languages::TextAddingRouteToTimetable, identifier.GetObjectID());
 				return true;
 
 			case ObjectTypeTimeTable:

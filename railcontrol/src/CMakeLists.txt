@@ -198,6 +198,10 @@ WebServer/HtmlTagRoute.cpp
 WebServer/HtmlTagRoute.h
 WebServer/HtmlTagSelect.cpp
 WebServer/HtmlTagSelect.h
+WebServer/HtmlTagSelectMultiple.cpp
+WebServer/HtmlTagSelectMultiple.h
+WebServer/HtmlTagSelectMultipleWithLabel.cpp
+WebServer/HtmlTagSelectMultipleWithLabel.h
 WebServer/HtmlTagSelectOrientation.h
 WebServer/HtmlTagSelectOrientationWithLabel.h
 WebServer/HtmlTagSelectWithLabel.cpp

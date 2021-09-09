@@ -34,6 +34,87 @@ function selectValue(key, value, elementId)
 	keyElement.onchange();
 }
 
+function selectMultipleValue(changedKey, elementId, none, several)
+{
+	var dropdown = document.getElementById('d_' + elementId);
+	if (!dropdown)
+	{
+		return;
+	}
+	var keyElement = document.getElementById('d_' + elementId);
+	if (!keyElement)
+	{
+		return;
+	}
+	var valueElement = document.getElementById('skip_' + elementId);
+	if (!valueElement)
+	{
+		return;
+	}
+	var dropdownElements = dropdown.childNodes;
+	var key = keyElement.value;
+	var value = valueElement.value;
+	for (var i = 0; i < dropdownElements.length; ++i)
+	{
+		var element = dropdownElements[i];
+		var attributes = element.attributes;
+		if (attributes.key.value != changedKey)
+		{
+			continue;
+		}
+
+		if (element.classList.contains('selected_option'))
+		{
+			key &= ~changedKey;
+		}
+		else
+		{
+			key |= changedKey;
+		}
+	}
+
+	var optionsCount = 0;
+	for (var i = 0; i < dropdownElements.length; ++i)
+	{
+		var element = dropdownElements[i];
+		var attributes = element.attributes;
+		if ((key & attributes.key.value) == attributes.key.value)
+		{
+			element.classList.add('selected_option');
+			value = element.textContent;
+			++optionsCount;
+		}
+		else
+		{
+			element.classList.remove('selected_option');
+		}
+	}
+
+	var textElement = document.getElementById('skip_' + elementId);
+	if (!textElement)
+	{
+		return;
+	}
+
+	switch(optionsCount)
+	{
+		case 0:
+			textElement.value = none;
+			break;
+
+		case 1:
+			textElement.value = value;
+			break;
+
+		default:
+			textElement.value = several;
+			break;
+	}
+
+	keyElement.value = key;
+	keyElement.onchange();
+}
+
 window.addEventListener('click', function(event) {
 	for (const select of document.querySelectorAll('.dropdown'))
 	{

@@ -44,7 +44,8 @@ namespace DataModel
 			:	TrackBase(manager),
 				LayoutItem(trackID),
 				LockableItem()
-			{}
+			{
+			}
 
 			inline Track(Manager* manager, const std::string& serialized)
 			:	Track(manager, TrackNone)

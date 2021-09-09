@@ -512,6 +512,10 @@ input {
 	background-color: #ccc;
 }
 
+.dropdownentry.selected_option::before {
+	content: "✔ ";
+}
+
 .dropdown.show,
 .dropdown.show .dropdownentry {
 	visibility: visible;
