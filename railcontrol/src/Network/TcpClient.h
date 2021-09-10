@@ -23,8 +23,8 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 #include <sys/socket.h>
 #include <thread>
-#include <vector>
 #include <unistd.h>
+#include <vector>
 
 #include "Logger/Logger.h"
 #include "Network/TcpConnection.h"
