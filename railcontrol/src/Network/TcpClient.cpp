@@ -21,8 +21,8 @@ along with RailControl; see the file LICENCE. If not see
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <sys/select.h>
 
+#include "Network/Select.h"
 #include "Network/TcpClient.h"
 
 namespace Network
@@ -102,7 +102,7 @@ namespace Network
 				tv.tv_usec = 0;
 				FD_ZERO(&myset);
 				FD_SET(sock, &myset);
-				ret = select(sock + 1, nullptr, &myset, nullptr, &tv);
+				ret = TEMP_FAILURE_RETRY(select(sock + 1, nullptr, &myset, nullptr, &tv));
 				if (ret < 0 && errno == EINTR)
 				{
 					continue;
