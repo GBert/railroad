@@ -1,11 +1,12 @@
 const int revisionnr = 
-1756
+1757
 ;
 const char* commithash = 
-"dfbfc57c16ae6ec9742518b89457ac7ecd6d9df0";
+"cb2bca66d37d48fd3f9bfa883cd67e9b2b39719c";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1757 2021-09-10 07:57:59 +0200 wio: provide port as slave ID\n" \
 "1756 2021-09-09 08:08:10 +0200 switch: allow both sensors and field events for position reporting\n" \
 "1755 2021-09-08 11:07:10 +0200 translation added for switch sensor\n" \
 "1754 2021-09-08 11:05:45 +0200 trackpickerdlg: accessory 24, switch sensor added\n" \
