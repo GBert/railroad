@@ -1,11 +1,12 @@
 const int revisionnr = 
-1757
+1758
 ;
 const char* commithash = 
-"cb2bca66d37d48fd3f9bfa883cd67e9b2b39719c";
+"2929ca011d11a108df83fed860f1ce126196b89e";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1758 2021-09-10 22:01:18 +0200 logo extended with qr-code pointing to the wiki\n" \
 "1757 2021-09-10 07:57:59 +0200 wio: provide port as slave ID\n" \
 "1756 2021-09-09 08:08:10 +0200 switch: allow both sensors and field events for position reporting\n" \
 "1755 2021-09-08 11:07:10 +0200 translation added for switch sensor\n" \
