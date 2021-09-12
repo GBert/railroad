@@ -1,11 +1,12 @@
 const int revisionnr = 
-1758
+1759
 ;
 const char* commithash = 
-"2929ca011d11a108df83fed860f1ce126196b89e";
+"c4bdd74dedb5c1c8b1dcbabe2ac3f4e7ea859098";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1759 2021-09-11 15:11:08 +0200 function events: block enterside option added\n" \
 "1758 2021-09-10 22:01:18 +0200 logo extended with qr-code pointing to the wiki\n" \
 "1757 2021-09-10 07:57:59 +0200 wio: provide port as slave ID\n" \
 "1756 2021-09-09 08:08:10 +0200 switch: allow both sensors and field events for position reporting\n" \
