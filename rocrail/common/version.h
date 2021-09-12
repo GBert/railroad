@@ -1,11 +1,12 @@
 const int revisionnr = 
-1759
+1760
 ;
 const char* commithash = 
-"c4bdd74dedb5c1c8b1dcbabe2ac3f4e7ea859098";
+"88c573219a2badd10ce298f98c1dd2f6bc9e6f23";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1760 2021-09-12 08:05:55 +0200 fundialog: fix for number of sizer rows\n" \
 "1759 2021-09-11 15:11:08 +0200 function events: block enterside option added\n" \
 "1758 2021-09-10 22:01:18 +0200 logo extended with qr-code pointing to the wiki\n" \
 "1757 2021-09-10 07:57:59 +0200 wio: provide port as slave ID\n" \
