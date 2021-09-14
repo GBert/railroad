@@ -1,11 +1,14 @@
 const int revisionnr = 
-1760
+1763
 ;
 const char* commithash = 
-"88c573219a2badd10ce298f98c1dd2f6bc9e6f23";
+"5d73e4859d88a6d9aaadad9a56df6edff14ae387";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1763 2021-09-14 08:33:52 +0200 lodi: enable UDP read blocking\n" \
+"1762 2021-09-14 08:14:54 +0200 lodi: work-around for getting base IP under Windows\n" \
+"1761 2021-09-13 10:46:59 +0200 wiodlg: check if the node already exist in the list before adding it multiple\n" \
 "1760 2021-09-12 08:05:55 +0200 fundialog: fix for number of sizer rows\n" \
 "1759 2021-09-11 15:11:08 +0200 function events: block enterside option added\n" \
 "1758 2021-09-10 22:01:18 +0200 logo extended with qr-code pointing to the wiki\n" \
