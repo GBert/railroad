@@ -1,11 +1,12 @@
 const int revisionnr = 
-1763
+1764
 ;
 const char* commithash = 
-"5d73e4859d88a6d9aaadad9a56df6edff14ae387";
+"3131b8ffeebc95b74dfefc24b54827e0ca5c7346";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1764 2021-09-16 11:43:25 +0200 bidib: unique thread names among multiple bidib instances\n" \
 "1763 2021-09-14 08:33:52 +0200 lodi: enable UDP read blocking\n" \
 "1762 2021-09-14 08:14:54 +0200 lodi: work-around for getting base IP under Windows\n" \
 "1761 2021-09-13 10:46:59 +0200 wiodlg: check if the node already exist in the list before adding it multiple\n" \
