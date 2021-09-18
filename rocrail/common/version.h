@@ -1,11 +1,13 @@
 const int revisionnr = 
-1764
+1766
 ;
 const char* commithash = 
-"3131b8ffeebc95b74dfefc24b54827e0ca5c7346";
+"d5f2e7c7246ff4462a4177f941f79021b6f00ac5";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1766 2021-09-18 11:42:53 +0200 cbusnodedlg: added arducan sniffer\n" \
+"1765 2021-09-17 08:11:11 +0200 aboxdlg: variable type fix for time\n" \
 "1764 2021-09-16 11:43:25 +0200 bidib: unique thread names among multiple bidib instances\n" \
 "1763 2021-09-14 08:33:52 +0200 lodi: enable UDP read blocking\n" \
 "1762 2021-09-14 08:14:54 +0200 lodi: work-around for getting base IP under Windows\n" \
