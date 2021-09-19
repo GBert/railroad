@@ -1,11 +1,12 @@
 const int revisionnr = 
-1766
+1767
 ;
 const char* commithash = 
-"d5f2e7c7246ff4462a4177f941f79021b6f00ac5";
+"72795b2d3ba8590a309b0b2d3ea6c2b7fff89613";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1767 2021-09-19 08:33:03 +0200 finder: regard route preferred values in case of multiple shortest paths\n" \
 "1766 2021-09-18 11:42:53 +0200 cbusnodedlg: added arducan sniffer\n" \
 "1765 2021-09-17 08:11:11 +0200 aboxdlg: variable type fix for time\n" \
 "1764 2021-09-16 11:43:25 +0200 bidib: unique thread names among multiple bidib instances\n" \
