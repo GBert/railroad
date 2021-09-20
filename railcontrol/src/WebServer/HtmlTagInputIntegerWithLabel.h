@@ -51,18 +51,18 @@ namespace WebServer
 			{
 			}
 
-			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
+			inline virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{
 				childTags[1].AddAttribute(name, value);
 				return *this;
 			}
 
-			inline bool IsAttributeSet(const std::string& name)
+			inline virtual bool IsAttributeSet(const std::string& name) override
 			{
 				return childTags[0].IsAttributeSet(name);
 			}
 
-			virtual HtmlTag AddClass(const std::string& _class) override
+			inline virtual HtmlTag AddClass(const std::string& _class) override
 			{
 				childTags[1].AddClass(_class);
 				return *this;

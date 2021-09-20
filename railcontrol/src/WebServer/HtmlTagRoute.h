@@ -37,15 +37,17 @@ namespace WebServer
 			HtmlTagRoute() = delete;
 			HtmlTagRoute(const DataModel::Route* route);
 
-			virtual ~HtmlTagRoute() {}
+			virtual ~HtmlTagRoute()
+			{
+			}
 
-			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
+			virtual inline HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{
 				childTags[0].AddAttribute(name, value);
 				return *this;
 			}
 
-			inline bool IsAttributeSet(const std::string& name)
+			virtual inline bool IsAttributeSet(const std::string& name) override
 			{
 				return childTags[0].IsAttributeSet(name);
 			}

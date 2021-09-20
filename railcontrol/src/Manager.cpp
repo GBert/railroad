@@ -1106,7 +1106,7 @@ void Manager::AccessoryState(const ControlType controlType, const ControlID cont
 	Switch* mySwitch = GetSwitch(controlID, protocol, address);
 	if (mySwitch != nullptr)
 	{
-		SwitchState(controlType, mySwitch, mySwitch->CalculateInvertedAccessoryState(state), true);
+		SwitchState(controlType, mySwitch, mySwitch->CalculateInvertedSwitchState(address, state), true);
 		return;
 	}
 
@@ -2094,9 +2094,15 @@ Switch* Manager::GetSwitch(const ControlID controlID, const Protocol protocol, c
 	std::lock_guard<std::mutex> guard(switchMutex);
 	for (auto& mySwitch : switches)
 	{
-		if (mySwitch.second->GetControlID() == controlID
-			&& mySwitch.second->GetProtocol() == protocol
-			&& mySwitch.second->GetAddress() == address)
+		const Switch* s = mySwitch.second;
+		if (s->GetControlID() != controlID
+			|| s->GetProtocol() != protocol)
+		{
+			continue;
+		}
+
+		if (s->GetAddress() == address
+			|| (s->GetType() == SwitchTypeThreeWay && (s->GetAddress() + 1) == address))
 		{
 			return mySwitch.second;
 		}

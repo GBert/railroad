@@ -43,18 +43,18 @@ namespace WebServer
 
 			virtual ~HtmlTagSelectOrientation() {}
 
-			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
+			virtual inline HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{
 				childTags[0].AddAttribute(name, value);
 				return *this;
 			}
 
-			inline bool IsAttributeSet(const std::string& name)
+			virtual inline bool IsAttributeSet(const std::string& name) override
 			{
 				return childTags[0].IsAttributeSet(name);
 			}
 
-			virtual HtmlTag AddClass(const std::string& className) override
+			virtual inline HtmlTag AddClass(const std::string& className) override
 			{
 				childTags[0].AddClass(className);
 				return *this;

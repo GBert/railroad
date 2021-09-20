@@ -55,8 +55,15 @@ namespace DataModel
 				Deserialize(serialized);
 			}
 
-			ObjectType GetObjectType() const override { return ObjectTypeSwitch; }
-			std::string GetLayoutType() const override { return Languages::GetText(Languages::TextSwitch); };
+			ObjectType GetObjectType() const override
+			{
+				return ObjectTypeSwitch;
+			}
+
+			std::string GetLayoutType() const override
+			{
+				return Languages::GetText(Languages::TextSwitch);
+			}
 
 			std::string Serialize() const override;
 
@@ -72,6 +79,8 @@ namespace DataModel
 			}
 
 			std::map<DataModel::AccessoryState,Languages::TextSelector> GetStateOptions() const;
+
+			AccessoryState CalculateInvertedSwitchState(const Address address, const AccessoryState state) const;
 
 			static DataModel::LayoutItem::LayoutItemSize CalculateHeightFromType(AccessoryType type);
 

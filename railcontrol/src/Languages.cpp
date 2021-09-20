@@ -470,7 +470,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextProgrammer */ { "Programmer", "Programmierer", "Programador" },
 /* TextProgrammingMode */ { "Programming mode", "Programmiermodus", "Modo programador" },
 /* TextPropulsion */ { "Propulsion", "Antrieb", "Propulsión" },
-/* TextPropulsionAccu */ { "Accu", "AAkku", "Acumulador" },
+/* TextPropulsionAccu */ { "Accu", "Akku", "Acumulador" },
 /* TextPropulsionDiesel */ { "Diesel", "Diesel", "Diesel" },
 /* TextPropulsionElectric */ { "Electric", "Elektrisch", "Electrico" },
 /* TextPropulsionGas */ { "Gas", "Gas", "Gas" },

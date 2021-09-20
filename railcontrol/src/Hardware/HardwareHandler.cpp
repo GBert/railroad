@@ -356,32 +356,32 @@ namespace Hardware
 		Protocol protocol =  mySwitch->GetProtocol();
 		Address address =  mySwitch->GetAddress();
 		DataModel::AccessoryPulseDuration duration = mySwitch->GetAccessoryPulseDuration();
-		if (mySwitch->GetType() == DataModel::SwitchTypeThreeWay)
+		if (mySwitch->GetType() != DataModel::SwitchTypeThreeWay)
 		{
-			switch (mySwitch->GetAccessoryState())
-			{
-				case DataModel::SwitchStateTurnout:
-					instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::AccessoryStateOn), duration);
-					instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::AccessoryStateOff), duration);
-					break;
-
-				case DataModel::SwitchStateStraight:
-					instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::AccessoryStateOn), duration);
-					instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::AccessoryStateOn), duration);
-					break;
-
-				case DataModel::SwitchStateThird:
-					instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::AccessoryStateOn), duration);
-					instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::AccessoryStateOff), duration);
-					break;
-
-				default:
-					break;
-			}
+			instance->Accessory(protocol, address, mySwitch->GetInvertedAccessoryState(), duration);
 			return;
 		}
-		// else left or right switch
-		instance->Accessory(protocol, address, mySwitch->GetInvertedAccessoryState(), duration);
+
+		switch (mySwitch->GetAccessoryState())
+		{
+			case DataModel::SwitchStateTurnout:
+				instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateTurnout), duration);
+				break;
+
+			case DataModel::SwitchStateStraight:
+				instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				break;
+
+			case DataModel::SwitchStateThird:
+				instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateTurnout), duration);
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	void HardwareHandler::SignalSettings(const SignalID signalId,

@@ -49,11 +49,11 @@ namespace WebServer
 			{
 			}
 
-			HtmlTag AddAttribute(const std::string& name, const std::string& value = "");
+			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value = "") override;
 
-			bool IsAttributeSet(const std::string& name);
+			virtual bool IsAttributeSet(const std::string& name) override;
 
-			HtmlTag AddClass(const std::string& _class);
+			virtual HtmlTag AddClass(const std::string& _class) override;
 	};
 } // namespace WebServer
 

@@ -50,11 +50,6 @@ namespace Hardware
 
 	bool DccPpExSerial::Receive(std::string& buffer)
 	{
-		bool ret = serialLine.Receive(buffer);
-		if (!ret)
-		{
-			logger->Error(Languages::TextUnableToReceiveData);
-		}
-		return ret;
+		return serialLine.Receive(buffer);
 	}
 } // namespace

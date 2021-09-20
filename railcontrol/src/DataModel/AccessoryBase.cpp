@@ -56,7 +56,7 @@ namespace DataModel
 		return true;
 	}
 
-	AccessoryState AccessoryBase::CalculateInvertedAccessoryState(AccessoryState state) const
+	AccessoryState AccessoryBase::CalculateInvertedAccessoryState(const AccessoryState state) const
 	{
 		if (inverted == false)
 		{

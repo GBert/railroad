@@ -51,11 +51,6 @@ namespace Hardware
 
 	bool DccPpExTcp::Receive(string& buffer)
 	{
-		const bool ret =  connection.Receive(buffer);
-		if (!ret)
-		{
-			logger->Error(Languages::TextUnableToReceiveData);
-		}
-		return ret;
+		return connection.Receive(buffer);
 	}
 } // namespace

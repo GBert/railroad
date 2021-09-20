@@ -185,7 +185,7 @@ namespace Hardware
 		bool DccPpEx::ReceiveData(string& buffer)
 		{
 			size_t size = 0;
-			while (size == 0 || buffer[size - 1] != '>')
+			while (size == 0 || (buffer[size - 1] != '>' && buffer[size - 1] != 0x0a))
 			{
 				if (!run)
 				{
@@ -200,15 +200,16 @@ namespace Hardware
 		void DccPpEx::Parse(const string& buffer)
 		{
 			unsigned int pos = 0;
-			while (true)
+			while (buffer.size() > pos)
 			{
 				if (buffer[pos] != '<')
 				{
-					return;
+					++pos;
+					continue;
 				}
 
 				++pos;
-				if (pos > buffer.size())
+				if (buffer.size() <= pos)
 				{
 					return;
 				}
@@ -233,7 +234,7 @@ namespace Hardware
 					}
 
 					default:
-						// other answers do not matter
+						// other answer does not matter
 						break;
 				}
 
@@ -241,12 +242,7 @@ namespace Hardware
 				{
 					++pos;
 				}
-				while (buffer.size() >= pos && buffer[pos] != '>');
-
-				if (buffer.size() >= pos)
-				{
-					return;
-				}
+				while (buffer.size() > pos && buffer[pos] != '>');
 			}
 		}
 

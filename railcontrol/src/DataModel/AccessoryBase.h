@@ -123,7 +123,7 @@ namespace DataModel
 				return accessoryState;
 			}
 
-			AccessoryState CalculateInvertedAccessoryState(AccessoryState state) const;
+			AccessoryState CalculateInvertedAccessoryState(const AccessoryState state) const;
 
 			inline AccessoryState GetInvertedAccessoryState() const
 			{

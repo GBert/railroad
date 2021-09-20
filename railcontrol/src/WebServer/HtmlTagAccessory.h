@@ -38,13 +38,13 @@ namespace WebServer
 			HtmlTagAccessory(const DataModel::Accessory* accessory);
 			virtual ~HtmlTagAccessory() {}
 
-			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
+			inline virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{
 				childTags[0].AddAttribute(name, value);
 				return *this;
 			}
 
-			inline bool IsAttributeSet(const std::string& name)
+			inline virtual bool IsAttributeSet(const std::string& name) override
 			{
 				return childTags[0].IsAttributeSet(name);
 			}

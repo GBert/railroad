@@ -86,6 +86,31 @@ namespace DataModel
 		return out;
 	}
 
+	AccessoryState Switch::CalculateInvertedSwitchState(const Address address, const AccessoryState state) const
+	{
+		if (!GetInverted())
+		{
+			if ((GetAddress() + 1) == address && state == SwitchStateTurnout)
+			{
+				return SwitchStateThird;
+			}
+			return state;
+		}
+
+		switch(state)
+		{
+			case SwitchStateTurnout:
+			case SwitchStateThird:
+				return SwitchStateStraight;
+
+			case SwitchStateStraight:
+				return GetAddress() == address ? SwitchStateTurnout : SwitchStateThird;
+
+			default:
+				return state;
+		}
+	}
+
 	DataModel::LayoutItem::LayoutItemSize Switch::CalculateHeightFromType(AccessoryType type)
 	{
 		switch (type)
