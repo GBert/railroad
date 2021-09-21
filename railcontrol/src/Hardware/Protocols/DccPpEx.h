@@ -139,7 +139,10 @@ namespace Hardware
 				inline bool ReceiveInternal(std::string& buffer)
 				{
 					const bool ret = Receive(buffer);
-					logger->Hex(buffer);
+					if (buffer.size())
+					{
+						logger->Hex(buffer);
+					}
 					return ret;
 				}
 
