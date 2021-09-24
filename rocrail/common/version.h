@@ -1,11 +1,12 @@
 const int revisionnr = 
-1769
+1770
 ;
 const char* commithash = 
-"4dd528d6d58a77d0d033352be98f7361ae0760e3";
+"9cd28f8e236fe4d5fe0d58055112826440d611f9";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1770 2021-09-24 09:46:56 +0200 wiopi: slave support (wip)\n" \
 "1769 2021-09-22 08:11:52 +0200 finder,operator: path options\n" \
 "1768 2021-09-21 08:20:51 +0200 finder: regard number of switch commands in case of alternative paths\n" \
 "1767 2021-09-19 08:33:03 +0200 finder: regard route preferred values in case of multiple shortest paths\n" \
