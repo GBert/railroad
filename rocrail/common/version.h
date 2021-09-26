@@ -1,11 +1,12 @@
 const int revisionnr = 
-1770
+1771
 ;
 const char* commithash = 
-"9cd28f8e236fe4d5fe0d58055112826440d611f9";
+"246601541274237dc996d9603aa65de1f37dbecf";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1771 2021-09-25 08:18:54 +0200 WIOpico: added as sub project of wiopi\n" \
 "1770 2021-09-24 09:46:56 +0200 wiopi: slave support (wip)\n" \
 "1769 2021-09-22 08:11:52 +0200 finder,operator: path options\n" \
 "1768 2021-09-21 08:20:51 +0200 finder: regard number of switch commands in case of alternative paths\n" \
