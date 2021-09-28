@@ -20,8 +20,9 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
-#include <map>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "DataModel/ObjectIdentifier.h"
 #include "Languages.h"
@@ -36,12 +37,11 @@ namespace WebServer
 		public:
 			HtmlTagSelectMultiple() = delete;
 
-			// T1 must be an integer type
-			// T2 must be implicitly convertible to Languages::TextSelector
-			template<typename T1, typename T2>
+			// T must be an integer type
+			template<typename T>
 			HtmlTagSelectMultiple(const std::string& name,
-				const std::map<T1,T2>& options,
-				const T1 defaultValue = 0)
+				const std::vector<std::pair<T,Languages::TextSelector>> options,
+				const T defaultValue = 0)
 			:	HtmlTagSelectMultiple(name, std::to_string(defaultValue))
 			{
 				const std::string none = Languages::GetText(Languages::TextNone);
@@ -60,6 +60,7 @@ namespace WebServer
 					value = none;
 				}
 				childTags[1].AddAttribute("value", value);
+
 			}
 
 			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value = "") override;

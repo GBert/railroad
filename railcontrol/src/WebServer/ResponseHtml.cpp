@@ -19,6 +19,7 @@ along with RailControl; see the file LICENCE. If not see
 */
 
 #include <sstream>
+#include <string>
 
 #include "WebServer/ResponseHtml.h"
 
@@ -54,7 +55,7 @@ namespace WebServer
 
 	std::ostream& operator<<(std::ostream& stream, const ResponseHtml& response)
 	{
-		stream << "HTTP/1.1 " << response.responseCode << " " << ResponseHtml::responseTexts.at(response.responseCode) << "\r\n";
+		stream << "HTTP/1.1 " << std::to_string(response.responseCode) << " " << ResponseHtml::responseTexts.at(response.responseCode) << "\r\n";
 		for (auto& header : response.headers)
 		{
 			stream << header.first << ": " << header.second << "\r\n";

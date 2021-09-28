@@ -21,6 +21,8 @@ along with RailControl; see the file LICENCE. If not see
 #pragma once
 
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "WebServer/HtmlTag.h"
 #include "WebServer/HtmlTagLabel.h"
@@ -36,7 +38,7 @@ namespace WebServer
 			template<typename T>
 			HtmlTagSelectMultipleWithLabel(const std::string& name,
 				const Languages::TextSelector label,
-				const std::map<T,Languages::TextSelector>& options,
+				const std::vector<std::pair<T,Languages::TextSelector>>& options,
 				const T defaultValue = 0)
 			:	HtmlTag("div")
 			{
