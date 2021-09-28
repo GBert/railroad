@@ -1,11 +1,13 @@
 const int revisionnr = 
-1771
+1773
 ;
 const char* commithash = 
-"246601541274237dc996d9603aa65de1f37dbecf";
+"10b4087443aea7b362f2e39b6cd74994450c6cac";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1773 2021-09-28 08:33:33 +0200 translation merge: pl,sl, fr, de, nl\n" \
+"1772 2021-09-28 07:55:16 +0200 wiopi,cv: trace correction for 3wire stepper\n" \
 "1771 2021-09-25 08:18:54 +0200 WIOpico: added as sub project of wiopi\n" \
 "1770 2021-09-24 09:46:56 +0200 wiopi: slave support (wip)\n" \
 "1769 2021-09-22 08:11:52 +0200 finder,operator: path options\n" \
