@@ -1,11 +1,12 @@
 const int revisionnr = 
-1773
+1774
 ;
 const char* commithash = 
-"10b4087443aea7b362f2e39b6cd74994450c6cac";
+"7646ccad05df097001d8a092ef3cf164f9812a02";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1774 2021-09-29 16:00:36 +0200 wio,model: fix for lookup loco/car by nodeid\n" \
 "1773 2021-09-28 08:33:33 +0200 translation merge: pl,sl, fr, de, nl\n" \
 "1772 2021-09-28 07:55:16 +0200 wiopi,cv: trace correction for 3wire stepper\n" \
 "1771 2021-09-25 08:18:54 +0200 WIOpico: added as sub project of wiopi\n" \
