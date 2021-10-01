@@ -73,7 +73,7 @@ static const int MAXPENDING = 16;       /* max outstanding tcp connections */
 unsigned char netframe[MAXDG];
 unsigned char ec_frame[13];
 
-struct filter_t filter;
+struct filter_t filter[2];
 
 void signal_handler(int sig) {
     syslog(LOG_WARNING, "got signal %s\n", strsignal(sig));
@@ -419,6 +419,7 @@ int main(int argc, char **argv) {
     char *udp_dst_address;
     char *bcast_interface;
     struct cs2_config_data_t cs2_config_data;
+    uint32_t id, mask;
 
     pidfd = 0;
     int local_udp_port = 15731;
@@ -541,11 +542,19 @@ int main(int argc, char **argv) {
 	    background = 0;
 	    break;
 	case 'x':
-	    if (sscanf(optarg, "%x %x", &filter.mask, &filter.id) != 2) {
+	    if (sscanf(optarg, "%x %x", &mask, &id) != 2) {
 		fprintf(stderr, "error scanning filter mask/id%s\n", optarg);
 		exit(EXIT_FAILURE);
 	    }
-	    filter.use = 1;
+	    if (filter[0].use) {
+		filter[1].mask = mask;
+		filter[1].id = id;
+		filter[1].use = 1;
+	    } else {
+		filter[0].mask = mask;
+		filter[0].id = id;
+		filter[0].use = 1;
+	    }
 	    break;
 	case 'h':
 	case '?':
