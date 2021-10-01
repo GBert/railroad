@@ -31,6 +31,7 @@ extern char *cs2_configs[][2];
 extern char **page_name;
 
 extern unsigned char netframe[MAXDG];
+extern struct filter_t filter;
 
 /* The following macro calls a zlib routine and checks the return
    value. If the return value ("status") is not OK, it prints an error
@@ -211,6 +212,11 @@ int net_to_net(int net_socket, struct sockaddr *net_addr, unsigned char *netfram
 int frame_to_net(int net_socket, struct sockaddr *net_addr, struct can_frame *frame) {
     int s;
     uint32_t canid;
+
+    if (filter.use) {
+	if ((frame->can_id & filter.mask) == filter.id)
+	    return 0;
+    }
 
     memset(netframe, 0, CAN_ENCAP_SIZE);
     frame->can_id &= CAN_EFF_MASK;

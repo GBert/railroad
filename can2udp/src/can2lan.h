@@ -62,6 +62,12 @@
 	    do { fprintf( pipe, "%s: " text " %s\n", __func__, var); \
 		 syslog( spipe, "%s: " text " %s\n", __func__, var); } while (0)
 
+struct filter_t {
+        uint32_t mask;
+        uint32_t id;
+	int use;
+};
+
 #if 0
 struct cs2_config {
     int canid;

@@ -73,6 +73,8 @@ static const int MAXPENDING = 16;       /* max outstanding tcp connections */
 unsigned char netframe[MAXDG];
 unsigned char ec_frame[13];
 
+struct filter_t filter;
+
 void signal_handler(int sig) {
     syslog(LOG_WARNING, "got signal %s\n", strsignal(sig));
     do_loop = 0;
@@ -80,7 +82,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.32\n\n");
+    fprintf(stderr, "   Version 1.4\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -92,6 +94,7 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -g                  send peridoic CAN member ping\n");
     fprintf(stderr, "         -T                  timeout starting %s in sec - default %d sec\n", prg, MAX_UDP_BCAST_RETRY);
     fprintf(stderr, "         -m                  doing MS1 workaround - default: don't do it\n");
+    fprintf(stderr, "         -x                  excluding mask/filter CAN->LAN e.g. \"0x00FF0000 0x00170000\"\n");
     fprintf(stderr, "         -f                  running in foreground\n");
     fprintf(stderr, "         -v                  verbose output (in foreground)\n\n");
 }
@@ -432,6 +435,8 @@ int main(int argc, char **argv) {
     /* clear timestamp for last CAN frame sent */
     memset(&last_sent, 0, sizeof(last_sent));
 
+    memset(&filter, 0, sizeof(filter));
+
     memset(&cs2_config_data, 0, sizeof(cs2_config_data));
 
     page_name = calloc(MAX_TRACK_PAGE, sizeof(char *));
@@ -478,7 +483,7 @@ int main(int argc, char **argv) {
 
     config_file[0] = '\0';
 
-    while ((opt = getopt(argc, argv, "c:u:s:t:d:b:i:kT:gmvhf?")) != -1) {
+    while ((opt = getopt(argc, argv, "c:u:s:t:d:b:i:kT:x:gmvhf?")) != -1) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
@@ -534,6 +539,13 @@ int main(int argc, char **argv) {
 	    break;
 	case 'f':
 	    background = 0;
+	    break;
+	case 'x':
+	    if (sscanf(optarg, "%x %x", &filter.mask, &filter.id) != 2) {
+		fprintf(stderr, "error scanning filter mask/id%s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    filter.use = 1;
 	    break;
 	case 'h':
 	case '?':
