@@ -1,11 +1,12 @@
 const int revisionnr = 
-1778
+1779
 ;
 const char* commithash = 
-"8f1223e38cfdd99c1caccbc22460c2f64b0d8a96";
+"4fec9116223d0dd944b974edd45c289830531307";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1779 2021-10-01 16:35:54 +0200 maxincline added in loc and operator\n" \
 "1778 2021-10-01 10:56:45 +0200 loc: geLen call extended with optional weight variable\n" \
 "1777 2021-09-30 11:12:28 +0200 revert traction\n" \
 "1776 2021-09-30 08:45:09 +0200 wiopi,stepper: fix for 3w\n" \
