@@ -196,7 +196,11 @@ int main(int argc, char **argv) {
 	    /* printf("Event: time %ld.%06ld, ", ev[n].time.tv_sec, ev[n].time.tv_usec); */
 	    /* printf(" type :0x%02x, code 0x%02x, value 0x%04x\n", ev[n].type, ev[n].code, ev[n].value); */
 	    if (ev[n].type == EV_MSC && (ev[n].code == MSC_RAW || ev[n].code == MSC_SCAN)) {
+#ifdef SUNXI_A20
 		time_t timestamp = ev[n].input_event_sec * 1000000 + ev[n].input_event_usec;
+#else
+		time_t timestamp = ev[n].time.tv_sec * 1000000 + ev[n].time.tv_usec;
+#endif
 		if ((timestamp - last) < BLINDTIME) continue;
 		last = timestamp;
 		int keycode = ev[n].value & 0xff;
