@@ -55,7 +55,6 @@ define Package/can2udp/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/clone-ms2-loco $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/cs2ping $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gb2-update $(1)/usr/bin/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ir-tester $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lan-schnitte $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ms2wifi $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ms2-loco-list $(1)/usr/bin/
@@ -80,6 +79,7 @@ ifneq (,$(findstring banana,$(CONFIG_TARGET_PROFILE)))
 	$(INSTALL_BIN) ./files/maecanserver.init $(1)/etc/init.d/maecanserver
 	$(INSTALL_BIN) ./files/s88udp.init $(1)/etc/init.d/s88udp
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ir-tester $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/s88udp-bpi $(1)/usr/bin/s88udp
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/s88test-bpi $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/s88can $(1)/usr/bin/
