@@ -1,11 +1,13 @@
 const int revisionnr = 
-1776
+1778
 ;
 const char* commithash = 
-"65ddc787c96d435e86af631dbd96d14cc81dafad";
+"8f1223e38cfdd99c1caccbc22460c2f64b0d8a96";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1778 2021-10-01 10:56:45 +0200 loc: geLen call extended with optional weight variable\n" \
+"1777 2021-09-30 11:12:28 +0200 revert traction\n" \
 "1776 2021-09-30 08:45:09 +0200 wiopi,stepper: fix for 3w\n" \
 "1775 2021-09-30 08:13:41 +0200 route,loc: traction added\n" \
 "1774 2021-09-29 16:00:36 +0200 wio,model: fix for lookup loco/car by nodeid\n" \
