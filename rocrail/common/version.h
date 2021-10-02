@@ -1,11 +1,13 @@
 const int revisionnr = 
-1779
+1781
 ;
 const char* commithash = 
-"4fec9116223d0dd944b974edd45c289830531307";
+"f414a51f278a51e9c37b69c6fc18063c622b26df";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1781 2021-10-02 11:00:53 +0200 translation merge: de, nl, fr\n" \
+"1780 2021-10-02 10:55:21 +0200 locdialog,operatordlg: layout corrections for incline\n" \
 "1779 2021-10-01 16:35:54 +0200 maxincline added in loc and operator\n" \
 "1778 2021-10-01 10:56:45 +0200 loc: geLen call extended with optional weight variable\n" \
 "1777 2021-09-30 11:12:28 +0200 revert traction\n" \
