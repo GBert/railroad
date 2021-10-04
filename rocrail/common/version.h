@@ -1,11 +1,14 @@
 const int revisionnr = 
-1781
+1784
 ;
 const char* commithash = 
-"f414a51f278a51e9c37b69c6fc18063c622b26df";
+"a383955a53e0433e0c36246663a6ccc5e9790ee9";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1784 2021-10-04 09:15:35 +0200 scheduledialog: filter out same group names\n" \
+"1783 2021-10-03 21:37:36 +0200 scheduledialog: sorting groups\n" \
+"1782 2021-10-02 14:49:49 +0200 scheduledialog: sort groups for comboboxes\n" \
 "1781 2021-10-02 11:00:53 +0200 translation merge: de, nl, fr\n" \
 "1780 2021-10-02 10:55:21 +0200 locdialog,operatordlg: layout corrections for incline\n" \
 "1779 2021-10-01 16:35:54 +0200 maxincline added in loc and operator\n" \
