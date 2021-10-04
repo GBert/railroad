@@ -335,10 +335,10 @@ void Manager::InitLocos()
 			continue;
 		}
 		{
+			std::vector<DataModel::LocoFunctionEntry> functions = loco->GetFunctionStates();
 			std::lock_guard<std::mutex> guard(controlMutex);
 			for (auto& control : controls)
 			{
-				std::vector<DataModel::LocoFunctionEntry> functions = loco->GetFunctionStates();
 				control.second->LocoSpeedOrientationFunctions(loco, loco->GetSpeed(), loco->GetOrientation(), functions);
 			}
 		}
@@ -865,7 +865,7 @@ bool Manager::LocoSave(LocoID locoID,
 	loco->SetReducedSpeed(reducedSpeed);
 	loco->SetCreepingSpeed(creepingSpeed);
 	loco->SetPropulsion(propulsion);
-	loco->SetType(type);
+	loco->SetTrainType(type);
 	loco->ConfigureFunctions(locoFunctions);
 	loco->AssignSlaves(slaves);
 
@@ -2383,6 +2383,8 @@ bool Manager::RouteSave(RouteID routeID,
 	const std::string& name,
 	const Delay delay,
 	const Route::PushpullType pushpull,
+	const Propulsion propulsion,
+	const TrainType trainType,
 	const Length minTrainLength,
 	const Length maxTrainLength,
 	const std::vector<DataModel::Relation*>& relationsAtLock,
@@ -2415,7 +2417,6 @@ bool Manager::RouteSave(RouteID routeID,
 	{
 		route = CreateAndAddObject(routes, routeMutex);
 	}
-
 	if (route == nullptr)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddRoute);
@@ -2485,6 +2486,8 @@ bool Manager::RouteSave(RouteID routeID,
 		route->SetFeedbackIdStop(feedbackIdStop);
 		route->SetFeedbackIdOver(feedbackIdOver);
 		route->SetPushpull(pushpull);
+		route->SetPropulsion(propulsion);
+		route->SetTrainType(trainType);
 		route->SetMinTrainLength(minTrainLength);
 		route->SetMaxTrainLength(maxTrainLength);
 		route->SetWaitAfterRelease(waitAfterRelease);
@@ -2501,6 +2504,8 @@ bool Manager::RouteSave(RouteID routeID,
 		route->SetFeedbackIdStop(FeedbackNone);
 		route->SetFeedbackIdOver(FeedbackNone);
 		route->SetPushpull(Route::PushpullTypeBoth);
+		route->SetPropulsion(PropulsionAll);
+		route->SetTrainType(TrainTypeAll);
 		route->SetMinTrainLength(0);
 		route->SetMaxTrainLength(0);
 		route->SetWaitAfterRelease(0);

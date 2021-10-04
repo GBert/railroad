@@ -1398,8 +1398,8 @@ namespace WebServer
 		Speed travelSpeed = DefaultTravelSpeed;
 		Speed reducedSpeed = DefaultReducedSpeed;
 		Speed creepingSpeed = DefaultCreepingSpeed;
-		Propulsion propulsion = PropulsionUnknown;
-		TrainType type = TrainTypeUnknown;
+		Propulsion propulsion = PropulsionOther;
+		TrainType type = TrainTypeOther;
 		LocoFunctionEntry locoFunctions[NumberOfLocoFunctions];
 		vector<Relation*> slaves;
 
@@ -1421,7 +1421,7 @@ namespace WebServer
 				reducedSpeed = loco->GetReducedSpeed();
 				creepingSpeed = loco->GetCreepingSpeed();
 				propulsion = loco->GetPropulsion();
-				type = loco->GetType();
+				type = loco->GetTrainType();
 				loco->GetFunctions(locoFunctions);
 				slaves = loco->GetSlaves();
 			}
@@ -1692,8 +1692,8 @@ namespace WebServer
 		{
 			creepingSpeed = reducedSpeed;
 		}
-		const Propulsion propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", PropulsionUnknown));
-		const TrainType type = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeUnknown));
+		const Propulsion propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", PropulsionOther));
+		const TrainType type = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeOther));
 
 		vector<DataModel::LocoFunctionEntry> locoFunctions;
 		DataModel::LocoFunctionEntry locoFunctionEntry;

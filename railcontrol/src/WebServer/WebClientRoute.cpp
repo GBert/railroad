@@ -20,6 +20,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "DataModel/DataModel.h"
@@ -35,6 +36,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "WebServer/HtmlTagInputTextWithLabel.h"
 #include "WebServer/HtmlTagRoute.h"
 #include "WebServer/HtmlTagSelect.h"
+#include "WebServer/HtmlTagSelectMultipleWithLabel.h"
 #include "WebServer/HtmlTagSelectOrientation.h"
 #include "WebServer/HtmlTagSelectWithLabel.h"
 #include "WebServer/WebClient.h"
@@ -46,6 +48,7 @@ using LayoutItemSize = DataModel::LayoutItem::LayoutItemSize;
 using LayoutRotation = DataModel::LayoutItem::LayoutRotation;
 using Visible = DataModel::LayoutItem::Visible;
 using std::map;
+using std::pair;
 using std::string;
 using std::to_string;
 using std::vector;
@@ -71,6 +74,8 @@ namespace WebServer
 		string name = Languages::GetText(Languages::TextNew);
 		Delay delay = Route::DefaultDelay;
 		Route::PushpullType pushpull = Route::PushpullTypeBoth;
+		Propulsion propulsion = PropulsionAll;
+		TrainType trainType = TrainTypeAll;
 		Length minTrainLength = 0;
 		Length maxTrainLength = 0;
 		vector<Relation*> relationsAtLock;
@@ -98,6 +103,8 @@ namespace WebServer
 				name = route->GetName();
 				delay = route->GetDelay();
 				pushpull = route->GetPushpull();
+				propulsion = route->GetPropulsion();
+				trainType = route->GetTrainType();
 				minTrainLength = route->GetMinTrainLength();
 				maxTrainLength = route->GetMaxTrainLength();
 				relationsAtLock = route->GetRelationsAtLock();
@@ -216,11 +223,56 @@ namespace WebServer
 		feedbackDiv.AddId("feedbacks");
 		feedbackDiv.AddChildTag(HtmlTagSelectFeedbacksOfTrack(toTrack, feedbackIdReduced, feedbackIdCreep, feedbackIdStop, feedbackIdOver));
 		tracksDiv.AddChildTag(feedbackDiv);
+
 		map<Route::PushpullType,Languages::TextSelector> pushpullOptions;
 		pushpullOptions[Route::PushpullTypeNo] = Languages::TextNoPushPull;
 		pushpullOptions[Route::PushpullTypeBoth] = Languages::TextAllTrains;
 		pushpullOptions[Route::PushpullTypeOnly] = Languages::TextPushPullOnly;
-		tracksDiv.AddChildTag(HtmlTagSelectWithLabel("pushpull", Languages::TextAllowedTrains, pushpullOptions, pushpull));
+		tracksDiv.AddChildTag(HtmlTagSelectWithLabel("pushpull", Languages::TextAllowedPushPull, pushpullOptions, pushpull));
+
+		vector<pair<Propulsion,Languages::TextSelector>> propulsionOptions;
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionAll,Languages::TextPropulsionAll));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionSteam,Languages::TextPropulsionSteam));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionDiesel,Languages::TextPropulsionDiesel));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionGas,Languages::TextPropulsionGas));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionElectric,Languages::TextPropulsionElectric));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionHydrogen,Languages::TextPropulsionHydrogen));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionAccu,Languages::TextPropulsionAccu));
+		propulsionOptions.push_back(pair<Propulsion,Languages::TextSelector>(PropulsionOther,Languages::TextPropulsionOther));
+		tracksDiv.AddChildTag(HtmlTagSelectMultipleWithLabel("propulsion", Languages::TextAllowedPropulsions, propulsionOptions, propulsion));
+
+		vector<pair<TrainType,Languages::TextSelector>> trainTypeOptions;
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeAll,Languages::TextTrainTypeAll));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypePassenger,Languages::TextTrainTypePassenger));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeInternationalHighSpeed,Languages::TextTrainTypeInternationalHighSpeed));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeNationalHighSpeed,Languages::TextTrainTypeNationalHighSpeed));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeInternationalLongDistance,Languages::TextTrainTypeInternationalLongDistance));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeNationalLongDistance,Languages::TextTrainTypeNationalLongDistance));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeInternationalNight,Languages::TextTrainTypeInternationalNight));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeNationalNight,Languages::TextTrainTypeNationalNight));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeLongDistanceFastLocal,Languages::TextTrainTypeLongDistanceFastLocal));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeFastLocal,Languages::TextTrainTypeFastLocal));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeLocal,Languages::TextTrainTypeLocal));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeSuburban,Languages::TextTrainTypeSuburban));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeUnderground,Languages::TextTrainTypeUnderground));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeHistoric,Languages::TextTrainTypeHistoric));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeExtra,Languages::TextTrainTypeExtra));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypePassengerWithCargo,Languages::TextTrainTypePassengerWithCargo));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargo,Languages::TextTrainTypeCargo));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargoLongDistance,Languages::TextTrainTypeCargoLongDistance));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargoLocal,Languages::TextTrainTypeCargoLocal));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargoBlock,Languages::TextTrainTypeCargoBlock));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargoTractor,Languages::TextTrainTypeCargoTractor));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargoExpress,Languages::TextTrainTypeCargoExpress));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCargoWithPassenger,Languages::TextTrainTypeCargoWithPassenger));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeRescue,Languages::TextTrainTypeRescue));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeConstruction,Languages::TextTrainTypeConstruction));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeEmpty,Languages::TextTrainTypeEmpty));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeLoco,Languages::TextTrainTypeLoco));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeCleaning,Languages::TextTrainTypeCleaning));
+		trainTypeOptions.push_back(pair<TrainType,Languages::TextSelector>(TrainTypeOther,Languages::TextTrainTypeOther));
+		tracksDiv.AddChildTag(HtmlTagSelectMultipleWithLabel("traintype", Languages::TextAllowedTrainTypes, trainTypeOptions, trainType));
+
 		tracksDiv.AddChildTag(HtmlTagInputIntegerWithLabel("mintrainlength", Languages::TextMinTrainLength, minTrainLength, 0, 99999));
 		tracksDiv.AddChildTag(HtmlTagInputIntegerWithLabel("maxtrainlength", Languages::TextMaxTrainLength, maxTrainLength, 0, 99999));
 		tracksDiv.AddChildTag(HtmlTagInputIntegerWithLabel("waitafterrelease", Languages::TextWaitAfterRelease, waitAfterRelease, 0, 300));
@@ -239,6 +291,16 @@ namespace WebServer
 		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
 		Delay delay = static_cast<Delay>(Utils::Utils::GetIntegerMapEntry(arguments, "delay"));
 		Route::PushpullType pushpull = static_cast<Route::PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "pushpull", Route::PushpullTypeBoth));
+		Propulsion propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", PropulsionAll));
+		if (propulsion == PropulsionUnknown)
+		{
+			propulsion = PropulsionAll;
+		}
+		TrainType trainType = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "traintype", TrainTypeAll));
+		if (trainType == TrainTypeUnknown)
+		{
+			trainType = TrainTypeAll;
+		}
 		Length mintrainlength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "mintrainlength", 0));
 		Length maxtrainlength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "maxtrainlength", 0));
 		Visible visible = static_cast<Visible>(Utils::Utils::GetBoolMapEntry(arguments, "visible"));
@@ -323,6 +385,8 @@ namespace WebServer
 			name,
 			delay,
 			pushpull,
+			propulsion,
+			trainType,
 			mintrainlength,
 			maxtrainlength,
 			relationsAtLock,

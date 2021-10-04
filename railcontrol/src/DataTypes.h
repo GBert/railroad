@@ -237,7 +237,14 @@ enum Propulsion : uint8_t
 	PropulsionElectric = 0x08,
 	PropulsionHydrogen = 0x10,
 	PropulsionAccu     = 0x20,
-	PropulsionOther    = 0x80
+	PropulsionOther    = 0x80,
+	PropulsionAll      = PropulsionSteam
+							| PropulsionDiesel
+							| PropulsionGas
+							| PropulsionElectric
+							| PropulsionHydrogen
+							| PropulsionAccu
+							| PropulsionOther
 };
 
 enum TrainType : uint32_t
@@ -260,6 +267,21 @@ enum TrainType : uint32_t
 
  	TrainTypePassengerWithCargo        = 0x00008000,
 
+	TrainTypePassenger                 = TrainTypeInternationalHighSpeed
+											| TrainTypeNationalHighSpeed
+											| TrainTypeInternationalLongDistance
+											| TrainTypeNationalLongDistance
+											| TrainTypeInternationalNight
+											| TrainTypeNationalNight
+											| TrainTypeLongDistanceFastLocal
+											| TrainTypeFastLocal
+											| TrainTypeLocal
+											| TrainTypeSuburban
+											| TrainTypeUnderground
+											| TrainTypeHistoric
+											| TrainTypeExtra
+											| TrainTypePassengerWithCargo,
+
 	TrainTypeCargoLongDistance         = 0x00010000,
 	TrainTypeCargoLocal                = 0x00020000,
 	TrainTypeCargoBlock                = 0x00040000,
@@ -268,11 +290,28 @@ enum TrainType : uint32_t
 
 	TrainTypeCargoWithPassenger        = 0x00800000,
 
-	TrainTypeRescue                    = 0x02000000,
-	TrainTypeConstruction              = 0x04000000,
-	TrainTypeEmpty                     = 0x08000000,
-	TrainTypeLoco                      = 0x10000000,
-	TrainTypeCleaning                  = 0x20000000,
-	TrainTypeOther                     = 0x40000000
+ 	TrainTypeCargo                     = TrainTypeCargoLongDistance
+ 											| TrainTypeCargoLocal
+ 											| TrainTypeCargoBlock
+ 											| TrainTypeCargoTractor
+ 											| TrainTypeCargoExpress
+ 											| TrainTypeCargoWithPassenger,
+
+	TrainTypeRescue                    = 0x01000000,
+	TrainTypeConstruction              = 0x02000000,
+	TrainTypeEmpty                     = 0x04000000,
+	TrainTypeLoco                      = 0x08000000,
+	TrainTypeCleaning                  = 0x10000000,
+
+	TrainTypeOther                     = 0x40000000,
 	// Bit 32 (0x80000000) can not be used because of conversion functions that handle with signed int32_t
+
+	TrainTypeAll                       = TrainTypePassenger
+											| TrainTypeCargo
+											| TrainTypeRescue
+											| TrainTypeConstruction
+											| TrainTypeEmpty
+											| TrainTypeLoco
+											| TrainTypeCleaning
+											| TrainTypeOther
 };

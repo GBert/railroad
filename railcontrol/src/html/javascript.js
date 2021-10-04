@@ -41,7 +41,7 @@ function selectMultipleValue(changedKey, elementId, none, several)
 	{
 		return;
 	}
-	var keyElement = document.getElementById('d_' + elementId);
+	var keyElement = document.getElementById(elementId);
 	if (!keyElement)
 	{
 		return;

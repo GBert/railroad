@@ -344,6 +344,8 @@ class Manager
 			const std::string& name,
 			const Delay delay,
 			const DataModel::Route::PushpullType pushpull,
+			const Propulsion propulsion,
+			const TrainType trainType,
 			const Length minTrainLength,
 			const Length maxTrainLength,
 			const std::vector<DataModel::Relation*>& relationsAtLock,

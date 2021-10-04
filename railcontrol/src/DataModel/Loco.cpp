@@ -83,7 +83,7 @@ namespace DataModel
 		str += ";propulsion=";
 		str += to_string(propulsion);
 		str += ";type=";
-		str += to_string(type);
+		str += to_string(trainType);
 		str += ";matchkey=";
 		str += matchKey;
 		return str;
@@ -126,7 +126,7 @@ namespace DataModel
 		creepingSpeed = Utils::Utils::GetIntegerMapEntry(arguments, "creepspeed", DefaultCreepingSpeed);
 		creepingSpeed = Utils::Utils::GetIntegerMapEntry(arguments, "creepingspeed", creepingSpeed);
 		propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", PropulsionUnknown));
-		type = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeUnknown));
+		trainType = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeUnknown));
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		return true;
 	}
