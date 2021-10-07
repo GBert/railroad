@@ -1,11 +1,14 @@
 const int revisionnr = 
-1784
+1787
 ;
 const char* commithash = 
-"a383955a53e0433e0c36246663a6ccc5e9790ee9";
+"94b267eefd343b2349bb777246c17655fb7a405f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1787 2021-10-07 11:18:24 +0200 channeltunedlg: layout fix for GTK\n" \
+"1786 2021-10-07 10:52:23 +0200 channeltunedlg: layout fix for GTK\n" \
+"1785 2021-10-07 09:04:15 +0200 svgutils: check for viewBox attribute for width and height\n" \
 "1784 2021-10-04 09:15:35 +0200 scheduledialog: filter out same group names\n" \
 "1783 2021-10-03 21:37:36 +0200 scheduledialog: sorting groups\n" \
 "1782 2021-10-02 14:49:49 +0200 scheduledialog: sort groups for comboboxes\n" \
