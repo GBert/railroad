@@ -1,11 +1,12 @@
 const int revisionnr = 
-1787
+1788
 ;
 const char* commithash = 
-"94b267eefd343b2349bb777246c17655fb7a405f";
+"f58f93d446adca44476f76bf088d81bae52a91d7";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1788 2021-10-08 08:17:35 +0200 svgutils: fix for rotating and viewBox\n" \
 "1787 2021-10-07 11:18:24 +0200 channeltunedlg: layout fix for GTK\n" \
 "1786 2021-10-07 10:52:23 +0200 channeltunedlg: layout fix for GTK\n" \
 "1785 2021-10-07 09:04:15 +0200 svgutils: check for viewBox attribute for width and height\n" \
