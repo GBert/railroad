@@ -1,11 +1,20 @@
 const int revisionnr = 
-1788
+1797
 ;
 const char* commithash = 
-"f58f93d446adca44476f76bf088d81bae52a91d7";
+"fa3e7d33b71a63481b8ce00b6062d1c913277b9c";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1797 2021-10-14 14:57:41 +0200 wiopi,cv: hall pin correction conflicting with second H-Bridge\n" \
+"1796 2021-10-14 14:43:08 +0200 dccppdlg: layout corrections\n" \
+"1795 2021-10-14 14:14:15 +0200 dccppdlg: increased IO port range to 16bit\n" \
+"1794 2021-10-14 14:11:09 +0200 wiopi: hall/kmh support added\n" \
+"1793 2021-10-13 10:28:46 +0200 trackpickerdlg: fix for scaling symbol cursor under Windows\n" \
+"1792 2021-10-13 09:13:55 +0200 trackpickerdlg: disable image cursor in case scale > 1.8\n" \
+"1791 2021-10-11 10:55:50 +0200 wiopi: cv fix for mobile stepper pins\n" \
+"1790 2021-10-10 15:23:45 +0200 dccpp: check for space on reporting outputs and switches\n" \
+"1789 2021-10-10 10:38:58 +0200 Rocweb: possible fix for dragging the throttle\n" \
 "1788 2021-10-08 08:17:35 +0200 svgutils: fix for rotating and viewBox\n" \
 "1787 2021-10-07 11:18:24 +0200 channeltunedlg: layout fix for GTK\n" \
 "1786 2021-10-07 10:52:23 +0200 channeltunedlg: layout fix for GTK\n" \
