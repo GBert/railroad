@@ -25,6 +25,10 @@ along with RailControl; see the file LICENCE. If not see
 #include "Network/TcpConnection.h"
 #include "Utils/Utils.h"
 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 namespace Network
 {
 	void TcpConnection::Terminate() const
