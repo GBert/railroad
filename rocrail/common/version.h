@@ -1,11 +1,12 @@
 const int revisionnr = 
-1798
+1799
 ;
 const char* commithash = 
-"d0bf0151ffc5fde80c095792da54dbc7bee53353";
+"4591e2eea910b4b62cdf5d1736f7f745c81450ba";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1799 2021-10-15 09:09:04 +0200 dccpp,switch: servo tune flag added\n" \
 "1798 2021-10-15 08:02:09 +0200 wiopi: mobile hall thread\n" \
 "1797 2021-10-14 14:57:41 +0200 wiopi,cv: hall pin correction conflicting with second H-Bridge\n" \
 "1796 2021-10-14 14:43:08 +0200 dccppdlg: layout corrections\n" \
