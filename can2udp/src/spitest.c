@@ -56,7 +56,7 @@ void test(int speed, int pktsize) {
     t_now = tv.tv_sec * 1000000 + tv.tv_usec - t_now;
     long int diff = ((signed)t_now - soll) * 1000 / soll;
 #ifndef OSZI
-    printf("%6ld => %6lldµs (%4ld‰)", soll, t_now, diff);
+    printf("%6ld => %6ldµs (%4ld‰)", soll, t_now, diff);
 #endif
 }
 
