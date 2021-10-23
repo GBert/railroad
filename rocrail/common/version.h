@@ -1,11 +1,55 @@
 const int revisionnr = 
-1799
+1843
 ;
 const char* commithash = 
-"4591e2eea910b4b62cdf5d1736f7f745c81450ba";
+"35f9bdb37e8b95900494bd2d595419617fad012a";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1843 2021-10-23 16:43:41 +0200 WIOpico: IO level correction\n" \
+"1842 2021-10-23 15:14:13 +0200 WIOpico: blink fix for output\n" \
+"1841 2021-10-23 14:07:07 +0200 WIOpico: output blink fix at 500ms\n" \
+"1840 2021-10-23 12:11:39 +0200 WIOpico: output signal fix\n" \
+"1839 2021-10-23 11:30:59 +0200 WIOpico: output blinking (wip)\n" \
+"1838 2021-10-23 10:20:34 +0200 WIOpico: digital write level swapped\n" \
+"1837 2021-10-23 08:06:13 +0200 WIOpico: binary update\n" \
+"1836 2021-10-23 07:54:24 +0200 z21: LAN_X_SET_EXT_ACCESSORY added\n" \
+"1835 2021-10-22 17:19:50 +0200 WIOpico: extra output trace\n" \
+"1834 2021-10-22 15:36:57 +0200 WIOpico: output blinking added\n" \
+"1833 2021-10-22 15:23:07 +0200 WIOpico: IO blink support\n" \
+"1832 2021-10-22 14:53:46 +0200 WIOpico: output signal aspect added\n" \
+"1831 2021-10-22 14:07:31 +0200 WIOpico: WIP\n" \
+"1830 2021-10-22 08:17:21 +0200 wiopi,manager: I/O reporting simplyfied\n" \
+"1829 2021-10-22 07:58:57 +0200 wiopi,manager: trace correction for Bank2 reporting\n" \
+"1828 2021-10-21 14:38:54 +0200 translation merge: sl, sr_latin, fr, cs\n" \
+"1827 2021-10-21 13:00:31 +0200 WIOpico: use 0xF0 as bounce step\n" \
+"1826 2021-10-21 10:45:40 +0200 switch: param added for bouncing\n" \
+"1825 2021-10-21 10:18:06 +0200 wio,wiopi,wiopico: use signal parameter for bouncing\n" \
+"1824 2021-10-21 07:57:46 +0200 WIOpico: save servo position in EEPROM\n" \
+"1823 2021-10-20 16:34:22 +0200 WIOpico: bounce directio dependent of > 90 or < 90\n" \
+"1822 2021-10-20 10:51:10 +0200 WIOpico: added build date and time\n" \
+"1821 2021-10-20 10:00:33 +0200 WIOpico: removed endless serial wait loop\n" \
+"1820 2021-10-20 09:16:39 +0200 wio,wiopi,wiopico: servo position report\n" \
+"1819 2021-10-20 08:13:15 +0200 wio: signal trace with I2C slave\n" \
+"1818 2021-10-20 08:12:19 +0200 dsd2010: catch serial device eroor\n" \
+"1817 2021-10-20 08:01:30 +0200 WIOpico,Servos: double bounce\n" \
+"1816 2021-10-19 15:05:25 +0200 WIOpico,Servos: bounce option for signals added\n" \
+"1815 2021-10-19 14:38:26 +0200 WIOpico: servo signal support\n" \
+"1814 2021-10-19 11:06:24 +0200 WIOpico: I/O config\n" \
+"1813 2021-10-19 09:12:07 +0200 WIOpico,Servos: implemented\n" \
+"1812 2021-10-19 08:13:11 +0200 WIOpico,Pixel: signal fix\n" \
+"1811 2021-10-19 08:03:21 +0200 output: delayed off not for servo and led\n" \
+"1810 2021-10-18 17:56:10 +0200 dccpp: store servo settings in EEPROM\n" \
+"1809 2021-10-18 15:25:33 +0200 WIOpico: dim and blink added in Pixel\n" \
+"1808 2021-10-18 10:29:15 +0200 WIOpico: classes for pixel and servo\n" \
+"1807 2021-10-17 15:43:29 +0200 WIOpi: manager correction for reporting inputs\n" \
+"1806 2021-10-17 15:23:46 +0200 dccpp: servo pwm range set from 150 to 600\n" \
+"1805 2021-10-17 15:04:49 +0200 WIOpico: fix for DOUT command\n" \
+"1804 2021-10-17 10:48:19 +0200 WIOpi,WIOpico: report inputs, servo/signal/output/multipixel support\n" \
+"1803 2021-10-17 08:44:56 +0200 WIOpico update\n" \
+"1802 2021-10-16 14:26:31 +0200 wiopi/pico: Pixel support (WIP)\n" \
+"1801 2021-10-16 13:43:52 +0200 wrapper: max finder paths increased to 20\n" \
+"1800 2021-10-16 11:27:27 +0200 finder: clear blacklist a depth zero\n" \
 "1799 2021-10-15 09:09:04 +0200 dccpp,switch: servo tune flag added\n" \
 "1798 2021-10-15 08:02:09 +0200 wiopi: mobile hall thread\n" \
 "1797 2021-10-14 14:57:41 +0200 wiopi,cv: hall pin correction conflicting with second H-Bridge\n" \
