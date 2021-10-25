@@ -1,11 +1,14 @@
 const int revisionnr = 
-1845
+1848
 ;
 const char* commithash = 
-"eb9664942c897eb6e67ecfbc1ce50797adc6c1f3";
+"7bcd6444b32f00e4de4fb2df1d828e8718d742d6";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1848 2021-10-25 15:56:41 +0200 WIOpico: multiplexing fix\n" \
+"1847 2021-10-25 14:50:17 +0200 WIOpi: multiplex\n" \
+"1846 2021-10-25 10:35:41 +0200 wio,wiopico,signal: multiplex type added\n" \
 "1845 2021-10-24 15:11:43 +0200 rascii multiplex type\n" \
 "1844 2021-10-24 14:49:56 +0200 WIOpi,WIOpico: stepper support\n" \
 "1843 2021-10-23 16:43:41 +0200 WIOpico: IO level correction\n" \
