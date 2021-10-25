@@ -1,11 +1,13 @@
 const int revisionnr = 
-1843
+1845
 ;
 const char* commithash = 
-"35f9bdb37e8b95900494bd2d595419617fad012a";
+"eb9664942c897eb6e67ecfbc1ce50797adc6c1f3";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1845 2021-10-24 15:11:43 +0200 rascii multiplex type\n" \
+"1844 2021-10-24 14:49:56 +0200 WIOpi,WIOpico: stepper support\n" \
 "1843 2021-10-23 16:43:41 +0200 WIOpico: IO level correction\n" \
 "1842 2021-10-23 15:14:13 +0200 WIOpico: blink fix for output\n" \
 "1841 2021-10-23 14:07:07 +0200 WIOpico: output blink fix at 500ms\n" \
