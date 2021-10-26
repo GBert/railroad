@@ -1,11 +1,15 @@
 const int revisionnr = 
-1848
+1852
 ;
 const char* commithash = 
-"7bcd6444b32f00e4de4fb2df1d828e8718d742d6";
+"8debf6c2a31fcfbc5f8c0d6364914f937fed95ff";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1852 2021-10-26 14:57:00 +0200 WIOpico: flicker free charlieplexing with 4 signals\n" \
+"1851 2021-10-26 08:52:10 +0200 WIOpico: use delayms in the main loop to get better 1m trigger for multiplexing\n" \
+"1850 2021-10-26 08:34:03 +0200 WIOpico: use opendcc multiplex table\n" \
+"1849 2021-10-26 08:21:02 +0200 WIOpico: multiplex blink\n" \
 "1848 2021-10-25 15:56:41 +0200 WIOpico: multiplexing fix\n" \
 "1847 2021-10-25 14:50:17 +0200 WIOpi: multiplex\n" \
 "1846 2021-10-25 10:35:41 +0200 wio,wiopico,signal: multiplex type added\n" \
