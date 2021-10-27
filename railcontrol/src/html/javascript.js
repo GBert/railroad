@@ -1851,6 +1851,90 @@ function checkAvailability()
 	xmlHttp.send(null);
 }
 
+function updateLocoControls()
+{
+	var layout = document.getElementById('layout');
+	if (!layout)
+	{
+		return;
+	}
+	var layerSelector = document.getElementById('layer_selector');
+	if (!layerSelector)
+	{
+		return;
+	}
+	for (var control = 0; control <= maxNumberOfLocoControls; ++control)
+	{
+		layout.classList.remove("layout_" + control);
+		layer_selector.classList.remove("layer_selector_" + control);
+		if (control == numberOfLocoControls)
+		{
+			layout.classList.add("layout_" + control);
+			layer_selector.classList.add("layer_selector_" + control);
+		}
+		var element = document.getElementById('loco_container_' + control);
+		if (!element)
+		{
+			continue;
+		}
+		if (control > numberOfLocoControls)
+		{
+			element.classList.add('hidden');
+		}
+		else
+		{
+			element.classList.remove('hidden');
+		}
+	}
+
+	var reduce = document.getElementById("reduce_locos");
+	if (reduce)
+	{
+		if (numberOfLocoControls == 0)
+		{
+			reduce.classList.add("hidden");
+		}
+		else
+		{
+			reduce.classList.remove("hidden");
+		}
+	}
+
+	var extend = document.getElementById("extend_locos");
+	if (extend)
+	{
+		if (numberOfLocoControls >= maxNumberOfLocoControls)
+		{
+			extend.classList.add("hidden");
+		}
+		else
+		{
+			extend.classList.remove("hidden");
+		}
+	}
+}
+
+function reduceLocos()
+{
+	if (numberOfLocoControls == 0)
+	{
+		alert('noting to reduce');
+		return;
+	}
+	--numberOfLocoControls;
+	updateLocoControls();
+}
+
+function extendLocos()
+{
+	if (numberOfLocoControls >= maxNumberOfLocoControls)
+	{
+		return;
+	}
+	++numberOfLocoControls;
+	updateLocoControls();
+}
+
 var noSleep = new NoSleep();
 document.addEventListener('click', function enableNoSleep()
 {
@@ -1872,4 +1956,7 @@ updater.onerror = function()
 
 window.layoutPosX = 0;
 window.layoutPosY = 0;
+
+var numberOfLocoControls = 1;
+var maxNumberOfLocoControls = 5;
 

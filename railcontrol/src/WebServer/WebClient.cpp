@@ -1952,22 +1952,22 @@ namespace WebServer
 		ReplyHtmlWithHeader(content);
 	}
 
-	HtmlTag WebClient::HtmlTagControlLoco(const ControlID controlID, const string& objectType, const ObjectID objectID)
+	HtmlTag WebClient::HtmlTagControlLoco(ControlID& controlId, const string& objectType, const ObjectID objectID)
 	{
 		std::map<ControlID,string> controls = manager.LocoControlListNames();
-		return WebClientStatic::HtmlTagControl(controls, controlID, objectType, objectID);
+		return WebClientStatic::HtmlTagControl(controls, controlId, objectType, objectID);
 	}
 
-	HtmlTag WebClient::HtmlTagControlAccessory(const ControlID controlID, const string& objectType, const ObjectID objectID)
+	HtmlTag WebClient::HtmlTagControlAccessory(ControlID& controlID, const string& objectType, const ObjectID objectID)
 	{
 		std::map<ControlID,string> controls = manager.AccessoryControlListNames();
 		return WebClientStatic::HtmlTagControl(controls, controlID, objectType, objectID);
 	}
 
-	HtmlTag WebClient::HtmlTagControlFeedback(const ControlID controlID, const string& objectType, const ObjectID objectID)
+	HtmlTag WebClient::HtmlTagControlFeedback(ControlID& controlId, const string& objectType, const ObjectID objectID)
 	{
 		std::map<ControlID,string> controls = manager.FeedbackControlListNames();
-		return WebClientStatic::HtmlTagControl(controls, controlID, objectType, objectID);
+		return WebClientStatic::HtmlTagControl(controls, controlId, objectType, objectID);
 	}
 
 	void WebClient::HandleAccessoryEdit(const map<string, string>& arguments)
@@ -2740,7 +2740,7 @@ namespace WebServer
 	void WebClient::HandleLocoSelector(const map<string,string>& arguments)
 	{
 		const unsigned int selector = Utils::Utils::GetIntegerMapEntry(arguments, "selector", 1);
-		ReplyHtmlWithHeader(HtmlTagLocoSelector(selector));
+		ReplyHtmlWithHeader(HtmlTagLocoSelector(to_string(selector)));
 	}
 
 	void WebClient::HandleLayerSelector()
@@ -3127,15 +3127,14 @@ namespace WebServer
 		}
 	}
 
-	HtmlTag WebClient::HtmlTagLocoSelector(const unsigned int selector) const
+	HtmlTag WebClient::HtmlTagLocoSelector(const string& selector) const
 	{
 		map<string,LocoID> options = manager.LocoIdsByName();
 		if (options.size() != 1)
 		{
 			options["-"] = LocoNone;
 		}
-		const string selectorText = to_string(selector);
-		return HtmlTagSelect("loco_" + selectorText, options).AddAttribute("onchange", "loadLoco(" + selectorText + ");");
+		return HtmlTagSelect("loco_" + selector, options).AddAttribute("onchange", "loadLoco(" + selector + ");");
 	}
 
 	void WebClient::HandleLoco(const map<string, string>& arguments)
@@ -3295,17 +3294,42 @@ namespace WebServer
 
 		body.AddChildTag(menu);
 
-		body.AddChildTag(HtmlTag("div").AddClass("loco_selector").AddId("loco_selector_1").AddChildTag(HtmlTagLocoSelector(1)));
-		body.AddChildTag(HtmlTag("div").AddClass("layer_selector").AddId("layer_selector").AddChildTag(HtmlTagLayerSelector()));
-		body.AddChildTag(HtmlTag("div").AddClass("loco").AddId("loco_1"));
-		body.AddChildTag(HtmlTag("div").AddClass("clock").AddId("clock").AddContent("<object data=\"/station-clock.svg\" class=\"clock2\" type=\"image/svg+xml\"><param name=\"secondHand\" value=\"din 41071.1\"/><param name=\"minuteHandBehavior\" value=\"sweeping\"/><param name=\"secondHandBehavior\" value=\"steeping\"/><param name=\"axisCoverRadius\" value=\"0\"/><param name=\"updateInterval\" value=\"250\"/></object>"));
-		body.AddChildTag(HtmlTag("div").AddClass("layout").AddId("layout")
+		for (unsigned int i = 1; i <= 5; ++i)
+		{
+			const string iText = to_string(i);
+			HtmlTag locoContainer("div");
+			locoContainer.AddClass("loco_container");
+			locoContainer.AddId("loco_container_" + iText);
+
+			HtmlTag locoSelector("div");
+			locoSelector.AddClass("loco_selector");
+			locoSelector.AddClass("loco_selector_" + iText);
+			locoSelector.AddId("loco_selector_" + iText);
+			locoSelector.AddChildTag(HtmlTagLocoSelector(iText));
+			locoContainer.AddChildTag(locoSelector);
+
+			HtmlTag loco("div");
+			loco.AddClass("loco");
+			loco.AddClass("loco_" + iText);
+			loco.AddId("loco_" + iText);
+			locoContainer.AddChildTag(loco);
+			if (i > 1)
+			{
+				locoContainer.AddClass("hidden");
+			}
+			body.AddChildTag(locoContainer);
+		}
+		body.AddChildTag(HtmlTag("div").AddClass("layer_selector").AddClass("layer_selector_1").AddId("layer_selector").AddChildTag(HtmlTagLayerSelector()));
+		body.AddChildTag(HtmlTag("div").AddClass("layout").AddClass("layout_1").AddId("layout")
 			.AddAttribute("oncontextmenu", "loadLayoutContext(event);")
 			.AddAttribute("ondragover", "allowDrop(event);")
 			.AddAttribute("ondrop", "drop(event);")
 			);
-		body.AddChildTag(HtmlTag("div").AddClass("popup").AddId("popup"));
+		//body.AddChildTag(HtmlTag("div").AddClass("reduce_locos").AddId("reduce_locos").AddContent("&lt;").AddAttribute("onclick", "reduceLocos(); return false;"));
+		//body.AddChildTag(HtmlTag("div").AddClass("extend_locos").AddId("extend_locos").AddContent("&gt;").AddAttribute("onclick", "extendLocos(); return false;"));
+		body.AddChildTag(HtmlTag("div").AddClass("clock").AddId("clock").AddContent("<object data=\"/station-clock.svg\" class=\"clock2\" type=\"image/svg+xml\"><param name=\"secondHand\" value=\"din 41071.1\"/><param name=\"minuteHandBehavior\" value=\"sweeping\"/><param name=\"secondHandBehavior\" value=\"steeping\"/><param name=\"axisCoverRadius\" value=\"0\"/><param name=\"updateInterval\" value=\"250\"/></object>"));
 		body.AddChildTag(HtmlTag("div").AddClass("status").AddId("status"));
+		body.AddChildTag(HtmlTag("div").AddClass("popup").AddId("popup"));
 		body.AddChildTag(HtmlTag("div").AddClass("infobox").AddId("infobox"));
 
 		body.AddChildTag(HtmlTag("div").AddClass("contextmenu").AddId("layout_context")

@@ -163,7 +163,10 @@ namespace WebServer
 				const DataModel::LayoutItem::LayoutRotation rotation = DataModel::LayoutItem::RotationNotRelevant,
 				const DataModel::LayoutItem::Visible visible = DataModel::LayoutItem::VisibleNotRelevant) const ;
 
-			HtmlTag HtmlTagControlAccessory(const ControlID controlID, const std::string& objectType, const ObjectID objectID);
+			HtmlTag HtmlTagControlLoco(ControlID& controlId, const std::string& objectType, const ObjectID objectID);
+			HtmlTag HtmlTagControlAccessory(ControlID& controlID, const std::string& objectType, const ObjectID objectID);
+			HtmlTag HtmlTagControlFeedback(ControlID& controlId, const std::string& objectType, const ObjectID objectID);
+
 			HtmlTag HtmlTagProtocolAccessory(const ControlID controlID, const Protocol selectedProtocol);
 
 			HtmlTag HtmlTagSelectFeedbackForTrack(const unsigned int counter,
@@ -192,7 +195,7 @@ namespace WebServer
 			void PrintMainHTML();
 			void DeliverFile(const std::string& file);
 			void DeliverFileInternal(FILE* f, const char* realFile, const std::string& file);
-			HtmlTag HtmlTagLocoSelector(const unsigned int selector) const;
+			HtmlTag HtmlTagLocoSelector(const std::string& selector) const;
 			HtmlTag HtmlTagLayerSelector() const;
 
 			HtmlTag HtmlTagMatchKeyProtocolLoco(const ControlID controlID,
@@ -207,9 +210,6 @@ namespace WebServer
 				const DataModel::LayoutItem::LayoutPosition posy,
 				const DataModel::LayoutItem::LayoutPosition posz,
 				const DataModel::LayoutItem::Visible visible) const;
-
-			HtmlTag HtmlTagControlLoco(const ControlID controlID, const std::string& objectType, const ObjectID objectID);
-			HtmlTag HtmlTagControlFeedback(const ControlID controlID, const std::string& objectType, const ObjectID objectID);
 
 			HtmlTag HtmlTagProgramModeSelector(const ControlID controlID, ProgramMode& mode) const;
 			HtmlTag HtmlTagCvFields(const ControlID controlID, const ProgramMode programMode) const;
