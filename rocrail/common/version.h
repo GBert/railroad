@@ -1,11 +1,12 @@
 const int revisionnr = 
-1853
+1854
 ;
 const char* commithash = 
-"ea5c731d52eb42d63a87d91d3b1f6348ef968cf8";
+"bd3bd4ef56a1428b678307332cc513bb5e83fffc";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1854 2021-10-27 15:45:03 +0200 rocs,mqtt: fix for subscribe fix header\n" \
 "1853 2021-10-26 21:56:44 +0200 signaldialog: aspect nr range increased to 255\n" \
 "1852 2021-10-26 14:57:00 +0200 WIOpico: flicker free charlieplexing with 4 signals\n" \
 "1851 2021-10-26 08:52:10 +0200 WIOpico: use delayms in the main loop to get better 1m trigger for multiplexing\n" \
