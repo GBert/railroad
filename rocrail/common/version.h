@@ -1,11 +1,12 @@
 const int revisionnr = 
-1852
+1853
 ;
 const char* commithash = 
-"8debf6c2a31fcfbc5f8c0d6364914f937fed95ff";
+"ea5c731d52eb42d63a87d91d3b1f6348ef968cf8";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1853 2021-10-26 21:56:44 +0200 signaldialog: aspect nr range increased to 255\n" \
 "1852 2021-10-26 14:57:00 +0200 WIOpico: flicker free charlieplexing with 4 signals\n" \
 "1851 2021-10-26 08:52:10 +0200 WIOpico: use delayms in the main loop to get better 1m trigger for multiplexing\n" \
 "1850 2021-10-26 08:34:03 +0200 WIOpico: use opendcc multiplex table\n" \
