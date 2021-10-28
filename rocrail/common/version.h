@@ -1,11 +1,12 @@
 const int revisionnr = 
-1854
+1855
 ;
 const char* commithash = 
-"bd3bd4ef56a1428b678307332cc513bb5e83fffc";
+"519121705490ae3be35db684a19707dee0f189e5";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1855 2021-10-28 14:24:32 +0200 locdialog: freeze/thaw bbt/bat/sbt lists on init\n" \
 "1854 2021-10-27 15:45:03 +0200 rocs,mqtt: fix for subscribe fix header\n" \
 "1853 2021-10-26 21:56:44 +0200 signaldialog: aspect nr range increased to 255\n" \
 "1852 2021-10-26 14:57:00 +0200 WIOpico: flicker free charlieplexing with 4 signals\n" \
