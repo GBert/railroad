@@ -1,11 +1,14 @@
 const int revisionnr = 
-1855
+1858
 ;
 const char* commithash = 
-"519121705490ae3be35db684a19707dee0f189e5";
+"d03187fadfc4a2b68bf6a57e271247aeadc922e4";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1858 2021-10-29 09:06:32 +0200 WIOpico: fix for multiplexing\n" \
+"1857 2021-10-29 08:32:34 +0200 wiodlg: added pulse units\n" \
+"1856 2021-10-29 08:15:15 +0200 WIOpico: multiplexing in 4 groups\n" \
 "1855 2021-10-28 14:24:32 +0200 locdialog: freeze/thaw bbt/bat/sbt lists on init\n" \
 "1854 2021-10-27 15:45:03 +0200 rocs,mqtt: fix for subscribe fix header\n" \
 "1853 2021-10-26 21:56:44 +0200 signaldialog: aspect nr range increased to 255\n" \
