@@ -1,11 +1,21 @@
 const int revisionnr = 
-1858
+1868
 ;
 const char* commithash = 
-"d03187fadfc4a2b68bf6a57e271247aeadc922e4";
+"12e8f0b9bf26a389935d787cb4dd25bee099cd14";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1868 2021-10-30 13:59:43 +0200 WIOpico: use own dimming for second signal\n" \
+"1867 2021-10-30 12:46:26 +0200 signal: mapped aspect number\n" \
+"1866 2021-10-30 12:42:17 +0200 wio: aspect value RASCII correction\n" \
+"1865 2021-10-30 11:09:08 +0200 switch: aspect type added\n" \
+"1864 2021-10-30 08:29:49 +0200 WIOpico: multiplex distant signal support\n" \
+"1863 2021-10-30 07:58:35 +0200 signal,item: signal flip aspect mapping\n" \
+"1862 2021-10-29 15:33:55 +0200 z21: revert aspect value\n" \
+"1861 2021-10-29 15:30:35 +0200 z21: use aspect value for signal command\n" \
+"1860 2021-10-29 14:44:57 +0200 WIOpico: multiplex\n" \
+"1859 2021-10-29 11:10:59 +0200 WIOpico: multiplexing fixes\n" \
 "1858 2021-10-29 09:06:32 +0200 WIOpico: fix for multiplexing\n" \
 "1857 2021-10-29 08:32:34 +0200 wiodlg: added pulse units\n" \
 "1856 2021-10-29 08:15:15 +0200 WIOpico: multiplexing in 4 groups\n" \
