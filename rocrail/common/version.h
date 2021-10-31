@@ -1,11 +1,12 @@
 const int revisionnr = 
-1868
+1869
 ;
 const char* commithash = 
-"12e8f0b9bf26a389935d787cb4dd25bee099cd14";
+"35de05f783a17406b94d8b2cbe159d3715b4d97f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1869 2021-10-30 17:25:09 +0200 auipanel: force refresh under Windows only\n" \
 "1868 2021-10-30 13:59:43 +0200 WIOpico: use own dimming for second signal\n" \
 "1867 2021-10-30 12:46:26 +0200 signal: mapped aspect number\n" \
 "1866 2021-10-30 12:42:17 +0200 wio: aspect value RASCII correction\n" \
