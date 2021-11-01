@@ -1,4 +1,4 @@
-// srcp-gl.h - adapted for basrcpd project 2018 by Rainer Müller 
+// srcp-gl.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
 
 /* $Id: srcp-gl.h 1346 2009-06-06 18:15:28Z mtrute $ */
 
@@ -84,14 +84,14 @@ int cacheDescribeGL(bus_t busnumber, uint32_t locid, char *msg);
 int cacheInitGL(bus_t busnumber, uint32_t locid, const char protocol,
                 int protoversion, int n_fs, int n_func, char *optData);
 int cacheTermGL(bus_t busnumber, uint32_t locid);
-void cacheCleanGL(bus_t bus);
-int cacheLockGL(bus_t busnumber, int addr, long int duration,
+void cacheCleanGL(bus_t busnumber);
+int cacheLockGL(bus_t busnumber, uint32_t locid, long int duration,
                 sessionid_t sessionid);
 int cacheGetLockGL(bus_t busnumber, uint32_t locid, sessionid_t * sessionid);
-int cacheUnlockGL(bus_t busnumber, int addr, sessionid_t sessionid);
+int cacheUnlockGL(bus_t busnumber, uint32_t locid, sessionid_t sessionid);
 void unlock_gl_bysessionid(sessionid_t sessionid);
 void unlock_gl_bytime(void);
-int describeLOCKGL(bus_t bus, int addr, char *reply);
+int describeLOCKGL(bus_t busnumber, uint32_t locid, char *reply);
 void debugGL(bus_t busnumber, gl_data_t *glp);
 
 int handle_mcs_prot(bus_t bus, uint32_t locid, int val);

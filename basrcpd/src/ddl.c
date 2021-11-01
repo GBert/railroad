@@ -1,4 +1,4 @@
-// ddl.c - adapted for basrcpd project 2018 by Rainer Müller
+// ddl.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 
 /* $Id: ddl.c 1456 2010-02-28 20:01:39Z gscholz $ */
 
@@ -6,28 +6,6 @@
  * DDL: Bus driver connected with a booster only without any special hardware.
  *
  * SIG
- * 24.08.12:
- * RaspberryPI Portierung. Nicht ganz sauber, aber einfach:
- * Wenn __arm__ definiert ist wird RaspberryPI angenommen.
- * Für den GPIO Zugriff wird die lib bcm2835 (http://www.open.com.au/mikem/bcm2835/index.html) verwendet.
- * Diese muss installiert sein. Zum linken muss im makefile für "libs" "-l bcm2835" eingetragen sein.
- *
- * 30.09.13:
- * RaspberryPI Erkennung über "configure" (CPU ARM und cpuinfo BCM2708).
- * Unterscheidung RaspberryPI Board Version 1 und 2.
- *
- * 20.08.16
- * RaspberryPI Model 2 & 3
- *
- * 23.08.16
- * SPI Ausgabe für Raspberry PI, aber unabhängig von diesem implementiert.
- * Jedoch trotzdem nur auf diesem benutzbar, da auf dem PI die zusätzlichen Leitungen
- * zur Booster Steuerung über GPIO's realisiert werden. Wenn ich nicht auf dem PI
- * bin weiss ich dann nicht, was ich da anstelle der RS232 HW-Handshake Leitungen nehmen soll...
- * Da der RS232 Ruhepegel Logisch 1 ist, der von SPI jedoch logisch 0 brauchen wir für das
- * Märklin / Motorola Protokoll noch einen Inverter. Wer nur DCC/NMRA macht kann darauf
- * verzichten.
- *
  * 27.09.16
  * MFX Protokoll (nur für SPI Ausgabe).
  * MFX Rückmelderkennung wird über SPI MISO eingelesen.
@@ -222,9 +200,125 @@ static struct spi_ioc_transfer spi_nmra_idle;
 #define MFX_RDS_SYNC_IMPULS_CLK_USEC 912
 //Breite RDS Sync Impulse (in usec)
 #define MFX_RDS_SYNC_IMPULS_USEC 25
+//Anzahl Bits für eine Periode berechnen (+1 um Integer Abrundung der Division aufzurunden)
+#define BITS_PER_RDSSYNC_PER ((MFX_RDS_SYNC_IMPULS_CLK_USEC * SPI_BAUDRATE_MFX_2 / 1000000) + 1)
+#define BITS_PER_RDSSYNC_IMP (MFX_RDS_SYNC_IMPULS_USEC * SPI_BAUDRATE_MFX_2 / 1000000)
 
+static struct termios sercomm_mfx;
+static unsigned char feedbackbuf[64];
+
+static pthread_t feedbackThread;
 static void *thr_Manage_DDL(void *);
 
+
+static void *thr_feedbackThread(void *threadParam)
+{
+    struct timeval tt;
+    fd_set rfds;
+    uint8_t event;
+	DDL_DATA *ddl = (DDL_DATA*) threadParam;	// -> buses[busnumber].driverdata;
+	ddl->resumeSM = -1;
+
+	usleep(50000);
+	syslog_bus(ddl->ownbusnr, DBG_INFO, "Feedback Thread started.");
+
+    FD_ZERO(&rfds);
+  	for (;;) {
+  		if (ddl->resumeSM < 0) ddl->allowSM = true;
+        // wait for a command which should generate feedback
+    	read(ddl->feedbackPipe[0], &event, sizeof(event));
+		syslog_bus(ddl->ownbusnr, DBG_INFO, "Value read in idle state: %d", event);
+  		ddl->allowSM = false;
+
+        ddl->fbData.fbbytnum = 0;
+    	tt.tv_sec = 0;
+        tt.tv_usec = 0;
+        ddl->fbData.pktcode = event;
+        switch (event) {
+        	case 0:			syslog_bus(ddl->ownbusnr, DBG_INFO, "Feedback Thread ended.");
+        					return NULL;
+        	case QMFX1PKTD:
+            case QMFX1PKTV: if (ddl->BOOSTER_COMM)
+                                send_seek_cmd(1, 0);    // wait for mfx carrier
+                            tt.tv_usec = 200000;
+                            break;
+            case QMFX8PKT:  ddl->fbData.fbbytnum = 1;
+                            tt.tv_usec = 200000;
+                            break;
+            case QMFX16PKT: ddl->fbData.fbbytnum = 2;
+                            tt.tv_usec = 208000;
+                            break;
+            case QMFX32PKT: ddl->fbData.fbbytnum = 4;
+                            tt.tv_usec = 220000;
+                            break;
+        }
+        ddl->fbData.fbcollect = 0;
+        if (ddl->BOOSTER_COMM && ddl->fbData.fbbytnum)
+            send_seek_cmd(2, ddl->fbData.fbbytnum);    // wait for a number of mfx data bytes
+
+        // wait for feedback reply
+        if (tt.tv_usec) {
+            FD_SET(ddl->feedbackPipe[0], &rfds);
+			int nready = select(ddl->feedbackPipe[0]+1, &rfds, NULL, NULL, &tt);
+
+		    if(nready < 0)
+            	syslog_bus(ddl->ownbusnr, DBG_ERROR, "select exception in line %d: %s",
+								__LINE__, strerror(errno));
+			else if (nready == 0) {
+				syslog_bus(ddl->ownbusnr, DBG_INFO, "T I M E O U T");
+                if (ddl->BOOSTER_COMM)
+                        send_seek_cmd(0, 0);    // stop waiting for data
+                if (ddl->fbData.pktcode > QMFX0PKT) handleMFXtimeout();
+	    	}
+			else if(FD_ISSET(ddl->feedbackPipe[0], &rfds)) {
+    			read(ddl->feedbackPipe[0], &event, sizeof(event));
+				syslog_bus(ddl->ownbusnr, DBG_INFO, "Value read in busy state: %d", event);
+                if (ddl->BOOSTER_COMM)
+                        send_seek_cmd(0, 0);    // stop waiting for data
+                switch (event) {
+					case 0x42:	sendMFXreadCVresult(ddl->fbData.serfbdata);
+								break;
+					case 0x43:	handleMFXacknowledge(ddl->fbData.serask);
+								break;
+					case 0x82:	sendMFXreadCVresult(ddl->fbData.canfbdata);
+								break;
+					case 0x83:	handleMFXacknowledge(ddl->fbData.canask);
+								break;
+					default:	syslog_bus(ddl->ownbusnr, DBG_WARN,
+									"Unexpected event received during wait phase: %d", event);
+				}
+            }
+	    }
+  	}
+}
+
+void handle_seek(bus_t busnumber, uint8_t *data, uint32_t uid)
+{
+//	supported seek subcommands are:
+//  	82 II DD   Index II and value DD of data byte or CRC
+//  	83 VV --   ASK-value VV
+
+    syslog_bus(busnumber, DBG_INFO, "mfx seek received with code %x", data[0]);
+
+	if (__DDL->BOOSTER_COMM) switch(data[0]) {
+		case 0x82:
+			if (data[1] < 6) {
+				__DDL->fbData.canfbdata[data[1]] = data[2];
+				__DDL->fbData.fbcollect |= (1 << data[1]);
+				if ((__DDL->fbData.fbcollect == ((2 << __DDL->fbData.fbbytnum) - 1))
+						&& checkMfxCRC(__DDL->fbData.canfbdata, __DDL->fbData.fbbytnum)) {
+					__DDL->fbData.uid = uid;
+					write(__DDL->feedbackPipe[1], data, 1);
+				}
+			}
+			break;
+		case 0x83:
+			__DDL->fbData.canask = data[1];
+			__DDL->fbData.uid = uid;
+			write(__DDL->feedbackPipe[1], data, 1);
+			break;
+	}
+}
 
 int init_lineDDL(bus_t busnumber)
 {
@@ -583,9 +677,6 @@ static void reset_MFXPacketPool(bus_t busnumber)
                    "pthread_mutex_unlock() failed: %s (errno = %d).",
                    strerror(result), result);
     }
-
-    close(__DDL->rdsPipeNew[0]);
-    close(__DDL->rdsPipeNew[1]);
 }
 
 /**
@@ -595,24 +686,21 @@ static void reset_MFXPacketPool(bus_t busnumber)
  *        Muss Grösser 0 sein damit im Byte vorher der letzte Pegel erkannt werden kann.
  *        Wird auf die neue, nächste freie Position erhöht.
  */
-static void addMFXSync(char *spiBuffer, unsigned int *pos) {
-  unsigned char p0, p1;
-  if (spiBuffer[*pos - 1]) {
-    //Letzter Pegel war 1 -> invertiert arbeiten
-    p0 = 0xFF;
-    p1 = 0x00;
-  }
-  else {
-    //Letzter Pegel war 0 -> "normal"
-    p0 = 0x00;
-    p1 = 0xFF;
-  }
-  spiBuffer[*pos+0] = p1; spiBuffer[*pos+1] = p1; //0
-  spiBuffer[*pos+2] = p0; spiBuffer[*pos+3] = p1; //1
-  spiBuffer[*pos+4] = p1; spiBuffer[*pos+5] = p0; //1 mit Regelverlettzung, keine Flanke zu Beginn
-  spiBuffer[*pos+6] = p0; spiBuffer[*pos+7] = p1; //1 mit Regelverlettzung, keine Flanke zu Beginn
-  spiBuffer[*pos+8] = p0; spiBuffer[*pos+9] = p0; //0
-  *pos += 10;
+static void addMFXhSync(char *spiBuffer, unsigned int *pos, int hsyncs)
+{
+	for (int i = 0; i < hsyncs; i++) {
+		if (spiBuffer[*pos - 1]) {
+			spiBuffer[*pos+0] = spiBuffer[*pos+1] = 0x00;
+			spiBuffer[*pos+2] = 0xFF;
+			spiBuffer[*pos+3] = spiBuffer[*pos+4] = 0x00;
+		}
+		else {
+			spiBuffer[*pos+0] = spiBuffer[*pos+1] = 0xFF;
+			spiBuffer[*pos+2] = 0x00;
+			spiBuffer[*pos+3] = spiBuffer[*pos+4] = 0xFF;
+		}
+		*pos += 5;
+	}
 }
 
 /**
@@ -647,17 +735,16 @@ static void addMFX(bool value, char *spiBuffer, unsigned int *pos) {
  * @param pos Position, an die eingefügt werden soll, wird um eingefügte Bytes inkrementiert
  *        Muss > 0 sein.
  */
-static void addRDSSync(char *spiBuffer, unsigned int *pos) {
-  //1 Bit Rückkmeldung -> 11 Sync, 0011, Pause, Sync, Pause, 2 Sync
-  unsigned int i;
-  for (i=0; i<MFX_SYNC_COUNT_RDS; i++) {
-    addMFXSync(spiBuffer, pos);
-  }
-  //Nun kommt 0011
-  addMFX(false, spiBuffer, pos);
-  addMFX(false, spiBuffer, pos);
-  addMFX(true, spiBuffer, pos);
-  addMFX(true, spiBuffer, pos);
+static void addRDSSync(char *spiBuffer, unsigned int *pos)
+{
+	// for feedback -> 11 or 11½ Sync, 0011, ...
+	addMFXhSync(spiBuffer, pos, (spiBuffer[*pos - 1]) ?  MFX_SYNC_COUNT_RDS * 2 :
+									MFX_SYNC_COUNT_RDS * 2 + 1);
+	// add the "0011" sequence
+	addMFX(false, spiBuffer, pos);
+	addMFX(false, spiBuffer, pos);
+	addMFX(true, spiBuffer, pos);
+	addMFX(true, spiBuffer, pos);
 }
 
 /**
@@ -666,162 +753,118 @@ static void addRDSSync(char *spiBuffer, unsigned int *pos) {
  *               ab dem 2. Byte folgenden
  * @param spiBuffer Buffer zur Speicherung des SPI Bytestream. Muss mindestens folgende Grösse haben:
  *                  QMFX0PKT : (256+15+256/8)*2=606 Bytes (max. Daten + Sync + max. Stuffing)
- *                  QMFX1PKT : QMFX0PKT + 2 * (11 + 1 + 2 Sync + 4 Bit) + 2 * 6.4ms (128 Bytes) = 606 + 148 + 256 = 1010
+ *                  QMFX1PKTD : QMFX0PKT + 2 * (11 + 1 + 2 Sync + 4 Bit) + 2 * 6.4ms (128 Bytes) = 606 + 148 + 256 = 1010
  *                  QMFX8PKT : QMFX0PKT + 2 * (11 + 1 Sync + 4 Bit) + 146 * (23 + 15 + DataBits) / 8 = 1574
  *                  QMFX16PKT : 1720
  *                  QMFX32PKT : 2012
  *                  QMFX64PKT : 2596
  * @param mfxTyp Eine MFX Typ aus QMFX?PKT (Keine bis 8 Byte Rückmeldung)
- * @param rdsPos Nur bei 1-Bit Rückmeldung (QMFX1PKT): Rückgabe der Position im SPI Buffer, ab der die Rückmeldung erwartet wird.
- *               Wenn nicht QMFX1PKT darf null übergeben werden.
- * @param rdsLen Analog rdsPos, die Länge der Rückmeldefensters.
  * @return Länge des spiBuffer.
  */
-static unsigned int convertMFXPacketToSPIStream(bus_t busnumber, char *packet, char *spiBuffer, unsigned int mfxTyp,
-                                                unsigned int *rdsPos, unsigned int *rdsLen) {
+static unsigned int convertMFXPacketToSPIStream(bus_t busnumber, char *packet, char *spiBuffer, unsigned int mfxTyp)
+{
   // Ein Bit in 2 Bytes, Baudrate ist so, dass diese Ausgabe 100us dauert
   // 1 : 0xFF, 0x00 oder 0x00, 0xFF (je nach Pegel vorher)
   // 0 : 0xFF, 0xFF oder 0x00, 0x00 (je nach Pegel vorher)
   //Ruhepegel am Anfang ist immer 0 (4 Byte) -> Start sync. ist immer gleich
-  unsigned int i, j;
-  unsigned int len = MFX_STARTSTOP_0_BYTES;
-  for (i=0; i<MFX_STARTSTOP_0_BYTES; i++) {
-    spiBuffer[i] = 0;
-  }
-  //Start Sync
-  addMFXSync(spiBuffer, &len);
-  unsigned int count1 = 0;
-  //Nutzdaten
-  for (i=0; i<(unsigned char)packet[0]; i++) {
-    if (packet[(i / 8) + 1] & (1 << (i % 8))) {
-      //1
-      addMFX(true, spiBuffer, &len);
-      count1++;
-      if (count1 >= 8) {
-        //Bitstuffing 0 einfügen
-        addMFX(false, spiBuffer, &len);
-        count1 = 0;
-      }
-    }
-    else {
-      //0
-      count1 = 0;
-      addMFX(false, spiBuffer, &len);
-    }
-  }
-  switch (mfxTyp) {
+	unsigned int i, j;
+	unsigned int len = MFX_STARTSTOP_0_BYTES;
+	//Start Sync
+	addMFXhSync(spiBuffer, &len, 2);
+	unsigned int count1 = 0;
+	// payload
+	for (i=0; i<(unsigned char)packet[0]; i++) {
+		if (packet[(i / 8) + 1] & (1 << (i % 8))) {
+			// 1
+			addMFX(true, spiBuffer, &len);
+			count1++;
+			if (count1 >= 8) {
+				// insert 0 for bit stuffing
+				addMFX(false, spiBuffer, &len);
+				count1 = 0;
+			}
+		}
+		else {
+			// 0
+			count1 = 0;
+			addMFX(false, spiBuffer, &len);
+		}
+	}
+	switch (mfxTyp) {
     case QMFX0PKT:
-      //Ende Sync
-      addMFXSync(spiBuffer, &len);
-      addMFXSync(spiBuffer, &len);
-      //Vereinzelte MFX Loks funktionieren nicht zuverlässig. Ausser:
-      //- 3. Sync am Ende
-      //- Pause nach Abschluss.
-      addMFXSync(spiBuffer, &len);
-      for (i=0; i<MFX_STARTSTOP_0_BYTES; i++) {
-        spiBuffer[len+i] = 0;
-      }
+      // final syncs
+      addMFXhSync(spiBuffer, &len, 5);
       len += MFX_STARTSTOP_0_BYTES;
       break;
-    case QMFX1PKT: //1 Bit Quittungsrückmeldung
-    case QMFX1DPKT:
+    case QMFX1PKTD: //1 Bit Quittungsrückmeldung
+    case QMFX1PKTV:
       addRDSSync(spiBuffer, &len);
       //6.4ms Pause mit 0, Rechnung passt noch in 32 Bit ...
-      j = 1000 * SPI_BAUDRATE_MFX_2 / 8000000; //erst 1ms nach Fenster auswerten, da von Schaltflanke noch RDS Ansprecher dedektiert werden können
-      *rdsPos = len + j;
       i = MFX_RDS_1BIT_DELAY * SPI_BAUDRATE_MFX_2 / 8000000; //8 Bit = 1 Byte und in usec
       //Mit anderem Pegel als vorher aufgehört wurde.
       memset(spiBuffer + len, ~spiBuffer[len - 1], i);
       len += i;
-      *rdsLen = i - 2*j; //Und eine ms früher
       //1 Sync
-      addMFXSync(spiBuffer, &len);
+      addMFXhSync(spiBuffer, &len, 2);
       //6.4ms Pause mit 0 oder 1 (anders als vorher aufgehört)
       memset(spiBuffer + len, ~spiBuffer[len - 1], i);
       len += i;
-      //2 Sync
-      addMFXSync(spiBuffer, &len);
-      addMFXSync(spiBuffer, &len);
+      // final syncs
+      addMFXhSync(spiBuffer, &len, 4);
       break;
-    case QMFX8PKT: //1 Byte RDS Rückmeldung
-    case QMFX16PKT: //2 Bytes
-    case QMFX32PKT: //4 Bytes
-    case QMFX64PKT: //8 Bytes
-      addRDSSync(spiBuffer, &len);
+    case QMFX8PKT:		// 1 Byte RDS feedback
+    case QMFX16PKT:		// 2 Bytes
+    case QMFX32PKT:		// 4 Bytes
+		addRDSSync(spiBuffer, &len);
       //23 * einen 25us Impuls alle 912us
       //Um diese ungerade Zeit möglichst genau einzuhalten wird hir mit einzelnen Bits in der SPI Ausgabe gearbeitet.
       //Ein Bit mit Baudrate SPI_BAUDRATE_MFX_2 dauert 6.25us. Mit 146 Bits sind wir bei 912.5us. Das dürfte genau genug sein!
       //Der letzte Takt wird dann wieder auf ganze Bytes aufgerundet, das sollte auch nicht stören.
       //Ruhepegel ist immer. Wenn vorher mit 0 aufgeöhrt wird das erste Bit noch auf 1 gesetzt.
-      bool start1 = (spiBuffer[len - 1] & 0x01) ? true : false;
       //Start ab aktueller len, ab dieser Position wird nun in Bit gerechnet (RaspPi SPI sendet MSB zuerst).
-      unsigned int bitPos = 0;
-      //Anzahl Bits für eine Periode berechnen (+1 um Integer Abrundung der Division aufzurunden)
-      unsigned int bitsPerRDSSyncPeriod = (MFX_RDS_SYNC_IMPULS_CLK_USEC * SPI_BAUDRATE_MFX_2 / 1000000) + 1;
-      unsigned int bitsPerRDSSyncImp = MFX_RDS_SYNC_IMPULS_USEC * SPI_BAUDRATE_MFX_2 / 1000000;
-      for (i = 0; i<MFX_RDS_SYNC_IMPULS_COUNT; i++) {
-        //Ruhepegel einfügen
-        for (j = 0; j < (bitsPerRDSSyncPeriod - bitsPerRDSSyncImp); j++) {
-          if ((bitPos % 8) == 0) {
-            //Neues Byte
-            spiBuffer[len + (bitPos / 8)] = 0;
-          }
-          bitPos++;
-        }
-        //25us Impuls einfügen
-        for (j = 0; j < bitsPerRDSSyncImp; j++) {
-          spiBuffer[len + (bitPos / 8)] |= 0x80 >> (bitPos % 8);
-          bitPos++;
-        }
-      }
+		unsigned int bitPos = 0;
+
+		for (i = 0; i<MFX_RDS_SYNC_IMPULS_COUNT; i++) {
+			bitPos += (BITS_PER_RDSSYNC_PER - BITS_PER_RDSSYNC_IMP);
+			// add 25us pulse
+			for (j = 0; j < BITS_PER_RDSSYNC_IMP; j++) {
+				spiBuffer[len + (bitPos / 8)] |= 0x80 >> (bitPos % 8);
+				bitPos++;
+			}
+		}
       //Jetzt die Takte für die Datenbits, dazu kommt in die Mitte MFX_RDS_SYNC_IMPULS_CLK_USEC noch ein Impuls.
       //Anzahl Bits ist (Startmuster 010 + Anzahl Datenbits + 8 Checksumme + 4) = Anzahl Datenbits + 15.
-      unsigned int rdsBitCount = 15;
-      switch (mfxTyp) {
-        case QMFX8PKT: //1 Byte RDS Rückmeldung
-          rdsBitCount += 8;
-          break;
-        case QMFX16PKT: //2 Bytes
-          rdsBitCount += 16;
-          break;
-        case QMFX32PKT: //4 Bytes
-          rdsBitCount += 32;
-          break;
-        case QMFX64PKT: //8 Bytes
-          rdsBitCount += 64;
-          break;
-      }
-      //Mal zwei da mit halber Periode gearbeitet wird
-      for (i = 0; i<(rdsBitCount * 2); i++) {
-        //Ruhepegel einfügen
-        for (j = 0; j < (bitsPerRDSSyncPeriod / 2 - bitsPerRDSSyncImp); j++) {
-          if ((bitPos % 8) == 0) {
-            //Neues Byte
-            spiBuffer[len + (bitPos / 8)] = 0;
-          }
-          bitPos++;
-        }
-        //25us Impuls einfügen
-        for (j = 0; j < bitsPerRDSSyncImp; j++) {
-          spiBuffer[len + (bitPos / 8)] |= 0x80 >> (bitPos % 8);
-          bitPos++;
-        }
-      }
-      //Ggf. nun noch Das erste Bit auf 1 um die letzte Flanke vor dem Sync. Muster korrekt zu haben
-      int rdsSize = (bitPos+7) / 8;
-      if (start1) {
-        spiBuffer[len] |= 0x80;
-      }
-      len += rdsSize;
-      //Und zum Abschluss noch ein letztes Sync
-      addMFXSync(spiBuffer, &len);
-      break;
-  }
+		unsigned int rdsBitCount = 15;
+		switch (mfxTyp) {
+			case QMFX8PKT:		// 1 Byte RDS feedback
+					rdsBitCount += 8;
+					break;
+			case QMFX16PKT:		// 2 Bytes
+					rdsBitCount += 16;
+					break;
+			case QMFX32PKT:		// 4 Bytes
+					rdsBitCount += 32;
+					break;
+		}
+		// and from now on with double frequency
+		for (i = 0; i<(rdsBitCount * 2); i++) {
+			bitPos += (BITS_PER_RDSSYNC_PER / 2 - BITS_PER_RDSSYNC_IMP);
+			// add 25us pulse
+			for (j = 0; j < BITS_PER_RDSSYNC_IMP; j++) {
+				spiBuffer[len + (bitPos / 8)] |= 0x80 >> (bitPos % 8);
+				bitPos++;
+			}
+		}
+		len += (bitPos+7) / 8;	//rdsSize;
+		// final syncs
+		addMFXhSync(spiBuffer, &len, 2);
+		break;
+	}
 
-  if (WRONGLEN) {
-    syslog_bus(busnumber, DBG_WARN, "SPI Transfer with %d Bytes -> wrong Timing", len);
-  }
-  return len;
+	if (WRONGLEN) {
+		syslog_bus(busnumber, DBG_WARN, "SPI Transfer with %d Bytes -> wrong Timing", len);
+	}
+	return len;
 }
 
 static void init_MFXPacketPool(bus_t busnumber)
@@ -856,15 +899,7 @@ static void init_MFXPacketPool(bus_t busnumber)
                    "pthread_mutex_unlock() failed: %s (errno = %d).",
                    strerror(result), result);
     }
-
-    //Pipe zur MFX RDS Auftragsvergabe an RDS Thread
-    result = pipe(__DDL->rdsPipeNew);
-    if (result != 0) {
-        syslog_bus(busnumber, DBG_ERROR,
-                   "pipe() failed: %s (errno = %d).",
-                   strerror(result), result);
-    }
-    if (startMFXThreads(busnumber, __DDL->rdsPipeNew[0])!= 0) {
+    if (startMFXThreads(busnumber, __DDL->feedbackPipe[0])!= 0) {
         syslog_bus(busnumber, DBG_ERROR,
                    "startMFXThreads failed.");
     }
@@ -927,7 +962,6 @@ time_t timeSince(struct timeval tv)
 static int checkShortcut(bus_t busnumber)
 {
     int arg;
-    time_t short_now = 0;
     struct timeval tv_shortcut = { 0, 0 };
 
     // read the CTS input
@@ -945,7 +979,7 @@ static int checkShortcut(bus_t busnumber)
                     tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
         }
         gettimeofday(&tv_shortcut, NULL);
-        short_now = tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
+        time_t short_now = tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
         if (__DDL->SHORTCUTDELAY <=
                 (short_now - __DDL->short_detected)) {
         	syslog_bus(busnumber, DBG_INFO,
@@ -984,29 +1018,22 @@ void send_packet(bus_t busnumber, char *packet,
     /* arguments for nanosleep and Maerklin solenoids/function decoders (38KHz) */
 //SID, 04.01.08 : Wartezeit wäre theoretisch schon 850us, dies geht aber mit den LDT Dekodern nicht....
 
-    //Nur für MFX RDS 1-Bit Rückmeldung: Position und Länge im SPI Bytestream an der sich die Rückmeldung befinden muss.
-    unsigned int mfxRdsLen, mfxRdsPos = 0;
+    unsigned int pause_btw, pause_end;
 
     struct spi_ioc_transfer spi;	// tx_buf; rx_buf; len; speed_hz; delay_usecs;
 									// bits_per_word; cs_change; pad;
-    char spiBuffer[2700]; //Worst Case wenn maximales MFX Paket
+    char spiBuffer[1600]  = { 0 };	// worst case is QMFX32PKT
 
     memset (&spi, 0, sizeof (spi)) ;
     spi.bits_per_word = 8;
     spi.tx_buf = (unsigned long)spiBuffer;
+
     switch (packet_type) {
-        case QNBLOCOPKT:
-        case QNBACCPKT:
-          __DDL->spiLastMM = 0;
-          spi.len = convertNMRAPacketToSPIStream(busnumber, packet, spiBuffer);
-          spi.speed_hz = SPI_BAUDRATE_NMRA_2;
-          break;
         case QM1LOCOPKT:
         case QM2LOCOPKT:
         case QM2FXPKT:
         case QM1FUNCPKT:
         case QM1SOLEPKT:
-        {
           //Für Märklin Motorola wird wie folgt kodiert (doppelte Baudrate):
           //- Paket mit
           //  - 0 -> 0xC0, 0x00, ich habe aber Schaltdekoder, die damit nicht funktionieren sondern einen ein wenig längeren Impuls wollen, also 0xE0, 0x00 ....
@@ -1016,80 +1043,45 @@ void send_packet(bus_t busnumber, char *packet,
           //- Paket Wiederholung
           //- 0 Bytes für Pause nach Paket: 4.2ms (Lok), resp. 2.1ms (Schaltdekoder) -> wegen bei doppleter Baudrate 1 Byte 104us (Lok). 62us (Schalt) = 42 Bytes
           //Total also 36 + 12 + 36 + 42 = 126 Bytes -> DMA Mode!
-
-          unsigned int pause_btw;
-          unsigned int pause_end;
-          if ((packet_type == QM1FUNCPKT) || (packet_type == QM1SOLEPKT)) {
-            pause_btw = 12;     // for functions multiples of 52µs
-            pause_end = 59;
-            spi.speed_hz = SPI_BAUDRATE_MAERKLIN_FUNC_2;
-          }
-          else {
-            pause_btw = 12;     // for locos multiples of 104µs
-            pause_end = 42;
-            spi.speed_hz = SPI_BAUDRATE_MAERKLIN_LOCO_2;
-          }
-          memset (spiBuffer, 0, sizeof (spiBuffer));
-          if (! __DDL->spiLastMM) {
-            //Wenn das letzte Paket kein MM Paket war, dann wird am Anfang noch eine Pause eingefügt
-            spi.len = pause_end;
-            if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
-              syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
-              return;
-            }
-          }
-          for (i=0; i<packet_size; i++) {
-            if (packet[i]) {
-              //1
-              spiBuffer[PAUSE_START + i * 2] = 0xFF;
-              spiBuffer[PAUSE_START + i * 2 + 1] = 0xFC;
+            if ((packet_type == QM1FUNCPKT) || (packet_type == QM1SOLEPKT)) {
+               pause_btw = 12;			// for functions multiples of 52µs
+               pause_end = 59;
+               spi.speed_hz = SPI_BAUDRATE_MAERKLIN_FUNC_2;
             }
             else {
-              //0
-              if ((packet_type == QM1FUNCPKT) || (packet_type == QM1SOLEPKT)) {
-                spiBuffer[PAUSE_START + i * 2] = 0xE0;
-              }
-              else {
-                spiBuffer[PAUSE_START + i * 2] = 0xC0;
-              }
-              spiBuffer[PAUSE_START + i * 2 + 1] = 0x00;
+                 pause_btw = 12;		// for locos multiples of 104µs
+                 pause_end = 42;
+                 spi.speed_hz = SPI_BAUDRATE_MAERKLIN_LOCO_2;
             }
-          }
-          //Wiederholung nach Pause "dazwischen"
-          memcpy(&(spiBuffer[PAUSE_START + packet_size * 2 + pause_btw]), &(spiBuffer[PAUSE_START]), packet_size * 2);
-          //Länge ist 2 Mal Paket, Pause dazwischen, Pause Ende
-          spi.len = PAUSE_START + 2 * (packet_size * 2) + pause_btw + pause_end;
-          __DDL->spiLastMM = 1;
-          break;
-        }
-        case QMFX0PKT:
-        case QMFX1PKT:
-        case QMFX1DPKT:
-        case QMFX8PKT:
-        case QMFX16PKT:
-        case QMFX32PKT:
-        case QMFX64PKT:
-          __DDL->spiLastMM = 0;
-          spi.len = convertMFXPacketToSPIStream(busnumber, packet, spiBuffer, packet_type, &mfxRdsPos, &mfxRdsLen);
-          spi.speed_hz = SPI_BAUDRATE_MFX_2;
-          spi.delay_usecs = 0;
-          if (spi.len > sizeof(spiBuffer)) {
-            //Buffer war zu klein, es wurde Speicher überschrieben.
-            syslog_bus(busnumber, DBG_FATAL,
-                       "MFX SPI Buffer Override. Buffersize=%d, Bytes write=%d",
-                       sizeof(spiBuffer), spi.len);
-            /*What to do now ?*/
-            exit(1);
-          }
-          break;
-    }
-
-    switch (packet_type) {
-        case QM1LOCOPKT:
-        case QM2LOCOPKT:
-        case QM2FXPKT:
-        case QM1FUNCPKT:
-        case QM1SOLEPKT:
+            if (! __DDL->spiLastMM) {
+               //Wenn das letzte Paket kein MM Paket war, dann wird am Anfang noch eine Pause eingefügt
+               spi.len = pause_end;
+               if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
+                  syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
+               return;
+               }
+            }
+            for (i=0; i<packet_size; i++) {
+                if (packet[i]) {
+                //1
+                spiBuffer[PAUSE_START + i * 2] = 0xFF;
+                spiBuffer[PAUSE_START + i * 2 + 1] = 0xFC;
+                }
+                else {
+                //0
+                if ((packet_type == QM1FUNCPKT) || (packet_type == QM1SOLEPKT)) {
+                   spiBuffer[PAUSE_START + i * 2] = 0xE0;
+                }
+                else {
+                   spiBuffer[PAUSE_START + i * 2] = 0xC0;
+                }
+                spiBuffer[PAUSE_START + i * 2 + 1] = 0x00;
+                }
+            }
+            // doubling the MM packet
+            memcpy(&(spiBuffer[PAUSE_START + packet_size * 2 + pause_btw]), &(spiBuffer[PAUSE_START]), packet_size * 2);
+            spi.len = PAUSE_START + 2 * (packet_size * 2) + pause_btw + pause_end;
+            __DDL->spiLastMM = 1;
             for (i = 0; i < xmits; i++) {
                 if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
                   syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
@@ -1099,84 +1091,49 @@ void send_packet(bus_t busnumber, char *packet,
             break;
         case QNBLOCOPKT:
         case QNBACCPKT:
+            __DDL->spiLastMM = 0;
+            spi.len = convertNMRAPacketToSPIStream(busnumber, packet, spiBuffer);
+            spi.speed_hz = SPI_BAUDRATE_NMRA_2;
             for (i = 0; i < xmits; i++) {
             	if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
                 	syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
                 	return;
                 }
             }
-#if 0
-            if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi_nmra_idle) < 0) {
-                syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
-                return;
-            }
-            if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
-                syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
-                return;
-            }
-#endif
             break;
-        case QMFX0PKT:
-        case QMFX1PKT:
-        case QMFX1DPKT:
+        case QMFX1PKTD:
+        case QMFX1PKTV:
         case QMFX8PKT:
         case QMFX16PKT:
         case QMFX32PKT:
-        case QMFX64PKT:	{	}
-            //Die "1 Bit" Rückmeldungen (RDS Signal vorhanden) erfolgen direkt über SPI MISO
-            unsigned int spiRxBufferSize = 0;
-            MFXRDSBits mfxRDSBits;
-            switch (packet_type) {
-              case QMFX1PKT:
-                //Es wird ein Eingangsbuffer benötigt
-                spiRxBufferSize = spi.len;
-                break;
-              case QMFX8PKT:
-                mfxRDSBits = RDS_8;
-                write(__DDL->rdsPipeNew[1], &mfxRDSBits, sizeof(mfxRDSBits));
-                break;
-              case QMFX16PKT:
-                mfxRDSBits = RDS_16;
-                write(__DDL->rdsPipeNew[1], &mfxRDSBits, sizeof(mfxRDSBits));
-                break;
-              case QMFX32PKT:
-                mfxRDSBits = RDS_32;
-                write(__DDL->rdsPipeNew[1], &mfxRDSBits, sizeof(mfxRDSBits));
-                break;
-              case QMFX64PKT:
-                mfxRDSBits = RDS_64;
-                write(__DDL->rdsPipeNew[1], &mfxRDSBits, sizeof(mfxRDSBits));
-                break;
+			i = rxstartwait_comport(&sercomm_mfx);
+			syslog_bus(busnumber, DBG_DEBUG, "rxstartwait_comport returned %d", i);
+            write(__DDL->feedbackPipe[1], &packet_type, 1);
+        case QMFX0PKT:
+            __DDL->spiLastMM = 0;
+			spi.len = convertMFXPacketToSPIStream(busnumber, packet, spiBuffer, packet_type);
+            spi.speed_hz = SPI_BAUDRATE_MFX_2;
+            if (spi.len > sizeof(spiBuffer)) {
+               //Buffer war zu klein, es wurde Speicher überschrieben.
+               syslog_bus(busnumber, DBG_FATAL,
+                       "MFX SPI Buffer Override. Buffersize=%d, Bytes write=%d",
+                       sizeof(spiBuffer), spi.len);
+               /*What to do now ?*/
+               exit(1);
             }
-            char spiRxBuffer[spiRxBufferSize];
-            if (spiRxBufferSize > 0) {
-              spi.rx_buf = (unsigned long)spiRxBuffer;
-            }
-            //Ausgabe, doppelt für Befehle ohne Rückmeldung
+            // multiple transmission only if no feedback
             for (i=0; i<(packet_type == QMFX0PKT ? xmits : 1); i++) {
               if (ioctl(buses[busnumber].device.file.fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
                 syslog_bus(busnumber, DBG_FATAL, "Error SPI Transfer ioctl.");
                 return;
               }
             }
-            //Auswertung "1 Bit" Rückmeldung
-            if (spiRxBufferSize > 0) {
-              //Wenn im Rückmeldefenster 50% auf 1 gesetzt ist, hat ein MFX Dekoder geantwortet
-              unsigned int count1 = 0;
-              for (i = 0; i < mfxRdsLen; i++) {
-                count1 += __builtin_popcount(spiRxBuffer[mfxRdsPos + i]);
-              }
-              //50% der Bits gesetzt, es wird wohl tatsächlich ein Dekoder geantwortet haben und keine Störung sein
-              bool rdsOK = (count1 >= (8*mfxRdsLen/2));
-              //RDS Rückmeldung absenden
-              tMFXRDSFeedback rdsFeedback;
-              rdsFeedback.ok = true; //Bei 1 Bit Rückmeldungen immer ok.
-              rdsFeedback.bits = 1;
-              rdsFeedback.feedback[0] = rdsOK;
-              newMFXRDSFeedback(rdsFeedback);
-            }
-            break;
-    }
+			if (packet_type != QMFX0PKT) {
+				i = read_comport(busnumber, sizeof(feedbackbuf), feedbackbuf);
+				if (i) serialMFXresult(feedbackbuf, i);
+			}
+			break;
+	}
 }
 
 /**
@@ -1376,7 +1333,7 @@ bool power_is_off(bus_t busnumber)
 void use_pgtrack(bus_t busnumber, bool use)
 {
     syslog_bus(busnumber, DBG_DEBUG,
-		"Programming track usage, actual %d, requested %d", __DDL->pgtrkonly, use);
+		"Programming track usage: actual %d, requested %d", __DDL->pgtrkonly, use);
     // TODO: complete coding of this procedure, HW access
     if (!__DDL->pgtrkonly && use) {
         syslog_bus(busnumber, DBG_DEBUG, "*** Main Track suspended");
@@ -1420,7 +1377,7 @@ static int init_gl_DDL(gl_data_t * gl, char *optData)
             break;
         case 'X': 			/* MFX */
             if (gl->n_func > 32) return SRCP_WRONGVALUE;
-            if (gl->protocolversion < 0 || gl->protocolversion > 1) {
+            if (gl->protocolversion > 1) {
                 return SRCP_WRONGVALUE;
             }
             // in case of MFX, UID could be appended optionally:
@@ -1493,9 +1450,11 @@ int readconfig_DDL(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
     __DDL->ENABLED_PROTOCOLS = (EP_MAERKLIN | EP_NMRADCC);      /* enabled p's */
     __DDL->NMRA_GA_OFFSET = 0;  /* offset for ga base address 0 or 1  */
     __DDL->PROGRAM_TRACK = 1;   /* 0: suppress SM commands to PT address */
+    __DDL->BOOSTER_COMM = 0;	/* feedback communication with boosters */
+    __DDL->FB_DEVNAME[0] = 0;	/* name of feedback UART device  */
     __DDL->MCS_DEVNAME[0] = 0;	/* if empty you do not use such a device */
-   	__DDL->FWD_M_ACCESSORIES = busnumber;	/* default is own bus */
-   	__DDL->FWD_N_ACCESSORIES = busnumber;	/* default is own bus */
+    __DDL->FWD_M_ACCESSORIES = busnumber;	/* default is own bus */
+    __DDL->FWD_N_ACCESSORIES = busnumber;	/* default is own bus */
 
     xmlNodePtr child = node->children;
     xmlChar *txt = NULL;
@@ -1602,6 +1561,21 @@ int readconfig_DDL(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
                 xmlFree(txt);
             }
         }
+        else if (xmlStrcmp(child->name, BAD_CAST "booster_comm") == 0) {
+            txt = xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+            if (txt != NULL) {
+                __DDL->BOOSTER_COMM = (xmlStrcmp(txt, BAD_CAST "yes")
+                                        == 0) ? true : false;
+                xmlFree(txt);
+            }
+        }
+        else if (xmlStrcmp(child->name, BAD_CAST "fb_device") == 0) {
+            txt = xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+            if (txt != NULL) {
+            	strncpy(__DDL->FB_DEVNAME, (char *)txt, 15);
+                xmlFree(txt);
+            }
+        }
         else if (xmlStrcmp(child->name, BAD_CAST "mcs_device") == 0) {
             txt = xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
             if (txt != NULL) {
@@ -1658,12 +1632,21 @@ int init_bus_DDL(bus_t busnumber)
                buses[busnumber].debuglevel);
 
     if (buses[busnumber].device.file.fd <= 0) {
-      buses[busnumber].device.file.fd = init_lineDDL(busnumber);
+		buses[busnumber].device.file.fd = init_lineDDL(busnumber);
+		if (__DDL->FB_DEVNAME[0]) {
+			open_comport(busnumber, __DDL->FB_DEVNAME);
+			cfmakeraw(&sercomm_mfx);
+			cfsetispeed(&sercomm_mfx, B9600);
+			cfsetospeed(&sercomm_mfx, B9600);
+		}
     }
     else {
     	syslog_bus(busnumber, DBG_INFO, "DDL was already active, pools must be reset.");
-	    reset_NMRAPacketPool(busnumber);
-	    reset_MFXPacketPool(busnumber);
+		write(__DDL->feedbackPipe[1], &protocol, 1);	// stop feedback thread
+		reset_NMRAPacketPool(busnumber);
+		reset_MFXPacketPool(busnumber);
+		close(__DDL->feedbackPipe[0]);
+		close(__DDL->feedbackPipe[1]);
 	}
 
     //GPIO In-Output für Boosterstuerung setzen:
@@ -1714,6 +1697,19 @@ int init_bus_DDL(bus_t busnumber)
     }
 	if (__DDL->MCS_DEVNAME[0]) init_mcs_gateway(busnumber);
 
+    //Pipe to communicate towards feedback thread, and create thread
+    int result = pipe(__DDL->feedbackPipe);
+    if (result != 0) {
+        syslog_bus(busnumber, DBG_ERROR,
+            	"pipe() failed: %s (errno = %d).", strerror(result), result);
+    }
+    __DDL->ownbusnr = busnumber;
+  	if (pthread_create(&feedbackThread, NULL, thr_feedbackThread,
+	  											(void *) __DDL) != 0) {
+    	syslog_bus(busnumber, DBG_ERROR,
+						"pthread_create thr_feedbackThread failed");
+  	}
+
     syslog_bus(busnumber, DBG_INFO, "DDL init done");
     buses[busnumber].protocols = protocols;
     return 0;
@@ -1727,6 +1723,7 @@ static void end_bus_thread(bus_thread_t * btd)
 
     if (buses[btd->bus].device.file.fd != -1)
         close(buses[btd->bus].device.file.fd);
+    close_comport(btd->bus);
 
     result = pthread_mutex_destroy(&buses[btd->bus].transmit_mutex);
     if (result != 0) {
@@ -1787,7 +1784,7 @@ static void *thr_Manage_DDL(void *v)
         pthread_testcancel();
 
         /* Service Mode Handling */
-        if (!queue_SM_isempty(btd->bus)) {
+        if (__DDLt->allowSM && !queue_SM_isempty(btd->bus)) {
             dequeueNextSM(btd->bus, &smakt);
 			switch(smakt.protocol) {
     			case PROTO_NMRA:	sprot = "NMRA";	break;
@@ -2005,6 +2002,13 @@ static void *thr_Manage_DDL(void *v)
             use_pgtrack(btd->bus, false);
         }
 
+		/* resume service mode command */
+		switch (__DDLt->resumeSM) {
+			case PROTO_MFX:	__DDLt->resumeSM = -1;	// do only once
+							resumeMfxGetCV();
+							break;
+		}
+
 		/* Generic Loco Handling */
         glp = dequeueNextGL(btd->bus);
 		if (glp) {
@@ -2031,7 +2035,7 @@ static void *thr_Manage_DDL(void *v)
         }
 
 		/* mfx Management */
-	    if ((__DDLt->ENABLED_PROTOCOLS & EP_MFX) &&
+	    if ((__DDLt->ENABLED_PROTOCOLS & EP_MFX) && __DDLt->allowSM &&
         		((tv_mfx.tv_sec == 0) || (timeSince(tv_mfx) >= nextmfxman))) {
         	nextmfxman = mfxManagement(btd->bus);
 			gettimeofday(&tv_mfx, NULL);

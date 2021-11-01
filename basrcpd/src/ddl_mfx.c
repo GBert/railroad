@@ -1,4 +1,4 @@
-// ddl_mfx.c - adapted for basrcpd project 2018 by Rainer Müller 
+// ddl_mfx.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -23,6 +23,8 @@
 #include "syslogmessage.h"
 #include "ddl.h"
 #include "srcp-gl.h"
+#include "srcp-sm.h"
+#include "srcp-info.h"
 #include "srcp-error.h"
 
 #ifndef SYSCONFDIR
@@ -30,49 +32,17 @@
 #endif
 
 //Zentrale UID, Dekoder Existenzabfrage und Dekodersuche Intervall (us)
-#define INTERVALL_UID 500000
+//#define INTERVALL_UID 500000
 //Anzahl Durchläufe "Zentrale UID" (INTERVALL_UID) nach der wieder eine Adresszuweisung wiederholt wird
-#define LOOP_UID_SID_REPEAT 10
+//#define LOOP_UID_SID_REPEAT 10
 //Pause nach MFX Read Befehlen(us)
 #define PAUSE_MFX_READ 50000
 
 //Max. MFX RDS Leseversuche
-#define MAX_RDS_REPEATS 10
+#define MAX_RDS_TRIALS 3
 
 //Anzahl MFX Funktionen
 #define MFX_FX_COUNT 16
-
-#if defined BANANAPI
-    #include <a20hw.h>
-  /* TODO for BPi*/    //Auf dem BananaPI muss das noch geklärt werden.
-  #define BAPI_MFX_RDS_QAL 16
-  #define BAPI_MFX_RDS_CLK 18
-  #define BAPI_MFX_RDS_DAT 22
-#elif defined RASPBERRYPI
-    #include <bcm2835.h>
-//RDS Input Ports
-//- QUAL : GPIO23, PIN16
-//- CLK  : GPIO24, PIN18
-//- DATA : GPIO25, PIN22
-#ifdef RASPBERRYPI_BOARD_V1
-  #define RPI_MFX_RDS_QAL RPI_GPIO_P1_16
-  #define RPI_MFX_RDS_CLK RPI_GPIO_P1_18
-  #define RPI_MFX_RDS_DAT RPI_GPIO_P1_22
-#elif defined RASPBERRYPI_BOARD_V2
-  //Auf dem Board V2 wurden ein paar Leitungen anders gemacht, warum auch immer...
-  #define RPI_MFX_RDS_QAL RPI_V2_GPIO_P1_16
-  #define RPI_MFX_RDS_CLK RPI_V2_GPIO_P1_18
-  #define RPI_MFX_RDS_DAT RPI_V2_GPIO_P1_22
-#elif defined RASPBERRYPI_MODEL_2_3
-  #define RPI_MFX_RDS_QAL RPI_BPLUS_GPIO_J8_16
-  #define RPI_MFX_RDS_CLK RPI_BPLUS_GPIO_J8_18
-  #define RPI_MFX_RDS_DAT RPI_BPLUS_GPIO_J8_22
-#else
-  #error "Unsupported new RaspberryPI Board Version"
-#endif
-
-#endif
-
 
 //MFX Verwaltungsthread
 //static pthread_t mfxManageThread;
@@ -80,10 +50,10 @@ static uint16_t registrationCounter;
 static int searchstep = 0;
 
 //MFX RDS Feedback thread
-static pthread_t mfxRDSThread;//Global zugängliche Parameter -> Code ist nur für eine DDL Instanz zu gebrauchen...
 static bus_t busnumber = 0;
 static int fdRDSNewRx; //Handle auf Pipe über die der RDS Rückmelde Thread Aufträge erhält
 
+static tMFXRead mfxread;
 static tMFXRDSFeedback rdsFeedback; //RDS Rückmeldungen
 static sem_t semRDSFeedback; //Semaphore zur Medlung von neuen RDS Daten
 
@@ -91,18 +61,6 @@ static sem_t semRDSFeedback; //Semaphore zur Medlung von neuen RDS Daten
 #define CV_SIZE 1024
 #define CVINDEX_SIZE 64
 
-#if 0
-typedef struct _tMFXKonfigCache {
-  //Die Dekoder Adresse
-  int adresse;
-  //Die Konfigdaten
-  uint8_t cache[CV_SIZE][CVINDEX_SIZE];
-  //Gültigkeit des Cache
-  bool valid[CV_SIZE][CVINDEX_SIZE];
-} tMFXKonfigCache;
-//Es wird jeweils eine Lok im Cache gehalten, mit der gerade Konfig-Variablen gelesen / geschrieben werden.
-static tMFXKonfigCache mfxKonfigCache = {.adresse=0, .cache={{0}}, .valid={{0}}};
-#endif
 
 /**
  * Servicemode (SM) aktiv oder nicht.
@@ -115,12 +73,12 @@ static bool sm = false;
  * MFX RDS Rückmeldung ist eingetroffen.
  * @param mfxRDSFeedback RDS Rückmeldung
  */
-void newMFXRDSFeedback(tMFXRDSFeedback mfxRDSFeedback) {
+/*void newMFXRDSFeedback(tMFXRDSFeedback mfxRDSFeedback) {
   rdsFeedback = mfxRDSFeedback;
   if (sem_post(&semRDSFeedback) != 0) {
     syslog_bus(busnumber, DBG_ERROR, "newMFXRDSFeedback sem_post fail");
   }
-}
+}		*/
 
 /**
  * Warten auf eine neue RDS Antwort.
@@ -131,9 +89,11 @@ static bool waitRDS() {
   timeout.tv_sec = 1;
   timeout.tv_nsec = 0;
   while (true) {
-    if (sem_timedwait(&semRDSFeedback, &timeout) == 0) {
+    // if (
+	    printf("waitRDS sem_wait %d, errno %d\n", sem_timedwait(&semRDSFeedback, &timeout), errno);
+		// == 0) {
       return true;
-    }
+//    }
     if (! buses[busnumber].power_state) {
       //Power Off -> nicht mehr warten
       //printf("waitRDS sem_wait Timeout\n");
@@ -153,7 +113,7 @@ static bool waitRDS() {
  *            Minimale Länge muss für alles ausreichend sein:
  *            Länge UID und fx max 10, Name 16+2 plus Spaces
  */
-void getMFXInitParam(uint32_t uid, /*char *name, uint32_t *fx,*/ char *msg) 
+void getMFXInitParam(uint32_t uid, /*char *name, uint32_t *fx,*/ char *msg)
 {
   sprintf(msg + strlen(msg), " %u", uid);
 /*  sprintf(msg + strlen(msg), " %u \"%s\"", uid, name);
@@ -168,7 +128,7 @@ void getMFXInitParam(uint32_t uid, /*char *name, uint32_t *fx,*/ char *msg)
  * @param gl Lok, zu der die MFX spezifischen INIT Paramater ermittelt werden sollen.
  * @param msg Message, an die die Paramater gehängt werden sollen.
  */
-void describeGLmfx(gl_data_t *gl, char *msg) 
+void describeGLmfx(gl_data_t *gl, char *msg)
 {
   if (gl->protocol == 'X') {
 //    getMFXInitParam(gl->decuid, /* gl->optData.mfx.name, gl->optData.mfx.fx,*/ msg);
@@ -260,7 +220,7 @@ static unsigned int sendMFXPaket(int address, char *stream, int packetTyp, int x
   //Da nur ein Paket mit MFX Rückmeldung unterwegs sein kann, muss die Semaphore zur RDS Rückmeldung hier immer auf 0 stehen.
   //Durch Timeout beim warten wegen z.B. Power Off und doch noch Ausführen Feedbackbefehl bei Power On
   //könnte es sein, dass die Semaphore deshalb bereits auf >0 steht.
-  if (packetTyp != QMFX0PKT) {
+/*  if (packetTyp != QMFX0PKT) {
     int value;
     while (true) {
       if (sem_getvalue(&semRDSFeedback, &value) == 0) {
@@ -276,23 +236,21 @@ static unsigned int sendMFXPaket(int address, char *stream, int packetTyp, int x
         break;
       }
     }
-  }
-  
+  }		*/
+
 	unsigned int sizeStream = ((stream[0] + 7) / 8) + 1; //+7 damit immer bei int Division aufgerundet wird
 	send_packet(busnumber, stream, sizeStream, packetTyp, xmits);
 	return sizeStream;
 }
 
 /**
-  Generate the packet for MFX-decoder with 9-bit
-  address and 128 speed steps and up to 16 functions
+  Generate the packet for MFX-decoder with 128 speed steps and up to 16 functions
   @param pointer to GL data
 */
 
 void comp_mfx_loco(bus_t bus, gl_data_t *glp)
 {
-	char packetstream[PKTSIZE];
-	memset(packetstream, 0, PKTSIZE);
+	char packetstream[PKTSIZE] = { 0 };
 
     int address = glp->id;
     int speed = glp->speed;
@@ -308,10 +266,10 @@ void comp_mfx_loco(bus_t bus, gl_data_t *glp)
     }
     else if (speed) speed++;        	// Never send FS1
 
-    if (direction == -1) direction = 0; // mfx loco TERM	
+    if (direction == -1) direction = 0; // mfx loco TERM
   	if (speed > 127) speed = 127;
     glp->speedchange &= ~(SCSPEED | SCDIREC);   // handled now
-    
+
 	syslog_bus(bus, DBG_DEBUG,
              "command for MFX protocol received addr:%d "
              "dir:%d speed:%d nspeeds:%d nfunc:%d funcs %x",
@@ -320,7 +278,7 @@ void comp_mfx_loco(bus_t bus, gl_data_t *glp)
   //packetstream Format:
   //1. Byte länge
   //Ab 2. Byte Low Bit: jedes Bit bis Anzahl Bits Länge
-  
+
   //Format des Bitstreams für Fahrstufe ist (9 Bit Adresse, 127 Fahrstufen):
   //<=4 Fn       : 110AAAAAAAAA001RSSSSSSS010FFFFCCCCCCCC
   //>4 .. <=8 Fn : 110AAAAAAAAA001RSSSSSSS0110FFFFFFFFCCCCCCCC
@@ -370,7 +328,7 @@ void comp_mfx_loco(bus_t bus, gl_data_t *glp)
       int i;
       for (i=16; i<32; i++) {
         if ((fxChange & (1U << i)) != 0) {
-			syslog_bus(bus, DBG_DEBUG, "COMP MFX Loco. Adr=%d, nfuncs=%d, Fx%d=%d", 
+			syslog_bus(bus, DBG_DEBUG, "COMP MFX Loco. Adr=%d, nfuncs=%d, Fx%d=%d",
 		  						address, nfuncs, i, (funcs >> i) & 1);
           	memset(packetstream, 0, PKTSIZE);
           	pos = 0;
@@ -392,7 +350,7 @@ void comp_mfx_loco(bus_t bus, gl_data_t *glp)
  * @return Aktuell gespeicherter Neuanmeldezähler, wenn nichts gespeichert ist 0.
  */
 static uint16_t loadRegistrationCounter() {
-  syslog_bus(busnumber, DBG_INFO, 
+  syslog_bus(busnumber, DBG_INFO,
   			"Load ReRegistration counter from file %s", REG_COUNTER_FILE);
   int regCountFile = open(REG_COUNTER_FILE, O_RDONLY);
   if (regCountFile < 0) {
@@ -428,10 +386,9 @@ static void saveRegistrationCounter(uint16_t regCounter) {
  * @param uid
  * @param registrationCounter
  */
-static void sendUIDandRegCounter(uint32_t uid, uint16_t registrationCounter) {
-  //printf("sendUIDandRegCounter uid=%u regCounter=%u\n", uid, registrationCounter);
-  char packetstream[PKTSIZE];
-  memset(packetstream, 0, PKTSIZE);
+static void sendUIDandRegCounter(uint32_t uid, uint16_t registrationCounter)
+{
+	char packetstream[PKTSIZE] = { 0 };
   //Format des Bitstreams:
   //10AAAAAAA111101UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUZZZZZZZZZZZZZZZZCCCCCCCC
   //A=0 (Broadcast)
@@ -444,7 +401,7 @@ static void sendUIDandRegCounter(uint32_t uid, uint16_t registrationCounter) {
   addBits(uid, 32, packetstream, &pos); //32 Bit UID
   addBits(registrationCounter, 16, packetstream, &pos); //16 Bit Neuanmeldezähler
   addCRCBits(packetstream, &pos);
-    
+
   sendMFXPaket(0, packetstream, QMFX0PKT, 1);
 }
 
@@ -453,14 +410,10 @@ static void sendUIDandRegCounter(uint32_t uid, uint16_t registrationCounter) {
  * Kann mit dekoderUID=0 zum löschend er SID im Dekoder mit anschliessender Neuanmeldung verwendet werden
  * @param adresse SID des Dekoders
  * @param dekoderUID Die UID des Dekoders (0=SID im Dekoder löschen)
- * @param waitDekoderQuittung true: Warten auf Quittung vom Dekoder (wird bei UID=0 ignoriert)
- *                            false: Keine Dekoder Rückmeldung abwarten
- * @return true Wenn der Dekoder vorhanden ist und antwortet, sonst false.
- *              Beim löschen SID im Dekoder (dekoderUID=0) oder wenn waitDekoderQuittung=false wird immer true zurückgegeben.
  */
-static bool sendDekoderExist(int adresse, uint32_t dekoderUID, bool waitDekoderQuittung) {
-  char packetstream[PKTSIZE];
-  memset(packetstream, 0, PKTSIZE);
+static void sendDekoderExist(int adresse, uint32_t dekoderUID)
+{
+	char packetstream[PKTSIZE] = { 0 };
   //Format des Bitstreams:
   //10AAAAAAA111100UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCCCCCCCC
   //Adresse
@@ -472,32 +425,12 @@ static bool sendDekoderExist(int adresse, uint32_t dekoderUID, bool waitDekoderQ
   addBits(dekoderUID, 32, packetstream, &pos); //32 Bit UID
   addCRCBits(packetstream, &pos);
 
-  unsigned int packetTyp;
-  if (dekoderUID == 0) {
-    //Löschen Zuordung, keine 1 Bit Rückmeldung
-    packetTyp = QMFX0PKT;
-  }
-  else {
-    //Dekoder Existenzabfrage, 1 Bit Rückmeldung
-    if (waitDekoderQuittung) {
-      packetTyp = QMFX1PKT;
-    }
-    else {
-      //Nur Dekoder Existenzabfrage senden, Rückmeldung egal (nur damit die MFX Dekoder zufrieden sind)
-      packetTyp = QMFX1DPKT;
-    }
-  }
-  sendMFXPaket(0, packetstream, packetTyp, 1);
-  if (packetTyp != QMFX1PKT) {
-    //keine Rückmeldung
-    return true;
-  }
-  //Dekoder Rückmeldung auswerten
-  //Warten auf Antwort
-  if (! waitRDS()) {
-    return false;
-  }
-  return rdsFeedback.feedback[0];
+	unsigned int packetTyp;
+	if (dekoderUID == 0)
+		packetTyp = QMFX0PKT;		// no verification when assignment removed
+	else
+		packetTyp = QMFX1PKTV;
+	sendMFXPaket(0, packetstream, packetTyp, 1);
 }
 
 /**
@@ -508,10 +441,10 @@ static bool sendDekoderExist(int adresse, uint32_t dekoderUID, bool waitDekoderQ
  *                   Wenn ein neuer Dekoder gefunden wurde wird dessen UID zurückgegeben.
  * @return true Wenn ein Dekoder auf die Suche reagiert hat und neu angemeldet werden muss.
  */
-static bool sendSearchNewDecoder(unsigned int countUIDBits, uint32_t *dekoderUID) {
+static bool sendSearchNewDecoder(unsigned int countUIDBits, uint32_t *dekoderUID)
+{
   //printf("Suche Dekoder C=%d, UID=%u\n", countUIDBits, *dekoderUID);
-  char packetstream[PKTSIZE];
-  memset(packetstream, 0, PKTSIZE);
+	char packetstream[PKTSIZE] = { 0 };
   //Format des Bitstreams:
   //10AAAAAAA111010CCCCCCUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCCCCCCCC
   //A=0 (Broadcast)
@@ -524,9 +457,9 @@ static bool sendSearchNewDecoder(unsigned int countUIDBits, uint32_t *dekoderUID
   addBits(countUIDBits, 6, packetstream, &pos); //6 Bit Count relevante UID Bits
   addBits(*dekoderUID, 32, packetstream, &pos); //32 Bit UID
   addCRCBits(packetstream, &pos);
-    
-  sendMFXPaket(0, packetstream, QMFX1PKT, 1);
-  
+
+  sendMFXPaket(0, packetstream, QMFX1PKTD, 1);
+
   //Warten auf Antwort
   if (! waitRDS()) {
     return false;
@@ -554,20 +487,17 @@ static bool sendSearchNewDecoder(unsigned int countUIDBits, uint32_t *dekoderUID
     return true;
   }
   //printf("Keine Antwort\n");
-  //Kein Dekoder hat geantwortet
   return false;
 }
 
 /**
  * Neuer Lok Schienenadresse zuweisen.
  * @param dekoderUID UID des neuen Dekoders
- * @return Die neu zugewiesene Schienenadresse. 0 wenn nicht möglich weil keine freie Adresse gefunden wurde.
  */
-void assignSID(uint32_t dekoderUID, unsigned int sid) 
+void assignSID(uint32_t dekoderUID, unsigned int sid)
 {
-  syslog_bus(busnumber, DBG_INFO, "New SID %d for UID %u", sid, dekoderUID);
-  char packetstream[PKTSIZE];
-  memset(packetstream, 0, PKTSIZE);
+	syslog_bus(busnumber, DBG_INFO, "New SID %d for UID %u", sid, dekoderUID);
+	char packetstream[PKTSIZE] = { 0 };
   //Format des Bitstreams:
   //10AAAAAAA111011AAAAAAAAAAAAAAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCCCCCCCC
   //1.A=0 (Broadcast)
@@ -580,24 +510,9 @@ void assignSID(uint32_t dekoderUID, unsigned int sid)
   addBits(sid, 14, packetstream, &pos); //14 Bit neue Adresse
   addBits(dekoderUID, 32, packetstream, &pos); //32 Bit UID
   addCRCBits(packetstream, &pos);
-    
+
   sendMFXPaket(0, packetstream, QMFX0PKT, 2);
 }
-
-#if 0
-/**
- * Prüft, ob der MFX Konfig Cache für Lokadresse "adresse" gesetzt ist.
- * Wenn nict, wird der Cache nue initialisiert.
- * @param adresse
- */
-static void checkMFXConfigCache(int adresse) {
-  if (mfxKonfigCache.adresse != adresse) {
-    //Bis jetzt ist eine andere Lok im Cache -> alles neu
-    mfxKonfigCache.adresse = adresse;
-    memset(mfxKonfigCache.valid, false, sizeof(mfxKonfigCache.valid));
-  }
-}
-#endif
 
 /**
  * CV einer Lok abrufen.
@@ -609,87 +524,32 @@ static void checkMFXConfigCache(int adresse) {
  * @param buffer Buffer in den die ausgelesen Bytes geschrieben werden.
  * @return true wenn ohne Fehler ausgelesen werden konnte.
  */
-static bool readCV(int adresse, uint16_t cv, uint16_t index, unsigned int bytes, char *buffer) 
+static bool readCV(int adresse, uint16_t cv, uint16_t index, unsigned int bytes)
 {
-//  checkMFXConfigCache(adresse);
-  if ((cv >= CV_SIZE) || (index >= CVINDEX_SIZE)) {
-    //Ungültige CV / Index Angaben
-    return false;
-  }
-  int i;
-#if 0
-  //Falls der Wert bereits im Cache ist wird dieser zurückgegeben
-  bool cacheOK = true;
-  for (i=0; i<bytes;i++) {
-    if (! mfxKonfigCache.valid[cv][index+i]) {
-      cacheOK = false;
-      break;
-    }
-  }
-  if (cacheOK) {
-    //Werte auc Cache zurückgeben
-    memcpy(buffer, &(mfxKonfigCache.cache[cv][index]), bytes);
-    return true;
-  }
-#endif
-  //Werte von Lokdekoder lesen
-  char packetstream[PKTSIZE];
-  memset(packetstream, 0, PKTSIZE);
+	if ((cv >= CV_SIZE) || (index >= CVINDEX_SIZE)) return false;
+
+	char packetstream[PKTSIZE] = { 0 };
   unsigned int packetTyp;
   unsigned int pos = 0;
   addAdrBits(adresse, packetstream, &pos); //Adresse
   addBits(0b111000, 6, packetstream, &pos); //KommandoCV lesen
   addBits(cv, 10, packetstream, &pos); //10 Bit CV
   addBits(index, 6, packetstream, &pos); //6 Bit Index
-  switch (bytes) { //2 Bits für Anzahl Bytes
-    case 2:
-      addBits(0b01, 2, packetstream, &pos);
-      packetTyp = QMFX16PKT;
-      break;
-    case 4:
-      addBits(0b10, 2, packetstream, &pos);
-      packetTyp = QMFX32PKT;
-      break;
-    case 8:
-      addBits(0b11, 2, packetstream, &pos);
-      packetTyp = QMFX64PKT;
-      break;
-    default:
-      //Im Zweifelsfall 1 Byte
-      bytes = 1;
-      addBits(0b00, 2, packetstream, &pos);
-      packetTyp = QMFX8PKT;
-  }
-  addCRCBits(packetstream, &pos);
+	switch (bytes) {						// 2 bits indicating nbr of bytes
+		case 1:	addBits(0b00, 2, packetstream, &pos);
+				packetTyp = QMFX8PKT;
+				break;
+		case 2:	addBits(0b01, 2, packetstream, &pos);
+				packetTyp = QMFX16PKT;
+				break;
+		default:addBits(0b10, 2, packetstream, &pos);
+				packetTyp = QMFX32PKT;
+	}
+	addCRCBits(packetstream, &pos);
 
-  for (i=0; i<MAX_RDS_REPEATS; i++) {
-    sendMFXPaket(0, packetstream, packetTyp, 1);
-  
-    //Auf Rückmeldung warten
-    if (! waitRDS()) {
-      return false;
-    }
-    if (rdsFeedback.ok) {
-      break;
-    }
-    /*
-    syslog_bus(busnumber, DBG_INFO,
-               "RDS Feedback ungültig");
-    printf("RDS Feedback ungültig\n");*/
-  }
-  if (rdsFeedback.ok) {
-    memcpy(buffer, rdsFeedback.feedback, bytes);
-    //printf("readCV return buffer[0]=0x%x\n", buffer[0]);
-    //Cache aktualisieren
-//    memcpy(&(mfxKonfigCache.cache[cv][index]), rdsFeedback.feedback, bytes);
-//    memset(&(mfxKonfigCache.valid[cv][index]), true, bytes);
-  }
-  else {
-    syslog_bus(busnumber, DBG_WARN, "RDS Feedback Abbruch. Zuviele ungültige Versuche.");
-  }
-  //Kurzs Pause damit nicht alles mit MFX Lesebefehlen geflutet wird.
-  usleep(PAUSE_MFX_READ);
-  return rdsFeedback.ok;
+	sendMFXPaket(0, packetstream, packetTyp, 1);
+
+	return true;
 }
 
 #if 0
@@ -813,7 +673,7 @@ static unsigned int getSID(uint32_t dekoderUID, bool *bereitsVorhanden) {
  * - Periodisches Versenden UID Zentrale und Neuanmeldezähler
  * - Periodisches suchen von noch nicht angemeldeten Dekodern, wenn welche gefunden werden,
  *   dann werden diese angemeldet.
- * @param 
+ * @param
  */
 time_t mfxManagement(bus_t busnum)
 {
@@ -823,7 +683,7 @@ time_t mfxManagement(bus_t busnum)
 	// TODO: search for new decoders and increment searchstep accordingly
     uint32_t dekoderUID = 0;
     if (searchstep) sendSearchNewDecoder(0, &dekoderUID);
-    
+
     return ((searchstep == 0) ? 1000000 : 100000);	// next call in about 1s or 0.1
 }
 
@@ -846,13 +706,12 @@ static void *thr_mfxManageThread(void *threadParam) {
       //Bus ist ein -> UID / Neuanmeldezähler versenden, neue Dekoder suchen
       sendUIDandRegCounter(uid, registrationCounter);
       usleep(INTERVALL_UID);
-#if 0
 // HACK: disable automatic PING and re-BIND by server
       //Periodische Existenzabfrage an alle angemeldeten Dekoder.
       //Rückmeldung wird nie ausgewertet, ich überwache sowieso nicht die ganze Anlage mit MFX fähigen Boostern
       uint32_t uidExist = getNextMFXLok(&lokAdrExist);
       if (uidExist != 0) {
-        sendDekoderExist(lokAdrExist, uidExist, false);
+        sendDekoderExist(lokAdrExist, uidExist);
         //Hier kommt noch ein kleiner Kunstgriff:
         //Periodische Widerholung MFX Schienenadresszuordnungen.
         //Damit werden Loks, die ihre Zuordnung gelöscht haben, gleich wieder angemeldet, auch dann, wenn sie auf einem
@@ -869,7 +728,6 @@ static void *thr_mfxManageThread(void *threadParam) {
           firstUID = uidExist;
         }
       }
-#endif
       //Wenn SM aktiv ist machen wir hier nichts mehr. Loksuche ist unterbrochen bis SM wieder ausgeschaltet wird.
       if (0) {		// HACK: disable temporarely (! sm) {
         //Suche nach noch nicht angemeldeten MFX Dekodern
@@ -885,7 +743,6 @@ static void *thr_mfxManageThread(void *threadParam) {
           //Neuanmeldezähler Inkrement
           registrationCounter++;
           saveRegistrationCounter(registrationCounter);
-#if 0
 // HACK: das brauchen wir wohl nicht
           //Lokname und Funktionen abfragen, wenn es eine neue Lok ist
           if (! bereitsVorhanden) {
@@ -913,267 +770,31 @@ static void *thr_mfxManageThread(void *threadParam) {
               sendDekoderTerm(adresse);
             }
           }
-#endif
         }
       }
     }
-#if 0
     else {
       //Beim nächsten Power Up wider von vorne beginnen mit SID Zuordnungen senden
       firstUID = 0;
       lokAdrExist = 0;
       countUIDLoops = 0;
     }
-#endif
     usleep(INTERVALL_UID);
   }
   return NULL;
 }
 #endif
 
-/**
- * Liest die RDS QUAL Leitung ein.
- * @return 0/1
- */
-static bool getRDSQual() {
-#if defined BANANAPI
-  /* TODO for BPi*/    //Auf dem BananaPI muss das noch geklärt werden.
-  // BAPI_MFX_RDS_QAL 
-    return 0;  
-#elif defined RASPBERRYPI
-    return  bcm2835_gpio_lev(RPI_MFX_RDS_QAL) == HIGH;
-#else
-  return false;
-#endif
-}
-/**
- * Liest die RDS CLK Leitung ein.
- * @return 0/1
- */
-static bool getRDSClk() {
-#if defined BANANAPI
-  /* TODO for BPi*/    //Auf dem BananaPI muss das noch geklärt werden.
-  // BAPI_MFX_RDS_CLK 
-    return 0;
-#elif defined RASPBERRYPI
-    return  bcm2835_gpio_lev(RPI_MFX_RDS_CLK) == HIGH;
-#else
-  return false;
-#endif
-}
-/**
- * Liest die RDS DATA Leitung ein.
- * @return 0/1
- */
-static bool getRDSData() {
-#if defined BANANAPI
-  /* TODO for BPi*/    //Auf dem BananaPI muss das noch geklärt werden.
-  // BAPI_MFX_RDS_DAT 
-    return 0;
-#elif defined RASPBERRYPI
-    return bcm2835_gpio_lev(RPI_MFX_RDS_DAT) == HIGH;
-#else
-  return false;
-#endif
-}
-
-/**
- * MFX Verwaltungsthread:
- * - Periodisches Versenden UID Zentrale und Neuanmeldezähler
- * - Periodisches suchen von noch nicht angemeldeten Dekodern, wenn welche gefunden werden,
- *   dann werden diese angemeldet.
- */
-static void *thr_mfxRDSThread(void *threadParam) 
+bool checkMfxCRC(uint8_t *buff, int n)
 {
-  MFXRDSBits mfxRDSBits;
-  
-#if defined BANANAPI
-  /* TODO for BPi*/    //Auf dem BananaPI muss das noch geklärt werden.
-  // BAPI_MFX_RDS_QAL 
-  // BAPI_MFX_RDS_CLK 
-  // BAPI_MFX_RDS_DAT 
-#elif defined RASPBERRYPI
-  //Notwendige Pins auf Input schalten
-  bcm2835_gpio_fsel(RPI_MFX_RDS_QAL, BCM2835_GPIO_FSEL_INPT);
-  bcm2835_gpio_set_pud(RPI_MFX_RDS_QAL, BCM2835_GPIO_PUD_OFF); //Kein Pull-Up-Down
-  bcm2835_gpio_fsel(RPI_MFX_RDS_CLK, BCM2835_GPIO_FSEL_INPT);
-  bcm2835_gpio_set_pud(RPI_MFX_RDS_CLK, BCM2835_GPIO_PUD_OFF); //Kein Pull-Up-Down
-  bcm2835_gpio_fsel(RPI_MFX_RDS_DAT, BCM2835_GPIO_FSEL_INPT);
-  bcm2835_gpio_set_pud(RPI_MFX_RDS_DAT, BCM2835_GPIO_PUD_OFF); //Kein Pull-Up-Down
-#else
-  syslog_bus(busnumber, DBG_ERROR,
-             "Kein MFX RDS Support auf dieser Plattform");
-#endif
-  
-  for (;;) {
-    //Warten auf einen Auftrag
-    read(fdRDSNewRx, &mfxRDSBits, sizeof(mfxRDSBits));
-    unsigned int rdsBitCount = 0;
-    uint16_t rdsCheckSumme = 0;
-    switch (mfxRDSBits) {
-      case RDS_8: //1Byte
-        rdsBitCount = 8;
-        break;
-      case RDS_16: //2Byte
-        rdsBitCount = 16;
-        break;
-      case RDS_32: //4Bytes
-        rdsBitCount = 32;
-        break;
-      case RDS_64: //8Bytes
-        rdsBitCount = 64;
-        break;
-      default:  ;
-    }
+	uint16_t crcreg = 0xFF;
 
-    //Es muss nun eine RDS Rückmeldung erfolgen.
-    // - Warten bis RDS QUAL Meldung vorliegt
-    // - Max. 23 mal 1, dann 010 (Startkennung)
-    // - Anzahl erwartetet Datenbits
-    // - 8 Bit Checksumme
-    //Alles zusammen darf max. 200ms dauern, sonst wird abgebrochen
-    struct timeval timeStart;
-    gettimeofday(&timeStart, NULL);
-    enum state_e {STATE_START1, STATE_START010, STATE_DATA, STATE_CHECK, STATE_FINAL};
-    enum state_e state = STATE_START1; //Warten auf QUAL und Data 1
-    unsigned int count = 0;
-    //Die Antwort
-    tMFXRDSFeedback mfxRDSFeedback;
-    memset(&mfxRDSFeedback, 0, sizeof(mfxRDSFeedback));
-    mfxRDSFeedback.ok = true;
-
-    //RDS Antwort einlesen und verarbeiten    
-    while ((state != STATE_FINAL)) {
-      //Warte auf nächsten Clock, positive Flanke
-      bool clkOld = getRDSClk();
-      for (;;) {
-        //Daten kommen etwa im 1ms Takt. Mit 200us Wartezeit sollte nichts verpasst werden
-        usleep(200);
-        bool clk = getRDSClk();
-        if ((!clkOld) && clk) {
-          //Pos. Flanke erkannt
-          //printf("RDS Clk.\n");
-          break;
-        }
-        clkOld = clk;
-        //ggf. Abbruch wegen Timeout
-		if (timeSince(timeStart) > 200000) {
-          //printf("RDS Timeout\n");
-          mfxRDSFeedback.ok = false;
-          break;
-        }
-      }
-      if (! mfxRDSFeedback.ok) {
-        break;
-      }
-      else {
-        switch (state) {
-          case STATE_START1:
-            //Während Sync Sequenz sollte RDS Qual Meldung vorhandens ein.
-            //Wenn nicht -> von vorne
-            if (! getRDSQual()) {
-              count = 0;
-              //printf("RDS Sync Abbruch. QUAL=0.\n");
-            }
-            else {
-              if (getRDSData()) {
-                count++; //Wieder ein 1 der Sync. Sequenz eingelesen
-                //printf("RDS STATE_START1. count=%d.\n", count);
-              }
-              else {
-                //Von den 23 Bits 1 in der Sync. Sequenz will ich min. die letzten 3 gesetzt sehen, dann kann dieses 0 die Startsquenz sein
-                if (count >= 3) {
-                  //printf("RDS new STATE_START010.\n", count);
-                  count = 0;
-                  state = STATE_START010;
-                }
-                else {
-                  //Wieder von vorne beginnen
-                  //printf("RDS STATE_START1 Restart. count=0.\n");
-                  count = 0;
-                }
-              }
-            }
-            break;
-          case STATE_START010:
-            //Erstes 0 wurde bereits gelesen, es wird noch 10 erwartet
-            //printf("RDS STATE_START010 count=%d.\n", count);
-            if (count == 0) {
-              if (getRDSData()) {
-                //1 gelesen, alles OK
-                count++;
-              }
-              else {
-                //0, Falsch, Abbruch
-                count = 0;
-                state = STATE_START1;
-                //printf("RDS STATE_START010 Abbruch -> STATE_START1.\n");
-              }
-            }
-            else {
-              if (getRDSData()) {
-                //1 gelesen, Abbruch
-                count = 0;
-                state = STATE_START1;
-                //printf("RDS STATE_START010 Abbruch -> STATE_START1.\n");
-              }
-              else {
-                //0, OK, Startsquenz ist fertig!
-                count = 0;
-                state = STATE_DATA;
-                //printf("RDS STATE_START010 -> STATE_DATA.\n");
-              }
-            }
-            break;
-          case STATE_DATA:
-            mfxRDSFeedback.feedback[count / 8] = (mfxRDSFeedback.feedback[count / 8] << 1) | getRDSData();
-            count++;
-            if (count >= rdsBitCount) {
-              state = STATE_CHECK;
-              count = 0;
-              //printf("RDS STATE_DATA -> STATE_CHECK.\n");
-            }
-            break;
-          case STATE_CHECK:
-            rdsCheckSumme = (rdsCheckSumme << 1) | getRDSData();
-            count++;
-            if (count >= 8) {
-              //Checksumme vollständig eingelesen
-              state = STATE_FINAL;
-              //printf("RDS STATE_CHECK -> STATE_FINAL.\n");
-            }
-            break;
-          default:  ;
-        }
-      }
-    }
-    if (state == STATE_FINAL) {
-      //Noch Checksumme prüfen
-      uint16_t checksum = 0x00FF;
-      int i;
-      for (i = 0; i < (rdsBitCount / 8); i++) {
-        checksum = checksum ^ (checksum << 1) ^ (checksum << 2);
-        checksum = checksum ^ mfxRDSFeedback.feedback[i];
-        if (checksum & 0x0100) {
-          checksum = checksum ^ 0x0107;
-        }
-        if (checksum & 0x0200) {
-          checksum = checksum ^ 0x020E;
-        }
-      }
-      if (checksum == rdsCheckSumme) {
-        mfxRDSFeedback.ok = true;
-        //printf("RDS Checksumme 0x%x OK. Byte 0=0x%x\n", rdsCheckSumme, mfxRDSFeedback.feedback[0]);
-      }
-      else {
-        mfxRDSFeedback.ok = false;
-        //printf("RDS Checksumme falsch.\n");
-      }
-    }
-    //Antwort absenden
-    newMFXRDSFeedback(mfxRDSFeedback);
-  }
-  return NULL;
+	for (int i = 0; i < n; i++) {
+		crcreg ^= (crcreg << 1) ^ (crcreg << 2) ^ buff[i];
+		if (crcreg & 0x0100) crcreg ^= 0x0107;
+		if (crcreg & 0x0200) crcreg ^= 0x020E;
+	}
+	return (crcreg == buff[n]);
 }
 
 /**
@@ -1190,19 +811,14 @@ int startMFXThreads(bus_t _busnumber, int _fdRDSNewRx)
 	if (busnumber) return 2;		// don't start threads twice
   	busnumber = _busnumber;
   	fdRDSNewRx = _fdRDSNewRx;
-  	
+
 	registrationCounter = loadRegistrationCounter();
-	syslog_bus(busnumber, DBG_INFO, 
+	syslog_bus(busnumber, DBG_INFO,
 				"ReRegistration counter initialized with %d", registrationCounter);
 
   if (sem_init(&semRDSFeedback, 0, 0) != 0) {
     syslog_bus(busnumber, DBG_ERROR,
                "sem_init fail");
-    return 1;
-  }
-  if (pthread_create(&mfxRDSThread, NULL, thr_mfxRDSThread, NULL) != 0) {
-    syslog_bus(busnumber, DBG_ERROR,
-               "pthread_create thr_mfxRDSThread fail");
     return 1;
   }
   return 0;
@@ -1212,15 +828,11 @@ int startMFXThreads(bus_t _busnumber, int _fdRDSNewRx)
  * Alle MFX Threads terminieren.
  * @return 0 für OK, !=0 für Fehler
  */
-int stopMFXThreads() 
+int stopMFXThreads()
 {
-  if (pthread_cancel(mfxRDSThread) != 0) {
-    return 1;
-  }
   if (sem_destroy(&semRDSFeedback) != 0) {
     return 1;
   }
-//  saveRegistrationCounter(registrationCounter);
   return 0;
 }
 
@@ -1229,10 +841,125 @@ int stopMFXThreads()
  * @param adresse Aktuell zugeordnete Schienenadresse.
  */
 void sendDekoderTerm(int adresse) {
-  sendDekoderExist(adresse, 0, false);
+  sendDekoderExist(adresse, 0);
 }
 
 //---------------------------- SM ----------------------------------------
+
+/**
+ * handle result received via serial feedback port
+ */
+void serialMFXresult(uint8_t *buf, int len)
+{
+	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
+	syslog_bus(busnumber, DBG_DEBUG, "read_comport read %d bytes", len);
+	for (int n=0; n<len; n++)
+		syslog_bus(busnumber, DBG_DEBUG, "read data %d was 0x%02X", n, buf[n]);
+
+	ddl->fbData.serask = buf[0];
+	uint8_t	event = 0x43;	// HACK: send something wired for test
+	write(ddl->feedbackPipe[1], &event, 1);
+}
+
+/**
+ * generate report when read successful
+ */
+void sendMFXreadCVresult(uint8_t *data)
+{
+	char minfo[4], info[250];
+	struct timeval now;
+	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
+
+	gettimeofday(&now, NULL);
+	sprintf(info, "%lu.%.3lu 100 INFO %lu SM %d CVMFX %d %d",
+			now.tv_sec, now.tv_usec / 1000, busnumber,
+			mfxread.addr, mfxread.cvline, mfxread.cvindex);
+
+	for (int i = 0; i < ddl->fbData.fbbytnum; i++) {
+		minfo[0] = 3;					// send read config responses
+		minfo[1] = (mfxread.cvline >> 8) | ((mfxread.cvindex + i) << 2);
+		minfo[2] = mfxread.cvline & 0xFF;
+		minfo[3] = data[i];
+		info_mcs(busnumber, 0x0F, mfxread.addr | 0x4000, minfo);
+		sprintf(info + strlen(info), " %d", data[i]);
+	}
+	sprintf(info + strlen(info), "\n");
+	enqueueInfoMessage(info);
+
+	usleep(200000);						// cooling gap
+	mfxread.cvnmbr -= 4;
+	if (mfxread.cvnmbr > 0) {
+		mfxread.cvindex += 4;
+		mfxread.repcount = 0;
+		ddl->resumeSM = PROTO_MFX;		// trigger resume
+	}
+}
+
+/**
+ * handle response from mfx ack
+ */
+void handleMFXacknowledge(uint8_t askval)
+{
+	char minfo[4], info[250];
+	struct timeval now;
+	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
+	syslog_bus(busnumber, DBG_INFO, "MFX - A C K  auf Code %d", ddl->fbData.pktcode);
+
+	switch (ddl->fbData.pktcode) {
+	case QMFX1PKTD:		// TODO: handle discovery packet - carrier detected
+					break;
+	case QMFX1PKTV:	minfo[0] = 3;		// send verify response with ASK
+					minfo[1] = mfxread.addr >> 8;
+					minfo[2] = mfxread.addr & 0xFF;
+					minfo[3] = askval;
+					info_mcs(busnumber, 7, mfxread.decuid, minfo);
+
+					gettimeofday(&now, NULL);
+					sprintf(info, "%lu.%.3lu 100 INFO %lu SM %d BIND %u\n",
+                            now.tv_sec, now.tv_usec / 1000, busnumber,
+                            mfxread.addr, mfxread.decuid);
+					enqueueInfoMessage(info);
+					break;
+	}
+}
+
+/**
+ * handle mfx response timeout
+ */
+void handleMFXtimeout(void)
+{
+	char minfo[4];
+	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
+	syslog_bus(busnumber, DBG_INFO, "MFX - TIMEOUT auf Code %d", ddl->fbData.pktcode);
+
+	switch (ddl->fbData.pktcode) {
+	case QMFX1PKTD:		// TODO: handle discovery packet - NO carrier detected
+					break;
+	case QMFX1PKTV:	minfo[0] = 2;		// send verify response with SID = 0
+					minfo[1] = 0;
+					minfo[2] = 0;
+					info_mcs(busnumber, 7, mfxread.decuid, minfo);
+					break;
+	default:	if (++mfxread.repcount < MAX_RDS_TRIALS)
+					ddl->resumeSM = PROTO_MFX;		// trigger resume
+				else {
+					minfo[0] = 2;		// send read config fail responses
+					minfo[1] = (mfxread.cvline >> 8) | (mfxread.cvindex << 2);
+					minfo[2] = mfxread.cvline & 0xFF;
+					info_mcs(busnumber, 0x0F, mfxread.addr, minfo);
+				}
+	}
+}
+
+/**
+ * resume CV read sequence
+ */
+void resumeMfxGetCV(void)
+{
+	syslog_bus(busnumber, DBG_INFO, "RESUME GET MFX Adr=%d, Get CV=%d, Index=%d, Len=%d",
+							mfxread.addr, mfxread.cvline, mfxread.cvindex, mfxread.cvnmbr);
+  	readCV(mfxread.addr, mfxread.cvline, mfxread.cvindex, mfxread.cvnmbr);
+}
 
 /**
  * Servicemode ein-ausschalten
@@ -1254,15 +981,10 @@ int smMfxSetCV(int address, int cv, int index, int value)
 {
 	if ((cv >= CV_SIZE) || (index >= CVINDEX_SIZE)) return -1;
     if (! buses[busnumber].power_state) return -2;
-  
-//  checkMFXConfigCache(address);
-  //Was neu geschrieben wurde wird im Cache als ungültig markiert damit sichergestellt ist, dass es bei einem Read von der Lok gelesen wird (Verify)
-//  mfxKonfigCache.valid[cv][index] = false;
-  
+
 	syslog_bus(busnumber, DBG_INFO, "SM MFX Adr=%d, Set CV=%d, Index=%d, Val=%d",
 									address, cv, index, value);
-  char packetstream[PKTSIZE];
-  memset(packetstream, 0, PKTSIZE);
+	char packetstream[PKTSIZE] = { 0 };
   unsigned int pos = 0;
   addAdrBits(address, packetstream, &pos); //Adresse
   addBits(0b111001, 6, packetstream, &pos); //Kommando CV Schreiben
@@ -1271,7 +993,7 @@ int smMfxSetCV(int address, int cv, int index, int value)
   addBits(0b00, 2, packetstream, &pos); //Immer 0 (1 Byte)
   addBits(value, 8, packetstream, &pos); //Das zu schreibende Byte
   addCRCBits(packetstream, &pos);
-    
+
   	sendMFXPaket(address, packetstream, QMFX0PKT, 2);
 	return 0;
 }
@@ -1283,37 +1005,35 @@ int smMfxSetCV(int address, int cv, int index, int value)
  * @param index Index innerhalb CV
  * @return Gelesenes Byte 0..255, < 0 für Error
  */
-int smMfxGetCV(int address, int cv, int index, int nmbr) 
+int smMfxGetCV(int address, int cv, int index, int nmbr)
 {
   //Nur erlaubt wenn SM Initialisiert ist, MFX Loksuche ausgeschaltet
-	if (! sm) return -1;
+//	if (! sm) return -1;
     if (! buses[busnumber].power_state) return -2;
-    
-  	char result = 0;
+
+	mfxread.addr = address;		// remember task details for continueing and answering
+    mfxread.cvline = cv;
+    mfxread.cvindex = index;
+    mfxread.cvnmbr = nmbr;
+    mfxread.repcount = 0;
+
 	syslog_bus(busnumber, DBG_INFO, "SM GET MFX Adr=%d, Get CV=%d, Index=%d, Len=%d",
 									address, cv, index, nmbr);
-  	if (readCV(address, cv, index, nmbr, &result)) {
-    //printf("SM GET MFX Adr=%d, Get CV=%d, Index=%d Result=%d\n", address, cv, index, result);
-    	return result;
-  	}
-  	//printf("SM GET MFX Adr=%d, Get CV=%d, Index=%d FAIL!\n", address, cv, index);
-  	return -1;
+
+  	return (readCV(address, cv, index, nmbr)) ? 0 : -1;
 }
 
 
-// new from R.M. in 2018
-
 /* MFX BIND */
 // if address == 0 uid is used to set the registration counter
-// TODO: clarify type and meaning of return value [-2 ... pos32] 
 int smMfxSetBind(int address, uint32_t uid)
 {
 	if (address == 0) {
-		if (registrationCounter != uid) 
-  			saveRegistrationCounter(uid);  
+		if (registrationCounter != uid)
+  			saveRegistrationCounter(uid);
 		registrationCounter = uid;
 		syslog_bus(busnumber, DBG_INFO, "** mfx RegCount set to %x", uid);
-		return uid;
+		return registrationCounter;
 	}
     if (! buses[busnumber].power_state) return -2;
 
@@ -1327,9 +1047,9 @@ int smMfxVerBind(int address, uint32_t uid)
 	if (address == 0) return registrationCounter;
 
     if (! buses[busnumber].power_state) return -2;
-    
-	sendDekoderExist(address, uid, false);	// HACK: don't wait for result
-	syslog_bus(busnumber, DBG_WARN,
-		"***** FAKE RESULT - mfx verify not yet implemented");
-	return 123;
+	mfxread.decuid = uid;
+	mfxread.addr = address;		// remember task details for continueing and answering
+
+	sendDekoderExist(address, uid);
+	return 0;
 }

@@ -1,4 +1,4 @@
-// io.h - adapted for basrcpd project 2018 by Rainer Müller 
+// io.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 
 /***************************************************************************
                           io.h  -  description
@@ -24,14 +24,15 @@
 
 #include "config-srcpd.h"
 
+int read_comport(bus_t bus, ssize_t maxbytes, unsigned char *bytes);
 // TODO: check if UART routines below could be reused, eg for Railcom
 // int  readByte(bus_t bus, bool wait, unsigned char *the_byte);
 // void writeByte(bus_t bus, const unsigned char the_byte, unsigned long msec);
 // void writeString(bus_t bus, const char *the_string, unsigned long msecs);
 
-// void restore_comport(bus_t bus);
-// void save_comport(bus_t bus);
-// void close_comport(bus_t bus);
+void open_comport(bus_t bus, const char *device);
+int rxstartwait_comport(struct termios *config);
+void close_comport(bus_t bus);
 
 int ssplitstr(char * str, int n, ...);
 ssize_t socket_readline(int Socket, char *line, int len);

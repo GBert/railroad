@@ -1,5 +1,5 @@
 /*
- * syslogmessage.c - adapted for basrcpd project 2018 by Rainer Müller 
+ * syslogmessage.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
  */
 
 /**************************************************************************
@@ -17,6 +17,7 @@
 #include <syslog.h>
 
 #include "syslogmessage.h"
+int logprint;
 
 /*
  * DBG: write some syslog information is current debug level of the

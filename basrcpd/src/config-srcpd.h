@@ -1,4 +1,4 @@
-// config_srcpd.h - adapted for basrcpd project 2018 by Rainer Müller 
+// config_srcpd.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 
 /***************************************************************************
                           config_srcpd.h  -  description
@@ -14,15 +14,6 @@
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  Changes:                                                               *
- *    26.10.2006 Frank Schmischke                                          *
- *               split LI100 to LI100-SERIAL and LI100-USB                 *
- *                                                                         *
  *                                                                         *
  ***************************************************************************/
 
@@ -137,8 +128,9 @@ typedef struct _BUS
   int flags;              /* Watchdog flag */
 } bus_data_t;
 
-bus_data_t buses[MAX_BUSES];
-bus_t num_buses;
+/* declare global variables */
+extern bus_data_t buses[MAX_BUSES];
+extern bus_t num_buses;
 
 int readConfig(char *filename);
 void run_bus_watchdog();

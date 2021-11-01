@@ -1,4 +1,4 @@
-// ddl-mfx.h - adapted for basrcpd project 2018 by Rainer Müller 
+// ddl-mfx.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -24,20 +24,23 @@
 #include <stdbool.h>  
 #include "config-srcpd.h"
 
-/* RDS Rückmeldungen */
-typedef enum {
-  RDS_1, //1Bit über Quittungsimpuls (nur RDS Trägersignal vorhanden)
-  RDS_8, //1Byte
-  RDS_16, //2Byte
-  RDS_32, //4Bytes
-  RDS_64 //8Bytes
-} MFXRDSBits;
-
 typedef struct _tMFXRDSFeedback {
     bool ok; //true OK (Bei 1 Bit Rückmeldungen immer OK), false Error (keine Rückmeldung oder CRC Fehler)
-    MFXRDSBits bits; //Anzahl Rückmeldebits
+//    MFXRDSBits bits; //Anzahl Rückmeldebits
     unsigned char feedback[8]; //Die Rückmeldung (wenn ok)
 } tMFXRDSFeedback;
+
+typedef struct _tMFXRead {
+	uint32_t decuid;
+    int addr;
+    int cvline;	
+    int cvindex;
+    int cvnmbr;
+    int repcount;
+} tMFXRead;
+
+
+bool checkMfxCRC(uint8_t *buff, int n);
 
 /**
  * Starten der MFX Threads:
@@ -92,9 +95,34 @@ void sendDekoderTerm(int adresse);
  * MFX RDS Rückmeldung ist eingetroffen.
  * @param mfxRDSFeedback RDS Rückmeldung
  */
-void newMFXRDSFeedback(tMFXRDSFeedback mfxRDSFeedback);
+//void newMFXRDSFeedback(tMFXRDSFeedback mfxRDSFeedback);
 
 //--------------------------- SM -----------------------------
+
+/**
+ * handle result received via serial feedback port
+ */
+void serialMFXresult(uint8_t *buf, int len);
+
+/**
+ * generate report when read successful
+ */
+void sendMFXreadCVresult(uint8_t *data);
+
+/**
+ * handle response from mfx ack
+ */
+void handleMFXacknowledge(uint8_t askval);
+
+/**
+ * handle mfx response timeout
+ */
+void handleMFXtimeout(void);
+
+/**
+ * resume CV read sequence
+ */
+void resumeMfxGetCV(void);
 
 /**
  * Servicemode ein-ausschalten

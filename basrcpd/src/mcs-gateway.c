@@ -1,6 +1,6 @@
 // mcs-gateway.c : gateway between Märklin CS CAN commands and srcpd
 //
-// C 2018 Rainer Müller
+// C 2018 - 2021 Rainer Müller
 // Das Programm unterliegt den Bedingungen der GNU General Public License 3 (GPL3).
 
 //#include <errno.h>
@@ -179,6 +179,9 @@ void *thr_handleCAN(void *vp)
 										frame.data[7] = v & 0xFF;
 									}
 									break;
+                        // mfx seek
+                        case 0x30:  handle_seek(mcs_bus, frame.data+5, uid);
+									continue;      // no reply
 						/* discarded without notice */
 						case 0x20:	// System Time
 									continue;
@@ -317,6 +320,20 @@ int info_mcs(bus_t bus, uint16_t infoid, uint32_t itemid, char * info)
 		syslog_bus(mcs_bus, DBG_ERROR, "sending CAN frame error in MCS line %d: %s",
 						__LINE__, strerror(errno));
 	return 0;
+}
+
+// send mfxSEEK towards CAN bus
+void send_seek_cmd(char scmd, char sdat)
+{
+    char info[4];
+    info[0] = 2;
+    info[1] = 0x30;
+    info[2] = scmd;
+    if (sdat) {
+        info[3] = sdat;
+        info[0] = 3;
+    }
+    info_mcs(mcs_bus, 0, ownuid, info);
 }
 
 void init_mcs_gateway(bus_t busnumber)

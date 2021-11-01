@@ -1,4 +1,4 @@
-// srcp-sm.c - adapted for basrcpd project 2018 by Rainer Müller 
+// srcp-sm.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
 
 /***************************************************************************
                          srcp-sm.c  -  description
@@ -271,41 +271,40 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
                     info_mcs(busnumber, 3, result, minfo);
                     break;
                 case BIND_MFX:
-                    snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d BIND %u\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, value);
-                    if (addr == 0) {			// SET ^ GET x GM 0 BIND
+                    if (addr == 0) {					// SET ^ GET x GM 0 BIND
+                    	if (command == VERIFY && value != result)
+							status = SRCP_WRONGVALUE;
        	                minfo[0] = 3;	minfo[1] = 9;	
 						minfo[2] = result >> 8; minfo[3] = result & 0xFF;
                     	info_mcs(busnumber, 1, 0, minfo);
+                    	value = result;
 					}
-					else { 						// SET ^ GET x GM y BIND
+					else if (command == SET) { 			// SET x GM y BIND
 						minfo[0] = 2;	
 						minfo[1] = addr >> 8; 	minfo[2] = addr & 0xFF;
 						minfo[5] = 5;
-						if (command != SET) {	// VERIFY x GM y BIND
-							if (result) {	// Amplitude Shift Keying value
-								minfo[0] = 3;	minfo[3] = result;	
-							}
-							minfo[5] = 7;
-						}
                     	info_mcs(busnumber, minfo[5], value, minfo);
                     }
+                    else if (command == GET)
+                    	status = SRCP_NODATA;
+                    if (minfo[0]) snprintf(info, MAXSRCPLINELEN,
+                            "%lu.%.3lu 100 INFO %lu SM %d BIND %u\n",
+                            now.tv_sec, now.tv_usec / 1000, busnumber,
+                            addr, value);
                     break;
                 case CV_MFX:
-					// HACK: dirty fast trial for write config
-					if (command == SET) result = value;
-                    snprintf(info, MAXSRCPLINELEN,
+					if (command == SET) {
+						snprintf(info, MAXSRCPLINELEN,
                             "%lu.%.3lu 100 INFO %lu SM %d CVMFX %d %d %d\n",
                             now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, typeaddr, bit_index, result);
-					minfo[0] = 4;
-					minfo[1] = (typeaddr >> 8) | (bit_index << 2);
-					minfo[2] = typeaddr & 0xFF;
-					minfo[3] = value;
-					minfo[4] = 0x80;	//result;
-                    info_mcs(busnumber, 0x11, addr, minfo);
+                            addr, typeaddr, bit_index, value);
+						minfo[0] = 4;
+						minfo[1] = (typeaddr >> 8) | (bit_index << 2);
+						minfo[2] = typeaddr & 0xFF;
+						minfo[3] = value;
+						minfo[4] = 0x80;	//result;
+						info_mcs(busnumber, 0x11, addr, minfo);
+					}
                     break;
         	}
    			if (info[0]) {

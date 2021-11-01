@@ -1,4 +1,4 @@
-// srcp-command.c - adapted for basrcpd project 2018 by Rainer Müller
+// srcp-command.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 /*
  * Vorliegende Software unterliegt der General Public License,
  * Version 2, 1991. (c) Matthias Trute, 2000-2001.
@@ -371,7 +371,7 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
                     rc = infoSM(bus, PROTO_MFX, GET, type, addr, value1, value2, value3, reply);
               	break;
             case BIND_MFX:
-            	rc = infoSM(bus, PROTO_MFX, GET, type, addr, -1, -1, value1, reply);
+            	rc = infoSM(bus, PROTO_MFX, GET, type, addr, -1, -1, -1, reply);
 			  	break;
             default:
               	rc = SRCP_WRONGVALUE;
@@ -612,7 +612,7 @@ static int handleVERIFY(sessionid_t sessionid, bus_t bus, char *device,
             		rc = infoSM(bus, PROTO_MFX, VERIFY, type, addr, -1, -1, value1, reply);
 			  		break;
               default:
-                rc = SRCP_WRONGVALUE;
+					rc = SRCP_WRONGVALUE;
             }
         }
     }
@@ -637,15 +637,8 @@ static int handleTERM(sessionid_t sessionid, bus_t bus, char *device,
         if (strlen(parameter) > 0)
             nelem = sscanf(parameter, "%ld", &addr);
         if (nelem == 1) {
-            sessionid_t lockid;
-            cacheGetLockGL(bus, addr, &lockid);
-            if (lockid == 0 || lockid == sessionid) {
-                rc = cacheUnlockGL(bus, addr, sessionid);
-                rc = cacheTermGL(bus, addr);
-            }
-            else {
-                rc = SRCP_DEVICELOCKED;
-            }
+            rc = cacheUnlockGL(bus, addr, sessionid);
+            if (rc == SRCP_OK) rc = cacheTermGL(bus, addr);
         }
     }
     else if (bus_has_devicegroup(bus, DG_GA)
@@ -753,8 +746,9 @@ static int handleINIT(sessionid_t sessionid, bus_t bus, char *device,
     if (bus_has_devicegroup(bus, DG_GL) && strncasecmp(device, "GL", 2) == 0) {
         long addr, protversion, n_fs, n_func;
         char prot;
-        char optData[strlen(parameter)]; //Optionale weitere, Protokollabhängige, Zusatzdaten
-        int nelem = sscanf(parameter, "%ld %1c %ld %ld %ld %[^\t\n]", &addr, &prot, &protversion, &n_fs, &n_func, optData);
+        char optData[32];
+        int nelem = sscanf(parameter, "%ld %1c %ld %ld %ld %30[^\t\n]", 
+							&addr, &prot, &protversion, &n_fs, &n_func, optData);
         if (nelem >= 5) {
             rc = cacheInitGL(bus, addr, prot, protversion, n_fs, n_func, optData);
         }

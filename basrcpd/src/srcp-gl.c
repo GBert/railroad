@@ -1,4 +1,4 @@
-// srcp-gl.c - adapted for basrcpd project 2018 by Rainer Müller
+// srcp-gl.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 
 /* $Id: srcp-gl.c 1740 2016-04-24 12:36:36Z gscholz $ */
 
@@ -49,8 +49,7 @@ unsigned int getMaxAddrGL(bus_t busnumber)
     if (busnumber <= num_buses) {
         return gl[busnumber].numberOfGl;
     }
-    else
-        return 0;
+    return 0;
 }
 
 /* there are decoders for 14, 27, 28 and 128 speed steps */
@@ -153,7 +152,7 @@ uint16_t isInitializedGL(bus_t busnumber, int index)
 // printf("idx %d -> ID %x\n", index, i);
         	return i;
     }
-    else return 0;
+    return 0;
 }
 
 /* Take new locomotive data and make some checks.
@@ -269,7 +268,7 @@ void cacheSetGL(bus_t busnumber, gl_data_t *glp, gl_data_t *l)
 {
    	char msg[1000];
    	int rc = SRCP_WRONGVALUE;
-   	int addr = glp->id; // getglid(glp);     //isInitializedGL(busnumber, i);
+   	int addr = glp->id;
     if ((addr >= MAXSRCPGL) || (gl[busnumber].gldir->proto[addr] == 0)) addr = getglid(glp);
    	glp->cacheddirection = l->direction;
     glp->cachedspeed = l->speed;
@@ -339,13 +338,11 @@ int cacheTermGL(bus_t busnumber, uint32_t locid)
           enqueueGL(busnumber, locid, -1, 0, 1, 0); //Direction -1 -> Info Term
         }
         else {
-          enqueueGL(busnumber, locid, 0, 0, 1, 0);
+          enqueueGL(busnumber, locid, 2, 0, 1, 0);
         }
         return SRCP_OK;
     }
-    else {
-        return SRCP_NODATA;
-    }
+    return SRCP_NODATA;
 }
 
 /*
@@ -357,18 +354,14 @@ int resetGL(bus_t busnumber, int addr)
         enqueueGL(busnumber, addr, 0, 0, 1, 0);
         return SRCP_OK;
     }
-    else {
-        return SRCP_NODATA;
-    }
+    return SRCP_NODATA;
 }
 
 
 void cacheCleanGL(bus_t bus)
 {
     for (unsigned int i = 1; i <= gl[bus].numberOfGl; i++) {
-//        bzero(&gl[bus].glstate[i], sizeof(gl_data_t));
-// TODO: mixture of original and Danis code, what to use?
-      	gl[bus].glstate[i].state = glsNone;
+        bzero(&gl[bus].glstate[i], sizeof(gl_data_t));
     }
     if (gl[bus].gldir) bzero(gl[bus].gldir, sizeof(gl_dir_t));
     if (buses[bus].init_func)  	(*buses[bus].init_func) (bus);
@@ -380,7 +373,7 @@ int cacheDescribeGL(bus_t busnumber, uint32_t locid, char *msg)
     uint16_t *gli = getGLIndex(busnumber, locid, 0);
     int i = gli ? *gli : 0;
     if (i && (gl[busnumber].glstate[i].state >= glsInit)) {
-        sprintf(msg, "%lu.%.3lu 101 INFO %lu GL %d %c %d %d %d",
+        sprintf(msg, "%lu.%.3lu 101 INFO %lu GL %u %c %d %d %d",
                 gl[busnumber].glstate[i].inittime.tv_sec,
                 gl[busnumber].glstate[i].inittime.tv_usec / 1000,
                 busnumber, locid,
@@ -407,7 +400,7 @@ int cacheInfoGL(bus_t busnumber, uint32_t locid, char *msg)
     int i = gli ? *gli : 0;
     if (i && (gl[busnumber].glstate[i].state == glsActive)) {
     	char *tmp;
-        sprintf(msg, "%lu.%.3lu 100 INFO %lu GL %d %d %d %d %d",
+        sprintf(msg, "%lu.%.3lu 100 INFO %lu GL %u %d %d %d %d",
                 gl[busnumber].glstate[i].tv.tv_sec,
                 gl[busnumber].glstate[i].tv.tv_usec / 1000,
                 busnumber, locid,
@@ -434,84 +427,74 @@ int cacheInfoGL(bus_t busnumber, uint32_t locid, char *msg)
     return SRCP_NODATA;
 }
 
-// TODO: check if we will really support LOCK feature
-//		if yes the following procedures have to be adapted to extended addr !
-
 /* has to use a semaphore, must be atomized! */
-int cacheLockGL(bus_t busnumber, int addr, long int duration,
+int cacheLockGL(bus_t busnumber, uint32_t locid, long int duration,
                 sessionid_t sessionid)
 {
-    if (isInitializedGL(busnumber, addr)) {
-        if (gl[busnumber].glstate[addr].locked_by == sessionid
-            		|| gl[busnumber].glstate[addr].locked_by == 0) {
-            char msg[256];
-            gl[busnumber].glstate[addr].locked_by = sessionid;
-            gl[busnumber].glstate[addr].lockduration = duration;
-            gettimeofday(&gl[busnumber].glstate[addr].locktime, NULL);
-            describeLOCKGL(busnumber, addr, msg);
+	uint16_t *gli = getGLIndex(busnumber, locid, 0);
+	int i = gli ? *gli : 0;
+	if (i && (gl[busnumber].glstate[i].state != glsNone)) {
+		if (gl[busnumber].glstate[i].locked_by == sessionid
+					|| gl[busnumber].glstate[i].locked_by == 0) {
+			char msg[256];
+            gl[busnumber].glstate[i].locked_by = sessionid;
+            gl[busnumber].glstate[i].lockduration = duration;
+            gettimeofday(&gl[busnumber].glstate[i].locktime, NULL);
+            describeLOCKGL(busnumber, locid, msg);
             enqueueInfoMessage(msg);
             return SRCP_OK;
         }
-        else {
-            return SRCP_DEVICELOCKED;
-        }
-    }
-    else {
-        return SRCP_WRONGVALUE;
-    }
+		return SRCP_DEVICELOCKED;
+	}
+	return SRCP_WRONGVALUE;
 }
 
 int cacheGetLockGL(bus_t busnumber, uint32_t locid, sessionid_t * session_id)
 {
-//    if (isInitializedGL(busnumber, addr)) {
-    uint16_t *gli = getGLIndex(busnumber, locid, 0);
-    int i = gli ? *gli : 0;
-    if (i && (gl[busnumber].glstate[i].state >= glsInit)) {
+	uint16_t *gli = getGLIndex(busnumber, locid, 0);
+	int i = gli ? *gli : 0;
+	if (i && (gl[busnumber].glstate[i].state >= glsInit)) {
         *session_id = gl[busnumber].glstate[i].locked_by;
         return SRCP_OK;
-    }
-    else return SRCP_WRONGVALUE;
+	}
+	return SRCP_WRONGVALUE;
 }
 
-int describeLOCKGL(bus_t bus, int addr, char *reply)
+int describeLOCKGL(bus_t busnumber, uint32_t locid, char *reply)
 {
-    if (isInitializedGL(bus, addr)) {
-
-        sprintf(reply, "%lu.%.3lu 100 INFO %lu LOCK GL %d %ld %lu\n",
-                gl[bus].glstate[addr].locktime.tv_sec,
-                gl[bus].glstate[addr].locktime.tv_usec / 1000,
-                bus, addr, gl[bus].glstate[addr].lockduration,
-                gl[bus].glstate[addr].locked_by);
+	uint16_t *gli = getGLIndex(busnumber, locid, 0);
+	int i = gli ? *gli : 0;
+	if (i && (gl[busnumber].glstate[i].state != glsNone)) {
+        sprintf(reply, "%lu.%.3lu 100 INFO %lu LOCK GL %u %ld %lu\n",
+                gl[busnumber].glstate[i].locktime.tv_sec,
+                gl[busnumber].glstate[i].locktime.tv_usec / 1000,
+                busnumber, locid, gl[busnumber].glstate[i].lockduration,
+                gl[busnumber].glstate[i].locked_by);
         return SRCP_OK;
-    }
-    else {
-        return SRCP_WRONGVALUE;
-    }
+	}
+	return SRCP_WRONGVALUE;
 }
 
-int cacheUnlockGL(bus_t busnumber, int addr, sessionid_t sessionid)
+int cacheUnlockGL(bus_t busnumber, uint32_t locid, sessionid_t sessionid)
 {
-    if (isInitializedGL(busnumber, addr)) {
-
-        if (gl[busnumber].glstate[addr].locked_by == sessionid
-            || gl[busnumber].glstate[addr].locked_by == 0) {
-            char msg[256];
-            gl[busnumber].glstate[addr].locked_by = 0;
-            gettimeofday(&gl[busnumber].glstate[addr].locktime, NULL);
-            sprintf(msg, "%lu.%.3lu 102 INFO %lu LOCK GL %d %lu\n",
-                    gl[busnumber].glstate[addr].locktime.tv_sec,
-                    gl[busnumber].glstate[addr].locktime.tv_usec / 1000,
-                    busnumber, addr, sessionid);
+	uint16_t *gli = getGLIndex(busnumber, locid, 0);
+	int i = gli ? *gli : 0;
+	if (i && (gl[busnumber].glstate[i].state != glsNone)) {
+		if (gl[busnumber].glstate[i].locked_by == sessionid
+					|| gl[busnumber].glstate[i].locked_by == 0) {
+			char msg[256];
+            gl[busnumber].glstate[i].locked_by = 0;
+            gettimeofday(&gl[busnumber].glstate[i].locktime, NULL);
+            sprintf(msg, "%lu.%.3lu 102 INFO %lu LOCK GL %u %lu\n",
+                    gl[busnumber].glstate[i].locktime.tv_sec,
+                    gl[busnumber].glstate[i].locktime.tv_usec / 1000,
+                    busnumber, locid, sessionid);
             enqueueInfoMessage(msg);
             return SRCP_OK;
         }
-        else {
-            return SRCP_DEVICELOCKED;
-        }
-    }
-    else {
-        return SRCP_WRONGVALUE;
-    }
+		return SRCP_DEVICELOCKED;
+	}
+	return SRCP_WRONGVALUE;
 }
 
 /**
@@ -519,14 +502,13 @@ int cacheUnlockGL(bus_t busnumber, int addr, sessionid_t sessionid)
  */
 void unlock_gl_bysessionid(sessionid_t sessionid)
 {
-    bus_t i;
-
     syslog_session(sessionid, DBG_DEBUG, "Unlocking GLs by session-id");
-    for (i = 0; i <= num_buses; i++) {
-        int number = getMaxAddrGL(i);
+    for (bus_t bus = 0; bus <= num_buses; bus++) {
+        int number = getMaxAddrGL(bus);
         for (int j = 1; j <= number; j++) {
-            if (gl[i].glstate[j].locked_by == sessionid) {
-                cacheUnlockGL(i, j, sessionid);
+            if (gl[bus].glstate[j].locked_by == sessionid) {
+				int i = isInitializedGL(bus, j);
+				if (i > 0) cacheUnlockGL(bus, i, sessionid);
             }
         }
     }
@@ -537,14 +519,13 @@ void unlock_gl_bysessionid(sessionid_t sessionid)
  */
 void unlock_gl_bytime(void)
 {
-    bus_t i;
-
-    for (i = 0; i <= num_buses; i++) {
-        int number = getMaxAddrGL(i);
+    for (bus_t bus = 0; bus <= num_buses; bus++) {
+        int number = getMaxAddrGL(bus);
         for (int j = 1; j <= number; j++) {
-            if (gl[i].glstate[j].lockduration > 0
-                && gl[i].glstate[j].lockduration-- == 1) {
-                cacheUnlockGL(i, j, gl[i].glstate[j].locked_by);
+            if (gl[bus].glstate[j].lockduration > 0
+                		&& gl[bus].glstate[j].lockduration-- == 1) {
+				int i = isInitializedGL(bus, j);
+				if (i > 0) cacheUnlockGL(bus, i, gl[bus].glstate[j].locked_by);
             }
         }
     }
@@ -617,16 +598,11 @@ void debugGL(bus_t busnumber, gl_data_t *glp)
 	syslog_bus(busnumber, DBG_WARN,
 		"*** GLSTATE for %d/%x: state %d, protocol %c, protocolversion %d",
 		busnumber, glp->id, glp->state, glp->protocol, glp->protocolversion);
-    syslog_bus(busnumber, DBG_WARN,
+	syslog_bus(busnumber, DBG_WARN,
 		"* n_func %d, n_fs %d speed %d, direction %d, funcs %x, UID %x",
 		glp->n_func, glp->n_fs, glp->speed, glp->direction, glp->funcs, glp->decuid);
-
-//      syslog_bus(busnumber, DBG_WARN, "lockduration %ld",
-//                 glp->lockduration);
-//      syslog_bus(busnumber, DBG_WARN, "locked_by %ld", glp->locked_by);
-        /*  struct timeval tv;
-           struct timeval inittime;
-           struct timeval locktime; */
+	if (glp->locked_by) syslog_bus(busnumber, DBG_WARN,
+		"locked_by %ld with duration %ld", glp->locked_by, glp->lockduration);
 }
 
 // Helpers for the mcs-Gateway

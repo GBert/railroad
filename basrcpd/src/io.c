@@ -1,4 +1,4 @@
-// io.c - adapted for basrcpd project 2018 by Rainer Müller 
+// io.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 
 /***************************************************************************
                           io.c  -  description
@@ -35,48 +35,34 @@
 #include "io.h"
 #include "syslogmessage.h"
 
-#if 0
-// TODO: check if UART code could be reused, eg for Railcom
-int readByte(bus_t bus, bool wait, unsigned char *the_byte)
-{
-    ssize_t i;
-    int status;
-    i=0; /* make sure every bit of the integer gets initialized, 
-      prevents some ioctl's from beeing misinterpreted */
-    /* with debug level beyond DBG_DEBUG, we will not really work on hardware */
-    if (buses[bus].debuglevel > DBG_DEBUG) {
-        i = 1;
-        *the_byte = 0;
-    }
-    else {
-        status = ioctl(buses[bus].device.file.fd, FIONREAD, &i);
-        if (status == -1) {
-            syslog_bus(bus, DBG_ERROR,
-                       "readbyte(): ioctl() failed: %s (errno = %d)\n",
-                       strerror(errno), errno);
-            return -1;
-        }
-        syslog_bus(bus, DBG_DEBUG,
-                   "readbyte(): (fd = %d), there are %d bytes to read.",
-                   buses[bus].device.file.fd, i);
 
-        /* read only, if there is really an input or if "wait" is true
-         * to do a blocking read */
-        if ((i > 0) || wait) {
-            i = read(buses[bus].device.file.fd, the_byte, 1);
-            if (i == -1) {
-                syslog_bus(bus, DBG_ERROR,
-                           "readbyte(): read() failed: %s (errno = %d)\n",
+int fdfb = -1;	// file descriptor for serial feedback port
+
+int read_comport(bus_t bus, ssize_t maxbytes, unsigned char *bytes)
+{
+    ssize_t i = 0;
+
+	if (fdfb <= 0) return -1;
+    if (ioctl(fdfb, FIONREAD, &i) == -1) {
+        syslog_bus(bus, DBG_ERROR, "read_comport ioctl() failed: %s (errno = %d)\n",
+                       strerror(errno), errno);
+        return -1;
+    }
+    /* read only if there is really an input to avoid a blocking read */
+    if (i > 0) {
+    	if (i > maxbytes) i = maxbytes;
+        i = read(fdfb, bytes, i);
+        if (i == -1) {
+            syslog_bus(bus, DBG_ERROR, "read_comport read() failed: %s (errno = %d)\n",
                            strerror(errno), errno);
-            }
-            if (i > 0)
-                syslog_bus(bus, DBG_DEBUG, "readbyte(): byte read: 0x%02x",
-                           *the_byte);
         }
     }
-    return (i > 0 ? 0 : -1);
+    if (i > 0) syslog_bus(bus, DBG_DEBUG, "read_comport read %d bytes", i);
+    return i;
 }
 
+#if 0
+// TODO: check if UART code could be reused, eg for Railcom
 void writeByte(bus_t bus, const unsigned char b, unsigned long msecs)
 {
     ssize_t i = 0;
@@ -113,23 +99,27 @@ void writeString(bus_t bus, const char *s, unsigned long msecs)
         writeByte(bus, s[i], msecs);
     }
 }
+#endif
 
-void save_comport(bus_t bus)
+void open_comport (bus_t bus, const char *device)
 {
-    int fd;
-
-    fd = open(buses[bus].device.file.path, O_RDWR);
-    if (fd == -1) {
-        syslog_bus(bus, DBG_ERROR,
-                   "Open serial line failed: %s (errno = %d).\n",
-                   strerror(errno), errno);
-    }
-    else {
-        tcgetattr(fd, &buses[bus].device.file.devicesettings);
-        close(fd);
-    }
+	if ((fdfb = open(device, O_RDWR|O_NOCTTY)) == -1)
+        syslog_bus(bus, DBG_ERROR, "Open feedback port %s failed: %s (errno = %d).",
+			device, strerror(errno), errno);
+    else
+    	syslog_bus(bus, DBG_INFO, "DDL will use %s for feedback.", device);
 }
 
+int rxstartwait_comport(struct termios *config)
+{
+	if (fdfb <= 0) return -1;
+	tcflush(fdfb, TCIFLUSH);
+	config->c_cflag |= (CLOCAL | CREAD);
+	config->c_cflag &= ~CRTSCTS;
+	return tcsetattr(fdfb, TCSAFLUSH, config);
+}
+
+#if 0
 void restore_comport(bus_t bus)
 {
     int fd;
@@ -149,19 +139,21 @@ void restore_comport(bus_t bus)
         syslog_bus(bus, DBG_INFO, "Old values successfully restored");
     }
 }
+#endif
 
 void close_comport(bus_t bus)
 {
-    struct termios interface;
-    syslog_bus(bus, DBG_INFO, "Closing serial line");
+//    struct termios interface;
+	if (fdfb > 0) {
+    	syslog_bus(bus, DBG_INFO, "Closing serial feedback port.");
 
-    tcgetattr(buses[bus].device.file.fd, &interface);
-    cfsetispeed(&interface, B0);
-    cfsetospeed(&interface, B0);
-    tcsetattr(buses[bus].device.file.fd, TCSANOW, &interface);
-    close(buses[bus].device.file.fd);
+//    tcgetattr(buses[bus].device.file.fd, &interface);
+//    cfsetispeed(&interface, B0);
+//    cfsetospeed(&interface, B0);
+//    tcsetattr(buses[bus].device.file.fd, TCSANOW, &interface);
+    	close(fdfb);
+    }
 }
-#endif
 
 // ssplitstr splits a string str into n tokens by assigning n pointers
 // if the nr of tokens is bigger than the nr of pointers, last points to remainder
@@ -245,7 +237,7 @@ ssize_t socket_readline(int Socket, char *line, int len)
 }
 
 /* Write "n" bytes to a descriptor. Stevens, UNP;
- * srcp messages must end with '\n' to use this function directly 
+ * srcp messages must end with '\n' to use this function directly
  * return values:
  *   -1: write error
  *  >=0: number of written characters */

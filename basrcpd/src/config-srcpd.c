@@ -1,4 +1,4 @@
-// config_srcpd.c - adapted for basrcpd project 2018 by Rainer Müller 
+// config_srcpd.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
 /*
 * This software is published under the terms of the GNU General Public
 * License, Version 2, 1991. (c) Matthias Trute, 2000-2001.
@@ -79,6 +79,11 @@
 #include "syslogmessage.h"
 
 
+/* define global variables */
+bus_data_t buses[MAX_BUSES];
+bus_t num_buses = 1;
+
+
 static const char DISABLE_MSG[] =
     "\"%s\" has been disabled at compile time.\n";
 
@@ -114,18 +119,16 @@ int bus_has_devicegroup(bus_t bus, int dg)
     return 0;
 }
 
-/** 
+/**
   check if a given bus supports a specified protocol
   @par Input: bus_t busnumber the bus
   @par Input: const char protocol the protocol
   @return SRCP_OK i.e. the protocol is found, else SRCP Error code */
 int bus_supports_protocol(bus_t busnumber, const char protocol)
 {
-    size_t i;
-
     if (buses[busnumber].protocols) {
         char const *protocols = buses[busnumber].protocols;
-        for (i = 0; i < strlen(protocols); i++) {
+        for (size_t i = 0; i < strlen(protocols); i++) {
             if (protocols[i] == protocol) {
                 return SRCP_OK;
             }
@@ -171,7 +174,6 @@ static bus_t register_bus(bus_t busnumber, xmlDocPtr doc, xmlNodePtr node)
     buses[current_bus].device.file.path = NULL;
 
     /* Definition of thread synchronisation  */
-    /*TODO: this should be (privately) moved to each bus */
     result = pthread_mutex_init(&buses[current_bus].transmit_mutex, NULL);
     if (result != 0) {
         syslog_bus(current_bus, DBG_ERROR,

@@ -1,5 +1,5 @@
 /*
- * syslogmessage.h - adapted for basrcpd project 2018 by Rainer Müller 
+ * syslogmessage.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller
  */
 
 /**************************************************************************
@@ -24,7 +24,7 @@
 #define DBG_INFO 4
 #define DBG_DEBUG 5
 
-int logprint;
+extern int logprint;
 
 void syslog_bus(bus_t busnumber, int dbglevel, const char *fmt, ...);
 void syslog_session(sessionid_t session, int dbglevel, const char *fmt, ...);
