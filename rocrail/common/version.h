@@ -1,11 +1,19 @@
 const int revisionnr = 
-1869
+1877
 ;
 const char* commithash = 
-"35de05f783a17406b94d8b2cbe159d3715b4d97f";
+"4c8414eec3fc654183c83e17ed6bab7a35eb6eea";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1877 2021-11-01 09:09:35 +0100 WIOpico: multiplex brightness added\n" \
+"1876 2021-11-01 07:56:04 +0100 signaldlg: a1...a5 aspect dialog added\n" \
+"1875 2021-11-01 07:16:18 +0100 router: fix tracing (Lothar)\n" \
+"1874 2021-10-31 15:07:27 +0100 aspectdlg: 8 bit support\n" \
+"1873 2021-10-31 14:23:14 +0100 WIOpico hardware\n" \
+"1872 2021-10-31 14:22:55 +0100 aspectdlg: layout corrections\n" \
+"1871 2021-10-31 14:13:40 +0100 signaldlg: aspect value dialog added\n" \
+"1870 2021-10-31 11:21:35 +0100 WIOpico: update\n" \
 "1869 2021-10-30 17:25:09 +0200 auipanel: force refresh under Windows only\n" \
 "1868 2021-10-30 13:59:43 +0200 WIOpico: use own dimming for second signal\n" \
 "1867 2021-10-30 12:46:26 +0200 signal: mapped aspect number\n" \
