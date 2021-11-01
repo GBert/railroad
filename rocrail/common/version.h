@@ -1,11 +1,12 @@
 const int revisionnr = 
-1877
+1878
 ;
 const char* commithash = 
-"4c8414eec3fc654183c83e17ed6bab7a35eb6eea";
+"80d2a10cc71900faf4fbddd8a5bd77f22379609f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1878 2021-11-01 13:55:28 +0100 WIOpico: use interrupt for refresh multiplex signal\n" \
 "1877 2021-11-01 09:09:35 +0100 WIOpico: multiplex brightness added\n" \
 "1876 2021-11-01 07:56:04 +0100 signaldlg: a1...a5 aspect dialog added\n" \
 "1875 2021-11-01 07:16:18 +0100 router: fix tracing (Lothar)\n" \
