@@ -1,11 +1,12 @@
 const int revisionnr = 
-1879
+1880
 ;
 const char* commithash = 
-"764feb0ed3b53ae042cd4c92aa417373629c5935";
+"0f3fa6bcd1db6523b558ced3bc364e5f5fdd87b8";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1880 2021-11-02 12:02:13 +0100 wio: removed singlegate check in case of type servo\n" \
 "1879 2021-11-01 21:33:27 +0100 WIOpico: fix for multiplex address 100(101)\n" \
 "1878 2021-11-01 13:55:28 +0100 WIOpico: use interrupt for refresh multiplex signal\n" \
 "1877 2021-11-01 09:09:35 +0100 WIOpico: multiplex brightness added\n" \
