@@ -1,11 +1,18 @@
 const int revisionnr = 
-1880
+1887
 ;
 const char* commithash = 
-"0f3fa6bcd1db6523b558ced3bc364e5f5fdd87b8";
+"f041d4745a3a51d0b578b8e6b9211e5291d4a06b";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1887 2021-11-03 09:45:42 +0100 WIOpico: faster dimming\n" \
+"1886 2021-11-03 09:23:47 +0100 WIOpico: dim only if parameter > 0\n" \
+"1885 2021-11-03 09:06:19 +0100 WIOpico: dimming and faster refresh with interrupt 100 micro seconds\n" \
+"1884 2021-11-03 08:56:58 +0100 WIOpi: manager trace nodeID and address\n" \
+"1883 2021-11-03 08:08:51 +0100 WIOpi: manager 10 I2C retries before slave set to lost\n" \
+"1882 2021-11-03 08:07:47 +0100 wio: trace fix for servo report from slave\n" \
+"1881 2021-11-03 07:44:27 +0100 seltabtrackdlg: decodernumber range increased\n" \
 "1880 2021-11-02 12:02:13 +0100 wio: removed singlegate check in case of type servo\n" \
 "1879 2021-11-01 21:33:27 +0100 WIOpico: fix for multiplex address 100(101)\n" \
 "1878 2021-11-01 13:55:28 +0100 WIOpico: use interrupt for refresh multiplex signal\n" \
