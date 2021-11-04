@@ -1,11 +1,13 @@
 const int revisionnr = 
-1887
+1889
 ;
 const char* commithash = 
-"f041d4745a3a51d0b578b8e6b9211e5291d4a06b";
+"e7099de2bfb5d59ac91ff0e3d93d179ec452bc9f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1889 2021-11-04 10:55:35 +0100 WIOpico: fix for zero aspect value\n" \
+"1888 2021-11-04 08:59:43 +0100 wiopi,servo: report val fix\n" \
 "1887 2021-11-03 09:45:42 +0100 WIOpico: faster dimming\n" \
 "1886 2021-11-03 09:23:47 +0100 WIOpico: dim only if parameter > 0\n" \
 "1885 2021-11-03 09:06:19 +0100 WIOpico: dimming and faster refresh with interrupt 100 micro seconds\n" \
