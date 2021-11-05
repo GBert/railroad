@@ -1,11 +1,14 @@
 const int revisionnr = 
-1889
+1892
 ;
 const char* commithash = 
-"e7099de2bfb5d59ac91ff0e3d93d179ec452bc9f";
+"ec8923e884cd6b8b0c4cda5eced66bcfc448d45d";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1892 2021-11-05 19:22:56 +0100 WIOpico: multiplexing fix\n" \
+"1891 2021-11-05 14:43:12 +0100 WIOpico: Charlieplexing (WIP)\n" \
+"1890 2021-11-05 07:52:21 +0100 WIOpico: multiplex save command in case of dimming is pending\n" \
 "1889 2021-11-04 10:55:35 +0100 WIOpico: fix for zero aspect value\n" \
 "1888 2021-11-04 08:59:43 +0100 wiopi,servo: report val fix\n" \
 "1887 2021-11-03 09:45:42 +0100 WIOpico: faster dimming\n" \
