@@ -1,11 +1,13 @@
 const int revisionnr = 
-1892
+1894
 ;
 const char* commithash = 
-"ec8923e884cd6b8b0c4cda5eced66bcfc448d45d";
+"391600445c8306f9d5a581f424bd23da0c1f747f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1894 2021-11-06 08:35:55 +0100 WIOpico: disable new Charlieplexing class\n" \
+"1893 2021-11-06 08:02:40 +0100 system action: calleruserdata added\n" \
 "1892 2021-11-05 19:22:56 +0100 WIOpico: multiplexing fix\n" \
 "1891 2021-11-05 14:43:12 +0100 WIOpico: Charlieplexing (WIP)\n" \
 "1890 2021-11-05 07:52:21 +0100 WIOpico: multiplex save command in case of dimming is pending\n" \
