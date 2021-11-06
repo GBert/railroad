@@ -1,11 +1,12 @@
 const int revisionnr = 
-1894
+1895
 ;
 const char* commithash = 
-"391600445c8306f9d5a581f424bd23da0c1f747f";
+"9dd14fe96855659944957ffc00c8a8dcb2b3ec2f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1895 2021-11-06 10:56:03 +0100 wiopi: stop slave polling in case of an unsupported OPC\n" \
 "1894 2021-11-06 08:35:55 +0100 WIOpico: disable new Charlieplexing class\n" \
 "1893 2021-11-06 08:02:40 +0100 system action: calleruserdata added\n" \
 "1892 2021-11-05 19:22:56 +0100 WIOpico: multiplexing fix\n" \
