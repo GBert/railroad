@@ -1,11 +1,17 @@
 const int revisionnr = 
-1895
+1901
 ;
 const char* commithash = 
-"9dd14fe96855659944957ffc00c8a8dcb2b3ec2f";
+"9412e654ed618d9cac1ec720fafa62aac703c982";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1901 2021-11-07 10:50:23 +0100 wiopi,cv,wrapper: removed option exthbridge because its the same as dualmotor\n" \
+"1900 2021-11-07 10:47:33 +0100 wiopi,wrapper: default mobiletype changed from 0 to 1\n" \
+"1899 2021-11-07 10:35:31 +0100 wiopi,manager: stop polling after 100 retries and only trace it once\n" \
+"1898 2021-11-07 10:25:08 +0100 tt: use diraddr for slave ID in case of type WIO\n" \
+"1897 2021-11-07 10:19:55 +0100 WIOpico,multiplex: only reset all pins to input in case of brightness pause\n" \
+"1896 2021-11-07 09:11:54 +0100 WIOpico: multiplexing without interrupt\n" \
 "1895 2021-11-06 10:56:03 +0100 wiopi: stop slave polling in case of an unsupported OPC\n" \
 "1894 2021-11-06 08:35:55 +0100 WIOpico: disable new Charlieplexing class\n" \
 "1893 2021-11-06 08:02:40 +0100 system action: calleruserdata added\n" \
