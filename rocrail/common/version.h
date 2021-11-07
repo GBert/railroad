@@ -1,11 +1,13 @@
 const int revisionnr = 
-1901
+1903
 ;
 const char* commithash = 
-"9412e654ed618d9cac1ec720fafa62aac703c982";
+"055618033c958eb9dc91bd703b7a4e5fe0455f8f";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1903 2021-11-07 12:04:14 +0100 WIOpico,multiplex: fix for switching between param 0 and 1\n" \
+"1902 2021-11-07 11:12:49 +0100 WIOpico,multiplex: fix for param 0\n" \
 "1901 2021-11-07 10:50:23 +0100 wiopi,cv,wrapper: removed option exthbridge because its the same as dualmotor\n" \
 "1900 2021-11-07 10:47:33 +0100 wiopi,wrapper: default mobiletype changed from 0 to 1\n" \
 "1899 2021-11-07 10:35:31 +0100 wiopi,manager: stop polling after 100 retries and only trace it once\n" \
