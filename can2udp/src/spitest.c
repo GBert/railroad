@@ -28,7 +28,7 @@ int baudrates[] = { SPI_BAUDRATE_MAERKLIN_LOCO_2, SPI_BAUDRATE_NMRA_2, SPI_BAUDR
 
 unsigned char puffer[2000];
 unsigned char rpuffer[2000];
-time_t t_now = 0;
+long long t_now = 0;
 struct timeval tv = { 0, 0 };
 
 int dev;
@@ -56,7 +56,7 @@ void test(int speed, int pktsize) {
     t_now = tv.tv_sec * 1000000 + tv.tv_usec - t_now;
     long int diff = ((signed)t_now - soll) * 1000 / soll;
 #ifndef OSZI
-    printf("%6ld => %6ldµs (%4ld‰)", soll, t_now, diff);
+    printf("%6ld => %6lldµs (%4ld‰)", soll, t_now, diff);
 #endif
 }
 
