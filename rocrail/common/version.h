@@ -1,11 +1,13 @@
 const int revisionnr = 
-1903
+1905
 ;
 const char* commithash = 
-"055618033c958eb9dc91bd703b7a4e5fe0455f8f";
+"69dc6dda18f1e0ce827ca36b8f3b5b87d205059a";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1905 2021-11-08 10:48:45 +0100 wio: set only bri attribute if > 0 for clock/alive event\n" \
+"1904 2021-11-08 10:18:51 +0100 WIOpi/WIOpico: use clock/weather brightnes for multiplex signals\n" \
 "1903 2021-11-07 12:04:14 +0100 WIOpico,multiplex: fix for switching between param 0 and 1\n" \
 "1902 2021-11-07 11:12:49 +0100 WIOpico,multiplex: fix for param 0\n" \
 "1901 2021-11-07 10:50:23 +0100 wiopi,cv,wrapper: removed option exthbridge because its the same as dualmotor\n" \
