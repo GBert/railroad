@@ -1,11 +1,13 @@
 const int revisionnr = 
-1906
+1908
 ;
 const char* commithash = 
-"f02e2752c0a9790fff7914aacf0b62780e31d7bd";
+"20f23a009c3890d486c1a09535e7d3487ff5ffc6";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1908 2021-11-09 11:04:10 +0100 rocweb: option show IDs (wip)\n" \
+"1907 2021-11-09 08:17:31 +0100 auipanel: force refresh option added\n" \
 "1906 2021-11-08 21:06:32 +0100 auipanel: removed force refresh\n" \
 "1905 2021-11-08 10:48:45 +0100 wio: set only bri attribute if > 0 for clock/alive event\n" \
 "1904 2021-11-08 10:18:51 +0100 WIOpi/WIOpico: use clock/weather brightnes for multiplex signals\n" \
