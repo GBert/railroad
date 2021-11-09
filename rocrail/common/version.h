@@ -1,11 +1,12 @@
 const int revisionnr = 
-1905
+1906
 ;
 const char* commithash = 
-"69dc6dda18f1e0ce827ca36b8f3b5b87d205059a";
+"f02e2752c0a9790fff7914aacf0b62780e31d7bd";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1906 2021-11-08 21:06:32 +0100 auipanel: removed force refresh\n" \
 "1905 2021-11-08 10:48:45 +0100 wio: set only bri attribute if > 0 for clock/alive event\n" \
 "1904 2021-11-08 10:18:51 +0100 WIOpi/WIOpico: use clock/weather brightnes for multiplex signals\n" \
 "1903 2021-11-07 12:04:14 +0100 WIOpico,multiplex: fix for switching between param 0 and 1\n" \
