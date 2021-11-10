@@ -1,11 +1,14 @@
 const int revisionnr = 
-1909
+1912
 ;
 const char* commithash = 
-"78881b5e44ce1058ada79d9b393457edaac68d50";
+"43e8c01a44910b91038a24ce2e6f1027dbbc2551";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1912 2021-11-10 19:27:26 +0100 wio: check if attribute hour is available before broadcasting the clock to the clients\n" \
+"1911 2021-11-10 12:38:29 +0100 location: use the pipe symbol for new line to be conform wiki\n" \
+"1910 2021-11-10 10:19:28 +0100 rocweb: ID labels (wip)\n" \
 "1909 2021-11-10 08:58:56 +0100 rocweb: labels (WIP)\n" \
 "1908 2021-11-09 11:04:10 +0100 rocweb: option show IDs (wip)\n" \
 "1907 2021-11-09 08:17:31 +0100 auipanel: force refresh option added\n" \
