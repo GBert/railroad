@@ -1,11 +1,12 @@
 const int revisionnr = 
-1908
+1909
 ;
 const char* commithash = 
-"20f23a009c3890d486c1a09535e7d3487ff5ffc6";
+"78881b5e44ce1058ada79d9b393457edaac68d50";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1909 2021-11-10 08:58:56 +0100 rocweb: labels (WIP)\n" \
 "1908 2021-11-09 11:04:10 +0100 rocweb: option show IDs (wip)\n" \
 "1907 2021-11-09 08:17:31 +0100 auipanel: force refresh option added\n" \
 "1906 2021-11-08 21:06:32 +0100 auipanel: removed force refresh\n" \
