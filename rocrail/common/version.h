@@ -1,11 +1,16 @@
 const int revisionnr = 
-1912
+1917
 ;
 const char* commithash = 
-"43e8c01a44910b91038a24ce2e6f1027dbbc2551";
+"b1a56a8b6da59550c8454758c083b384b0526879";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1917 2021-11-11 10:31:10 +0100 wiodlg: report corrections\n" \
+"1916 2021-11-11 10:19:01 +0100 wiodlg: report slave address\n" \
+"1915 2021-11-11 09:27:22 +0100 wiodlg: added more reporting columns\n" \
+"1914 2021-11-11 09:01:46 +0100 wiodlg: reporting added\n" \
+"1913 2021-11-11 07:41:59 +0100 loc: calibrate correction for other CV numbers\n" \
 "1912 2021-11-10 19:27:26 +0100 wio: check if attribute hour is available before broadcasting the clock to the clients\n" \
 "1911 2021-11-10 12:38:29 +0100 location: use the pipe symbol for new line to be conform wiki\n" \
 "1910 2021-11-10 10:19:28 +0100 rocweb: ID labels (wip)\n" \
