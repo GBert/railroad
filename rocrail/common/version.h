@@ -1,11 +1,12 @@
 const int revisionnr = 
-1917
+1918
 ;
 const char* commithash = 
-"b1a56a8b6da59550c8454758c083b384b0526879";
+"e669dcda23835dfb15ded0fd18eedd4a55d49e75";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1918 2021-11-11 14:48:36 +0100 laction: adjusted the ASCII timetable representation to be conform with HTML\n" \
 "1917 2021-11-11 10:31:10 +0100 wiodlg: report corrections\n" \
 "1916 2021-11-11 10:19:01 +0100 wiodlg: report slave address\n" \
 "1915 2021-11-11 09:27:22 +0100 wiodlg: added more reporting columns\n" \
