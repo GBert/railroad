@@ -1,11 +1,15 @@
 const int revisionnr = 
-1918
+1922
 ;
 const char* commithash = 
-"e669dcda23835dfb15ded0fd18eedd4a55d49e75";
+"ad995f36817d6b5a957a8308354002d9f3d4f038";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1922 2021-11-12 15:50:26 +0100 wiopi: make 7 segement clock brightness sensible\n" \
+"1921 2021-11-12 15:28:45 +0100 wiopi: TSL2591 support added (brightness)\n" \
+"1920 2021-11-12 10:34:56 +0100 wiodlg: added plan location as column in the report\n" \
+"1919 2021-11-12 09:25:08 +0100 location: adjusted the HTML attribute for fon color (andRoc)\n" \
 "1918 2021-11-11 14:48:36 +0100 laction: adjusted the ASCII timetable representation to be conform with HTML\n" \
 "1917 2021-11-11 10:31:10 +0100 wiodlg: report corrections\n" \
 "1916 2021-11-11 10:19:01 +0100 wiodlg: report slave address\n" \
