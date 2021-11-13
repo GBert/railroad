@@ -1,11 +1,13 @@
 const int revisionnr = 
-1922
+1924
 ;
 const char* commithash = 
-"ad995f36817d6b5a957a8308354002d9f3d4f038";
+"dc4b9d988f23bffc1d62a8c3a51696c7cf5ecf9b";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1924 2021-11-13 15:15:53 +0100 WIOpi: fix for global pin structure\n" \
+"1923 2021-11-13 13:01:58 +0100 rocs: exclude also arm from sys/io.h\n" \
 "1922 2021-11-12 15:50:26 +0100 wiopi: make 7 segement clock brightness sensible\n" \
 "1921 2021-11-12 15:28:45 +0100 wiopi: TSL2591 support added (brightness)\n" \
 "1920 2021-11-12 10:34:56 +0100 wiodlg: added plan location as column in the report\n" \
