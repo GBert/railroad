@@ -1,11 +1,13 @@
 const int revisionnr = 
-1924
+1926
 ;
 const char* commithash = 
-"dc4b9d988f23bffc1d62a8c3a51696c7cf5ecf9b";
+"37dc97f1408430098647b1c9b7ee748b44906bce";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1926 2021-11-14 15:33:29 +0100 action: condition class:! added\n" \
+"1925 2021-11-14 15:06:11 +0100 WIOpico hardware update\n" \
 "1924 2021-11-13 15:15:53 +0100 WIOpi: fix for global pin structure\n" \
 "1923 2021-11-13 13:01:58 +0100 rocs: exclude also arm from sys/io.h\n" \
 "1922 2021-11-12 15:50:26 +0100 wiopi: make 7 segement clock brightness sensible\n" \
