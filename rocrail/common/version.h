@@ -1,11 +1,13 @@
 const int revisionnr = 
-1926
+1928
 ;
 const char* commithash = 
-"37dc97f1408430098647b1c9b7ee748b44906bce";
+"1ce2bd914b7ab90693d341b9cd8e9690ffb1c1a8";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1928 2021-11-14 19:23:50 +0100 z21: resend broadcast flags after power on\n" \
+"1927 2021-11-14 19:11:57 +0100 z21: wait 1000ms after connect before sending commands (work-around)\n" \
 "1926 2021-11-14 15:33:29 +0100 action: condition class:! added\n" \
 "1925 2021-11-14 15:06:11 +0100 WIOpico hardware update\n" \
 "1924 2021-11-13 15:15:53 +0100 WIOpi: fix for global pin structure\n" \
