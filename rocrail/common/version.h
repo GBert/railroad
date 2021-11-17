@@ -1,11 +1,12 @@
 const int revisionnr = 
-1928
+1929
 ;
 const char* commithash = 
-"1ce2bd914b7ab90693d341b9cd8e9690ffb1c1a8";
+"f4c9e7331766cc8f19282d3baf2d693198450ad7";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1929 2021-11-17 10:46:52 +0100 gca136dlg: IID combobox added\n" \
 "1928 2021-11-14 19:23:50 +0100 z21: resend broadcast flags after power on\n" \
 "1927 2021-11-14 19:11:57 +0100 z21: wait 1000ms after connect before sending commands (work-around)\n" \
 "1926 2021-11-14 15:33:29 +0100 action: condition class:! added\n" \
