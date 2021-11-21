@@ -1,11 +1,15 @@
 const int revisionnr = 
-1929
+1933
 ;
 const char* commithash = 
-"f4c9e7331766cc8f19282d3baf2d693198450ad7";
+"9ee1cf5a8e50703b6aacfb0a70c5025121f16d93";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1933 2021-11-20 14:17:20 +0100 feedbackdialog: monitor button added\n" \
+"1932 2021-11-20 12:15:44 +0100 wiopi: default player\n" \
+"1931 2021-11-19 12:08:20 +0100 control: add CPU architecture to the issue.txt\n" \
+"1930 2021-11-19 11:01:35 +0100 in: fix for swap a loco in a terminal station if its not a commuter\n" \
 "1929 2021-11-17 10:46:52 +0100 gca136dlg: IID combobox added\n" \
 "1928 2021-11-14 19:23:50 +0100 z21: resend broadcast flags after power on\n" \
 "1927 2021-11-14 19:11:57 +0100 z21: wait 1000ms after connect before sending commands (work-around)\n" \
