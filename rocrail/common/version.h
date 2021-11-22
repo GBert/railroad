@@ -1,11 +1,13 @@
 const int revisionnr = 
-1934
+1936
 ;
 const char* commithash = 
-"e00487f9e60130d4062c3017b2636d34553ec674";
+"7cac29ca294d1d0f882c915f127447c1e2d5f975";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1936 2021-11-22 14:35:25 +0100 netbidib: use uint64_t for the UID\n" \
+"1935 2021-11-22 11:09:53 +0100 rocguiinidlg: label correction\n" \
 "1934 2021-11-21 15:07:45 +0100 in: swap in terminal in case of commuter or NOT stopnonecommuter\n" \
 "1933 2021-11-20 14:17:20 +0100 feedbackdialog: monitor button added\n" \
 "1932 2021-11-20 12:15:44 +0100 wiopi: default player\n" \
