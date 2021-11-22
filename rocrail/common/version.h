@@ -1,11 +1,12 @@
 const int revisionnr = 
-1933
+1934
 ;
 const char* commithash = 
-"9ee1cf5a8e50703b6aacfb0a70c5025121f16d93";
+"e00487f9e60130d4062c3017b2636d34553ec674";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1934 2021-11-21 15:07:45 +0100 in: swap in terminal in case of commuter or NOT stopnonecommuter\n" \
 "1933 2021-11-20 14:17:20 +0100 feedbackdialog: monitor button added\n" \
 "1932 2021-11-20 12:15:44 +0100 wiopi: default player\n" \
 "1931 2021-11-19 12:08:20 +0100 control: add CPU architecture to the issue.txt\n" \
