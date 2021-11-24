@@ -1,11 +1,12 @@
 const int revisionnr = 
-1940
+1941
 ;
 const char* commithash = 
-"8d7237d67f9150cfdce38d029891b33d4206b8d1";
+"f0be045898733d98c202d80fa1e83f6892d02905";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1941 2021-11-24 19:57:14 +0100 guiframe: set default xterm size\n" \
 "1940 2021-11-24 18:58:25 +0100 guiframe: launch xterm under linux for starting the server\n" \
 "1939 2021-11-24 10:31:48 +0100 blockdialog: allow route editting in module view\n" \
 "1938 2021-11-24 08:28:06 +0100 macos: server terminal option\n" \
