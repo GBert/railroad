@@ -1,11 +1,14 @@
 const int revisionnr = 
-1936
+1939
 ;
 const char* commithash = 
-"7cac29ca294d1d0f882c915f127447c1e2d5f975";
+"11f11208c1770200d8bdbba0608387cc75d42e34";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1939 2021-11-24 10:31:48 +0100 blockdialog: allow route editting in module view\n" \
+"1938 2021-11-24 08:28:06 +0100 macos: server terminal option\n" \
+"1937 2021-11-23 10:42:54 +0100 model: skip none free/open routes at selecting one\n" \
 "1936 2021-11-22 14:35:25 +0100 netbidib: use uint64_t for the UID\n" \
 "1935 2021-11-22 11:09:53 +0100 rocguiinidlg: label correction\n" \
 "1934 2021-11-21 15:07:45 +0100 in: swap in terminal in case of commuter or NOT stopnonecommuter\n" \
