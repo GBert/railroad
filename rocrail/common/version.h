@@ -1,11 +1,16 @@
 const int revisionnr = 
-1941
+1946
 ;
 const char* commithash = 
-"f0be045898733d98c202d80fa1e83f6892d02905";
+"f32cdb0a74918fc8fad9dcfab8119cd9569a0694";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1946 2021-11-25 18:22:41 +0100 throttle button color selection added\n" \
+"1945 2021-11-25 13:38:00 +0100 guiframe: default xterm size set to 132x32\n" \
+"1944 2021-11-25 12:04:51 +0100 ecos: function support increased to 32\n" \
+"1943 2021-11-25 10:53:57 +0100 timedactions: remark field added\n" \
+"1942 2021-11-25 07:59:37 +0100 rascii: servo commando added\n" \
 "1941 2021-11-24 19:57:14 +0100 guiframe: set default xterm size\n" \
 "1940 2021-11-24 18:58:25 +0100 guiframe: launch xterm under linux for starting the server\n" \
 "1939 2021-11-24 10:31:48 +0100 blockdialog: allow route editting in module view\n" \
