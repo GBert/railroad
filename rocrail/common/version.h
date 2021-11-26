@@ -1,11 +1,12 @@
 const int revisionnr = 
-1946
+1947
 ;
 const char* commithash = 
-"f32cdb0a74918fc8fad9dcfab8119cd9569a0694";
+"45046ceeb7a48f4969adf19768c24b511bde43ba";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1947 2021-11-26 07:39:26 +0100 rocguiinidlg: layout correction for button color\n" \
 "1946 2021-11-25 18:22:41 +0100 throttle button color selection added\n" \
 "1945 2021-11-25 13:38:00 +0100 guiframe: default xterm size set to 132x32\n" \
 "1944 2021-11-25 12:04:51 +0100 ecos: function support increased to 32\n" \
