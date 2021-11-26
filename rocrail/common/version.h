@@ -1,11 +1,14 @@
 const int revisionnr = 
-1947
+1950
 ;
 const char* commithash = 
-"45046ceeb7a48f4969adf19768c24b511bde43ba";
+"99135b83c5f86e2c64a917e36871587176b05378";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1950 2021-11-26 17:18:19 +0100 ecos: trace correction for function on/off\n" \
+"1949 2021-11-26 13:45:47 +0100 rocview: disable wxWidgets asserts\n" \
+"1948 2021-11-26 13:30:22 +0100 rocview wrapper: fix for button default color on\n" \
 "1947 2021-11-26 07:39:26 +0100 rocguiinidlg: layout correction for button color\n" \
 "1946 2021-11-25 18:22:41 +0100 throttle button color selection added\n" \
 "1945 2021-11-25 13:38:00 +0100 guiframe: default xterm size set to 132x32\n" \
