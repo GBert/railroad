@@ -1,11 +1,13 @@
 const int revisionnr = 
-1952
+1954
 ;
 const char* commithash = 
-"eb855766ab2ef0da81cdf6045b6625ef3503db8d";
+"1bef288e201078551129dde157928ccebff51f29";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1954 2021-11-27 12:16:53 +0100 ledbutton: color also for gray theme (only active if not set to black)\n" \
+"1953 2021-11-27 12:05:03 +0100 wiopi: support for set/get confx\n" \
 "1952 2021-11-27 10:50:07 +0100 hueconfdlg: removed the obsolete usernames\n" \
 "1951 2021-11-27 08:41:32 +0100 hue: format correction\n" \
 "1950 2021-11-26 17:18:19 +0100 ecos: trace correction for function on/off\n" \
