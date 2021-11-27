@@ -1,11 +1,13 @@
 const int revisionnr = 
-1950
+1952
 ;
 const char* commithash = 
-"99135b83c5f86e2c64a917e36871587176b05378";
+"eb855766ab2ef0da81cdf6045b6625ef3503db8d";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1952 2021-11-27 10:50:07 +0100 hueconfdlg: removed the obsolete usernames\n" \
+"1951 2021-11-27 08:41:32 +0100 hue: format correction\n" \
 "1950 2021-11-26 17:18:19 +0100 ecos: trace correction for function on/off\n" \
 "1949 2021-11-26 13:45:47 +0100 rocview: disable wxWidgets asserts\n" \
 "1948 2021-11-26 13:30:22 +0100 rocview wrapper: fix for button default color on\n" \
