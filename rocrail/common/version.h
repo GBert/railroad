@@ -1,11 +1,17 @@
 const int revisionnr = 
-1954
+1960
 ;
 const char* commithash = 
-"1bef288e201078551129dde157928ccebff51f29";
+"ebe66a8420e5d0b6858f9b426a3ee3d25b001c82";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1960 2021-11-28 21:53:09 +0100 wrapper: trace level monitor default false\n" \
+"1959 2021-11-28 15:18:28 +0100 loc: soundplayer double quote option added\n" \
+"1958 2021-11-28 14:59:00 +0100 rocutils: rgb2hue added\n" \
+"1957 2021-11-28 12:32:46 +0100 hue: saturation option added\n" \
+"1956 2021-11-28 10:35:32 +0100 wio: 64 I/O support for WIOpi\n" \
+"1955 2021-11-27 14:09:02 +0100 app: not disable find on startup\n" \
 "1954 2021-11-27 12:16:53 +0100 ledbutton: color also for gray theme (only active if not set to black)\n" \
 "1953 2021-11-27 12:05:03 +0100 wiopi: support for set/get confx\n" \
 "1952 2021-11-27 10:50:07 +0100 hueconfdlg: removed the obsolete usernames\n" \
