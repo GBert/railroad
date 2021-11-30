@@ -1,11 +1,14 @@
 const int revisionnr = 
-1960
+1963
 ;
 const char* commithash = 
-"ebe66a8420e5d0b6858f9b426a3ee3d25b001c82";
+"1e6838fad25afb657cb72e3c55fda3b6703267cf";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1963 2021-11-29 22:12:59 +0100 seltab: delay parameter added for stepper speed\n" \
+"1962 2021-11-29 17:53:36 +0100 hue: sat2temp option added\n" \
+"1961 2021-11-29 13:35:19 +0100 guiframe: issue tracelevels menu item added\n" \
 "1960 2021-11-28 21:53:09 +0100 wrapper: trace level monitor default false\n" \
 "1959 2021-11-28 15:18:28 +0100 loc: soundplayer double quote option added\n" \
 "1958 2021-11-28 14:59:00 +0100 rocutils: rgb2hue added\n" \
