@@ -1,11 +1,17 @@
 const int revisionnr = 
-1963
+1969
 ;
 const char* commithash = 
-"1e6838fad25afb657cb72e3c55fda3b6703267cf";
+"05c892374d8aad86d2d8fd99c9cd1a84353edea6";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1969 2021-11-30 18:01:26 +0100 removed: auto save on modify\n" \
+"1968 2021-11-30 14:18:44 +0100 hue: add ct value to none color type\n" \
+"1967 2021-11-30 11:31:23 +0100 huedlg: layout correction\n" \
+"1966 2021-11-30 11:18:20 +0100 hue: show calculated temperature in the trace\n" \
+"1965 2021-11-30 07:59:42 +0100 model: save the notes tab external too in notes.txt\n" \
+"1964 2021-11-30 07:35:13 +0100 guiframe: fix for open server interminal for Apple\n" \
 "1963 2021-11-29 22:12:59 +0100 seltab: delay parameter added for stepper speed\n" \
 "1962 2021-11-29 17:53:36 +0100 hue: sat2temp option added\n" \
 "1961 2021-11-29 13:35:19 +0100 guiframe: issue tracelevels menu item added\n" \
