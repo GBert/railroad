@@ -1,11 +1,13 @@
 const int revisionnr = 
-1969
+1971
 ;
 const char* commithash = 
-"05c892374d8aad86d2d8fd99c9cd1a84353edea6";
+"bc5c27908667f559df854825992f5b3fb93bdabd";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1971 2021-12-01 11:42:30 +0100 wiopi,stepper: report only steps > 10\n" \
+"1970 2021-12-01 08:00:13 +0100 seltab: disable reporting stepper steps\n" \
 "1969 2021-11-30 18:01:26 +0100 removed: auto save on modify\n" \
 "1968 2021-11-30 14:18:44 +0100 hue: add ct value to none color type\n" \
 "1967 2021-11-30 11:31:23 +0100 huedlg: layout correction\n" \
