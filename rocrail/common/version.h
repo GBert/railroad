@@ -1,11 +1,16 @@
 const int revisionnr = 
-1971
+1976
 ;
 const char* commithash = 
-"bc5c27908667f559df854825992f5b3fb93bdabd";
+"36cc750198e18f588940618f7c057c06e17afac8";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1976 2021-12-02 16:10:46 +0100 wiopi: product model zero1w added\n" \
+"1975 2021-12-02 15:00:50 +0100 wiodlg: model esp added\n" \
+"1974 2021-12-02 14:35:35 +0100 wiodlg,wiopi: model info added\n" \
+"1973 2021-12-02 12:27:16 +0100 wiopi: zero2w type added\n" \
+"1972 2021-12-02 11:25:10 +0100 wiopi: not set default info level -> use command line option -info\n" \
 "1971 2021-12-01 11:42:30 +0100 wiopi,stepper: report only steps > 10\n" \
 "1970 2021-12-01 08:00:13 +0100 seltab: disable reporting stepper steps\n" \
 "1969 2021-11-30 18:01:26 +0100 removed: auto save on modify\n" \
