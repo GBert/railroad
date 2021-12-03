@@ -1,11 +1,14 @@
 const int revisionnr = 
-1976
+1979
 ;
 const char* commithash = 
-"36cc750198e18f588940618f7c057c06e17afac8";
+"3a498d5abc2c78b638ce04a09af314315b504749";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1979 2021-12-03 08:16:49 +0100 remarks removed\n" \
+"1978 2021-12-03 08:03:04 +0100 svg: removed remark nodes\n" \
+"1977 2021-12-03 07:05:04 +0100 seltabtrackdlg: decoder tracknr range increased to 24bit\n" \
 "1976 2021-12-02 16:10:46 +0100 wiopi: product model zero1w added\n" \
 "1975 2021-12-02 15:00:50 +0100 wiodlg: model esp added\n" \
 "1974 2021-12-02 14:35:35 +0100 wiodlg,wiopi: model info added\n" \
