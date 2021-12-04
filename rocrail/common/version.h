@@ -1,11 +1,12 @@
 const int revisionnr = 
-1979
+1980
 ;
 const char* commithash = 
-"3a498d5abc2c78b638ce04a09af314315b504749";
+"7180c68aaebd292768eb7a3dfb20886d0fb04512";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1980 2021-12-03 15:18:38 +0100 seltab: regard invert flag in case of WIO stepper\n" \
 "1979 2021-12-03 08:16:49 +0100 remarks removed\n" \
 "1978 2021-12-03 08:03:04 +0100 svg: removed remark nodes\n" \
 "1977 2021-12-03 07:05:04 +0100 seltabtrackdlg: decoder tracknr range increased to 24bit\n" \
