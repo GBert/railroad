@@ -1,11 +1,13 @@
 const int revisionnr = 
-1980
+1982
 ;
 const char* commithash = 
-"7180c68aaebd292768eb7a3dfb20886d0fb04512";
+"40727a2d7bf6d4ca6d43c04a020dd47799857c6a";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1982 2021-12-05 10:50:41 +0100 rocview: makefile added missing library for win32\n" \
+"1981 2021-12-04 13:16:30 +0100 model: regard available locked routes in case of schedule\n" \
 "1980 2021-12-03 15:18:38 +0100 seltab: regard invert flag in case of WIO stepper\n" \
 "1979 2021-12-03 08:16:49 +0100 remarks removed\n" \
 "1978 2021-12-03 08:03:04 +0100 svg: removed remark nodes\n" \
