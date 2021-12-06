@@ -1,11 +1,12 @@
 const int revisionnr = 
-1983
+1984
 ;
 const char* commithash = 
-"734e93ea7ccd82488de048eda2c8534d6aca871c";
+"9782b4d494f1c121b5825320c6523ece9b2032fa";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1984 2021-12-06 16:13:54 +0100 wiopi,wiopico: testing update\n" \
 "1983 2021-12-05 18:29:29 +0100 hue: send only on/off for porttype output\n" \
 "1982 2021-12-05 10:50:41 +0100 rocview: makefile added missing library for win32\n" \
 "1981 2021-12-04 13:16:30 +0100 model: regard available locked routes in case of schedule\n" \
