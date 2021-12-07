@@ -1,11 +1,14 @@
 const int revisionnr = 
-1984
+1987
 ;
 const char* commithash = 
-"9782b4d494f1c121b5825320c6523ece9b2032fa";
+"bb0bf20be8a8c74edc153176da433e62bfa745cd";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1987 2021-12-07 10:23:08 +0100 block: fix for fifo red signal Vmid\n" \
+"1986 2021-12-07 08:20:44 +0100 WIOpico: binary update\n" \
+"1985 2021-12-07 08:03:52 +0100 wiopi: slave manager improvements\n" \
 "1984 2021-12-06 16:13:54 +0100 wiopi,wiopico: testing update\n" \
 "1983 2021-12-05 18:29:29 +0100 hue: send only on/off for porttype output\n" \
 "1982 2021-12-05 10:50:41 +0100 rocview: makefile added missing library for win32\n" \
