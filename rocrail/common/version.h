@@ -1,11 +1,13 @@
 const int revisionnr = 
-1987
+1989
 ;
 const char* commithash = 
-"bb0bf20be8a8c74edc153176da433e62bfa745cd";
+"f995762087d783933f9e6c6d7bb47474f4f53c01";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1989 2021-12-08 07:51:01 +0100 finddest: only use new schedule index if a (free)route was found\n" \
+"1988 2021-12-07 17:02:05 +0100 initdest: send Vcurrent in case of type automobile\n" \
 "1987 2021-12-07 10:23:08 +0100 block: fix for fifo red signal Vmid\n" \
 "1986 2021-12-07 08:20:44 +0100 WIOpico: binary update\n" \
 "1985 2021-12-07 08:03:52 +0100 wiopi: slave manager improvements\n" \
