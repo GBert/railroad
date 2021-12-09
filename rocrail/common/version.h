@@ -1,11 +1,13 @@
 const int revisionnr = 
-1989
+1991
 ;
 const char* commithash = 
-"f995762087d783933f9e6c6d7bb47474f4f53c01";
+"850aaec0bceb7943b943785dd8bd9473ed69ced6";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1991 2021-12-09 10:22:07 +0100 wiodlg: 3W fast option added\n" \
+"1990 2021-12-09 07:59:25 +0100 finddest,schedules: fix for detecting end of schedule\n" \
 "1989 2021-12-08 07:51:01 +0100 finddest: only use new schedule index if a (free)route was found\n" \
 "1988 2021-12-07 17:02:05 +0100 initdest: send Vcurrent in case of type automobile\n" \
 "1987 2021-12-07 10:23:08 +0100 block: fix for fifo red signal Vmid\n" \
