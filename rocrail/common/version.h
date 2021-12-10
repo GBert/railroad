@@ -1,11 +1,14 @@
 const int revisionnr = 
-1991
+1994
 ;
 const char* commithash = 
-"850aaec0bceb7943b943785dd8bd9473ed69ced6";
+"a5a21260734a95bbdac9f18f09dc12e584db4748";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1994 2021-12-10 08:46:12 +0100 block: disregard wait option in case of active FiFo\n" \
+"1993 2021-12-09 16:35:23 +0100 wheater: double quote option added for sound\n" \
+"1992 2021-12-09 14:47:52 +0100 wiopi,stepper: 3W fast support added\n" \
 "1991 2021-12-09 10:22:07 +0100 wiodlg: 3W fast option added\n" \
 "1990 2021-12-09 07:59:25 +0100 finddest,schedules: fix for detecting end of schedule\n" \
 "1989 2021-12-08 07:51:01 +0100 finddest: only use new schedule index if a (free)route was found\n" \
