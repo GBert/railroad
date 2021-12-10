@@ -230,9 +230,9 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
 			switch (type) {
                 case CV:
                     snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d CV %d %d\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, typeaddr, result);
+                            "%lld.%.3ld 100 INFO %lu SM %d CV %d %d\n",
+                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+							busnumber, addr, typeaddr, result);
                     if (addr < 0) addr = -addr;
 					minfo[0] = 3;
 					minfo[1] = typeaddr >> 8;
@@ -249,21 +249,21 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
                     break;
                 case REGISTER:
                     snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d REG %d %d\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, typeaddr, result);
+                            "%lld.%.3ld 100 INFO %lu SM %d REG %d %d\n",
+                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+							busnumber, addr, typeaddr, result);
                     break;
                 case PAGE:
                     snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d PAGE %d %d\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, typeaddr, result);
+                            "%lld.%.3ld 100 INFO %lu SM %d PAGE %d %d\n",
+                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+							busnumber, addr, typeaddr, result);
                     break;
                 case CV_BIT:
                     snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d CVBIT %d %d %d\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, typeaddr, bit_index, result);
+                            "%lld.%.3ld 100 INFO %lu SM %d CVBIT %d %d %d\n",
+                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+                            busnumber, addr, typeaddr, bit_index, result);
                     break;
                 case MM_REG:
                     minfo[0] = 1;	
@@ -288,16 +288,16 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
                     else if (command == GET)
                     	status = SRCP_NODATA;
                     if (minfo[0]) snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d BIND %u\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, value);
+                            "%lld.%.3ld 100 INFO %lu SM %d BIND %u\n",
+                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+							busnumber, addr, (unsigned) value);
                     break;
                 case CV_MFX:
 					if (command == SET) {
 						snprintf(info, MAXSRCPLINELEN,
-                            "%lu.%.3lu 100 INFO %lu SM %d CVMFX %d %d %d\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            addr, typeaddr, bit_index, value);
+                            "%lld.%.3ld 100 INFO %lu SM %d CVMFX %d %d %d\n",
+                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+							busnumber, addr, typeaddr, bit_index, value);
 						minfo[0] = 4;
 						minfo[1] = (typeaddr >> 8) | (bit_index << 2);
 						minfo[2] = typeaddr & 0xFF;

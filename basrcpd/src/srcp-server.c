@@ -1,4 +1,4 @@
-// srcpd-server.c - adapted for basrcpd project 2018 by Rainer Müller 
+// srcpd-server.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
 
 /* $Id: srcp-server.c 1725 2016-03-20 17:06:01Z gscholz $ */
 
@@ -152,11 +152,11 @@ int describeSERVER(bus_t bus, int addr, char *reply)
     
 	struct timeval tv = { 0, 0 };
 	gettimeofday(&tv, NULL);
-    sprintf(reply, "%lu.%.3lu 101 INFO 0 SERVER BASRCPD " VERSION 
+    sprintf(reply, "%lld.%.3ld 101 INFO 0 SERVER BASRCPD " VERSION 
 					" SERIAL %llu TEMP %llu\n",
-            		tv.tv_sec, tv.tv_usec / 1000, 
-					getPlatformData(PL_SERIAL), getPlatformData(PL_TEMP)/100);
-
+            		(long long) tv.tv_sec, (long) (tv.tv_usec / 1000), 
+					(unsigned long long) getPlatformData(PL_SERIAL),
+					(unsigned long long) getPlatformData(PL_TEMP)/100);
     return SRCP_INFO;
 }
 
@@ -218,24 +218,24 @@ int infoSERVER(char *msg)
 
     switch (get_server_state()) {
         case ssResetting:
-            sprintf(msg, "%lu.%.3lu 100 INFO 0 SERVER RESETTING\n",
-                    akt_time.tv_sec, akt_time.tv_usec / 1000);
+            sprintf(msg, "%lld.%.3ld 100 INFO 0 SERVER RESETTING\n",
+                (long long) akt_time.tv_sec, (long) (akt_time.tv_usec / 1000));
             break;
 
         case ssTerminating:
-            sprintf(msg, "%lu.%.3lu 100 INFO 0 SERVER TERMINATING\n",
-                    akt_time.tv_sec, akt_time.tv_usec / 1000);
+            sprintf(msg, "%lld.%.3ld 100 INFO 0 SERVER TERMINATING\n",
+                (long long) akt_time.tv_sec, (long) (akt_time.tv_usec / 1000));
             break;
 
         case ssRunning:
-            sprintf(msg, "%lu.%.3lu 100 INFO 0 SERVER RUNNING\n",
-                    akt_time.tv_sec, akt_time.tv_usec / 1000);
+            sprintf(msg, "%lld.%.3ld 100 INFO 0 SERVER RUNNING\n",
+                (long long) akt_time.tv_sec, (long) (akt_time.tv_usec / 1000));
             break;
 
         default:
             syslog_bus(0, DBG_ERROR,
                        "ERROR, unexpected server state detected!");
-            break;
+            return SRCP_UNKNOWNVALUE;
     }
     return SRCP_OK;
 }

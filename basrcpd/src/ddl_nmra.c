@@ -1,3 +1,5 @@
+// ddl_nmra.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
 /* +----------------------------------------------------------------------+ */
@@ -658,8 +660,6 @@ int protocol_nmra_sm_write_cvbyte_pom(bus_t busnumber, int address, int cv,
     char progstream[BUFFERSIZE];
     char bitstream[BUFFERSIZE];
     char packetstream[PKTSIZE];
-    int j;
-    int adr = 0;
 
     syslog_bus(busnumber, DBG_DEBUG,
                "WR Byte command for PoM %d received addr:%d CV:%d value:%d",
@@ -670,11 +670,6 @@ int protocol_nmra_sm_write_cvbyte_pom(bus_t busnumber, int address, int cv,
         value < 0 || value > 255 || (address > 127 && mode == 1))
         return -1;
 
-    adr = address;
-    if (mode == 2) {
-        adr += ADDR14BIT_OFFSET;
-    }
-
     calc_address_stream(addrstream, addrerrbyte, address, mode);
     calc_byte_program_stream(progstream, addrerrbyte, cv, value, false,
                              true);
@@ -682,7 +677,7 @@ int protocol_nmra_sm_write_cvbyte_pom(bus_t busnumber, int address, int cv,
     strcat(bitstream, addrstream);
     strcat(bitstream, progstream);
 
-    j = translateBitstream2Packetstream(busnumber, bitstream, packetstream);
+    int j = translateBitstream2Packetstream(busnumber, bitstream, packetstream);
 
     if (j > 0) {
     	send_packet(busnumber, packetstream, j, QNBLOCOPKT, 3);    
@@ -711,8 +706,6 @@ int protocol_nmra_sm_write_cvbit_pom(bus_t busnumber, int address, int cv,
     char progstream[BUFFERSIZE];
     char bitstream[BUFFERSIZE];
     char packetstream[PKTSIZE];
-    int j;
-    int adr = 0;
 
     syslog_bus(busnumber, DBG_DEBUG,
                "WR Bit command for PoM %d received addr:%d CV:%d bit:%d value:%d",
@@ -724,11 +717,6 @@ int protocol_nmra_sm_write_cvbit_pom(bus_t busnumber, int address, int cv,
         || (address > 127 && mode == 1))
         return -1;
 
-    adr = address;
-    if (mode == 2) {
-        adr += ADDR14BIT_OFFSET;
-    }
-
     calc_address_stream(addrstream, addrerrbyte, address, mode);
     calc_bit_program_stream(progstream, addrerrbyte, cv, bit, value, false,
                             true);
@@ -736,7 +724,7 @@ int protocol_nmra_sm_write_cvbit_pom(bus_t busnumber, int address, int cv,
     strcat(bitstream, addrstream);
     strcat(bitstream, progstream);
 
-    j = translateBitstream2Packetstream(busnumber, bitstream, packetstream);
+    int j = translateBitstream2Packetstream(busnumber, bitstream, packetstream);
 
     if (j > 0) {
     	send_packet(busnumber, packetstream, j, QNBLOCOPKT, 3);    
@@ -1144,12 +1132,10 @@ int protocol_nmra_sm_verify_phregister(bus_t bus, int reg, int value)
 */
 int protocol_nmra_sm_get_phregister(bus_t bus, int reg)
 {
-    int rc;
     int i;
     for (i = 0; i < 256; i++) {
-        rc = protocol_nmra_sm_phregister(bus, reg, i, true);
-        if (rc)
-            break;
+        int rc = protocol_nmra_sm_phregister(bus, reg, i, true);
+        if (rc) break;
     }
     return i;
 }
@@ -1426,12 +1412,10 @@ int protocol_nmra_sm_verify_page(bus_t busnumber, int cv, int value)
 int protocol_nmra_sm_get_page(bus_t busnumber, int cv)
 {
     int page = calc_page(cv);
-    int rc;
     int i;
     for (i = 0; i < 256; i++) {
-        rc = protocol_nmra_sm_page(busnumber, page, (cv - 1) & 3, i, true);
-        if (rc)
-            break;
+        int rc = protocol_nmra_sm_page(busnumber, page, (cv - 1) & 3, i, true);
+        if (rc) break;
     }
     return i;
 }

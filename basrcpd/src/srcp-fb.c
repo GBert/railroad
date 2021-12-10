@@ -1,4 +1,4 @@
-// srcp-fb.c - adapted for basrcpd project 2019 by Rainer Müller 
+// srcp-fb.c - adapted for basrcpd project 2019 - 2021 by Rainer MÃ¼ller
 
 /***************************************************************************
  *                                                                         *
@@ -175,15 +175,13 @@ int setFB(bus_t bus, int port, int value)
 int updateFB(bus_t bus, int port, int value)
 {
     int result;
-    int port_t;
-    struct timezone dummy;
     struct timeval akt_time;
 
     /* check range to disallow segmentation fault */
     if ((port > get_number_fb(bus)) || (port < 1))
         return SRCP_WRONGVALUE;
 
-    port_t = port - 1;
+    int port_t = port - 1;
     /* we read 8 or 16 ports at once, but we will only change those ports, */
     /* which are really changed */
     /*  */
@@ -193,7 +191,7 @@ int updateFB(bus_t bus, int port, int value)
         syslog_bus(bus, DBG_DEBUG, "FB %02i/%04i is set to \"%i\"", bus,
                    port, value);
 
-        gettimeofday(&akt_time, &dummy);
+        gettimeofday(&akt_time, NULL);
         if (value == 0) {
             if (min_time[bus] == 0) {
                 fb[bus].fbstate[port_t].state = value;
@@ -256,15 +254,11 @@ int updateFB(bus_t bus, int port, int value)
 int setFBmodul(bus_t bus, int modul, int values)
 {
     int i;
-    int c;
-    int fb_contact;
-    int ports;
     int dir;
     int mask;
-    int rc;
-    rc = SRCP_OK;
+    int rc = SRCP_OK;
 
-    ports = ((buses[bus].flags & FB_16_PORTS) == FB_16_PORTS) ? 16 : 8;
+    int ports = ((buses[bus].flags & FB_16_PORTS) == FB_16_PORTS) ? 16 : 8;
     if (buses[bus].flags & FB_4_PORTS)
         ports = 4;
     if ((buses[bus].flags & FB_ORDER_0) == FB_ORDER_0) {
@@ -276,13 +270,12 @@ int setFBmodul(bus_t bus, int modul, int values)
         mask = 1 << (ports - 1);
     }
     /* compute start contact ( (module - 1) * ports + 1 ) */
-    fb_contact = modul - 1;
+    int fb_contact = modul - 1;
     fb_contact *= ports;
     fb_contact++;
 
     for (i = 0; i < ports; i++) {
-        c = (values & mask) ? 1 : 0;
-        rc = updateFB(bus, fb_contact++, c);
+        rc = updateFB(bus, fb_contact++, (values & mask) ? 1 : 0);
         if (dir)
             mask >>= 1;
         else
@@ -301,8 +294,9 @@ int infoFB(bus_t bus, int port, char *msg, size_t length)
     msg[0] = 0x00;
 
     if (rc >= SRCP_OK) {
-        snprintf(msg, length, "%lu.%.3lu 100 INFO %lu FB %d %d\n",
-                 time.tv_sec, time.tv_usec / 1000, bus, port, state);
+        snprintf(msg, length, "%lld.%.3ld 100 INFO %lu FB %d %d\n",
+                 (long long) time.tv_sec,
+				 (long) (time.tv_usec / 1000), bus, port, state);
         return SRCP_INFO;
     }
     else {
@@ -335,7 +329,6 @@ void set_min_time(bus_t busnumber, int mt)
 int init_FB(bus_t bus, int number)
 {
     struct timeval akt_time;
-    int i;
 
     if (bus >= MAX_BUSES)
         return 1;
@@ -347,7 +340,7 @@ int init_FB(bus_t bus, int number)
         if (fb[bus].fbstate == NULL)
             return 1;
         fb[bus].numberOfFb = number;
-        for (i = 0; i < number; i++) {
+        for (int i = 0; i < number; i++) {
             fb[bus].fbstate[i].state = 0;
             fb[bus].fbstate[i].change = 0;
             fb[bus].fbstate[i].timestamp = akt_time;

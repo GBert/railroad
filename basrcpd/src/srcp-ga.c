@@ -1,3 +1,5 @@
+// srcp-ga.c - adapted for basrcpd project 2019 - 2021 by Rainer Müller
+
 /* $Id: srcp-ga.c 1739 2016-04-22 20:42:26Z gscholz $ */
 /*
  * This software is published under the restrictions of the
@@ -163,7 +165,7 @@ int setGA(bus_t busnumber, int addr, ga_data_t a)
     		minfo[4] = at & 0xFF;
     	}
     	else minfo[0] = 2;		// short form
-    	info_mcs(busnumber, 0x17, addr + ((ga[busnumber].gastate[addr].protocol 
+    	info_mcs(busnumber, 0x17, addr + ((ga[busnumber].gastate[addr].protocol
 									== 'N') ? 0x37FF : 0x2FFF), minfo);
         return SRCP_OK;
     }
@@ -183,8 +185,9 @@ int termGA(bus_t busnumber, int addr)
         char msg[256];
         struct timeval now;
         gettimeofday(&now, NULL);
-        snprintf(msg, sizeof(msg), "%lu.%.3lu 102 INFO %lu GA %d\n",
-                now.tv_sec, now.tv_usec / 1000, busnumber, addr);
+        snprintf(msg, sizeof(msg), "%lld.%.3ld 102 INFO %lu GA %d\n",
+                (long long) now.tv_sec,
+				(long) (now.tv_usec / 1000), busnumber, addr);
         enqueueInfoMessage(msg);
 
         /* at least clear GA data */
@@ -206,9 +209,9 @@ int describeGA(bus_t busnumber, int addr, char *msg)
 
     if ((addr > 0) && (addr <= number_ga)
         && (ga[busnumber].gastate[addr].protocol)) {
-        sprintf(msg, "%lu.%.3lu 101 INFO %lu GA %d %c\n",
-                ga[busnumber].gastate[addr].inittime.tv_sec,
-                ga[busnumber].gastate[addr].inittime.tv_usec / 1000,
+        sprintf(msg, "%lld.%.3ld 101 INFO %lu GA %d %c\n",
+                (long long) ga[busnumber].gastate[addr].inittime.tv_sec,
+                (long) (ga[busnumber].gastate[addr].inittime.tv_usec / 1000),
                 busnumber, addr, ga[busnumber].gastate[addr].protocol);
     }
     else {
@@ -225,9 +228,9 @@ int infoGA(bus_t busnumber, int addr, int port, char *msg)
     if ((addr > 0) && (addr <= number_ga) && (port >= 0)
         && (port < MAXGAPORT)
         && (ga[busnumber].gastate[addr].tv[port].tv_sec > 0)) {
-        sprintf(msg, "%lu.%.3lu 100 INFO %lu GA %d %d %d\n",
-                ga[busnumber].gastate[addr].tv[port].tv_sec,
-                ga[busnumber].gastate[addr].tv[port].tv_usec / 1000,
+        sprintf(msg, "%lld.%.3ld 100 INFO %lu GA %d %d %d\n",
+                (long long) ga[busnumber].gastate[addr].tv[port].tv_sec,
+                (long) (ga[busnumber].gastate[addr].tv[port].tv_usec / 1000),
                 busnumber, addr, port, ga[busnumber].gastate[addr].action);
     }
     else {
@@ -303,9 +306,9 @@ int getlockGA(bus_t busnumber, int addr, sessionid_t *sessionid)
 
 int describeLOCKGA(bus_t bus, int addr, char *reply)
 {
-    sprintf(reply, "%lu.%.3lu 100 INFO %lu LOCK GA %d %ld %lu\n",
-            ga[bus].gastate[addr].locktime.tv_sec,
-            ga[bus].gastate[addr].locktime.tv_usec / 1000,
+    sprintf(reply, "%lld.%.3ld 100 INFO %lu LOCK GA %d %ld %lu\n",
+            (long long) ga[bus].gastate[addr].locktime.tv_sec,
+            (long) (ga[bus].gastate[addr].locktime.tv_usec / 1000),
             bus, addr, ga[bus].gastate[addr].lockduration,
             ga[bus].gastate[addr].locked_by);
     return SRCP_OK;
@@ -320,9 +323,9 @@ int unlockGA(bus_t busnumber, int addr, sessionid_t sessionid)
     	char msg[256];
         ga_tmp->locked_by = 0;
         gettimeofday(&ga_tmp->locktime, NULL);
-        sprintf(msg, "%lu.%.3lu 102 INFO %lu LOCK GA %d\n",
-                ga_tmp->locktime.tv_sec,
-                ga_tmp->locktime.tv_usec / 1000,
+        sprintf(msg, "%lld.%.3ld 102 INFO %lu LOCK GA %d\n",
+                (long long) ga_tmp->locktime.tv_sec,
+                (long) (ga_tmp->locktime.tv_usec / 1000),
                 busnumber, addr);
         enqueueInfoMessage(msg);
         return SRCP_OK;
@@ -418,13 +421,13 @@ void clean_GA(bus_t bus)
 }
 
 /* Interface for the mcs-Gateway */
-void handle_mcs_gacc(bus_t bus, char protocol, int addr, int port, 
+void handle_mcs_gacc(bus_t bus, char protocol, int addr, int port,
 			int action, int activetime)
 {
-	if (bus) { 		// bus == 0 indicates that basrcpd should ignore 
+	if (bus) { 		// bus == 0 indicates that basrcpd should ignore
 		if (ga[bus].gastate[addr].protocol != protocol) {
-			if (initGA(bus, addr, protocol) != SRCP_OK) return; 
+			if (initGA(bus, addr, protocol) != SRCP_OK) return;
 		}
 		enqueueGA(bus, addr, port, action, activetime);
 	}
-}			
+}

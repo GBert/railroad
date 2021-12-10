@@ -275,8 +275,9 @@ void cacheSetGL(bus_t busnumber, gl_data_t *glp, gl_data_t *l)
     gettimeofday(&glp->tv, NULL);
     if (glp->state == glsTerm) {
        	rc = SRCP_INFO;
-        snprintf(msg, sizeof(msg), "%lu.%.3lu 102 INFO %lu GL %d\n",
-                glp->tv.tv_sec, glp->tv.tv_usec / 1000, busnumber, addr);
+        snprintf(msg, sizeof(msg), "%lld.%.3ld 102 INFO %lu GL %d\n",
+                (long long) glp->tv.tv_sec,
+				(long) (glp->tv.tv_usec / 1000), busnumber, addr);
         // delete all data of terminated entry
         uint16_t *gli = getGLIndex(busnumber, getglid(glp) | MCSADDRINDICATOR, 0);
         *gli = 0;
@@ -373,9 +374,9 @@ int cacheDescribeGL(bus_t busnumber, uint32_t locid, char *msg)
     uint16_t *gli = getGLIndex(busnumber, locid, 0);
     int i = gli ? *gli : 0;
     if (i && (gl[busnumber].glstate[i].state >= glsInit)) {
-        sprintf(msg, "%lu.%.3lu 101 INFO %lu GL %u %c %d %d %d",
-                gl[busnumber].glstate[i].inittime.tv_sec,
-                gl[busnumber].glstate[i].inittime.tv_usec / 1000,
+        sprintf(msg, "%lld.%.3ld 101 INFO %lu GL %u %c %d %d %d",
+                (long long) gl[busnumber].glstate[i].inittime.tv_sec,
+                (long) (gl[busnumber].glstate[i].inittime.tv_usec / 1000),
                 busnumber, locid,
 				gl[busnumber].glstate[i].protocol,
                 gl[busnumber].glstate[i].protocolversion,
@@ -400,9 +401,9 @@ int cacheInfoGL(bus_t busnumber, uint32_t locid, char *msg)
     int i = gli ? *gli : 0;
     if (i && (gl[busnumber].glstate[i].state == glsActive)) {
     	char *tmp;
-        sprintf(msg, "%lu.%.3lu 100 INFO %lu GL %u %d %d %d %d",
-                gl[busnumber].glstate[i].tv.tv_sec,
-                gl[busnumber].glstate[i].tv.tv_usec / 1000,
+        sprintf(msg, "%lld.%.3ld 100 INFO %lu GL %u %d %d %d %d",
+                (long long) gl[busnumber].glstate[i].tv.tv_sec,
+                (long) (gl[busnumber].glstate[i].tv.tv_usec / 1000),
                 busnumber, locid,
 				gl[busnumber].glstate[i].direction,
                 gl[busnumber].glstate[i].speed,
@@ -465,9 +466,9 @@ int describeLOCKGL(bus_t busnumber, uint32_t locid, char *reply)
 	uint16_t *gli = getGLIndex(busnumber, locid, 0);
 	int i = gli ? *gli : 0;
 	if (i && (gl[busnumber].glstate[i].state != glsNone)) {
-        sprintf(reply, "%lu.%.3lu 100 INFO %lu LOCK GL %u %ld %lu\n",
-                gl[busnumber].glstate[i].locktime.tv_sec,
-                gl[busnumber].glstate[i].locktime.tv_usec / 1000,
+        sprintf(reply, "%lld.%.3ld 100 INFO %lu LOCK GL %u %ld %lu\n",
+                (long long) gl[busnumber].glstate[i].locktime.tv_sec,
+                (long) (gl[busnumber].glstate[i].locktime.tv_usec / 1000),
                 busnumber, locid, gl[busnumber].glstate[i].lockduration,
                 gl[busnumber].glstate[i].locked_by);
         return SRCP_OK;
@@ -485,9 +486,9 @@ int cacheUnlockGL(bus_t busnumber, uint32_t locid, sessionid_t sessionid)
 			char msg[256];
             gl[busnumber].glstate[i].locked_by = 0;
             gettimeofday(&gl[busnumber].glstate[i].locktime, NULL);
-            sprintf(msg, "%lu.%.3lu 102 INFO %lu LOCK GL %u %lu\n",
-                    gl[busnumber].glstate[i].locktime.tv_sec,
-                    gl[busnumber].glstate[i].locktime.tv_usec / 1000,
+            sprintf(msg, "%lld.%.3ld 102 INFO %lu LOCK GL %u %lu\n",
+                    (long long) gl[busnumber].glstate[i].locktime.tv_sec,
+                    (long) (gl[busnumber].glstate[i].locktime.tv_usec / 1000),
                     busnumber, locid, sessionid);
             enqueueInfoMessage(msg);
             return SRCP_OK;

@@ -1,4 +1,4 @@
-// srcp-session.c - adapted for basrcpd project 2018 by Rainer Müller 
+// srcp-session.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
 
 /**************************************************************************
                           srcp-session.c
@@ -506,9 +506,9 @@ int start_session(session_node_t * sn)
 
     gettimeofday(&akt_time, NULL);
 
-    snprintf(msg, sizeof(msg), "%lu.%.3lu 101 INFO 0 SESSION %lu %s\n",
-             akt_time.tv_sec, akt_time.tv_usec / 1000, sn->session,
-             (sn->mode == smCommand ? "COMMAND" : "INFO"));
+    snprintf(msg, sizeof(msg), "%lld.%.3ld 101 INFO 0 SESSION %lu %s\n",
+             (long long) akt_time.tv_sec, (long) (akt_time.tv_usec / 1000),
+			 sn->session, (sn->mode == smCommand ? "COMMAND" : "INFO"));
     enqueueInfoMessage(msg);
 
     syslog_session(sn->session, DBG_INFO,
@@ -530,8 +530,8 @@ int stop_session(sessionid_t sid)
     unlock_ga_bysessionid(sid);
     unlock_gl_bysessionid(sid);
 
-    snprintf(msg, sizeof(msg), "%lu.%.3lu 102 INFO 0 SESSION %lu\n",
-             akt_time.tv_sec, akt_time.tv_usec / 1000, sid);
+    snprintf(msg, sizeof(msg), "%lld.%.3ld 102 INFO 0 SESSION %lu\n",
+             (long long) akt_time.tv_sec, (long) (akt_time.tv_usec / 1000), sid);
     enqueueInfoMessage(msg);
 
     return SRCP_OK;

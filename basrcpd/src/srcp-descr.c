@@ -1,3 +1,5 @@
+// srcp-descr.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+
 /* $Id: srcp-descr.c 1725 2016-03-20 17:06:01Z gscholz $ */
 
 /*
@@ -17,9 +19,9 @@ void startup_DESCRIPTION()
 
 int describeBus(bus_t bus, char *reply)
 {
-    sprintf(reply, "%lu.%.3lu 100 INFO %ld DESCRIPTION %s\n",
-            buses[bus].power_change_time.tv_sec,
-            buses[bus].power_change_time.tv_usec / 1000, bus,
+    sprintf(reply, "%lld.%.3ld 100 INFO %lu DESCRIPTION %s\n",
+            (long long) buses[bus].power_change_time.tv_sec,
+            (long) (buses[bus].power_change_time.tv_usec / 1000), bus,
             buses[bus].description);
     return SRCP_INFO;
 }

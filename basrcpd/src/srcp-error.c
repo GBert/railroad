@@ -1,3 +1,5 @@
+// srcp-error.c - adapted for basrcpd project 2019 - 2021 by Rainer Müller
+
 /* $Id: srcp-error.c 1456 2010-02-28 20:01:39Z gscholz $ */
 
 /* 
@@ -13,117 +15,87 @@
 
 int srcp_fmt_msg(int errorcode, char *msg, struct timeval time)
 {
+	char * emsg;
     switch (errorcode) {
         case 100:
-            sprintf(msg, "%lu.%.3lu %d INFO\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
-            break;
         case 101:
-            sprintf(msg, "%lu.%.3lu %d INFO\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
-            break;
         case 102:
-            sprintf(msg, "%lu.%.3lu %d INFO\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
-            break;
         case 110:
-            sprintf(msg, "%lu.%.3lu %d INFO\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "INFO";
             break;
         case 200:
-            sprintf(msg, "%lu.%.3lu %d OK\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "OK";
             break;
         case 202:
-            sprintf(msg, "%lu.%.3lu %d OK CONNECTIONMODE\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "OK CONNECTIONMODE";
             break;
         case 201:
-            sprintf(msg, "%lu.%.3lu %d OK PROTOCOL SRCP\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "OK PROTOCOL SRCP";
             break;
         case 400:
-            sprintf(msg, "%lu.%.3lu %d ERROR unsupported protocol\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unsupported protocol";
             break;
         case 401:
-            sprintf(msg,
-                    "%lu.%.3lu %d ERROR unsupported connection mode\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unsupported connection mode";
             break;
         case 402:
-            sprintf(msg, "%lu.%.3lu %d ERROR insufficient data\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR insufficient data";
             break;
         case 410:
-            sprintf(msg, "%lu.%.3lu %d ERROR unknown command\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unknown command";
             break;
         case 411:
-            sprintf(msg, "%lu.%.3lu %d ERROR unknown value\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unknown value";
             break;
         case 412:
-            sprintf(msg, "%lu.%.3lu %d ERROR wrong value\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR wrong value";
             break;
         case 413:
-            sprintf(msg, "%lu.%.3lu %d ERROR temporarily prohibited\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR temporarily prohibited";
             break;
         case 414:
-            sprintf(msg, "%lu.%.3lu %d ERROR device locked\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR device locked";
             break;
         case 415:
-            sprintf(msg, "%lu.%.3lu %d ERROR forbidden\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR forbidden";
             break;
         case 416:
-            sprintf(msg, "%lu.%.3lu %d ERROR no data\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR no data";
             break;
         case 417:
-            sprintf(msg, "%lu.%.3lu %d ERROR timeout\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR timeout";
             break;
         case 418:
-            sprintf(msg, "%lu.%.3lu %d ERROR list too long\n", time.tv_sec,
-                    time.tv_usec / 1000, errorcode);
+            emsg = "ERROR list too long";
             break;
         case 419:
-            sprintf(msg, "%lu.%.3lu %d ERROR list too short\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR list too short";
             break;
         case 420:
-            sprintf(msg,
-                    "%lu.%.3lu %d ERROR unsupported device protocol\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unsupported device protocol";
             break;
         case 421:
-            sprintf(msg, "%lu.%.3lu %d ERROR unsupported device\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unsupported device";
             break;
         case 422:
-            sprintf(msg, "%lu.%.3lu %d ERROR unsupported device group\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unsupported device group";
             break;
         case 423:
-            sprintf(msg, "%lu.%.3lu %d ERROR unsupported operation\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR unsupported operation";
             break;
         case 424:
-            sprintf(msg, "%lu.%.3lu %d ERROR device reinitialized\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR device reinitialized";
             break;
         case 500:
-            sprintf(msg, "%lu.%.3lu %d ERROR out of resources\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            emsg = "ERROR out of resources";
             break;
         default:
-            sprintf(msg, "%lu.%.3lu 600 ERROR internal error %d, "
-                    "please report to srcpd-devel@srcpd.sorceforge.net\n",
-                    time.tv_sec, time.tv_usec / 1000, errorcode);
+            sprintf(msg, "%lld.%.3ld 600 ERROR internal error %d\n",
+                    (long long) time.tv_sec,
+					(long) (time.tv_usec / 1000), errorcode);
+            return errorcode;
     }
+    sprintf(msg, "%lld.%.3ld %d %s\n", (long long) time.tv_sec,
+                (long) (time.tv_usec / 1000), errorcode, emsg);
     return errorcode;
 }

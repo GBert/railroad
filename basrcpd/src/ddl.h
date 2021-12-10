@@ -108,7 +108,7 @@ typedef struct _DDL_DATA {
     int number_ga;
 
     int CHECKSHORT;             /* default no shortcut checking */
-    time_t SHORTCUTDELAY;       /* usecs shortcut delay         */
+    long SHORTCUTDELAY;			/* usecs shortcut delay         */
     int CHECKCLIENTS;			/* check if clients can control */
     int ENABLED_PROTOCOLS;      /* enabled p's                  */
     int NMRA_GA_OFFSET;         /* offset for ga base address 0/1*/
@@ -122,7 +122,7 @@ typedef struct _DDL_DATA {
     int spiLastMM;              //War das letzte Paket ein Märklin Motorola Paket?
     unsigned int uid;           /* Für MFX die UID der Zentrale */
 
-    time_t short_detected;
+    long long short_detected;
     char NMRA_idle_data[4 * 256]; //Worst Case SPI Mode
 
     //"Normaler" Refresh Zyklus
@@ -202,7 +202,7 @@ void send_packet(bus_t busnumber, char *packet,
 #define SL_RI  22
 
 /* calculate difference between time value and now, returns it in µs */
-time_t timeSince(struct timeval tv);
+long long timeSince(struct timeval tv);
 
 /* check if shortcut or emergengy break happened */
 bool power_is_off(bus_t busnumber);

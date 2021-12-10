@@ -148,7 +148,7 @@ void describeGLmfx(gl_data_t *gl, char *msg)
  */
 static void addBits(unsigned int bits, unsigned int len, char *stream, unsigned int *pos) {
   unsigned int i;
-  unsigned int maske = 1 << (len - 1);
+  unsigned int maske = 1U << (len - 1);
   for (i = 0; i<len; i++) {
     if (bits & maske) {
       stream[1 + (*pos / 8)] |= 1 << (*pos % 8);
@@ -193,10 +193,11 @@ static void addAdrBits(int address, char *stream, unsigned int *pos) {
  *               CRC wird ab stream[1] LSB bis pos-1 berechnet.
  * @param pos Position, an der eingefügt werden soll. Wird um CRC Länge (8) inkrementiert.
  */
+#define CRC_LEN 8
 static void addCRCBits(char *stream, unsigned int *pos) {
   uint16_t crc = 0x007F; // nicht nur 8 Bit, um Carry zu erhalten
   unsigned int i;
-  const int CRC_LEN = 8;
+//  const int CRC_LEN = 8;
   unsigned int count = *pos + CRC_LEN;
   for (i = 0; i < count; i++) {
     crc = (crc << 1) + ((stream[1 + (i / 8)] & (1 << (i % 8))) ? 1 : 0);
@@ -675,7 +676,7 @@ static unsigned int getSID(uint32_t dekoderUID, bool *bereitsVorhanden) {
  *   dann werden diese angemeldet.
  * @param
  */
-time_t mfxManagement(bus_t busnum)
+long mfxManagement(bus_t busnum)
 {
 	DDL_DATA *ddl = (DDL_DATA*)buses[busnum].driverdata;
 	if (searchstep == 0) sendUIDandRegCounter(ddl -> uid, registrationCounter);
@@ -871,9 +872,9 @@ void sendMFXreadCVresult(uint8_t *data)
 	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
 
 	gettimeofday(&now, NULL);
-	sprintf(info, "%lu.%.3lu 100 INFO %lu SM %d CVMFX %d %d",
-			now.tv_sec, now.tv_usec / 1000, busnumber,
-			mfxread.addr, mfxread.cvline, mfxread.cvindex);
+	sprintf(info, "%lld.%.3ld 100 INFO %lu SM %d CVMFX %d %d",
+			(long long) now.tv_sec, (long) (now.tv_usec / 1000),
+			busnumber, mfxread.addr, mfxread.cvline, mfxread.cvindex);
 
 	for (int i = 0; i < ddl->fbData.fbbytnum; i++) {
 		minfo[0] = 3;					// send read config responses
@@ -915,9 +916,9 @@ void handleMFXacknowledge(uint8_t askval)
 					info_mcs(busnumber, 7, mfxread.decuid, minfo);
 
 					gettimeofday(&now, NULL);
-					sprintf(info, "%lu.%.3lu 100 INFO %lu SM %d BIND %u\n",
-                            now.tv_sec, now.tv_usec / 1000, busnumber,
-                            mfxread.addr, mfxread.decuid);
+					sprintf(info, "%lld.%.3ld 100 INFO %lu SM %d BIND %u\n",
+							(long long) now.tv_sec, (long) (now.tv_usec / 1000),
+							busnumber, mfxread.addr, mfxread.decuid);
 					enqueueInfoMessage(info);
 					break;
 	}

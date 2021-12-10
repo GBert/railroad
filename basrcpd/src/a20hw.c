@@ -1,5 +1,5 @@
 // a20hw.c : Routinen zur direkten Hardware-Ansteuerung eines A20-SOC
-// C 2017 Rainer Müller 
+// C 2017 - 2021 Rainer Müller 
 // Das Programm unterliegt den Bedingungen der GNU General Public License 3 (GPL3).
 // frei nach bcm2835.c von Mike McCauley
 //
@@ -58,9 +58,8 @@ void a20_gpio_set(uint16_t pin)
 	if (pin >= 288) return;
 	volatile uint32_t* paddr = a20_gpio + ((GPIO_DAT_OFFSET +(pin/32) * 0x24) >> 2);
 	uint8_t   shift = pin % 32;
-	uint32_t  mask = 0x01 << shift;
-	uint32_t  value = 1 << shift;
-	a20_peri_set_bits(paddr, value, mask);
+	uint32_t  mask = 1U << shift;
+	a20_peri_set_bits(paddr, mask, mask);
 }
 
 // Sets the specified pin output to LOW.
@@ -69,9 +68,8 @@ void a20_gpio_clr(uint16_t pin)
 	if (pin >= 288) return;
 	volatile uint32_t* paddr = a20_gpio + ((GPIO_DAT_OFFSET +(pin/32) * 0x24) >> 2);
 	uint8_t   shift = pin % 32;
-	uint32_t  mask = 0x01 << shift;
-	uint32_t  value = 0 << shift;
-	a20_peri_set_bits(paddr, value, mask);
+	uint32_t  mask = 1U << shift;
+	a20_peri_set_bits(paddr, 0, mask);
 }
 
 // Sets the output state of the specified pin to HIGH or LOW.
@@ -89,7 +87,7 @@ uint8_t a20_gpio_lev(uint16_t pin)
 	volatile uint32_t* paddr = a20_gpio + ((GPIO_DAT_OFFSET +(pin/32) * 0x24) >> 2);
 	uint8_t shift = pin % 32;
 	uint32_t value = a20_peri_read(paddr);
-	return (value & (1 << shift)) ? HIGH : LOW;
+	return (value & (1U << shift)) ? HIGH : LOW;
 }
 
 // Sets the Function Select register for the given pin, which configures

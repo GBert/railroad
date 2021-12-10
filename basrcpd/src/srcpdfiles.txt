@@ -3,14 +3,17 @@
     1803    neue Module aufgenommen
     1806    Optimierungen
 a20hw.c         neu
+    2112    cppcheck-Meldungen beseitigt
 a20hw.h         neu
 canbus.c        neu 1803
+    2112    Wanungen reduziert
 canbus.h        neu 1803
 clientservice.c unverändert aus Original-srcpd Stand 1710
     1711    ugly musl workaround
     1712    übernommen
     1806    Optimierungen
     2002    Abschalten bei Kommunikationsverlust
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 clientservice.h unverändert aus Original-srcpd Stand 1710
     2002    Abschalten bei Kommunikationsverlust
 config-srcpd.c  aus Sigg-srcpd Rev96, modifiziert -> Original
@@ -33,6 +36,7 @@ config.h        erzeugt per config-Script, modifiziert
     2002    korrekte Versionsangabe
     2102    korrekte Versionsangabe
     2110    korrekte Versionsangabe
+    2112    korrekte Versionsangabe
 ddl.c           aus Sigg-srcpd Rev96, modifiziert BaPi, SPI-Timing
     1803    MCS-Anssteuerung eingebaut
     1806    Optimierungen
@@ -48,6 +52,7 @@ ddl.c           aus Sigg-srcpd Rev96, modifiziert BaPi, SPI-Timing
     2102    Vorbereitung Programmiergleisunterstützung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
     2110    Überarbeitung der mfx-Paketerzeugung
+    2112    Umstellung auf zukunftsfähiges Zeitformat
     ** UART-Methoden entfernen
 ddl.h           aus Sigg-srcpd Rev96, original
     1803    MCS-Anssteuerung eingebaut
@@ -58,6 +63,7 @@ ddl.h           aus Sigg-srcpd Rev96, original
     2002    Abschalten bei Kommunikationsverlust
     2102    Vorbereitung Programmiergleisunterstützung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 ddl_maerklin.c  aus Sigg-srcpd Rev96, modifiziert -> Original
     1803    GL-Cachezugriff angepasst
     1809    erweiterte Lokadressierung
@@ -80,11 +86,13 @@ ddl_mfx.c       aus Sigg-srcpd Rev96, modifiziert -> Original + BaPi
     2002    Wanungen reduziert
     2102    Verbesserung bei Notstop und Richtungswechsel
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 ddl_mfx.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1806    Optimierungen
     1905    Optimierungen Signalerzeugung, Parameterprüfung
     1907    Vereinfachung der Threadstruktur zur Signalerzeugung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 ddl_nmra.c      aus Sigg-srcpd Rev96, original
     1803    kleine Optimierungen
     1806    unbenutzen Code ausgeklammert
@@ -92,6 +100,7 @@ ddl_nmra.c      aus Sigg-srcpd Rev96, original
     1907    Vereinfachung der Threadstruktur zur Signalerzeugung
     2102    Beseitigung von Compiler-Warnungen
     2102    Verbesserung bei Notstop und Richtungswechsel 
+    2112    cppcheck-Meldungen beseitigt
     ** UART-Methoden entfernen
 ddl_nmra.h      aus Sigg-srcpd Rev96, original
     1905    Optimierungen Signalerzeugung, Parameterprüfung
@@ -123,6 +132,7 @@ mcs-gateway.c   neu 180307
 netservice.c    unverändert aus Original-srcpd Stand 1710
 netservice.h    unverändert aus Original-srcpd Stand 1710
 platform.c      neu ab 1806
+    2112    cppcheck-Meldungen beseitigt
 platform.h      neu ab 1806
     1907    Mehrfacheinbindeschutzsymbol geändert
 srcp-command.c  aus Sigg-srcpd Rev96, modifiziert -> Original
@@ -133,14 +143,18 @@ srcp-command.c  aus Sigg-srcpd Rev96, modifiziert -> Original
     2110    Korrekturen beim Locking und diverses Kleinere
 srcp-command.h  unverändert aus Original-srcpd Stand 1710
 srcp-descr.c    unverändert aus Original-srcpd Stand 1710
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-descr.h    unverändert aus Original-srcpd Stand 1710
 srcp-error.c    unverändert aus Original-srcpd Stand 1710
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-error.h    unverändert aus Original-srcpd Stand 1710
 srcp-fb.c       unverändert aus Original-srcpd Stand 1710
-    1903   Unschönheiten beseitigt
+    1903    Unschönheiten beseitigt
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-fb.h       unverändert aus Original-srcpd Stand 1710
 srcp-ga.c       unverändert aus Original-srcpd Stand 1710
     1906    Stellen über MCS-Gateway eingebaut
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-ga.h       unverändert aus Original-srcpd Stand 1710
     1906    Stellen über MCS-Gateway eingebaut
 srcp-gl.c       aus Sigg-srcpd Rev96, modifiziert -> Original
@@ -153,6 +167,7 @@ srcp-gl.c       aus Sigg-srcpd Rev96, modifiziert -> Original
     2102    Verbesserung bei Notstop und Richtungswechsel 
     2110    Korrekturen beim Locking 
     2110    Aufräumen und cppcheck-Warnungen beseitigt
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-gl.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1803    MCS-Anssteuerung eingebaut
     1806    aufgeräumt
@@ -162,6 +177,7 @@ srcp-gl.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     2102    Verbesserung bei Notstop und Richtungswechsel
     2110    Korrekturen beim Locking 
 srcp-gm.c       unverändert aus Original-srcpd Stand 1710
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-gm.h       unverändert aus Original-srcpd Stand 1710
 srcp-info.c     unverändert aus Original-srcpd Stand 1710
     1809    erweiterte Lokadressierung
@@ -169,13 +185,16 @@ srcp-info.c     unverändert aus Original-srcpd Stand 1710
 srcp-info.h     unverändert aus Original-srcpd Stand 1710
     1803    MCS-Anssteuerung eingebaut
 srcp-power.c    unverändert aus Original-srcpd Stand 1710
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-power.h    unverändert aus Original-srcpd Stand 1710
 srcp-server.c   unverändert aus Original-srcpd Stand 1710      
     1806    Server-Description hinzugefügt
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-server.h   unverändert aus Original-srcpd Stand 1710
 srcp-session.c  unverändert aus Original-srcpd Stand 1710
     1809    Aufhänger-Beseitigung
     2002    Unschönheit beseitigt
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-session.h  unverändert aus Original-srcpd Stand 1710
 srcp-sm.c       aus Sigg-srcpd Rev96, original
     1806    Anpassungen für mfx, aufräumen
@@ -183,12 +202,14 @@ srcp-sm.c       aus Sigg-srcpd Rev96, original
     1902    Schreiben von mfx-CV
     2102    Vorbereitung Programmiergleisunterstützung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-sm.h       aus Sigg-srcpd Rev96, original
     1806    Anpassungen für mfx
     1809    Konfigurationsschnittstelle für MCS
     2102    Vorbereitung Programmiergleisunterstützung
 srcp-time.c     unverändert aus Original-srcpd Stand 1710
-    1903   Unschönheiten beseitigt
+    1903    Unschönheiten beseitigt
+    2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-time.h     unverändert aus Original-srcpd Stand 1710
 srcpd.c         aus Sigg-srcpd Rev96, modifiziert -> Original + BaPi
     [Gerd: SYSCONFDIR]

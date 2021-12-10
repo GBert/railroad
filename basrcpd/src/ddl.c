@@ -951,7 +951,7 @@ void update_MFXPacketPool(bus_t busnumber, int adr,
 /**************************************************************************/
 
 /* calculate difference between time value and now, returns it in µs */
-time_t timeSince(struct timeval tv)
+long long timeSince(struct timeval tv)
 {
 	struct timeval now = { 0, 0 };
 	gettimeofday(&now, NULL);
@@ -979,7 +979,7 @@ static int checkShortcut(bus_t busnumber)
                     tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
         }
         gettimeofday(&tv_shortcut, NULL);
-        time_t short_now = tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
+        long long short_now = tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
         if (__DDL->SHORTCUTDELAY <=
                 (short_now - __DDL->short_detected)) {
         	syslog_bus(busnumber, DBG_INFO,
@@ -1438,8 +1438,7 @@ int readconfig_DDL(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
 
     buses[busnumber].thr_func = &thr_Manage_DDL;
 
-    strcpy(buses[busnumber].description,
-           "GA GL SM POWER LOCK DESCRIPTION");
+    strcpy(buses[busnumber].description, "GA GL SM POWER LOCK");
 
     __DDL->number_gl = 255;
     __DDL->number_ga = 324;
@@ -1760,7 +1759,7 @@ static void *thr_Manage_DDL(void *v)
     int gastep = 0;
     int last_cancel_state, last_cancel_type, progwin = 0;
     char * scmd, * sprot, * stype;
-    time_t nextmfxman = 0;
+    long nextmfxman = 0;
 	struct timeval tv_ga, tv_mfx = { 0, 0 };
 
     bus_thread_t *btd = (bus_thread_t *) malloc(sizeof(bus_thread_t));

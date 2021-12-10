@@ -1,4 +1,4 @@
-// srcp-time.c - adapted for basrcpd project 2019 by Rainer Müller 
+// srcp-time.c - adapted for basrcpd project 2019 - 2021 by Rainer MÃ¼ller
 
 /***************************************************************************
  *                                                                         *
@@ -8,8 +8,8 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-/* 
- * Vorliegende Software unterliegt der General Public License, 
+/*
+ * Vorliegende Software unterliegt der General Public License,
  * Version 2, 1991. (c) Matthias Trute, 2000-2001.
  */
 
@@ -144,8 +144,9 @@ int termTIME()
     }
 
     gettimeofday(&current_time, NULL);
-    snprintf(msg, sizeof(msg), "%lu.%.3lu 102 INFO 0 TIME\n",
-             current_time.tv_sec, current_time.tv_usec / 1000);
+    snprintf(msg, sizeof(msg), "%lld.%.3ld 102 INFO 0 TIME\n",
+             (long long) current_time.tv_sec,
+			 (long) (current_time.tv_usec / 1000));
     enqueueInfoMessage(msg);
 
     return SRCP_OK;
@@ -237,8 +238,8 @@ int infoTIME(char *msg)
 
     gettimeofday(&akt_time, NULL);
 
-    sprintf(msg, "%lu.%.3lu 100 INFO 0 TIME %d %d %d %d\n",
-            akt_time.tv_sec, akt_time.tv_usec / 1000,
+    sprintf(msg, "%lld.%.3ld 100 INFO 0 TIME %d %d %d %d\n",
+            (long long) akt_time.tv_sec, (long) (akt_time.tv_usec / 1000),
             vt.day, vt.hour, vt.min, vt.sec);
 
     return SRCP_INFO;
@@ -253,8 +254,8 @@ int describeTIME(char *reply)
     if (result != SRCP_OK)
         return result;
 
-    sprintf(reply, "%lu.%.3lu 101 INFO 0 TIME %d %d\n",
-            td.inittime.tv_sec, td.inittime.tv_usec / 1000,
+    sprintf(reply, "%lld.%.3ld 101 INFO 0 TIME %d %d\n",
+            (long long) td.inittime.tv_sec, (long) (td.inittime.tv_usec / 1000),
             td.ratio_x, td.ratio_y);
 
     return SRCP_INFO;
@@ -265,15 +266,13 @@ int describeTIME(char *reply)
  ***********************************************************************/
 void *thr_clock(void *v)
 {
-    int result;
     vtime_t vt;
-    unsigned long sleeptime;
     bool sendinfo = false;
     distort.ratio_x = distort.ratio_y = 0;
 
     while (true) {
 
-        result = pthread_mutex_lock(&time_distort_mutex);
+        int result = pthread_mutex_lock(&time_distort_mutex);
         if (result != 0) {
             syslog_bus(0, DBG_ERROR,
                        "pthread_mutex_lock() failed: %s (errno = %d).",
@@ -292,7 +291,7 @@ void *thr_clock(void *v)
         }
 
         /* delta Modellzeit = delta real time * ratio_x/ratio_y */
-        sleeptime = (1000000 * distort.ratio_y) / distort.ratio_x;
+        unsigned long sleeptime = (1000000 * distort.ratio_y) / distort.ratio_x;
 
         result = pthread_mutex_unlock(&time_distort_mutex);
         if (result != 0) {

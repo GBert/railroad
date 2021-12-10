@@ -1,4 +1,4 @@
-// clientservice.c - adapted for basrcpd project 2018 by Rainer Müller 
+// clientservice.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
 /*
  * Vorliegende Software unterliegt der General Public License,
  * Version 2, 1991. (c) Matthias Trute, 2000-2001.
@@ -85,7 +85,6 @@ void *thr_doClient(void *v)
 {
     char line[MAXSRCPLINELEN], reply[MAXSRCPLINELEN];
 	char *cmd, *setcmd, *parm; 
-    int rc;	
     struct timeval time;
     int last_cancel_state, last_cancel_type;
     int result;
@@ -135,7 +134,7 @@ void *thr_doClient(void *v)
 
     while (true) {
         pthread_testcancel();
-        rc = SRCP_HS_NODATA;
+        int rc = SRCP_HS_NODATA;
         reply[0] = 0x00;
         memset(line, 0, sizeof(line));
 
@@ -169,8 +168,9 @@ void *thr_doClient(void *v)
                 register_session(sn);
 
                 gettimeofday(&time, NULL);
-                snprintf(reply, sizeof(reply), "%lu.%.3lu 200 OK GO %lu\n",
-                         time.tv_sec, time.tv_usec / 1000, sn->session);
+                snprintf(reply, sizeof(reply), "%lld.%.3ld 200 OK GO %lu\n",
+                         (long long) time.tv_sec,
+						 (long) (time.tv_usec / 1000), sn->session);
 
                 sresult = writen(sn->socket, reply, strlen(reply));
                 if (-1 == sresult) {

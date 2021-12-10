@@ -1,7 +1,7 @@
 // canbus.c : new bus type CANBUS for the srcpd project
 // allows communication srcp <-> canbus
 //
-// C 2015 Rainer Müller
+// C 2015 - 2021 Rainer Müller
 
 /***************************************************************************
  *                                                                         *
@@ -57,8 +57,7 @@ int readconfig_CANBUS(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
     buses[busnumber].thr_func = &thr_sendrec_CANBUS;
 //    buses[busnumber].init_gl_func = &init_gl_CANBUS;
     buses[busnumber].init_ga_func = &init_ga_CANBUS;
-    strcpy(buses[busnumber].description,
-           "GA GL FB SM POWER LOCK DESCRIPTION");
+    strcpy(buses[busnumber].description, "GA GL FB SM POWER LOCK");
 
     __canbus->number_fb = 0;  /* max 31 */
     __canbus->number_ga = 256;
@@ -166,7 +165,7 @@ static bool initSocketCan(bus_t bus)
 
     ret = setsockopt(buses[bus].device.file.fd, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
                &err_mask, sizeof(err_mask));
-    return true;
+    return (ret == 0);
 }
 
 
@@ -220,7 +219,6 @@ bool sendCanMsg(bus_t bus, struct can_frame msg, bool extended, bool rtr)
 // timeout - GetMsg will return false after timeout period
 bool checkCanMsg(bus_t bus)
 {
-    int bytesRead, j;
     int ret;
     unsigned int type;
     fd_set rfds;
@@ -239,14 +237,14 @@ bool checkCanMsg(bus_t bus)
     if(ret < 0) return false;
 
     if(ret > 0) {
-        bytesRead = read(buses[bus].device.file.fd, &msg, sizeof(msg));
+        int bytesRead = read(buses[bus].device.file.fd, &msg, sizeof(msg));
 
         if(bytesRead == sizeof(msg)) {
             if (msg.can_id & CAN_ERR_FLAG) printf("ERR ");
             if (msg.can_id & CAN_EFF_FLAG) printf("EXT ");
             if (msg.can_id & CAN_RTR_FLAG) printf("RTR ");
     		printf("recvd: %x, DLC %i", msg.can_id & CAN_EFF_MASK, msg.can_dlc);
-    		for(j = 0; j < msg.can_dlc; j++) printf(" %x", msg.data[j]);
+    		for(int j = 0; j < msg.can_dlc; j++) printf(" %x", msg.data[j]);
     		printf("\n");
 
     		type = (msg.can_id & 0x1FFFFF00) + (msg.can_dlc ? msg.data[0] : 0);
@@ -322,12 +320,11 @@ static void handle_power_command(bus_t bus)
 static void handle_ga_command(bus_t busnumber)
 {
     ga_data_t gatmp;
-    int addr, i;
     struct timeval akt_time;
   	struct can_frame msg;
 
     dequeueNextGA(busnumber, &gatmp);
-    addr = gatmp.id;
+    int addr = gatmp.id;
 
     gettimeofday(&akt_time, NULL);
     gatmp.tv[gatmp.port] = akt_time;
@@ -346,7 +343,7 @@ static void handle_ga_command(bus_t busnumber)
     setGA(busnumber, addr, gatmp);
 
     if (gatmp.action && (gatmp.activetime > 0)) {
-        for (i = 0; i < 50; i++) {
+        for (int i = 0; i < 50; i++) {
             if (__canbus->tga[i].id == 0) {
                 gatmp.t = akt_time;
                 gatmp.t.tv_sec += gatmp.activetime / 1000;
@@ -393,7 +390,7 @@ static void end_bus_thread(bus_thread_t * btd)
 /*main thread routine for this bus*/
 void *thr_sendrec_CANBUS(void *v)
 {
-    int addr, ctr, pause;
+    int addr, ctr, pause = 0;
     struct timeval akt_time, cmp_time;
     ga_data_t gatmp;
     int last_cancel_state, last_cancel_type;

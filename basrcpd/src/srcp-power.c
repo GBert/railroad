@@ -1,3 +1,5 @@
+// srcp-power.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+
 /* $Id: srcp-power.c 1456 2010-02-28 20:01:39Z gscholz $ */
 
 /*
@@ -34,9 +36,9 @@ int getPower(bus_t bus)
 
 int infoPower(bus_t bus, char *msg)
 {
-    sprintf(msg, "%lu.%.3lu 100 INFO %ld POWER %s %s\n",
-            buses[bus].power_change_time.tv_sec,
-            buses[bus].power_change_time.tv_usec / 1000, bus,
+    sprintf(msg, "%lld.%.3ld 100 INFO %lu POWER %s %s\n",
+            (long long) buses[bus].power_change_time.tv_sec,
+            (long) (buses[bus].power_change_time.tv_usec / 1000), bus,
             buses[bus].power_state ? "ON" : "OFF", buses[bus].power_msg);
     return SRCP_INFO;
 }
