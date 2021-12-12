@@ -1,11 +1,13 @@
 const int revisionnr = 
-1994
+1996
 ;
 const char* commithash = 
-"a5a21260734a95bbdac9f18f09dc12e584db4748";
+"5c7eb98beb8baab0099b8857db097b6704a64847";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1996 2021-12-12 08:24:27 +0100 loconet: changed trace level for undocumented message to develop\n" \
+"1995 2021-12-12 08:15:56 +0100 socket: fix for gethostname under windows\n" \
 "1994 2021-12-10 08:46:12 +0100 block: disregard wait option in case of active FiFo\n" \
 "1993 2021-12-09 16:35:23 +0100 wheater: double quote option added for sound\n" \
 "1992 2021-12-09 14:47:52 +0100 wiopi,stepper: 3W fast support added\n" \
