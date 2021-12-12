@@ -1,11 +1,12 @@
 const int revisionnr = 
-1996
+1997
 ;
 const char* commithash = 
-"5c7eb98beb8baab0099b8857db097b6704a64847";
+"47ba4e028a71d4493ba19cfeb0661d565d0593ed";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"1997 2021-12-12 14:13:57 +0100 rocrailinidlg: brightness added\n" \
 "1996 2021-12-12 08:24:27 +0100 loconet: changed trace level for undocumented message to develop\n" \
 "1995 2021-12-12 08:15:56 +0100 socket: fix for gethostname under windows\n" \
 "1994 2021-12-10 08:46:12 +0100 block: disregard wait option in case of active FiFo\n" \
