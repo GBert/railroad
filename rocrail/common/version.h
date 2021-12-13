@@ -1,11 +1,15 @@
 const int revisionnr = 
-1997
+2001
 ;
 const char* commithash = 
-"47ba4e028a71d4493ba19cfeb0661d565d0593ed";
+"a26cc683381d487551923b2869faaa6e03742ab5";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"2001 2021-12-12 18:33:52 +0100 wiopi,stepper: 3w fast support\n" \
+"2000 2021-12-12 18:31:10 +0100 wiopi,stepper: 3w fast support\n" \
+"1999 2021-12-12 16:16:56 +0100 control: take over bri value on rocrail.ini save\n" \
+"1998 2021-12-12 15:57:58 +0100 control: fix for hard coded 255 bri\n" \
 "1997 2021-12-12 14:13:57 +0100 rocrailinidlg: brightness added\n" \
 "1996 2021-12-12 08:24:27 +0100 loconet: changed trace level for undocumented message to develop\n" \
 "1995 2021-12-12 08:15:56 +0100 socket: fix for gethostname under windows\n" \
@@ -2002,6 +2006,5 @@ const char* revlog =
 "4 2019-09-21 11:32:32 +0200 WIO dialog added: WIP\n" \
 "3 2019-09-21 08:35:10 +0200 translation cleanup\n" \
 "2 2019-09-20 15:21:09 +0200 router: WIP\n" \
-"1 2019-09-20 14:03:13 +0200 Initial commit\n" \
 
 "log end";
