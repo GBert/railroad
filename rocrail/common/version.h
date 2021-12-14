@@ -1,11 +1,14 @@
 const int revisionnr = 
-2001
+2004
 ;
 const char* commithash = 
-"a26cc683381d487551923b2869faaa6e03742ab5";
+"29aaf63aa6a267d969f31100d899ff6e859e315b";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"2004 2021-12-14 14:25:54 +0100 wiopi: canusb SOD\n" \
+"2003 2021-12-14 14:14:06 +0100 wiopi: canusb CBUS support (WIP)\n" \
+"2002 2021-12-14 08:37:19 +0100 guiframe: show active weather in status bar\n" \
 "2001 2021-12-12 18:33:52 +0100 wiopi,stepper: 3w fast support\n" \
 "2000 2021-12-12 18:31:10 +0100 wiopi,stepper: 3w fast support\n" \
 "1999 2021-12-12 16:16:56 +0100 control: take over bri value on rocrail.ini save\n" \
@@ -2003,8 +2006,5 @@ const char* revlog =
 "7 2019-09-22 08:19:42 +0200 clntcon: disable removal of client duplets\n" \
 "6 2019-09-22 08:19:01 +0200 router: trace corrections\n" \
 "5 2019-09-21 15:01:35 +0200 wiodlg: WIP\n" \
-"4 2019-09-21 11:32:32 +0200 WIO dialog added: WIP\n" \
-"3 2019-09-21 08:35:10 +0200 translation cleanup\n" \
-"2 2019-09-20 15:21:09 +0200 router: WIP\n" \
 
 "log end";
