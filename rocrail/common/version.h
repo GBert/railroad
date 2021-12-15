@@ -1,11 +1,13 @@
 const int revisionnr = 
-2004
+2006
 ;
 const char* commithash = 
-"29aaf63aa6a267d969f31100d899ff6e859e315b";
+"b581ac6f4f0cad11a4d3c32959fb168afcfbbcfb";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"2006 2021-12-15 13:10:13 +0100 weather: broadcast after active\n" \
+"2005 2021-12-15 12:55:58 +0100 wiopi,canusb: addressing correction\n" \
 "2004 2021-12-14 14:25:54 +0100 wiopi: canusb SOD\n" \
 "2003 2021-12-14 14:14:06 +0100 wiopi: canusb CBUS support (WIP)\n" \
 "2002 2021-12-14 08:37:19 +0100 guiframe: show active weather in status bar\n" \
@@ -2004,7 +2006,5 @@ const char* revlog =
 "9 2019-09-22 08:55:52 +0200 wiodlg: WIP\n" \
 "8 2019-09-22 08:43:23 +0200 clntcon: removed function to lookup duplets\n" \
 "7 2019-09-22 08:19:42 +0200 clntcon: disable removal of client duplets\n" \
-"6 2019-09-22 08:19:01 +0200 router: trace corrections\n" \
-"5 2019-09-21 15:01:35 +0200 wiodlg: WIP\n" \
 
 "log end";
