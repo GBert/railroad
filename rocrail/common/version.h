@@ -1,11 +1,12 @@
 const int revisionnr = 
-2007
+2008
 ;
 const char* commithash = 
-"02e3e27f278980d5e04e27b1e9c23ca1764b0860";
+"220684f54282aaaeb6ea2e36176d6bf6c57960ea";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"2008 2021-12-16 15:12:45 +0100 block: set directly closed also in case of reserved\n" \
 "2007 2021-12-16 11:27:49 +0100 readme.txt: update\n" \
 "2006 2021-12-15 13:10:13 +0100 weather: broadcast after active\n" \
 "2005 2021-12-15 12:55:58 +0100 wiopi,canusb: addressing correction\n" \
@@ -2005,6 +2006,5 @@ const char* revlog =
 "11 2019-09-22 10:00:23 +0200 removed router check at startup\n" \
 "10 2019-09-22 09:07:53 +0200 obsolete icon deleted\n" \
 "9 2019-09-22 08:55:52 +0200 wiodlg: WIP\n" \
-"8 2019-09-22 08:43:23 +0200 clntcon: removed function to lookup duplets\n" \
 
 "log end";
