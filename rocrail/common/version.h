@@ -1,11 +1,13 @@
 const int revisionnr = 
-2008
+2010
 ;
 const char* commithash = 
-"220684f54282aaaeb6ea2e36176d6bf6c57960ea";
+"e0701abe0ef9b88f13a5f3aa5290b38cd1cea6c3";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"2010 2021-12-17 08:16:31 +0100 translation merge: nl, zh_CN, sl, de, fr\n" \
+"2009 2021-12-17 07:52:20 +0100 importantchanges: update\n" \
 "2008 2021-12-16 15:12:45 +0100 block: set directly closed also in case of reserved\n" \
 "2007 2021-12-16 11:27:49 +0100 readme.txt: update\n" \
 "2006 2021-12-15 13:10:13 +0100 weather: broadcast after active\n" \
@@ -2004,7 +2006,5 @@ const char* revlog =
 "13 2019-09-22 15:03:49 +0200 wiodlg: WIP\n" \
 "12 2019-09-22 11:37:52 +0200 old animated gif\n" \
 "11 2019-09-22 10:00:23 +0200 removed router check at startup\n" \
-"10 2019-09-22 09:07:53 +0200 obsolete icon deleted\n" \
-"9 2019-09-22 08:55:52 +0200 wiodlg: WIP\n" \
 
 "log end";
