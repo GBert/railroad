@@ -1,11 +1,12 @@
 const int revisionnr = 
-2012
+2013
 ;
 const char* commithash = 
-"f921c5a407639112d459981c8b2c766b1d2c29ca";
+"e1a6d0398ee3037b2268e2cfa4e871e355b3a9f3";
 const char* origin = "LOCAL"
 ;
 const char* revlog = 
+"2013 2021-12-18 07:52:35 +0100 virtual block: check for switches if its reserved instead of checking all slave blocks\n" \
 "2012 2021-12-17 21:58:28 +0100 route,model: D&D exception for shunting and route permission\n" \
 "2011 2021-12-17 15:08:48 +0100 wiopi: sockercan support added for canusb slaves\n" \
 "2010 2021-12-17 08:16:31 +0100 translation merge: nl, zh_CN, sl, de, fr\n" \
@@ -2005,6 +2006,5 @@ const char* revlog =
 "16 2019-09-23 14:41:39 +0200 mbus ascii: sleep 10ms in case of nothing to read\n" \
 "15 2019-09-23 14:37:49 +0200 mbus ascii: fix for reading\n" \
 "14 2019-09-23 14:24:06 +0200 wiodlg: WIP\n" \
-"13 2019-09-22 15:03:49 +0200 wiodlg: WIP\n" \
 
 "log end";
