@@ -82,7 +82,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.4\n\n");
+    fprintf(stderr, "   Version 1.5\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -418,6 +418,8 @@ int main(int argc, char **argv) {
     struct timespec ts;
     char *udp_dst_address;
     char *bcast_interface;
+    char *searchinterface;
+    char *tempsp;
     struct cs2_config_data_t cs2_config_data;
     uint32_t id, mask;
 
@@ -466,13 +468,13 @@ int main(int argc, char **argv) {
     strcpy(ifr.ifr_name, "can0");
     memset(config_dir, 0, sizeof(config_dir));
 
-    udp_dst_address = (char *)calloc(MAXIPLEN, 1);
+    udp_dst_address = (char *)calloc(MAXIFLEN, 1);
     if (!udp_dst_address) {
 	fprintf(stderr, "can't alloc memory for udp_dst_address: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     };
 
-    bcast_interface = (char *)calloc(MAXIPLEN, 1);
+    bcast_interface = (char *)calloc(MAXIFLEN, 1);
     if (!bcast_interface) {
 	fprintf(stderr, "can't alloc memory for bcast_interface: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
@@ -507,13 +509,13 @@ int main(int argc, char **argv) {
 	    destination_port = strtoul(optarg, (char **)NULL, 10);
 	    break;
 	case 'b':
-	    if (strnlen(optarg, MAXIPLEN) <= MAXIPLEN - 1) {
+	    if (strnlen(optarg, MAXIFLEN) <= MAXIFLEN - 1) {
 		/* IP address begins with a number */
 		if ((optarg[0] >= '0') && (optarg[0] <= '9')) {
-		    strncpy(udp_dst_address, optarg, MAXIPLEN - 1);
+		    strncpy(udp_dst_address, optarg, MAXIFLEN - 1);
 		} else {
-		    memset(udp_dst_address, 0, MAXIPLEN);
-		    strncpy(bcast_interface, optarg, MAXIPLEN - 1);
+		    memset(udp_dst_address, 0, MAXIFLEN);
+		    strncpy(bcast_interface, optarg, MAXIFLEN - 1);
 		}
 	    } else {
 		fprintf(stderr, "UDP broadcast address or interface error: %s\n", optarg);
@@ -591,8 +593,13 @@ int main(int argc, char **argv) {
 	    if (ifa->ifa_addr) {
 		if (ifa->ifa_addr->sa_family == AF_INET) {
 		    bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
-		    if (strncmp(ifa->ifa_name, bcast_interface, strlen(bcast_interface)) == 0)
-			udp_dst_address = inet_ntoa(bsa->sin_addr);
+		    printf("complete >%s<\n", bcast_interface);
+		    tempsp = strdup(bcast_interface);
+		    while ((searchinterface = strsep(&tempsp, ","))) {
+			printf("ifa->ifa_name >%s< searchinterface >%s<\n", ifa->ifa_name, searchinterface);
+			if (strncmp(ifa->ifa_name, searchinterface, strlen(searchinterface)) == 0)
+			    udp_dst_address = inet_ntoa(bsa->sin_addr);
+		    }
 		}
 	    }
 	}
