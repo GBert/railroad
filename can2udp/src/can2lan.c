@@ -407,8 +407,6 @@ int main(int argc, char **argv) {
     int sa, sc, sb, st, st2, tcp_socket;
     struct sockaddr_in saddr, baddr, tcp_addr, tcp_addr2;
     /* vars for determing broadcast address */
-    struct ifaddrs *ifap, *ifa;
-    struct sockaddr_in *bsa;
     struct sockaddr_can caddr;
     struct ifreq ifr;
     socklen_t caddrlen = sizeof(caddr);
@@ -418,7 +416,7 @@ int main(int argc, char **argv) {
     struct timespec ts;
     char *udp_dst_address;
     char *bcast_interface;
-    char *searchinterface;
+    char *searchif;
     char *tempsp;
     struct cs2_config_data_t cs2_config_data;
     uint32_t id, mask;
@@ -586,32 +584,29 @@ int main(int argc, char **argv) {
     page_name = read_track_file(config_file, page_name);
 
     /* we are trying to setup a UDP socket */
-    for (i = 0; i < timeout; i++) {
-	/* trying to get the broadcast address */
-	getifaddrs(&ifap);
-	for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-	    if (ifa->ifa_addr) {
-		if (ifa->ifa_addr->sa_family == AF_INET) {
-		    bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
-		    printf("complete >%s<\n", bcast_interface);
-		    tempsp = strdup(bcast_interface);
-		    while ((searchinterface = strsep(&tempsp, ","))) {
-			printf("ifa->ifa_name >%s< searchinterface >%s<\n", ifa->ifa_name, searchinterface);
-			if (strncmp(ifa->ifa_name, searchinterface, strlen(searchinterface)) == 0)
-			    udp_dst_address = inet_ntoa(bsa->sin_addr);
-		    }
-		}
-	    }
-	}
-	freeifaddrs(ifap);
-	/* try to prepare UDP sending socket struct */
+    if (udp_dst_address[0]) {
 	memset(&baddr, 0, sizeof(baddr));
 	baddr.sin_family = AF_INET;
 	baddr.sin_port = htons(destination_port);
 	s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
-	if (s > 0)
-	    break;
-	sleep(1);
+    } else {
+	for (i = 0; i < timeout; i++) {
+	    /* trying to get the broadcast address */
+	    tempsp = strdup(bcast_interface);
+	    while ((searchif = strsep(&tempsp, ","))) {
+		udp_dst_address = search_interface(searchif);
+		if (udp_dst_address)
+		    break;
+	    }
+	    /* try to prepare UDP sending socket struct */
+	    memset(&baddr, 0, sizeof(baddr));
+	    baddr.sin_family = AF_INET;
+	    baddr.sin_port = htons(destination_port);
+	    s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
+	    if (s > 0)
+		break;
+	    sleep(1);
+	}
     }
     /* check if we got a real UDP socket after MAX_UDP_BCAST_TRY seconds */
     if (s <= 0) {
