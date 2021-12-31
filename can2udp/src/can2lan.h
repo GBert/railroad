@@ -151,5 +151,6 @@ int reassemble_data(struct cs2_config_data_t *config_data, unsigned char *netfra
 uint16_t CRCCCITT(uint8_t *data, size_t length, uint16_t seed);
 extern int write_pid_file(const char *pid_fn);
 void free_track_file(char **page_name);
+char *search_interface(char *search);
 #endif /* _CAN2LAN_H_ */
 

@@ -319,6 +319,28 @@ int inflate_data(struct cs2_config_data_t *config_data) {
     return 0;
 }
 
+char *search_interface(char *search) {
+    struct sockaddr_in *bsa;
+    struct ifaddrs *ifap, *ifa;
+
+    /* trying to get the broadcast address */
+    getifaddrs(&ifap);
+    for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+	if (ifa->ifa_addr) {
+	    if (ifa->ifa_addr->sa_family == AF_INET) {
+		bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
+		if (strncmp(ifa->ifa_name, search, strlen(search)) == 0) {
+		    freeifaddrs(ifap);
+		    return inet_ntoa(bsa->sin_addr);
+		}
+	    }
+	}
+     }
+     freeifaddrs(ifap);
+     return NULL;
+}
+
+
 int config_write(struct cs2_config_data_t *config_data) {
     FILE *config_fp;
     uint16_t crc;
