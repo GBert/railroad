@@ -599,12 +599,14 @@ int main(int argc, char **argv) {
 		    break;
 	    }
 	    /* try to prepare UDP sending socket struct */
-	    memset(&baddr, 0, sizeof(baddr));
-	    baddr.sin_family = AF_INET;
-	    baddr.sin_port = htons(destination_port);
-	    s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
-	    if (s > 0)
-		break;
+	    if (udp_dst_address) {
+		memset(&baddr, 0, sizeof(baddr));
+		baddr.sin_family = AF_INET;
+		baddr.sin_port = htons(destination_port);
+		s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
+		if (s > 0)
+		    break;
+		}
 	    sleep(1);
 	}
     }
