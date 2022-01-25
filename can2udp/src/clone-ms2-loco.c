@@ -864,9 +864,9 @@ int main(int argc, char **argv) {
 			system("/usr/bin/cansend can0 0031B311#43425553010C0040");
 		    }
 		    /* start Railcontrol when loco "Lokliste" and F2 pressed */
-		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
+		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 2)) {
 			if (!trigger_data.background && trigger_data.verbose)
-				printf("send CAN PING Answer\n");
+				printf("Start Railcontrol\n");
 			system("/etc/init.d/railcontrol start");
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */
