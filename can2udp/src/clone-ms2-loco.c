@@ -68,7 +68,6 @@ pthread_mutex_t lock;
 static unsigned char GET_MS2_LOCO_LIST[]   = { 0x6c, 0x6f, 0x6b, 0x6c, 0x69, 0x73, 0x74, 0x65 };	/* lokliste */
 static unsigned char GET_MS2_LOCO_NAMES[]  = { 0x6c, 0x6f, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x6e };	/* loknamen */
 static unsigned char GET_MS2_CONFIG_LOCO[] = { 0x6c, 0x6f, 0x6b, 0x69, 0x6e, 0x66, 0x6f, 0x00 };	/* lokinfo  */
-static unsigned char SRSEII_PING_ANSWER[]  = { 0x43, 0x42, 0x55, 0x53, 0x01, 0x0C, 0x00, 0x40 };	/* lokinfo  */
 
 
 static char *T_CAN_FORMAT_STRG	= "   -> CAN     0x%08X   [%d]";
@@ -205,15 +204,6 @@ int send_can_frame(int can_socket, struct can_frame *frame, int verbose) {
     if (verbose)
 	print_can_frame(T_CAN_FORMAT_STRG, frame);
     return 0;
-}
-
-void send_srseii_ping_answer(struct trigger_t *trigger) {
-    struct can_frame frame;
-
-    memset(&frame, 0, sizeof(frame));
-    frame.can_id = 0x0031b311;
-    memcpy(frame.data, SRSEII_PING_ANSWER, sizeof(frame.data));
-    send_can_frame(trigger->socket, &frame, trigger->verbose);
 }
 
 int get_ms2_loco_names(struct trigger_t *trigger, uint8_t start, int8_t end) {
@@ -871,7 +861,7 @@ int main(int argc, char **argv) {
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
 			if (!trigger_data.background && trigger_data.verbose)
 				printf("send CAN PING Answer\n");
-			send_srseii_ping_answer(&trigger_data);
+			system("/usr/bin/cansend can0 0031B311#43425553010C0040");
 		    }
 		    /* start Railcontrol when loco "Lokliste" and F2 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
