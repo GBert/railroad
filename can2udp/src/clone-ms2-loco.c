@@ -867,7 +867,7 @@ int main(int argc, char **argv) {
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
 			if (!trigger_data.background && trigger_data.verbose)
 				printf("send CAN PING Answer\n");
-			system("/etc/ini.d/railcontrol start 2>&1 > /dev/null");
+			system("/etc/init.d/railcontrol start");
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 4)) {
