@@ -76,6 +76,7 @@ endif
 ifneq (,$(findstring banana,$(CONFIG_TARGET_PROFILE)))
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/can2lan.init_bpi $(1)/etc/init.d/can2lan
+	$(INSTALL_BIN) ./files/clone-ms2-loco.init $(1)/etc/init.d/clone-ms2-loco
 	$(INSTALL_BIN) ./files/maecanserver.init $(1)/etc/init.d/maecanserver
 	$(INSTALL_BIN) ./files/s88udp.init $(1)/etc/init.d/s88udp
 	$(INSTALL_DIR) $(1)/usr/bin
@@ -88,6 +89,7 @@ endif
 ifneq (,$(findstring bananapro,$(CONFIG_TARGET_PROFILE)))
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/can2lan.init_bpi $(1)/etc/init.d/can2lan
+	$(INSTALL_BIN) ./files/clone-ms2-loco.init $(1)/etc/init.d/clone-ms2-loco
 	$(INSTALL_BIN) ./files/maecanserver.init $(1)/etc/init.d/maecanserver
 	$(INSTALL_BIN) ./files/s88udp.init_bpipro $(1)/etc/init.d/s88udp
 	$(INSTALL_DIR) $(1)/usr/bin
