@@ -871,7 +871,7 @@ int main(int argc, char **argv) {
 			    system("/etc/init.d/railcontrol start");
 			} else {
 			    if (!trigger_data.background && trigger_data.verbose)
-                                printf(" ... Railcontrol already running !\n");
+                                printf(" ... Railcontrol is already running !\n");
 			}
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */
