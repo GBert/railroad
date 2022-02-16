@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.18\n\n");
+    fprintf(stderr, "   Version 3.19\n\n");
     fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -776,11 +776,11 @@ void decode_frame(struct can_frame *frame) {
 	    printf("Lok Discovery - Protokoll Kennung 0x%02X", frame->data[0]);
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
-	    printf("Lok Discovery - 0x%04X Protokoll Kennung 0x%02X", uid, frame->data[4]);
+	    printf("Lok Discovery - 0x%08X Protokoll Kennung 0x%02X", uid, frame->data[4]);
 	}
 	if (frame->can_dlc == 6) {
 	    uid = be32(frame->data);
-	    printf("Lok Discovery - 0x%04X Range %d ASK %d", uid, frame->data[4], frame->data[5]);
+	    printf("Lok Discovery - 0x%08X Range %d ASK %d", uid, frame->data[4], frame->data[5]);
 	}
 	printf("\n");
 	break;
