@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.6\n\n");
+    fprintf(stderr, "   Version 1.7\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -866,8 +866,13 @@ int main(int argc, char **argv) {
 		    /* start Railcontrol when loco "Lokliste" and F2 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 2)) {
 			if (!trigger_data.background && trigger_data.verbose)
-				printf("Start Railcontrol\n");
-			system("/etc/init.d/railcontrol start");
+				printf("Starting Railcontrol\n");
+			if (system("pidof railcontrol")) {
+			    system("/etc/init.d/railcontrol start");
+			} else {
+			    if (!trigger_data.background && trigger_data.verbose)
+                                printf(" ... Railcontrol already running !\n");
+			}
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 4)) {
