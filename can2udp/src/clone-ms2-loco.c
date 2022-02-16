@@ -865,13 +865,13 @@ int main(int argc, char **argv) {
 		    }
 		    /* start Railcontrol when loco "Lokliste" and F2 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 2)) {
-			if (!trigger_data.background && trigger_data.verbose)
-				printf("Starting Railcontrol\n");
-			if (system("pidof railcontrol")) {
+			if (system("pidof railcontrol 2>&1 > /dev/null")) {
 			    system("/etc/init.d/railcontrol start");
+			    if (!trigger_data.background && trigger_data.verbose)
+				printf("Starting Railcontrol\n");
 			} else {
 			    if (!trigger_data.background && trigger_data.verbose)
-                                printf(" ... Railcontrol is already running !\n");
+                                printf("Railcontrol is already running !\n");
 			}
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */
