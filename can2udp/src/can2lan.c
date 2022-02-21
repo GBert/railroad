@@ -82,7 +82,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.5\n\n");
+    fprintf(stderr, "   Version 1.6\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -265,6 +265,20 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 	    net_to_net(tcp_socket, NULL, netframe, CAN_ENCAP_SIZE);
 	    if (cs2_config_data->verbose)
 		printf("got CAN device registration\n");
+	}
+	break;
+    case (0x00300000UL):
+	if (cs2fake_ping) {
+	    if (cs2_config_data->verbose)
+		printf("                received CAN ping\n");
+	    memcpy(netframe, M_CAN_PING_CS2, 13);
+	    if (net_to_net(tcp_socket, NULL, netframe, CAN_ENCAP_SIZE)) {
+		fprint_syslog_wc(stderr, LOG_ERR, "sending TCP data (CAN Ping member) error:", strerror(errno));
+	    } else {
+		print_can_frame(NET_TCP_FORMAT_STRG, netframe, cs2_config_data->verbose);
+		if (cs2_config_data->verbose)
+		    printf("                replied CAN ping (fake GFP)\n");
+	    }
 	}
 	break;
     case (0x00310000UL):	/* CAN ping */
