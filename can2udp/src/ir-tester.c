@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     unsigned char loco_function[32];
     unsigned char direction;
     socklen_t caddrlen = sizeof(caddr);
-    time_t last = 0;
+    int64_t last = 0;
 
     status = 0;
     loco = DEFAULT_LOCO;
@@ -197,9 +197,9 @@ int main(int argc, char **argv) {
 	    /* printf(" type :0x%02x, code 0x%02x, value 0x%04x\n", ev[n].type, ev[n].code, ev[n].value); */
 	    if (ev[n].type == EV_MSC && (ev[n].code == MSC_RAW || ev[n].code == MSC_SCAN)) {
 #ifdef SUNXI_A20
-		time_t timestamp = ev[n].input_event_sec * 1000000 + ev[n].input_event_usec;
+		int64_t timestamp = (int64_t) ev[n].input_event_sec * 1000000 + ev[n].input_event_usec;
 #else
-		time_t timestamp = ev[n].time.tv_sec * 1000000 + ev[n].time.tv_usec;
+		int64_t timestamp = (int64_t) ev[n].time.tv_sec * 1000000 + ev[n].time.tv_usec;
 #endif
 		if ((timestamp - last) < BLINDTIME) continue;
 		last = timestamp;
