@@ -49,7 +49,7 @@ unsigned char netframe[MAXDG];
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface> -r <infrared-interface> -s <step>\n", prg);
-    fprintf(stderr, "   Version 0.5\n\n");
+    fprintf(stderr, "   Version 0.6\n\n");
     fprintf(stderr, "         -l <loco id>        loco id - default %d\n", DEFAULT_LOCO);
     fprintf(stderr, "         -i <can int>        can interface - default can0\n");
     fprintf(stderr, "         -r <ir int>         infrared event interface - default /dev/input/event1\n");
