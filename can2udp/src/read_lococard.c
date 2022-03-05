@@ -41,14 +41,24 @@ static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
 
 static const char *loco_function_string [] = {
     " ",
-    "Licht",
-    "ka",
-    "ka",
-    "ka",
-    "ka",
-    "ka",
-    "ka",
-    "ka"
+    "Stirnbeleuchtung",
+    "Innenbeleuchtung",
+    "Außenlicht/Rücklicht",
+    "Fernlicht",
+    "Audio hören",
+    "Pantograf",
+    "Rauchgenerator",
+    "Rangiergang",
+    "Telexkupplung",
+    "Horn",
+    "Schaffnerpfiff",
+    "Pfeife",
+    "Glocke",
+    "Kran seitswärts bewegen",
+    "Kran hoch/runter",
+    "Kran links drehen",
+    "Kran neigen",
+    "ABV aus"
 };
 
 void print_usage(char *prg) {
@@ -228,7 +238,9 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    uint8_t ti = loco_config->bin[i++];
 		    switch(k) {
 		    case 0:
-			printf(" %10s 0x%02x", loco_function_string[ti & 0x07], ti);
+			/* TODO */
+			if (ti < 20)
+			    printf(" %20s 0x%02x", loco_function_string[ti & 0x0f], ti);
 			break;
 		    case 99: /* TODO */
 			printf("\n");
