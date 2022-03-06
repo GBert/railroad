@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.19\n\n");
+    fprintf(stderr, "   Version 3.20\n\n");
     fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -911,7 +911,7 @@ void decode_frame(struct can_frame *frame) {
 		printf("Magnetartikel ID 0x%08X Ausgang %u Strom %u", uid, frame->data[4], frame->data[5]);
 	}
 	if (frame->can_dlc == 8)
-	    printf(" Schaltzeit/Sonderfunktionswert %u", be16(&frame->data[6]));
+	    printf(" Schaltzeit/Sonderfunktionswert %u (%u ms)", be16(&frame->data[6]), be16(&frame->data[6] * 100);
 	printf("\n");
 	break;
     /* S88 Polling */
