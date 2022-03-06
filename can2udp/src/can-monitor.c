@@ -904,11 +904,11 @@ void decode_frame(struct can_frame *frame) {
 	uid = be32(frame->data);
 	if (frame->can_dlc >= 6) {
 	    if ((uid > 0x2FFF) && (uid < 0x3400))
-		printf("Magnetartikel MM1 ID %u Ausgang %u Strom %u", uid - 0x2FFF, frame->data[4], frame->data[5]);
+		printf("Magnetartikel MM1 ID %u Ausgang %u Strom %u", uid - 0x2FFF, frame->data[4] + 1, frame->data[5]);
 	    else if ((uid > 0x37FF) && (uid < 0x4000))
-		printf("Magnetartikel DCC ID %u Ausgang %u Strom %u", uid - 0x37FF, frame->data[4], frame->data[5]);
+		printf("Magnetartikel DCC ID %u Ausgang %u Strom %u", uid - 0x37FF, frame->data[4] + 1, frame->data[5]);
 	    else
-		printf("Magnetartikel ID 0x%08X Ausgang %u Strom %u", uid, frame->data[4], frame->data[5]);
+		printf("Magnetartikel ID 0x%08X Ausgang %u Strom %u", uid, frame->data[4] + 1, frame->data[5]);
 	}
 	if (frame->can_dlc == 8)
 	    printf(" Schaltzeit/Sonderfunktionswert %u (%u ms)", be16(&frame->data[6]), be16(&frame->data[6]) * 10);
