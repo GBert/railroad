@@ -911,7 +911,7 @@ void decode_frame(struct can_frame *frame) {
 		printf("Magnetartikel ID 0x%08X Ausgang %u Strom %u", uid, frame->data[4], frame->data[5]);
 	}
 	if (frame->can_dlc == 8)
-	    printf(" Schaltzeit/Sonderfunktionswert %u (%u ms)", be16(&frame->data[6]), be16(&frame->data[6] * 100);
+	    printf(" Schaltzeit/Sonderfunktionswert %u (%u ms)", be16(&frame->data[6]), be16(&frame->data[6]) * 100);
 	printf("\n");
 	break;
     /* S88 Polling */
