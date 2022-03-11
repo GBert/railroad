@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name microsd_spi_cd)(type Legacy)(uri ${KIPRJMOD}/sd-card-conn/microsd_spi_cd.lib)(options "")(descr ""))
+)
