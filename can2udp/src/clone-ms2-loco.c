@@ -69,6 +69,7 @@ static unsigned char GET_MS2_LOCO_LIST[]   = { 0x6c, 0x6f, 0x6b, 0x6c, 0x69, 0x7
 static unsigned char GET_MS2_LOCO_NAMES[]  = { 0x6c, 0x6f, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x6e };	/* loknamen */
 static unsigned char GET_MS2_CONFIG_LOCO[] = { 0x6c, 0x6f, 0x6b, 0x69, 0x6e, 0x66, 0x6f, 0x00 };	/* lokinfo  */
 
+
 static char *T_CAN_FORMAT_STRG	= "   -> CAN     0x%08X   [%d]";
 static char *F_CAN_FORMAT_STRG	= "      CAN ->  0x%08X   [%d]";
 
@@ -137,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.5\n\n");
+    fprintf(stderr, "   Version 1.7\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -854,6 +855,23 @@ int main(int argc, char **argv) {
 			    if (!trigger_data.background && trigger_data.verbose)
 				printf("FSM_START clone MS2 locos\n");
 			    get_ms2_dbsize(&trigger_data);
+			}
+		    }
+		    /* initiate SRSEII ping answer when loco "Lokliste" and F1 pressed */
+		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
+			if (!trigger_data.background && trigger_data.verbose)
+				printf("send CAN PING Answer\n");
+			system("/usr/bin/cansend can0 0031B311#43425553010C0040");
+		    }
+		    /* start Railcontrol when loco "Lokliste" and F2 pressed */
+		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 2)) {
+			if (system("pidof railcontrol 2>&1 > /dev/null")) {
+			    system("/etc/init.d/railcontrol start");
+			    if (!trigger_data.background && trigger_data.verbose)
+				printf("Starting Railcontrol\n");
+			} else {
+			    if (!trigger_data.background && trigger_data.verbose)
+                                printf("Railcontrol is already running !\n");
 			}
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */

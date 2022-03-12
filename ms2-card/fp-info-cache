@@ -1,0 +1,155 @@
+32653402936872
+w_switch
+PCB_PUSH
+PCB pushbutton, Tyco FSM6x6 series
+pushbutton
+0
+4
+4
+w_switch
+PCB_PUSH2
+PCB pushbutton, TEC R18-801A series
+pushbutton
+0
+4
+2
+w_switch
+dip_1-300
+Dip switch, DIL2 x 0,3"
+DIP
+0
+2
+2
+w_switch
+dip_2-300
+Dip switch, DIL4 x 0,3"
+DIP
+0
+4
+4
+w_switch
+dip_3-300
+Dip switch, DIL6 x 0,3"
+DIP
+0
+6
+6
+w_switch
+dip_4-300
+Dip switch, DIL8 x 0,3"
+DIP
+0
+8
+8
+w_switch
+dip_5-300
+Dip switch, DIL10 x 0,3"
+DIP
+0
+10
+10
+w_switch
+dip_6-300
+Dip switch, DIL12 x 0,3"
+DIP
+0
+12
+12
+w_switch
+dip_7-300
+Dip switch, DIL14 x 0,3"
+DIP
+0
+14
+14
+w_switch
+dip_8-300
+Dip switch, DIL16 x 0,3"
+DIP
+0
+16
+16
+w_switch
+dip_9-300
+Dip switch, DIL18 x 0,3"
+DIP
+0
+18
+18
+w_switch
+dip_10-300
+Dip switch, DIL20 x 0,3"
+DIP
+0
+20
+20
+w_switch
+dip_12-300
+Dip switch, DIL24 x 0,3"
+DIP
+0
+24
+24
+w_switch
+pcb_push_xiejia_pb-11d01
+PCB pushbutton, Xiejia PB-11D01
+pushbutton
+0
+2
+2
+w_switch
+pcb_push_xiejia_pb-11d03
+PCB pushbutton, Xiejia PB-11D03
+pushbutton
+0
+3
+3
+w_switch
+pcb_push_xiejia_pb-11d14
+PCB pushbutton, Xiejia PB-11D14
+pushbutton
+0
+4
+4
+w_switch
+smd_push
+SMD Pushbutton
+
+0
+2
+2
+w_switch
+smd_push2
+SMD Pushbutton 2
+
+0
+4
+4
+w_switch
+smd_push_xiejia_pb-11d06
+SMD pushbutton, Xiejia PB-11D06
+pushbutton
+0
+2
+2
+w_switch
+switch_100sp5
+E-Switch 100SP5
+
+0
+3
+3
+w_switch
+switch_mfp116dg-ra
+Knitter MFP 116 DG-RA
+
+0
+5
+3
+w_switch
+switch_mmp122-r
+Knitter MMP122-R
+
+0
+3
+3

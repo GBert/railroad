@@ -1,0 +1,647 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "Lokkarten Emulator"
+Date "2022-02-13"
+Rev "0.1"
+Comp "Modellbahn eXtreme"
+Comment1 "Hardi Stengelin"
+Comment2 "Gerhard Bertelsmann"
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector:USB_B_Micro J30
+U 1 1 62091BB3
+P 4775 2050
+F 0 "J30" H 4545 2039 50  0000 R CNN
+F 1 "Power Only" H 4545 1948 50  0000 R CNN
+F 2 "Connector_USB:USB_Micro-B_Molex-105017-0001" H 4925 2000 50  0001 C CNN
+F 3 "~" H 4925 2000 50  0001 C CNN
+	1    4775 2050
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 62099616
+P 4775 2500
+F 0 "#PWR0102" H 4775 2250 50  0001 C CNN
+F 1 "GND" H 4780 2327 50  0000 C CNN
+F 2 "" H 4775 2500 50  0001 C CNN
+F 3 "" H 4775 2500 50  0001 C CNN
+	1    4775 2500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4775 2450 4775 2500
+NoConn ~ 4875 2450
+Wire Wire Line
+	4475 1850 4475 1650
+NoConn ~ 4475 2250
+$Comp
+L Connector_Generic:Conn_02x04_Counter_Clockwise J20
+U 1 1 620C4F47
+P 2475 1750
+F 0 "J20" H 2525 2067 50  0000 C CNN
+F 1 "Smartcard Connector" H 2525 1976 50  0000 C CNN
+F 2 "w_conn_misc:iso7816_conn" H 2475 1750 50  0001 C CNN
+F 3 "~" H 2475 1750 50  0001 C CNN
+	1    2475 1750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5375 5825 4950 5825
+Wire Wire Line
+	5375 5925 5175 5925
+$Comp
+L power:GND #PWR0107
+U 1 1 620D190B
+P 5175 6650
+F 0 "#PWR0107" H 5175 6400 50  0001 C CNN
+F 1 "GND" H 5180 6477 50  0000 C CNN
+F 2 "" H 5175 6650 50  0001 C CNN
+F 3 "" H 5175 6650 50  0001 C CNN
+	1    5175 6650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5375 6125
+Wire Wire Line
+	5375 5725 5300 5725
+Wire Wire Line
+	5300 5725 5300 5275
+$Comp
+L power:VCC #PWR0108
+U 1 1 620D86CF
+P 5300 5275
+F 0 "#PWR0108" H 5300 5125 50  0001 C CNN
+F 1 "VCC" H 5315 5448 50  0000 C CNN
+F 2 "" H 5300 5275 50  0001 C CNN
+F 3 "" H 5300 5275 50  0001 C CNN
+	1    5300 5275
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5375 5525 4950 5525
+Wire Wire Line
+	4950 6025 5375 6025
+Wire Wire Line
+	5375 5625 4950 5625
+Text Label 4950 5525 0    50   ~ 0
+CS0
+$Comp
+L Device:R R11
+U 1 1 620E2FC2
+P 3875 6050
+F 0 "R11" V 3925 6175 50  0000 L CNN
+F 1 "4k7" V 3875 5975 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 3805 6050 50  0001 C CNN
+F 3 "~" H 3875 6050 50  0001 C CNN
+	1    3875 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R12
+U 1 1 620E340C
+P 4000 6050
+F 0 "R12" V 4050 6175 50  0000 L CNN
+F 1 "4k7" V 4000 5975 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 3930 6050 50  0001 C CNN
+F 3 "~" H 4000 6050 50  0001 C CNN
+	1    4000 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R13
+U 1 1 620E379E
+P 4125 6050
+F 0 "R13" V 4175 6175 50  0000 L CNN
+F 1 "4k7" V 4125 5975 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 4055 6050 50  0001 C CNN
+F 3 "~" H 4125 6050 50  0001 C CNN
+	1    4125 6050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3875 6200 3875 6425
+Wire Wire Line
+	4000 6200 4000 6425
+Wire Wire Line
+	4125 6200 4125 6425
+Text Label 4000 6425 1    50   ~ 0
+MOSI
+Text Label 4125 6425 1    50   ~ 0
+MISO
+Text Label 3875 6425 1    50   ~ 0
+CLK
+Wire Wire Line
+	4125 5700 4125 5900
+Wire Wire Line
+	4000 5900 4000 5700
+Connection ~ 4000 5700
+Wire Wire Line
+	4000 5700 4125 5700
+Wire Wire Line
+	3875 5900 3875 5700
+$Comp
+L power:VCC #PWR0109
+U 1 1 620EE2F3
+P 4000 5700
+F 0 "#PWR0109" H 4000 5550 50  0001 C CNN
+F 1 "VCC" H 4015 5873 50  0000 C CNN
+F 2 "" H 4000 5700 50  0001 C CNN
+F 3 "" H 4000 5700 50  0001 C CNN
+	1    4000 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R20
+U 1 1 620FAAFE
+P 1750 4000
+F 0 "R20" V 1800 4125 50  0000 L CNN
+F 1 "4k7" V 1750 3925 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 1680 4000 50  0001 C CNN
+F 3 "~" H 1750 4000 50  0001 C CNN
+	1    1750 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R21
+U 1 1 620FAB04
+P 1875 4000
+F 0 "R21" V 1925 4125 50  0000 L CNN
+F 1 "4k7" V 1875 3925 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 1805 4000 50  0001 C CNN
+F 3 "~" H 1875 4000 50  0001 C CNN
+	1    1875 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1750 4150 1750 4375
+Wire Wire Line
+	1875 4150 1875 4375
+Text Label 1875 4375 1    50   ~ 0
+SDA
+Text Label 1750 4375 1    50   ~ 0
+SCL
+Wire Wire Line
+	1750 3850 1750 3650
+Wire Wire Line
+	1750 3650 1875 3650
+Wire Wire Line
+	1875 3850 1875 3650
+Connection ~ 1875 3650
+$Comp
+L power:VCC #PWR0110
+U 1 1 620FAB27
+P 1875 3650
+F 0 "#PWR0110" H 1875 3500 50  0001 C CNN
+F 1 "VCC" H 1890 3823 50  0000 C CNN
+F 2 "" H 1875 3650 50  0001 C CNN
+F 3 "" H 1875 3650 50  0001 C CNN
+	1    1875 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2275 1650 1750 1650
+Wire Wire Line
+	2775 1650 3150 1650
+Wire Wire Line
+	3150 1650 3150 2125
+$Comp
+L power:GND #PWR0128
+U 1 1 621D6BB9
+P 3150 2125
+F 0 "#PWR0128" H 3150 1875 50  0001 C CNN
+F 1 "GND" H 3155 1952 50  0000 C CNN
+F 2 "" H 3150 2125 50  0001 C CNN
+F 3 "" H 3150 2125 50  0001 C CNN
+	1    3150 2125
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2275 1850 2125 1850
+Wire Wire Line
+	2775 1850 2925 1850
+Text Label 2125 1850 0    50   ~ 0
+SCL
+Text Label 2925 1850 2    50   ~ 0
+SDA
+$Comp
+L Device:LED D1
+U 1 1 62269748
+P 3675 1800
+F 0 "D1" V 3714 1682 50  0000 R CNN
+F 1 "LED" V 3623 1682 50  0000 R CNN
+F 2 "LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 3675 1800 50  0001 C CNN
+F 3 "~" H 3675 1800 50  0001 C CNN
+	1    3675 1800
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 6226974E
+P 3675 1450
+F 0 "R1" H 3745 1496 50  0000 L CNN
+F 1 "330" V 3675 1400 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 3605 1450 50  0001 C CNN
+F 3 "~" H 3675 1450 50  0001 C CNN
+	1    3675 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0136
+U 1 1 62269754
+P 3675 1250
+F 0 "#PWR0136" H 3675 1100 50  0001 C CNN
+F 1 "VCC" H 3690 1423 50  0000 C CNN
+F 2 "" H 3675 1250 50  0001 C CNN
+F 3 "" H 3675 1250 50  0001 C CNN
+	1    3675 1250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3675 1250 3675 1300
+Wire Wire Line
+	3675 1650 3675 1600
+Wire Wire Line
+	3675 1950 3675 2125
+$Comp
+L power:GND #PWR0137
+U 1 1 62276B56
+P 3675 2125
+F 0 "#PWR0137" H 3675 1875 50  0001 C CNN
+F 1 "GND" H 3680 1952 50  0000 C CNN
+F 2 "" H 3675 2125 50  0001 C CNN
+F 3 "" H 3675 2125 50  0001 C CNN
+	1    3675 2125
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x05 J11
+U 1 1 623348F3
+P 8600 5800
+F 0 "J11" H 8680 5842 50  0000 L CNN
+F 1 "I2C" H 8680 5751 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" H 8600 5800 50  0001 C CNN
+F 3 "~" H 8600 5800 50  0001 C CNN
+	1    8600 5800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8400 5600 8325 5600
+Wire Wire Line
+	8325 5600 8325 5425
+Wire Wire Line
+	8400 6000 8325 6000
+Wire Wire Line
+	8325 6000 8325 6150
+Wire Wire Line
+	8400 5700 8150 5700
+Wire Wire Line
+	8400 5800 8150 5800
+Wire Wire Line
+	8400 5900 8150 5900
+Text Label 8150 5800 0    50   ~ 0
+SDA
+Text Label 8150 5900 0    50   ~ 0
+SCL
+Text Label 8150 5700 0    50   ~ 0
+Card
+$Comp
+L power:GND #PWR0142
+U 1 1 6233C878
+P 8325 6150
+F 0 "#PWR0142" H 8325 5900 50  0001 C CNN
+F 1 "GND" H 8330 5977 50  0000 C CNN
+F 2 "" H 8325 6150 50  0001 C CNN
+F 3 "" H 8325 6150 50  0001 C CNN
+	1    8325 6150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0143
+U 1 1 6233F9B6
+P 8325 5425
+F 0 "#PWR0143" H 8325 5275 50  0001 C CNN
+F 1 "VCC" H 8340 5598 50  0000 C CNN
+F 2 "" H 8325 5425 50  0001 C CNN
+F 3 "" H 8325 5425 50  0001 C CNN
+	1    8325 5425
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7775 1725 7900 1725
+Connection ~ 7775 1725
+Wire Wire Line
+	7775 1825 7900 1825
+Wire Wire Line
+	7775 1725 7775 1825
+Wire Wire Line
+	7300 1725 7775 1725
+$Comp
+L Connector_Generic:Conn_01x02 J21
+U 1 1 6221E177
+P 8100 1725
+F 0 "J21" H 8050 1850 50  0000 L CNN
+F 1 "Card Edge" H 7925 1500 50  0000 L CNN
+F 2 "w_conn_misc:MS2_Edge" H 8100 1725 50  0001 C CNN
+F 3 "~" H 8100 1725 50  0001 C CNN
+	1    8100 1725
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6600 1575 6600 1625
+$Comp
+L power:VCC #PWR0131
+U 1 1 62219413
+P 6600 1575
+F 0 "#PWR0131" H 6600 1425 50  0001 C CNN
+F 1 "VCC" H 6615 1748 50  0000 C CNN
+F 2 "" H 6600 1575 50  0001 C CNN
+F 3 "" H 6600 1575 50  0001 C CNN
+	1    6600 1575
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7300 1250 7300 1300
+$Comp
+L power:VCC #PWR0127
+U 1 1 621C950C
+P 7300 1250
+F 0 "#PWR0127" H 7300 1100 50  0001 C CNN
+F 1 "VCC" H 7315 1423 50  0000 C CNN
+F 2 "" H 7300 1250 50  0001 C CNN
+F 3 "" H 7300 1250 50  0001 C CNN
+	1    7300 1250
+	1    0    0    -1  
+$EndComp
+Text Label 6350 1975 0    50   ~ 0
+Card
+Connection ~ 6600 1975
+Wire Wire Line
+	6600 1975 6350 1975
+$Comp
+L power:GND #PWR0126
+U 1 1 621C52CE
+P 7300 2300
+F 0 "#PWR0126" H 7300 2050 50  0001 C CNN
+F 1 "GND" H 7305 2127 50  0000 C CNN
+F 2 "" H 7300 2300 50  0001 C CNN
+F 3 "" H 7300 2300 50  0001 C CNN
+	1    7300 2300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R24
+U 1 1 621C4890
+P 7300 1450
+F 0 "R24" V 7400 1400 50  0000 L CNN
+F 1 "100k" V 7300 1375 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 7230 1450 50  0001 C CNN
+F 3 "~" H 7300 1450 50  0001 C CNN
+	1    7300 1450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7300 1725 7300 1600
+Connection ~ 7300 1725
+Wire Wire Line
+	7300 2175 7300 2300
+Wire Wire Line
+	7300 1775 7300 1725
+Wire Wire Line
+	6950 1975 7000 1975
+Wire Wire Line
+	6600 1975 6600 1925
+Wire Wire Line
+	6650 1975 6600 1975
+$Comp
+L Device:R R22
+U 1 1 621B397D
+P 6600 1775
+F 0 "R22" V 6700 1725 50  0000 L CNN
+F 1 "1k" V 6600 1725 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 6530 1775 50  0001 C CNN
+F 3 "~" H 6600 1775 50  0001 C CNN
+	1    6600 1775
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R23
+U 1 1 621B31C1
+P 6800 1975
+F 0 "R23" V 6875 1925 50  0000 L CNN
+F 1 "1k" V 6800 1925 50  0000 L CNN
+F 2 "Resistors_SMD:R_0805_HandSolderingII" V 6730 1975 50  0001 C CNN
+F 3 "~" H 6800 1975 50  0001 C CNN
+	1    6800 1975
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Transistor_BJT:BC847 Q30
+U 1 1 621B18B5
+P 7200 1975
+F 0 "Q30" H 7391 2021 50  0000 L CNN
+F 1 "BC847" H 7391 1930 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 7400 1900 50  0001 L CIN
+F 3 "http://www.infineon.com/dgdl/Infineon-BC847SERIES_BC848SERIES_BC849SERIES_BC850SERIES-DS-v01_01-en.pdf?fileId=db3a304314dca389011541d4630a1657" H 7200 1975 50  0001 L CNN
+	1    7200 1975
+	1    0    0    -1  
+$EndComp
+Text Label 4950 5625 0    50   ~ 0
+MOSI
+Text Label 4950 6025 0    50   ~ 0
+MISO
+Text Label 4950 5825 0    50   ~ 0
+CLK
+Text Label 1750 1650 0    50   ~ 0
+MS2PWR
+Wire Wire Line
+	3875 5700 4000 5700
+Text Notes 8975 5800 0    50   ~ 0
+Debug I2C
+$Comp
+L microsd_spi_cd:MicroSD_SPI_CD J10
+U 1 1 628636B3
+P 5725 5825
+F 0 "J10" H 5450 5875 60  0000 R CNN
+F 1 "MicroSD_SPI_CD" H 6050 6325 60  0000 R CNN
+F 2 "w_conn_misc:GCT-MEM2055-00-190-01-A" H 5575 5825 60  0001 C CNN
+F 3 "" H 5575 5825 60  0000 C CNN
+	1    5725 5825
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	5175 5925 5175 6650
+Text Label 5300 5425 1    50   ~ 0
+VCC
+$Comp
+L Connector_Generic:Conn_01x04 J23
+U 1 1 6290A726
+P 1525 2425
+F 0 "J23" H 1443 2092 50  0000 C CNN
+F 1 "Conn_01x04" H 1443 2091 50  0001 C CNN
+F 2 "Connector_PinHeader_1.27mm:PinHeader_1x04_P1.27mm_Vertical" H 1525 2425 50  0001 C CNN
+F 3 "~" H 1525 2425 50  0001 C CNN
+	1    1525 2425
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2275 1750 1875 1750
+Wire Wire Line
+	1875 1750 1875 2225
+Wire Wire Line
+	1875 2225 1725 2225
+Wire Wire Line
+	2275 1950 1975 1950
+Wire Wire Line
+	1975 1950 1975 2325
+Wire Wire Line
+	1975 2325 1725 2325
+Wire Wire Line
+	2775 1750 3050 1750
+Wire Wire Line
+	3050 1750 3050 2525
+Wire Wire Line
+	3050 2525 1725 2525
+Wire Wire Line
+	2775 1950 2950 1950
+Wire Wire Line
+	2950 1950 2950 2425
+Wire Wire Line
+	2950 2425 1725 2425
+$Comp
+L Connector_Generic:Conn_01x02 J22
+U 1 1 622BD65B
+P 8100 2175
+F 0 "J22" H 8050 2300 50  0000 L CNN
+F 1 "Card Edge" H 7925 1950 50  0000 L CNN
+F 2 "w_conn_misc:MS2_Edge" H 8100 2175 50  0001 C CNN
+F 3 "~" H 8100 2175 50  0001 C CNN
+	1    8100 2175
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7775 1825 7775 2175
+Wire Wire Line
+	7775 2175 7900 2175
+Connection ~ 7775 1825
+Wire Wire Line
+	7775 2175 7775 2275
+Wire Wire Line
+	7775 2275 7900 2275
+Connection ~ 7775 2175
+NoConn ~ 4475 2050
+NoConn ~ 4475 2150
+$Comp
+L Memory_Flash:W25Q128JVS U1
+U 1 1 623918D5
+P 4175 4425
+F 0 "U1" H 3875 4950 50  0000 C CNN
+F 1 "W25Q128JVS" H 4150 4400 50  0000 C CNN
+F 2 "Package_SO:SOIC-8_5.23x5.23mm_P1.27mm" H 4175 4425 50  0001 C CNN
+F 3 "http://www.winbond.com/resource-files/w25q128jv_dtr%20revc%2003272018%20plus.pdf" H 4175 4425 50  0001 C CNN
+	1    4175 4425
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3675 4525 3425 4525
+Text Label 3425 4525 0    50   ~ 0
+CLK
+$Comp
+L power:GND #PWR0101
+U 1 1 623C25CA
+P 4175 4875
+F 0 "#PWR0101" H 4175 4625 50  0001 C CNN
+F 1 "GND" H 4180 4702 50  0000 C CNN
+F 2 "" H 4175 4875 50  0001 C CNN
+F 3 "" H 4175 4875 50  0001 C CNN
+	1    4175 4875
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4175 4825 4175 4875
+$Comp
+L power:VCC #PWR0103
+U 1 1 623C4C28
+P 4175 3975
+F 0 "#PWR0103" H 4175 3825 50  0001 C CNN
+F 1 "VCC" H 4190 4148 50  0000 C CNN
+F 2 "" H 4175 3975 50  0001 C CNN
+F 3 "" H 4175 3975 50  0001 C CNN
+	1    4175 3975
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4175 3975 4175 4025
+Wire Wire Line
+	3675 4325 3425 4325
+Wire Wire Line
+	4675 4225 5000 4225
+Wire Wire Line
+	4675 4325 5000 4325
+Text Label 5000 4225 2    50   ~ 0
+MOSI
+Text Label 5000 4325 2    50   ~ 0
+MISO
+Text Label 3425 4325 0    50   ~ 0
+CS1
+$Comp
+L power:+5V #PWR0104
+U 1 1 623ED064
+P 4475 1650
+F 0 "#PWR0104" H 4475 1500 50  0001 C CNN
+F 1 "+5V" H 4490 1823 50  0000 C CNN
+F 2 "" H 4475 1650 50  0001 C CNN
+F 3 "" H 4475 1650 50  0001 C CNN
+	1    4475 1650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Micro_SD_Card J1
+U 1 1 623F1AE6
+P 7125 5725
+F 0 "J1" H 7075 6442 50  0000 C CNN
+F 1 "Micro_SD_Card" H 7075 6351 50  0000 C CNN
+F 2 "w_conn_misc:GCT-MEM2055-00-190-01-A" H 8275 6025 50  0001 C CNN
+F 3 "http://katalog.we-online.de/em/datasheet/693072010801.pdf" H 7125 5725 50  0001 C CNN
+	1    7125 5725
+	1    0    0    -1  
+$EndComp
+$Comp
+L Lokkarten:PI_PICO_ZERO M1
+U 1 1 6240208A
+P 7000 3600
+F 0 "M1" H 6975 4267 50  0000 C CNN
+F 1 "PI_PICO_ZERO" H 6975 4176 50  0000 C CNN
+F 2 "Lokkarten:PI_PICO_ZERO" H 7000 3600 50  0001 C CNN
+F 3 "https://www.waveshare.com/wiki/RP2040-Zero" H 7000 3600 50  0001 C CNN
+	1    7000 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Lokkarten:SSD1306 Brd1
+U 1 1 6241CB55
+P 5325 3600
+F 0 "Brd1" H 5603 3704 50  0000 L CNN
+F 1 "SSD1306" H 5603 3613 50  0000 L CNN
+F 2 "Lokkarten:128x64OLED" H 5225 3850 50  0001 C CNN
+F 3 "" H 5225 3850 50  0001 C CNN
+	1    5325 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Switch:SW_Push SW1
+U 1 1 62428719
+P 3250 3250
+F 0 "SW1" H 3250 3535 50  0000 C CNN
+F 1 "SW_Push" H 3250 3444 50  0000 C CNN
+F 2 "w_switch:PCB_PUSH" H 3250 3450 50  0001 C CNN
+F 3 "~" H 3250 3450 50  0001 C CNN
+	1    3250 3250
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC

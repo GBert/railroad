@@ -32,6 +32,7 @@ static unsigned char M_GLEISBOX_ALL_PROTO_ENABLE[]     = { 0x00, 0x00, 0x03, 0x0
 static unsigned char M_CAN_PING[]                      = { 0x00, 0x30, 0x47, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 static unsigned char M_CAN_PING_CS2_1[]                = { 0x00, 0x31, 0x63, 0x4A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x04, 0x02, 0xFF, 0xF0 };
 static unsigned char M_CAN_PING_CS2_2[]                = { 0x00, 0x31, 0x63, 0x4B, 0x08, 0x00, 0x00, 0x00, 0x00, 0x03, 0x44, 0x00, 0x00 };
+static unsigned char M_CAN_PING_CS2_3[]                = { 0x00, 0x31, 0x03, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x04, 0x02, 0xFF, 0xFF };
 static unsigned char M_CAN_PING_CS2[]                  = { 0x00, 0x30, 0x47, 0x11, 0x08, 0x00, 0x00, 0x00, 0x00, 0x03, 0x08, 0xff, 0xff };
 static unsigned char M_PING_RESPONSE[] = { 0x00, 0x30, 0x00, 0x00, 0x00 };
 
@@ -82,7 +83,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.5\n\n");
+    fprintf(stderr, "   Version 1.6\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -265,6 +266,20 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 	    net_to_net(tcp_socket, NULL, netframe, CAN_ENCAP_SIZE);
 	    if (cs2_config_data->verbose)
 		printf("got CAN device registration\n");
+	}
+	break;
+    case (0x00300000UL):
+	if (cs2fake_ping) {
+	    if (cs2_config_data->verbose)
+		printf("                received CAN ping\n");
+	    memcpy(netframe, M_CAN_PING_CS2_3, 13);
+	    if (net_to_net(tcp_socket, NULL, netframe, CAN_ENCAP_SIZE)) {
+		fprint_syslog_wc(stderr, LOG_ERR, "sending TCP data (CAN Ping member) error:", strerror(errno));
+	    } else {
+		print_can_frame(NET_TCP_FORMAT_STRG, netframe, cs2_config_data->verbose);
+		if (cs2_config_data->verbose)
+		    printf("                replied CAN ping (fake GFP)\n");
+	    }
 	}
 	break;
     case (0x00310000UL):	/* CAN ping */
@@ -599,12 +614,14 @@ int main(int argc, char **argv) {
 		    break;
 	    }
 	    /* try to prepare UDP sending socket struct */
-	    memset(&baddr, 0, sizeof(baddr));
-	    baddr.sin_family = AF_INET;
-	    baddr.sin_port = htons(destination_port);
-	    s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
-	    if (s > 0)
-		break;
+	    if (udp_dst_address) {
+		memset(&baddr, 0, sizeof(baddr));
+		baddr.sin_family = AF_INET;
+		baddr.sin_port = htons(destination_port);
+		s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
+		if (s > 0)
+		    break;
+		}
 	    sleep(1);
 	}
     }

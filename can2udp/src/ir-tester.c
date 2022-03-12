@@ -49,7 +49,7 @@ unsigned char netframe[MAXDG];
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface> -r <infrared-interface> -s <step>\n", prg);
-    fprintf(stderr, "   Version 0.5\n\n");
+    fprintf(stderr, "   Version 0.6\n\n");
     fprintf(stderr, "         -l <loco id>        loco id - default %d\n", DEFAULT_LOCO);
     fprintf(stderr, "         -i <can int>        can interface - default can0\n");
     fprintf(stderr, "         -r <ir int>         infrared event interface - default /dev/input/event1\n");
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     unsigned char loco_function[32];
     unsigned char direction;
     socklen_t caddrlen = sizeof(caddr);
-    time_t last = 0;
+    int64_t last = 0;
 
     status = 0;
     loco = DEFAULT_LOCO;
@@ -197,9 +197,9 @@ int main(int argc, char **argv) {
 	    /* printf(" type :0x%02x, code 0x%02x, value 0x%04x\n", ev[n].type, ev[n].code, ev[n].value); */
 	    if (ev[n].type == EV_MSC && (ev[n].code == MSC_RAW || ev[n].code == MSC_SCAN)) {
 #ifdef SUNXI_A20
-		time_t timestamp = ev[n].input_event_sec * 1000000 + ev[n].input_event_usec;
+		int64_t timestamp = (int64_t) ev[n].input_event_sec * 1000000 + ev[n].input_event_usec;
 #else
-		time_t timestamp = ev[n].time.tv_sec * 1000000 + ev[n].time.tv_usec;
+		int64_t timestamp = (int64_t) ev[n].time.tv_sec * 1000000 + ev[n].time.tv_usec;
 #endif
 		if ((timestamp - last) < BLINDTIME) continue;
 		last = timestamp;
