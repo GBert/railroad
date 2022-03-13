@@ -59,6 +59,7 @@ int read_loco_data(char *config_file, int config_type);
 int read_loco_names(char *config_file);
 void show_loco_names(FILE *file, int low, int high);
 int get_loco_max(void);
+void set_sid(void);
 int get_loco_uid(char *name);
 
 int strip_ms2_spaces(uint8_t *data, int len);

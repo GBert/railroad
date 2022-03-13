@@ -197,6 +197,15 @@ void delete_all_loco_names(void) {
     }
 }
 
+void set_sid(void) {
+    struct loco_data_t *nloco, *tmp;
+
+    HASH_ITER(hh, loco_data, nloco, tmp) {
+	if ((!nloco->sid) && (strncmp(nloco->type,"mfx",3)))
+	    nloco->sid = nloco->id;
+    }
+}
+
 int add_loco_name(struct loco_names_t *loco) {
     struct loco_names_t *l;
 
