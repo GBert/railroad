@@ -533,7 +533,7 @@ int get_data(struct trigger_t *trigger, struct can_frame *frame) {
 		    fprintf(stderr, "%s: error writing loco file [%s]\n", __func__, trigger->loco_file);
 		} else {
 		    if (!trigger->background && trigger->verbose)
-			printf("writing new loco file [%s] mask %d\n", trigger->loco_file, trigger->print_loco_mask);
+			printf("writing new loco file [%s] mask %d and set SID\n", trigger->loco_file, trigger->print_loco_mask);
 		    set_sid();
 		    print_all_locos(fp, trigger->print_loco_mask);
 		    fclose(fp);
