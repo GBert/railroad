@@ -14,17 +14,6 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Connector:USB_B_Micro J30
-U 1 1 62091BB3
-P 4775 2050
-F 0 "J30" H 4545 2039 50  0000 R CNN
-F 1 "Power Only" H 4545 1948 50  0000 R CNN
-F 2 "Connector_USB:USB_Micro-B_Molex-105017-0001" H 4925 2000 50  0001 C CNN
-F 3 "~" H 4925 2000 50  0001 C CNN
-	1    4775 2050
-	-1   0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR0102
 U 1 1 62099616
 P 4775 2500
@@ -131,11 +120,11 @@ Wire Wire Line
 Wire Wire Line
 	4125 6200 4125 6425
 Text Label 4000 6425 1    50   ~ 0
-MOSI
+MOSI0
 Text Label 4125 6425 1    50   ~ 0
-MISO
+MISO0
 Text Label 3875 6425 1    50   ~ 0
-CLK
+CLK0
 Wire Wire Line
 	4125 5700 4125 5900
 Wire Wire Line
@@ -183,9 +172,9 @@ Wire Wire Line
 Wire Wire Line
 	1875 4150 1875 4375
 Text Label 1875 4375 1    50   ~ 0
-SDA
+SDA0
 Text Label 1750 4375 1    50   ~ 0
-SCL
+SCL0
 Wire Wire Line
 	1750 3850 1750 3650
 Wire Wire Line
@@ -204,8 +193,6 @@ F 3 "" H 1875 3650 50  0001 C CNN
 	1    1875 3650
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	2275 1650 1750 1650
 Wire Wire Line
 	2775 1650 3150 1650
 Wire Wire Line
@@ -305,9 +292,9 @@ Wire Wire Line
 Wire Wire Line
 	8400 5900 8150 5900
 Text Label 8150 5800 0    50   ~ 0
-SDA
+SDA0
 Text Label 8150 5900 0    50   ~ 0
-SCL
+SCL0
 Text Label 8150 5700 0    50   ~ 0
 Card
 $Comp
@@ -452,13 +439,11 @@ F 3 "http://www.infineon.com/dgdl/Infineon-BC847SERIES_BC848SERIES_BC849SERIES_B
 	1    0    0    -1  
 $EndComp
 Text Label 4950 5625 0    50   ~ 0
-MOSI
+MOSI0
 Text Label 4950 6025 0    50   ~ 0
-MISO
+MISO0
 Text Label 4950 5825 0    50   ~ 0
-CLK
-Text Label 1750 1650 0    50   ~ 0
-MS2PWR
+CLK0
 Wire Wire Line
 	3875 5700 4000 5700
 Text Notes 8975 5800 0    50   ~ 0
@@ -550,7 +535,7 @@ $EndComp
 Wire Wire Line
 	3675 4525 3425 4525
 Text Label 3425 4525 0    50   ~ 0
-CLK
+CLK1
 $Comp
 L power:GND #PWR0101
 U 1 1 623C25CA
@@ -584,9 +569,9 @@ Wire Wire Line
 Wire Wire Line
 	4675 4325 5000 4325
 Text Label 5000 4225 2    50   ~ 0
-MOSI
+MOSI1
 Text Label 5000 4325 2    50   ~ 0
-MISO
+MISO1
 Text Label 3425 4325 0    50   ~ 0
 CS1
 $Comp
@@ -601,17 +586,6 @@ F 3 "" H 4475 1650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Micro_SD_Card J1
-U 1 1 623F1AE6
-P 7125 5725
-F 0 "J1" H 7075 6442 50  0000 C CNN
-F 1 "Micro_SD_Card" H 7075 6351 50  0000 C CNN
-F 2 "w_conn_misc:GCT-MEM2055-00-190-01-A" H 8275 6025 50  0001 C CNN
-F 3 "http://katalog.we-online.de/em/datasheet/693072010801.pdf" H 7125 5725 50  0001 C CNN
-	1    7125 5725
-	1    0    0    -1  
-$EndComp
-$Comp
 L Lokkarten:PI_PICO_ZERO M1
 U 1 1 6240208A
 P 7000 3600
@@ -623,25 +597,229 @@ F 3 "https://www.waveshare.com/wiki/RP2040-Zero" H 7000 3600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Lokkarten:SSD1306 Brd1
-U 1 1 6241CB55
-P 5325 3600
-F 0 "Brd1" H 5603 3704 50  0000 L CNN
-F 1 "SSD1306" H 5603 3613 50  0000 L CNN
-F 2 "Lokkarten:128x64OLED" H 5225 3850 50  0001 C CNN
-F 3 "" H 5225 3850 50  0001 C CNN
-	1    5325 3600
-	1    0    0    -1  
-$EndComp
-$Comp
 L Switch:SW_Push SW1
 U 1 1 62428719
 P 3250 3250
 F 0 "SW1" H 3250 3535 50  0000 C CNN
-F 1 "SW_Push" H 3250 3444 50  0000 C CNN
+F 1 "SW_Push" H 3250 3444 50  0001 C CNN
 F 2 "w_switch:PCB_PUSH" H 3250 3450 50  0001 C CNN
 F 3 "~" H 3250 3450 50  0001 C CNN
 	1    3250 3250
 	1    0    0    -1  
 $EndComp
+$Comp
+L power:+5V #PWR0105
+U 1 1 62323869
+P 6250 3200
+F 0 "#PWR0105" H 6250 3050 50  0001 C CNN
+F 1 "+5V" H 6265 3373 50  0000 C CNN
+F 2 "" H 6250 3200 50  0001 C CNN
+F 3 "" H 6250 3200 50  0001 C CNN
+	1    6250 3200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6300 3250 6250 3250
+Wire Wire Line
+	6250 3250 6250 3200
+Wire Wire Line
+	7650 3450 7875 3450
+Text Label 7875 3450 2    50   ~ 0
+CLK0
+Wire Wire Line
+	7650 3550 7875 3550
+Wire Wire Line
+	7650 3650 7875 3650
+Wire Wire Line
+	7650 3750 7875 3750
+Text Label 7875 3550 2    50   ~ 0
+MOSI0
+Text Label 7875 3650 2    50   ~ 0
+MISO0
+Text Label 7875 3750 2    50   ~ 0
+CS0
+Wire Wire Line
+	7650 4050 7875 4050
+Wire Wire Line
+	7200 4300 7200 4550
+Wire Wire Line
+	7100 4300 7100 4550
+Wire Wire Line
+	7000 4300 7000 4550
+Text Label 7875 4050 2    50   ~ 0
+MISO1
+Wire Wire Line
+	7650 3850 7875 3850
+Wire Wire Line
+	7650 3950 7875 3950
+Text Label 7875 3850 2    50   ~ 0
+SDA1
+Text Label 7875 3950 2    50   ~ 0
+SCL1
+Wire Wire Line
+	8375 3950 8175 3950
+Wire Wire Line
+	8175 3850 8375 3850
+$Comp
+L Lokkarten:SSD1306 Brd1
+U 1 1 6241CB55
+P 8725 4000
+F 0 "Brd1" H 9003 4104 50  0000 L CNN
+F 1 "SSD1306" H 9003 4013 50  0000 L CNN
+F 2 "Lokkarten:128x64OLED" H 8625 4250 50  0001 C CNN
+F 3 "" H 8625 4250 50  0001 C CNN
+	1    8725 4000
+	0    -1   -1   0   
+$EndComp
+Text Label 8175 3850 0    50   ~ 0
+SDA1
+Text Label 8175 3950 0    50   ~ 0
+SCL1
+Wire Wire Line
+	8375 4050 8125 4050
+Wire Wire Line
+	8125 4050 8125 3575
+$Comp
+L power:VCC #PWR0106
+U 1 1 623757A8
+P 8125 3575
+F 0 "#PWR0106" H 8125 3425 50  0001 C CNN
+F 1 "VCC" H 8140 3748 50  0000 C CNN
+F 2 "" H 8125 3575 50  0001 C CNN
+F 3 "" H 8125 3575 50  0001 C CNN
+	1    8125 3575
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8375 4150 8325 4150
+Wire Wire Line
+	8325 4150 8325 4350
+$Comp
+L power:GND #PWR0111
+U 1 1 623788A4
+P 8325 4350
+F 0 "#PWR0111" H 8325 4100 50  0001 C CNN
+F 1 "GND" H 8330 4177 50  0000 C CNN
+F 2 "" H 8325 4350 50  0001 C CNN
+F 3 "" H 8325 4350 50  0001 C CNN
+	1    8325 4350
+	1    0    0    -1  
+$EndComp
+Text Label 7200 4550 1    50   ~ 0
+CS1
+Text Label 7100 4550 1    50   ~ 0
+CLK1
+Text Label 7000 4550 1    50   ~ 0
+MOSI1
+Wire Wire Line
+	6300 3950 6050 3950
+Wire Wire Line
+	6300 4050 6050 4050
+Text Label 6050 3950 0    50   ~ 0
+SDA0
+Text Label 6050 4050 0    50   ~ 0
+SCL0
+Wire Wire Line
+	3050 3250 3000 3250
+Wire Wire Line
+	3000 3250 3000 3400
+$Comp
+L power:GND #PWR0112
+U 1 1 623895CC
+P 3000 3400
+F 0 "#PWR0112" H 3000 3150 50  0001 C CNN
+F 1 "GND" H 3005 3227 50  0000 C CNN
+F 2 "" H 3000 3400 50  0001 C CNN
+F 3 "" H 3000 3400 50  0001 C CNN
+	1    3000 3400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3450 3250 3775 3250
+Text Label 3775 3250 2    50   ~ 0
+GP12
+Wire Wire Line
+	6900 4300 6900 4550
+Text Label 6900 4550 1    50   ~ 0
+GP12
+Wire Wire Line
+	6800 4300 6800 4550
+Text Label 6800 4550 1    50   ~ 0
+Card
+NoConn ~ 7650 3250
+NoConn ~ 7650 3350
+Wire Wire Line
+	6300 3350 6075 3350
+Wire Wire Line
+	6300 3450 5950 3450
+Wire Wire Line
+	5950 3450 5950 3250
+$Comp
+L power:VCC #PWR0113
+U 1 1 623AA623
+P 5950 3250
+F 0 "#PWR0113" H 5950 3100 50  0001 C CNN
+F 1 "VCC" H 5965 3423 50  0000 C CNN
+F 2 "" H 5950 3250 50  0001 C CNN
+F 3 "" H 5950 3250 50  0001 C CNN
+	1    5950 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0114
+U 1 1 623AAB7F
+P 6075 3575
+F 0 "#PWR0114" H 6075 3325 50  0001 C CNN
+F 1 "GND" H 6080 3402 50  0000 C CNN
+F 2 "" H 6075 3575 50  0001 C CNN
+F 3 "" H 6075 3575 50  0001 C CNN
+	1    6075 3575
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6300 3550
+NoConn ~ 6300 3650
+NoConn ~ 6300 3750
+NoConn ~ 6300 3850
+NoConn ~ 4675 4525
+NoConn ~ 4675 4625
+Wire Wire Line
+	6075 3350 6075 3575
+NoConn ~ 2275 1650
+$Comp
+L Device:C C1
+U 1 1 623F45D6
+P 2975 4400
+F 0 "C1" H 3090 4446 50  0000 L CNN
+F 1 "100nF" H 3090 4355 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" H 3013 4250 50  0001 C CNN
+F 3 "~" H 2975 4400 50  0001 C CNN
+	1    2975 4400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0115
+U 1 1 623F54D3
+P 2975 4600
+F 0 "#PWR0115" H 2975 4350 50  0001 C CNN
+F 1 "GND" H 2980 4427 50  0000 C CNN
+F 2 "" H 2975 4600 50  0001 C CNN
+F 3 "" H 2975 4600 50  0001 C CNN
+	1    2975 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0116
+U 1 1 623F5B53
+P 2975 4200
+F 0 "#PWR0116" H 2975 4050 50  0001 C CNN
+F 1 "VCC" H 2990 4373 50  0000 C CNN
+F 2 "" H 2975 4200 50  0001 C CNN
+F 3 "" H 2975 4200 50  0001 C CNN
+	1    2975 4200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2975 4200 2975 4250
+Wire Wire Line
+	2975 4550 2975 4600
 $EndSCHEMATC
