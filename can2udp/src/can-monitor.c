@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.20\n\n");
+    fprintf(stderr, "   Version 3.21\n\n");
     fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -1004,6 +1004,10 @@ void decode_frame(struct can_frame *frame) {
 	    break;
 	case 0x0054:
 	    printf("Cg Rückmelder");
+	    break;
+	case 0x4681:
+	case 0x46FF:
+	    printf("Rocrail");
 	    break;
 	case 0x1234:
 	    printf("MäCAN-Weichendecoder");
