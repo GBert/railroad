@@ -292,9 +292,9 @@ Wire Wire Line
 Wire Wire Line
 	8400 5900 8150 5900
 Text Label 8150 5800 0    50   ~ 0
-SDA
+SDA0
 Text Label 8150 5900 0    50   ~ 0
-SCL
+SCL0
 Text Label 8150 5700 0    50   ~ 0
 Card
 $Comp
@@ -601,7 +601,7 @@ L Switch:SW_Push SW1
 U 1 1 62428719
 P 3250 3250
 F 0 "SW1" H 3250 3535 50  0000 C CNN
-F 1 "SW_Push" H 3250 3444 50  0000 C CNN
+F 1 "SW_Push" H 3250 3444 50  0001 C CNN
 F 2 "w_switch:PCB_PUSH" H 3250 3450 50  0001 C CNN
 F 3 "~" H 3250 3450 50  0001 C CNN
 	1    3250 3250

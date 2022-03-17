@@ -12,8 +12,8 @@
   (page A4)
   (title_block
     (title "Lokkkarten Emulator")
-    (date 2022-03-11)
-    (rev 0.1)
+    (date 2022-03-16)
+    (rev 0.2)
     (comment 1 "Hardi Stengelin")
     (comment 2 "Gerhard Bertelsmann")
   )
