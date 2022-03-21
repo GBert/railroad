@@ -61,10 +61,10 @@ PI Pico
 
 I2C Slave
 
-| GPIO | Function |
-|------|----------|
-| GP4  | SDA      |
-| GP5  | SCL      |
+| GPIO | Function |       |
+|------|----------|-------|
+| GP4  | SDA      | PIN 6 |
+| GP5  | SCL      | PIN 7 |
 
 
 https://draeger-it.blog/maker-pi-pico-2-sensordaten-auf-einer-sd-card-speichern/
