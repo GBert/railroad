@@ -35,6 +35,7 @@
 
 unsigned char pre_mm[]    = { 0x02, 0x75, 0x00 };
 unsigned char pre_mfx[]   = { 0x02, 0xf5, 0x00 };
+unsigned char pre_mfx2[]  = { 0x02, 0xe5, 0x00 };
 unsigned char pre_other[] = { 0x02, 0xc5, 0x00 };
 
 static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
@@ -162,6 +163,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     /* preamble */
     if (memcmp(loco_config->bin, pre_mfx, 3) == 0)
 	printf("type: mfx\n");
+    else if (memcmp(loco_config->bin, pre_mfx2, 3) == 0)
+	printf("type: mfx2\n");
     else if (memcmp(loco_config->bin, pre_mm, 3) == 0)
 	printf("type: mm\n");
     else if (memcmp(loco_config->bin, pre_other, 3) == 0)
@@ -253,6 +256,30 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		printf("\n");
 	    }
 	    break;
+	/* mfx Address */
+	case 12:
+	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
+	    printf("\nmfxAdr:\n");
+	    printf("    target: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("      name: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf(" speetable: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("      xcel: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("    volume: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("    (addr): %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("  num func: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("      func: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    break;
+	/* Loco functions 2*/
+	case 13:
+	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
+	    func = 16;
+	    printf("\n");
+	    for (j = 0; j < length / 2; j++) {
+		printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i+1]);
+		i += 2;
+	    }
+	    printf("\n");
+	    break;
 	default:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    if (length <= 4)
@@ -262,11 +289,11 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    switch (index) {
 	    case 1:
 		loco_data->long_uid = temp;
-		printf("           mfx UID ");
+		printf("               uid ");
 		break;
 	    case 2:
 		loco_data->uid = temp;
-		printf("               UID ");
+		printf("           address ");
 		break;
 	    case 3:
 		loco_data->acc_delay = temp;
@@ -291,6 +318,10 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    case 8:
 		loco_data->volume = temp;
 		printf("            volume ");
+		break;
+	    case 10:
+		loco_data->mfxuid = temp;
+		printf("           mfx uid ");
 		break;
 	    default:
 		printf("           unknown ");
