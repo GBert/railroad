@@ -323,6 +323,10 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		loco_data->mfxuid = temp;
 		printf("           mfx uid ");
 		break;
+	    case 11:
+		loco_data->mfxuid = temp;
+		printf("          mfx type ");
+		break;
 	    default:
 		printf("           unknown ");
 		break;
