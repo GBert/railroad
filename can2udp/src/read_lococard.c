@@ -272,11 +272,16 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	/* Loco functions 2*/
 	case 13:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
-	    func = 16;
-	    printf("\n");
-	    for (j = 0; j < length / 2; j++) {
-		printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i+1]);
-		i += 2;
+	    if (length == 32) {
+		printf("\n");
+		func = 16;
+		for (j = 0; j < length / 2; j++) {
+		    printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i+1]);
+		    i += 2;
+		}
+	    } else {
+		printf(" 0x%02x\n", loco_config->bin[i]);
+		i += length;
 	    }
 	    printf("\n");
 	    break;
