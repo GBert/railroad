@@ -201,8 +201,10 @@ void set_sid(void) {
     struct loco_data_t *nloco, *tmp;
 
     HASH_ITER(hh, loco_data, nloco, tmp) {
-	if (strncmp("mfx", nloco->type, 3) == 0)
-	    nloco->sid = nloco->address;
+	if (strncmp("mfx", nloco->type, 3) == 0) {
+	    nloco->sid = nloco->uid & 0x3fff;
+	    nloco->address = nloco->uid & 0x3fff;
+	}
     }
 }
 
