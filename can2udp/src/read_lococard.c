@@ -439,9 +439,12 @@ int main(int argc, char **argv) {
     if (cs2_output)
 	print_loco(stdout, &loco_data, 0);
 
+    check_free(filename);
+    check_free(loco_data.mfxAdr);
     check_free(loco_data.icon);
     check_free(loco_data.name);
     check_free(loco_data.type);
+    check_free(loco_config.bin);
 
     return EXIT_SUCCESS;
 }
