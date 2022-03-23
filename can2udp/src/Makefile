@@ -106,8 +106,8 @@ get-cs-config: crc-ccitt.o get-cs-config.o
 pio-i2c-udp: pio-i2c-udp.o
 	$(CC) $(CFLAGS) -o pio-i2c-udp pio-i2c-udp.o
 
-read_lococard: read_lococard.o
-	$(CC) $(CFLAGS) -o read_lococard read_lococard.o
+read_lococard: read-cs2-config.o read_lococard.o
+	$(CC) $(CFLAGS) -o read_lococard read-cs2-config.o read_lococard.o
 
 s88udp-bpi: allwinner.o s88udp-bpi.o
 	$(CC) $(CFLAGS) -o s88udp-bpi allwinner.o s88udp-bpi.o
