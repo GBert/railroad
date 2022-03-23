@@ -333,11 +333,11 @@ F 3 "" H 7300 1250 50  0001 C CNN
 	1    7300 1250
 	1    0    0    -1  
 $EndComp
-Text Label 6350 1975 0    50   ~ 0
+Text Label 6200 1975 0    50   ~ 0
 Card
 Connection ~ 6600 1975
 Wire Wire Line
-	6600 1975 6350 1975
+	6600 1975 6450 1975
 $Comp
 L power:GND #PWR0126
 U 1 1 621C52CE
@@ -957,4 +957,25 @@ Wire Wire Line
 	4675 4625 5400 4625
 Wire Wire Line
 	5400 4300 5400 4625
+$Comp
+L Device:Jumper JP1
+U 1 1 623BDA57
+P 6750 2525
+F 0 "JP1" H 6750 2700 50  0000 C CNN
+F 1 "Jumper" H 6750 2400 50  0000 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_TrianglePad1.0x1.5mm" H 6750 2525 50  0001 C CNN
+F 3 "~" H 6750 2525 50  0001 C CNN
+	1    6750 2525
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6450 2525 6450 1975
+Connection ~ 6450 1975
+Wire Wire Line
+	6450 1975 6200 1975
+Wire Wire Line
+	7050 2525 7775 2525
+Wire Wire Line
+	7775 2525 7775 2275
+Connection ~ 7775 2275
 $EndSCHEMATC
