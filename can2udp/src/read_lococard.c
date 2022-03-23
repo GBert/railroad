@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 
 #include "cs2-config.h"
+#include "read-cs2-config.h"
 
 #define check_free(a) \
             do { if ( a ) free(a); } while (0)
@@ -64,9 +65,18 @@ static const char *loco_function_string [] = {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -f\n", prg);
-    fprintf(stderr, "   Version 0.2\n\n");
-    fprintf(stderr, "         -h                  this help\n\n");
+    fprintf(stderr, "   Version 0.3\n\n");
+    fprintf(stderr, "         -o                  lokomotive.cs2 style output\n");
+    fprintf(stderr, "         -h                  this help\n");
     fprintf(stderr, "         -v                  verbose output\n\n");
+}
+
+uint16_t le16(uint8_t * u) {
+    return (u[1] << 8) | u[0];
+}
+
+uint32_t le32(uint8_t * u) {
+    return (u[3] << 24) | (u[2] << 16) | (u[1] << 8) | u[0];
 }
 
 void print_bitmap(unsigned char *data) {
@@ -153,6 +163,7 @@ char *extract_string(unsigned int *index, unsigned char *bin, unsigned int lengt
 
 int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_data) {
     unsigned int i, j, k, func, id, temp, png_size;
+    uint8_t value[4];
     unsigned char index, length;
     char *loco_name;
     char *proto_name;
@@ -168,7 +179,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     else if (memcmp(loco_config->bin, pre_mm, 3) == 0)
 	printf("type: mm\n");
     else if (memcmp(loco_config->bin, pre_other, 3) == 0)
-	printf("type: other\n");
+	printf("type: dcc/slx\n");
     else
 	return EXIT_FAILURE;
 
@@ -231,6 +242,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    func = 0;
 	    printf("\n");
 	    for (j = 0; j < length / 10; j++) {
+		loco_data->function[func].type = loco_config->bin[i];
+		loco_data->function[func].duration = loco_config->bin[i+1];
 		printf(" function %2u: ", func++);
 		for (k = 0; k < 10; k++) {
 		    printf(" 0x%02x", loco_config->bin[i++]);
@@ -276,6 +289,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		printf("\n");
 		func = 16;
 		for (j = 0; j < length / 2; j++) {
+		    loco_data->function[func].type = loco_config->bin[i];
+		    loco_data->function[func].duration = loco_config->bin[i+1];
 		    printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i+1]);
 		    i += 2;
 		}
@@ -288,48 +303,48 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	default:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    if (length <= 4)
-		memcpy(&temp, loco_config->bin, length);
+		memcpy(value, &(loco_config->bin[i]), length);
 	    else
-		temp = 0;
+		memset(value, 0, 4);
 	    switch (index) {
 	    case 1:
-		loco_data->long_uid = temp;
+		loco_data->long_uid = le32(value);
 		printf("               uid ");
 		break;
 	    case 2:
-		loco_data->uid = temp;
+		loco_data->uid = le16(value);
 		printf("           address ");
 		break;
 	    case 3:
-		loco_data->acc_delay = temp;
+		loco_data->acc_delay = value[0];
 		printf("acceleration delay ");
 		break;
 	    case 4:
-		loco_data->slow_down_delay = temp;
+		loco_data->slow_down_delay = value[0];
 		printf("   slow down delay ");
 		break;
 	    case 5:
-		loco_data->vmin = temp;
+		loco_data->vmin = value[0];
 		printf("              Vmin ");
 		break;
 	    case 6:
-		loco_data->vmax = temp;
+		loco_data->vmax = value[0];
 		printf("              Vmax ");
 		break;
 	    case 7:
-		loco_data->tacho = temp;
+		loco_data->tmax = le16(value);
 		printf("             tacho ");
 		break;
 	    case 8:
-		loco_data->volume = temp;
+		loco_data->volume = value[0];
 		printf("            volume ");
 		break;
 	    case 10:
-		loco_data->mfxuid = temp;
+		loco_data->mfxuid = le32(value);
 		printf("           mfx uid ");
 		break;
 	    case 11:
-		loco_data->mfxuid = temp;
+		loco_data->mfxtype = value[0];
 		printf("          mfx type ");
 		break;
 	    default:
@@ -351,23 +366,27 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 }
 
 int main(int argc, char **argv) {
-    int opt, verbose;
+    int cs2_output, opt, verbose;
     struct loco_config_t loco_config;
     struct loco_data_t loco_data;
     char *filename;
 
     /* defaults */
+
+    cs2_output = 0;
     memset(&loco_config, 0, sizeof(loco_config));
     memset(&loco_data, 0, sizeof(loco_data));
     verbose = 1;
 
-    while ((opt = getopt(argc, argv, "vh?")) != -1) {
+    while ((opt = getopt(argc, argv, "ovh?")) != -1) {
 	switch (opt) {
 
+	case 'o':
+	    cs2_output = 1;
+	    break;
 	case 'v':
 	    verbose = 1;
 	    break;
-
 	case 'h':
 	case '?':
 	    print_usage(basename(argv[0]));
@@ -400,6 +419,9 @@ int main(int argc, char **argv) {
 
     if (verbose)
 	decode_sc_data(&loco_config, &loco_data);
+
+    if (cs2_output)
+	print_loco(stdout, &loco_data, 0);
 
     check_free(loco_data.icon);
     check_free(loco_data.name);
