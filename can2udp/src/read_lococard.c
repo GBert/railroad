@@ -165,6 +165,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     unsigned int i, j, k, func, id, temp, png_size;
     uint8_t value[4];
     unsigned char index, length;
+    struct mfxAdr_t *mfxAdr;
     char *loco_name;
     char *proto_name;
     char *png_name;
@@ -271,6 +272,21 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    break;
 	/* mfx Address */
 	case 12:
+	    mfxAdr = (struct mfxAdr_t *)calloc(1, sizeof(struct mfxAdr_t));
+	    if (!mfxAdr) {
+		fprintf(stderr, "%s: error alloc mfxAdr structure memory\n", __func__);
+		return EXIT_FAILURE;
+	    }
+	    mfxAdr->target =      le16(&(loco_config->bin[i]));
+	    mfxAdr->name =        le16(&(loco_config->bin[i+2]));
+	    mfxAdr->speedtable =  le16(&(loco_config->bin[i+4]));
+	    mfxAdr->address =     le16(&(loco_config->bin[i+6]));
+	    mfxAdr->xcel =        le16(&(loco_config->bin[i+8]));
+	    mfxAdr->volume =      le16(&(loco_config->bin[i+10]));
+	    mfxAdr->numfunction = le16(&(loco_config->bin[i+12]));
+	    mfxAdr->function =    le16(&(loco_config->bin[i+14]));
+	    loco_data->mfxAdr = mfxAdr;
+
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    printf("\nmfxAdr:\n");
 	    printf("    target: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
@@ -308,11 +324,11 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		memset(value, 0, 4);
 	    switch (index) {
 	    case 1:
-		loco_data->long_uid = le32(value);
+		loco_data->uid = le32(value);
 		printf("               uid ");
 		break;
 	    case 2:
-		loco_data->uid = le16(value);
+		loco_data->address = le16(value);
 		printf("           address ");
 		break;
 	    case 3:
