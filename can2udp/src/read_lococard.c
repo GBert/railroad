@@ -178,8 +178,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	printf("unknown loco card type - first byte 0x%02x should be 2", length);
 	return EXIT_FAILURE;
     }
-    func = le16(&loco_config->bin[1]);
-    switch (func) {
+    id = le16(&loco_config->bin[1]);
+    switch (id) {
     case PREAMBLE_MFX:
 	printf("type mfx\n");
 	break;
@@ -193,7 +193,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	printf("type: other\n");
 	break;
     default:
-	printf("unknown loco card type 0x%04x", func);
+	printf("unknown loco card type 0x%04x", id);
 	return EXIT_FAILURE;
     }
     i = 3;
