@@ -162,7 +162,7 @@ char *extract_string(unsigned int *index, unsigned char *bin, unsigned int lengt
 }
 
 int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_data) {
-    unsigned int i, j, k, func, id, temp, png_size;
+    unsigned int i, j, k, func, id, png_size;
     uint8_t value[4];
     unsigned char index, length;
     struct mfxAdr_t *mfxAdr;
@@ -194,8 +194,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 
 	case 0:
 	    printf("index [0x%02x @ 0x%04x] sub-index [%u]: ", index, i, length);
-	    temp = loco_config->bin[i++];
-	    length = (loco_config->bin[i++] << 8) + temp;
+	    length = le16(&loco_config->bin[i]);
+	    i += 2;
 	    printf(" total length [%u]\n", length);
 	    id = loco_config->bin[i++];
 	    while ((id != 0) && (id != 255)) {
@@ -277,26 +277,27 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		fprintf(stderr, "%s: error alloc mfxAdr structure memory\n", __func__);
 		return EXIT_FAILURE;
 	    }
-	    mfxAdr->target =      le16(&(loco_config->bin[i]));
-	    mfxAdr->name =        le16(&(loco_config->bin[i+2]));
-	    mfxAdr->speedtable =  le16(&(loco_config->bin[i+4]));
-	    mfxAdr->address =     le16(&(loco_config->bin[i+6]));
-	    mfxAdr->xcel =        le16(&(loco_config->bin[i+8]));
-	    mfxAdr->volume =      le16(&(loco_config->bin[i+10]));
-	    mfxAdr->numfunction = le16(&(loco_config->bin[i+12]));
-	    mfxAdr->function =    le16(&(loco_config->bin[i+14]));
+	    mfxAdr->target =      le16(&loco_config->bin[i]);
+	    mfxAdr->name =        le16(&loco_config->bin[i+2]);
+	    mfxAdr->speedtable =  le16(&loco_config->bin[i+4]);
+	    mfxAdr->address =     le16(&loco_config->bin[i+6]);
+	    mfxAdr->xcel =        le16(&loco_config->bin[i+8]);
+	    mfxAdr->volume =      le16(&loco_config->bin[i+10]);
+	    mfxAdr->numfunction = le16(&loco_config->bin[i+12]);
+	    mfxAdr->function =    le16(&loco_config->bin[i+14]);
 	    loco_data->mfxAdr = mfxAdr;
 
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    printf("\nmfxAdr:\n");
-	    printf("    target: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf("      name: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf(" speetable: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf("      xcel: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf("    volume: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf("    (addr): %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf("  num func: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
-	    printf("      func: %3u\n", loco_config->bin[i++] + (loco_config->bin[i++] << 8));
+	    printf("    target: %3u\n", le16(&loco_config->bin[i]));
+	    printf("      name: %3u\n", le16(&loco_config->bin[i+2]));
+	    printf(" speetable: %3u\n", le16(&loco_config->bin[i+4]));
+	    printf("      xcel: %3u\n", le16(&loco_config->bin[i+6]));
+	    printf("    volume: %3u\n", le16(&loco_config->bin[i+8]));
+	    printf("    (addr): %3u\n", le16(&loco_config->bin[i+10]));
+	    printf("  num func: %3u\n", le16(&loco_config->bin[i+12]));
+	    printf("      func: %3u\n", le16(&loco_config->bin[i+14]));
+	    i += length;
 	    break;
 	/* Loco functions 2*/
 	case 13:
