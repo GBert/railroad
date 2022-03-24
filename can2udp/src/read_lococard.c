@@ -175,7 +175,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     /* preamble */
     length = loco_config->bin[0];
     if (length != 2) {
-	printf("unknown loco card type - first byte 0x%02x", length);
+	printf("unknown loco card type - first byte 0x%02x should be 2", length);
 	return EXIT_FAILURE;
     }
     func = le16(&loco_config->bin[1]);
@@ -219,25 +219,25 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    if (loco_name == NULL)
 			return EXIT_FAILURE;
 		    loco_data->name = loco_name;
-		    printf("loco name: >%s<\n", loco_name);
+		    printf("    loco name: >%s<\n", loco_name);
 		    break;
 		case 0x1f:
 		    proto_name = extract_string(&i, loco_config->bin, length);
 		    if (proto_name == NULL)
 			return EXIT_FAILURE;
-		    printf("proto name: >%s<\n", proto_name);
+		    printf("    proto name: >%s<\n", proto_name);
 		    loco_data->type = proto_name;
 		    break;
 		case 0x20:
 		    png_name = extract_string(&i, loco_config->bin, length);
 		    if (png_name == NULL)
 			return EXIT_FAILURE;
-		    printf("png name: >%s<\n", png_name);
+		    printf("    png name: >%s<\n", png_name);
 		    loco_data->icon = png_name;
 		    break;
 		case 0x05:
 		    png_size = length + (loco_config->bin[i++] << 8);
-		    printf("png start: 0x%04x  end: 0x%04x  size: 0x%04x  %u bytes\n",
+		    printf("    png start: 0x%04x  end: 0x%04x  size: 0x%04x  %u bytes\n",
 			   i, i + png_size, png_size, png_size);
 		    return EXIT_SUCCESS;
 		default:
