@@ -34,10 +34,10 @@
 #define check_free(a) \
             do { if ( a ) free(a); } while (0)
 
-unsigned char pre_mm[]    = { 0x02, 0x75, 0x00 };
-unsigned char pre_mfx[]   = { 0x02, 0xf5, 0x00 };
-unsigned char pre_mfx2[]  = { 0x02, 0xe5, 0x00 };
-unsigned char pre_other[] = { 0x02, 0xc5, 0x00 };
+#define PREAMBLE_MM	0x0075
+#define PREAMBLE_OTHER	0x00C5
+#define PREAMBLE_MFX2	0x00E5
+#define PREAMBLE_MFX	0x00F5
 
 static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
 
@@ -173,17 +173,29 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     index = 0;
 
     /* preamble */
-    if (memcmp(loco_config->bin, pre_mfx, 3) == 0)
-	printf("type: mfx\n");
-    else if (memcmp(loco_config->bin, pre_mfx2, 3) == 0)
-	printf("type: mfx2\n");
-    else if (memcmp(loco_config->bin, pre_mm, 3) == 0)
-	printf("type: mm\n");
-    else if (memcmp(loco_config->bin, pre_other, 3) == 0)
-	printf("type: dcc/slx\n");
-    else
+    length = loco_config->bin[0];
+    if (length != 2) {
+	printf("unknown loco card type - first byte 0x%02x", length);
 	return EXIT_FAILURE;
-
+    }
+    func = le16(&loco_config->bin[1]);
+    switch (func) {
+    case PREAMBLE_MFX:
+	printf("type mfx\n");
+	break;
+    case PREAMBLE_MFX2:
+	printf("type mfx2\n");
+	break;
+    case PREAMBLE_MM:
+	printf("type mm\n");
+	break;
+    case PREAMBLE_OTHER:
+	printf("type: other\n");
+	break;
+    default:
+	printf("unknown loco card type 0x%04x", func);
+	return EXIT_FAILURE;
+    }
     i = 3;
 
     while (i < loco_config->eeprom_size) {
