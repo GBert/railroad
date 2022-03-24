@@ -41,7 +41,7 @@ unsigned char pre_other[] = { 0x02, 0xc5, 0x00 };
 
 static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
 
-static const char *loco_function_string [] = {
+static const char *loco_function_string[] = {
     " ",
     "Stirnbeleuchtung",
     "Innenbeleuchtung",
@@ -83,15 +83,15 @@ void print_bitmap(unsigned char *data) {
     uint8_t i, j, mask;
     unsigned char *line;
 
-    line = data;   
+    line = data;
     for (i = 0; i < 8; i++) {
 	mask = 0x80;
-	for ( j = 0; j < 8 ; j++) {
-	   if (*line & mask)
+	for (j = 0; j < 8; j++) {
+	    if (*line & mask)
 		printf("*");
-	   else
+	    else
 		printf(".");
-	   mask >>= 1;
+	    mask >>= 1;
 	}
 	printf("\n");
 	line++;
@@ -244,7 +244,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    printf("\n");
 	    for (j = 0; j < length / 10; j++) {
 		loco_data->function[func].type = loco_config->bin[i];
-		loco_data->function[func].duration = loco_config->bin[i+1];
+		loco_data->function[func].duration = loco_config->bin[i + 1];
 		printf(" function %2u: ", func++);
 		for (k = 0; k < 10; k++) {
 		    printf(" 0x%02x", loco_config->bin[i++]);
@@ -253,13 +253,13 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		i -= 10;
 		for (k = 0; k < 10; k++) {
 		    uint8_t ti = loco_config->bin[i++];
-		    switch(k) {
+		    switch (k) {
 		    case 0:
 			/* TODO */
 			if (ti < 20)
 			    printf(" %20s 0x%02x", loco_function_string[ti & 0x0f], ti);
 			break;
-		    case 99: /* TODO */
+		    case 99:	/* TODO */
 			printf("\n");
 			print_bitmap(&loco_config->bin[i]);
 			break;
@@ -278,28 +278,28 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		return EXIT_FAILURE;
 	    }
 	    mfxAdr->target =      le16(&loco_config->bin[i]);
-	    mfxAdr->name =        le16(&loco_config->bin[i+2]);
-	    mfxAdr->speedtable =  le16(&loco_config->bin[i+4]);
-	    mfxAdr->address =     le16(&loco_config->bin[i+6]);
-	    mfxAdr->xcel =        le16(&loco_config->bin[i+8]);
-	    mfxAdr->volume =      le16(&loco_config->bin[i+10]);
-	    mfxAdr->numfunction = le16(&loco_config->bin[i+12]);
-	    mfxAdr->function =    le16(&loco_config->bin[i+14]);
+	    mfxAdr->name =        le16(&loco_config->bin[i + 2]);
+	    mfxAdr->speedtable =  le16(&loco_config->bin[i + 4]);
+	    mfxAdr->address =     le16(&loco_config->bin[i + 6]);
+	    mfxAdr->xcel =        le16(&loco_config->bin[i + 8]);
+	    mfxAdr->volume =      le16(&loco_config->bin[i + 10]);
+	    mfxAdr->numfunction = le16(&loco_config->bin[i + 12]);
+	    mfxAdr->function =    le16(&loco_config->bin[i + 14]);
 	    loco_data->mfxAdr = mfxAdr;
 
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    printf("\nmfxAdr:\n");
 	    printf("    target: %3u\n", le16(&loco_config->bin[i]));
-	    printf("      name: %3u\n", le16(&loco_config->bin[i+2]));
-	    printf(" speetable: %3u\n", le16(&loco_config->bin[i+4]));
-	    printf("      xcel: %3u\n", le16(&loco_config->bin[i+6]));
-	    printf("    volume: %3u\n", le16(&loco_config->bin[i+8]));
-	    printf("    (addr): %3u\n", le16(&loco_config->bin[i+10]));
-	    printf("  num func: %3u\n", le16(&loco_config->bin[i+12]));
-	    printf("      func: %3u\n", le16(&loco_config->bin[i+14]));
+	    printf("      name: %3u\n", le16(&loco_config->bin[i + 2]));
+	    printf(" speetable: %3u\n", le16(&loco_config->bin[i + 4]));
+	    printf("      xcel: %3u\n", le16(&loco_config->bin[i + 6]));
+	    printf("    volume: %3u\n", le16(&loco_config->bin[i + 8]));
+	    printf("    (addr): %3u\n", le16(&loco_config->bin[i + 10]));
+	    printf("  num func: %3u\n", le16(&loco_config->bin[i + 12]));
+	    printf("      func: %3u\n", le16(&loco_config->bin[i + 14]));
 	    i += length;
 	    break;
-	/* Loco functions 2*/
+	/* Loco functions 2 */
 	case 13:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    if (length == 32) {
@@ -307,8 +307,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		func = 16;
 		for (j = 0; j < length / 2; j++) {
 		    loco_data->function[func].type = loco_config->bin[i];
-		    loco_data->function[func].duration = loco_config->bin[i+1];
-		    printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i+1]);
+		    loco_data->function[func].duration = loco_config->bin[i + 1];
+		    printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i + 1]);
 		    i += 2;
 		}
 	    } else {
