@@ -163,7 +163,6 @@ char *extract_string(unsigned int *index, unsigned char *bin, unsigned int lengt
 
 int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_data) {
     unsigned int i, j, k, func, id, png_size;
-    uint8_t value[4];
     unsigned char index, length;
     struct mfxAdr_t *mfxAdr;
     char *loco_name;
@@ -331,49 +330,45 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    break;
 	default:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
-	    if (length <= 4)
-		memcpy(value, &(loco_config->bin[i]), length);
-	    else
-		memset(value, 0, 4);
 	    switch (index) {
 	    case 1:
-		loco_data->uid = le32(value);
+		loco_data->uid = le32(&loco_config->bin[i]);
 		printf("               uid ");
 		break;
 	    case 2:
-		loco_data->address = le16(value);
+		loco_data->address = le16(&loco_config->bin[i]);
 		printf("           address ");
 		break;
 	    case 3:
-		loco_data->acc_delay = value[0];
+		loco_data->acc_delay = loco_config->bin[i];
 		printf("acceleration delay ");
 		break;
 	    case 4:
-		loco_data->slow_down_delay = value[0];
+		loco_data->slow_down_delay = loco_config->bin[i];
 		printf("   slow down delay ");
 		break;
 	    case 5:
-		loco_data->vmin = value[0];
+		loco_data->vmin = loco_config->bin[i];
 		printf("              Vmin ");
 		break;
 	    case 6:
-		loco_data->vmax = value[0];
+		loco_data->vmax = loco_config->bin[i];
 		printf("              Vmax ");
 		break;
 	    case 7:
-		loco_data->tmax = le16(value);
+		loco_data->tmax = le16(&loco_config->bin[i]);
 		printf("             tacho ");
 		break;
 	    case 8:
-		loco_data->volume = value[0];
+		loco_data->volume = loco_config->bin[i];
 		printf("            volume ");
 		break;
 	    case 10:
-		loco_data->mfxuid = le32(value);
+		loco_data->mfxuid = le32(&loco_config->bin[i]);
 		printf("           mfx uid ");
 		break;
 	    case 11:
-		loco_data->mfxtype = value[0];
+		loco_data->mfxtype = loco_config->bin[i];
 		printf("          mfx type ");
 		break;
 	    default:
