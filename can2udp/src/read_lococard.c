@@ -206,8 +206,12 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	case 0:
 	    printf("index [0x%02x @ 0x%04x] sub-index [%u]: ", index, i, length);
 	    length = le16(&loco_config->bin[i]);
-	    i += 2;
 	    printf(" total length [%u]\n", length);
+	    i += 2;
+	    for (j = 0; j < length; j++) {
+		printf(" 0x%02x", loco_config->bin[i + j]);
+	    }
+	    printf("\n");
 	    id = loco_config->bin[i++];
 	    while ((id != 0) && (id != 255)) {
 		length = loco_config->bin[i++];
@@ -299,7 +303,11 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    loco_data->mfxAdr = mfxAdr;
 
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
-	    printf("\nmfxAdr:\n");
+	    printf("mfxAdr:\n");
+	    for (j = 0; j < length; j++) {
+		printf(" 0x%02x", loco_config->bin[i + j]);
+	    }
+	    printf("\n");
 	    printf("    target: %3u\n", le16(&loco_config->bin[i]));
 	    printf("      name: %3u\n", le16(&loco_config->bin[i + 2]));
 	    printf(" speetable: %3u\n", le16(&loco_config->bin[i + 4]));
