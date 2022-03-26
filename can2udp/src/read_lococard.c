@@ -192,7 +192,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	printf("ID 0x%04x type: other\n", id);
 	break;
     default:
-	printf("unknown loco card type 0x%04x", id);
+	printf("unknown loco card type 0x%04x\n", id);
 	// return EXIT_FAILURE;
     }
     i = 3;
@@ -336,6 +336,13 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    }
 	    printf("\n");
 	    break;
+	case 14:
+	case 15:
+	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
+	    loco_data->symbol = loco_config->bin[i];
+	    printf("            symbol ");
+	    printf(" 0x%02x", loco_config->bin[i++]);
+	    break;
 	default:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    switch (index) {
@@ -378,11 +385,6 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    case 11:
 		loco_data->mfxtype = loco_config->bin[i];
 		printf("          mfx type ");
-		break;
-	    case 14:
-	    case 15:
-		loco_data->symbol = loco_config->bin[i];
-		printf("            symbol ");
 		break;
 	    default:
 		printf("           unknown ");
