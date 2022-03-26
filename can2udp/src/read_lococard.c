@@ -64,7 +64,7 @@ static const char *loco_function_string[] = {
 };
 
 void print_usage(char *prg) {
-    fprintf(stderr, "\nUsage: %s -v -f\n", prg);
+    fprintf(stderr, "\nUsage: %s -v -f FILE\n", prg);
     fprintf(stderr, "   Version 0.3\n\n");
     fprintf(stderr, "         -o                  lokomotive.cs2 style output\n");
     fprintf(stderr, "         -h                  this help\n");
@@ -180,16 +180,16 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     id = le16(&loco_config->bin[1]);
     switch (id) {
     case PREAMBLE_MFX:
-	printf("type mfx\n");
+	printf("ID 0x%04x type mfx\n", id);
 	break;
     case PREAMBLE_MFX2:
-	printf("type mfx2\n");
+	printf("ID 0x%04x type mfx2\n", id);
 	break;
     case PREAMBLE_MM:
-	printf("type mm\n");
+	printf("ID 0x%04x type mm\n", id);
 	break;
     case PREAMBLE_OTHER:
-	printf("type: other\n");
+	printf("ID 0x%04x type: other\n", id);
 	break;
     default:
 	printf("unknown loco card type 0x%04x", id);
@@ -310,10 +310,10 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    printf("\n");
 	    printf("    target: %3u\n", le16(&loco_config->bin[i]));
 	    printf("      name: %3u\n", le16(&loco_config->bin[i + 2]));
-	    printf(" speetable: %3u\n", le16(&loco_config->bin[i + 4]));
+	    printf("speedtable: %3u\n", le16(&loco_config->bin[i + 4]));
 	    printf("      xcel: %3u\n", le16(&loco_config->bin[i + 6]));
 	    printf("    volume: %3u\n", le16(&loco_config->bin[i + 8]));
-	    printf("    (addr): %3u\n", le16(&loco_config->bin[i + 10]));
+	    printf("      addr: %3u\n", le16(&loco_config->bin[i + 10]));
 	    printf("  num func: %3u\n", le16(&loco_config->bin[i + 12]));
 	    printf("      func: %3u\n", le16(&loco_config->bin[i + 14]));
 	    i += length;
