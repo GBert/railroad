@@ -34,10 +34,11 @@
 #define check_free(a) \
             do { if ( a ) free(a); } while (0)
 
-#define PREAMBLE_MM	0x0075
-#define PREAMBLE_OTHER	0x00C5
-#define PREAMBLE_MFX2	0x00E5
-#define PREAMBLE_MFX	0x00F5
+#define PREAMBLE_MM		0x0075
+#define PREAMBLE_OTHER		0x00C5
+#define PREAMBLE_MFX		0x00E5
+#define PREAMBLE_MFX2		0x00F5
+#define PREAMBLE_MFX_F32	0x0117
 
 static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
 
@@ -65,7 +66,7 @@ static const char *loco_function_string[] = {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -f FILE\n", prg);
-    fprintf(stderr, "   Version 0.3\n\n");
+    fprintf(stderr, "   Version 0.4\n\n");
     fprintf(stderr, "         -o                  lokomotive.cs2 style output\n");
     fprintf(stderr, "         -h                  this help\n");
     fprintf(stderr, "         -v                  verbose output\n\n");
@@ -183,10 +184,13 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	printf("ID 0x%04x type mfx\n", id);
 	break;
     case PREAMBLE_MFX2:
-	printf("ID 0x%04x type mfx2\n", id);
+	printf("ID 0x%04x type mfx\n", id);
 	break;
     case PREAMBLE_MM:
-	printf("ID 0x%04x type mm\n", id);
+	printf("ID 0x%04x type mm 8 functions\n", id);
+	break;
+    case PREAMBLE_MFX_F32:
+	printf("ID 0x%04x type: mfx 32 functions\n", id);
 	break;
     case PREAMBLE_OTHER:
 	printf("ID 0x%04x type: other\n", id);
@@ -340,7 +344,10 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	case 15:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    loco_data->symbol = loco_config->bin[i];
-	    printf("            symbol ");
+	    if (index == 14)
+		printf("        MS2 symbol ");
+	    else
+		printf("        CS2 symbol ");
 	    printf(" 0x%02x", loco_config->bin[i++]);
 	    break;
 	default:
