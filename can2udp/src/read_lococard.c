@@ -162,6 +162,16 @@ char *extract_string(unsigned int *index, unsigned char *bin, unsigned int lengt
     return s;
 }
 
+void print_value(unsigned char *data, unsigned int *i, char *st, int index, int length) {
+    int j;
+
+    printf("index [0x%02x @ 0x%04x] length [%3d]: %s", index, *i, length, st);
+    for (j = 0; j < length; j++) {
+	printf(" 0x%02x", data[*i + j]);
+    }
+    *i += length;
+}
+
 int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_data) {
     unsigned int i, j, k, func, id, png_size;
     unsigned char index, length;
@@ -256,6 +266,38 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    id = loco_config->bin[i++];
 	    }
 	    break;
+	case 1:
+	    loco_data->uid = le32(&loco_config->bin[i]);
+	    print_value(loco_config->bin, &i, "               uid ", index, length);
+	    break;
+	case 2:
+	    loco_data->address = le16(&loco_config->bin[i]);
+	    print_value(loco_config->bin, &i, "           address ", index, length);
+	    break;
+	case 3:
+	    loco_data->acc_delay = loco_config->bin[i];
+	    print_value(loco_config->bin, &i, "acceleration delay ", index, length);
+	    break;
+	case 4:
+	    loco_data->slow_down_delay = loco_config->bin[i];
+	    print_value(loco_config->bin, &i, "   slow down delay ", index, length);
+	    break;
+	case 5:
+	    loco_data->vmin = loco_config->bin[i];
+	    print_value(loco_config->bin, &i, "              Vmin ", index, length);
+	    break;
+	case 6:
+	    loco_data->vmax = loco_config->bin[i];
+	    print_value(loco_config->bin, &i, "              Vmax ", index, length);
+	    break;
+	case 7:
+	    loco_data->tmax = le16(&loco_config->bin[i]);
+	    print_value(loco_config->bin, &i, "             tacho ", index, length);
+	    break;
+	case 8:
+	    loco_data->volume = loco_config->bin[i];
+	    print_value(loco_config->bin, &i, "            volume ", index, length);
+	    break;
 	/* Loco functions */
 	case 9:
 	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
@@ -288,6 +330,14 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		}
 		printf("\n");
 	    }
+	    break;
+	case 10:
+	    loco_data->mfxuid = le32(&loco_config->bin[i]);
+	    print_value(loco_config->bin, &i, "           mfx uid ", index, length);
+	    break;
+	case 11:
+	    loco_data->mfxtype = loco_config->bin[i];
+	    print_value(loco_config->bin, &i, "          mfx type ", index, length);
 	    break;
 	/* mfx Address */
 	case 12:
@@ -324,8 +374,8 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 	    break;
 	/* Loco functions 2 */
 	case 13:
-	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    if (length == 32) {
+		printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 		printf("\n");
 		func = 16;
 		for (j = 0; j < length / 2; j++) {
@@ -334,73 +384,26 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    printf(" function %2u: %3u 0x%02x\n", func++, loco_config->bin[i], loco_config->bin[i + 1]);
 		    i += 2;
 		}
+		printf("\n");
+	    /* old card seems to store the symbol here */
+	    } else if (length == 1) {
+		loco_data->symbol = loco_config->bin[i];
+		print_value(loco_config->bin, &i, "            symbol ", index, length);
 	    } else {
 		printf(" 0x%02x\n", loco_config->bin[i]);
 		i += length;
 	    }
-	    printf("\n");
 	    break;
 	case 14:
 	case 15:
-	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
 	    loco_data->symbol = loco_config->bin[i];
 	    if (index == 14)
-		printf("        CS2 symbol ");
+		print_value(loco_config->bin, &i, "        CS2 symbol ", index, length);
 	    else
-		printf("        MS2 symbol ");
-	    printf(" 0x%02x", loco_config->bin[i++]);
+		print_value(loco_config->bin, &i, "        MS2 symbol ", index, length);
 	    break;
 	default:
-	    printf("index [0x%02x @ 0x%04x] length [%3d]: ", index, i, length);
-	    switch (index) {
-	    case 1:
-		loco_data->uid = le32(&loco_config->bin[i]);
-		printf("               uid ");
-		break;
-	    case 2:
-		loco_data->address = le16(&loco_config->bin[i]);
-		printf("           address ");
-		break;
-	    case 3:
-		loco_data->acc_delay = loco_config->bin[i];
-		printf("acceleration delay ");
-		break;
-	    case 4:
-		loco_data->slow_down_delay = loco_config->bin[i];
-		printf("   slow down delay ");
-		break;
-	    case 5:
-		loco_data->vmin = loco_config->bin[i];
-		printf("              Vmin ");
-		break;
-	    case 6:
-		loco_data->vmax = loco_config->bin[i];
-		printf("              Vmax ");
-		break;
-	    case 7:
-		loco_data->tmax = le16(&loco_config->bin[i]);
-		printf("             tacho ");
-		break;
-	    case 8:
-		loco_data->volume = loco_config->bin[i];
-		printf("            volume ");
-		break;
-	    case 10:
-		loco_data->mfxuid = le32(&loco_config->bin[i]);
-		printf("           mfx uid ");
-		break;
-	    case 11:
-		loco_data->mfxtype = loco_config->bin[i];
-		printf("          mfx type ");
-		break;
-	    default:
-		printf("           unknown ");
-		break;
-	    }
-
-	    for (j = 0; j < length; j++) {
-		printf(" 0x%02x", loco_config->bin[i++]);
-	    }
+	    print_value(loco_config->bin, &i, "           unknown ", index, length);
 	    break;
 	}
 	printf("\n");
