@@ -30,6 +30,7 @@
 
 #include "cs2-config.h"
 #include "read-cs2-config.h"
+#include "loco-strings.h"
 
 #define check_free(a) \
             do { if ( a ) free(a); } while (0)
@@ -41,28 +42,6 @@
 #define PREAMBLE_MFX_F32	0x0117
 
 static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
-
-static const char *loco_function_string[] = {
-    " ",
-    "Stirnbeleuchtung",
-    "Innenbeleuchtung",
-    "Außenlicht/Rücklicht",
-    "Fernlicht",
-    "Audio hören",
-    "Pantograf",
-    "Rauchgenerator",
-    "Rangiergang",
-    "Telexkupplung",
-    "Horn",
-    "Schaffnerpfiff",
-    "Pfeife",
-    "Glocke",
-    "Kran seitswärts bewegen",
-    "Kran hoch/runter",
-    "Kran links drehen",
-    "Kran neigen",
-    "ABV aus"
-};
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -f FILE\n", prg);
@@ -317,7 +296,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    switch (k) {
 		    case 0:
 			/* TODO */
-			if (ti < 20)
+			if (ti < 100)
 			    printf(" %20s 0x%02x", loco_function_string[ti & 0x0f], ti);
 			break;
 		    case 99:	/* TODO */
