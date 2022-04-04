@@ -5,7 +5,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Lokkarten Emulator"
-Date "2022-03-11"
+Date "2022-03-29"
 Rev "0.2"
 Comp "Modellbahn eXtreme"
 Comment1 "Gerhard Bertelsmann"
@@ -677,11 +677,9 @@ Text Label 7000 4550 1    50   ~ 0
 MOSI1
 Wire Wire Line
 	6300 3950 6050 3950
-Wire Wire Line
-	6300 4050 6050 4050
-Text Label 6050 3950 0    50   ~ 0
+Text Label 6050 3950 0    50   Italic 0
 SDA0
-Text Label 6050 4050 0    50   ~ 0
+Text Label 6050 4050 0    50   Italic 0
 SCL0
 Wire Wire Line
 	3050 3250 3000 3250
@@ -713,39 +711,37 @@ Card
 NoConn ~ 7650 3250
 NoConn ~ 7650 3350
 Wire Wire Line
-	6300 3350 6075 3350
+	6300 3350 5775 3350
 Wire Wire Line
-	6300 3450 5950 3450
+	6300 3450 6000 3450
 Wire Wire Line
-	5950 3450 5950 3250
+	6000 3450 6000 3250
 $Comp
 L power:VCC #PWR0113
 U 1 1 623AA623
-P 5950 3250
-F 0 "#PWR0113" H 5950 3100 50  0001 C CNN
-F 1 "VCC" H 5965 3423 50  0000 C CNN
-F 2 "" H 5950 3250 50  0001 C CNN
-F 3 "" H 5950 3250 50  0001 C CNN
-	1    5950 3250
+P 6000 3250
+F 0 "#PWR0113" H 6000 3100 50  0001 C CNN
+F 1 "VCC" H 6015 3423 50  0000 C CNN
+F 2 "" H 6000 3250 50  0001 C CNN
+F 3 "" H 6000 3250 50  0001 C CNN
+	1    6000 3250
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR0114
 U 1 1 623AAB7F
-P 6075 3575
-F 0 "#PWR0114" H 6075 3325 50  0001 C CNN
-F 1 "GND" H 6080 3402 50  0000 C CNN
-F 2 "" H 6075 3575 50  0001 C CNN
-F 3 "" H 6075 3575 50  0001 C CNN
-	1    6075 3575
+P 5775 3575
+F 0 "#PWR0114" H 5775 3325 50  0001 C CNN
+F 1 "GND" H 5780 3402 50  0000 C CNN
+F 2 "" H 5775 3575 50  0001 C CNN
+F 3 "" H 5775 3575 50  0001 C CNN
+	1    5775 3575
 	1    0    0    -1  
 $EndComp
-NoConn ~ 6300 3550
-NoConn ~ 6300 3650
 NoConn ~ 6300 3750
 NoConn ~ 6300 3850
 Wire Wire Line
-	6075 3350 6075 3575
+	5775 3350 5775 3575
 NoConn ~ 2275 1650
 $Comp
 L Device:C C1
@@ -978,4 +974,16 @@ Wire Wire Line
 Wire Wire Line
 	7775 2525 7775 2275
 Connection ~ 7775 2275
+Wire Wire Line
+	6050 3950 6050 3650
+Wire Wire Line
+	6050 3650 6300 3650
+Wire Wire Line
+	6000 4050 6000 3550
+Wire Wire Line
+	6000 3550 6300 3550
+Wire Wire Line
+	6000 4050 6300 4050
+Text Notes 5925 3850 0    50   ~ 0
+hand\nwire
 $EndSCHEMATC
