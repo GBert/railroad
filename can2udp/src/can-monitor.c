@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.21\n\n");
+    fprintf(stderr, "   Version 3.22\n\n");
     fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -1214,7 +1214,7 @@ void decode_frame(struct can_frame *frame) {
 		config_data.deflated_size_counter += 8;
 	    }
 	    printf("Config Data Stream: Daten (%d/%d)\n", config_data.deflated_size_counter, config_data.deflated_size);
-	    if (config_data.deflated_size_counter >= config_data.deflated_size) {
+	    if ((config_data.deflated_size_counter >= config_data.deflated_size) && config_data.deflated_data) {
 		crc = CRCCCITT(config_data.deflated_data, config_data.deflated_size_counter, 0xFFFF);
 		if (crc == config_data.crc) {
 		    printf(GRN "Config Data %s mit CRC 0x%04X, Länge %d, ",
