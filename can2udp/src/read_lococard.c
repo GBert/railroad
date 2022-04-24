@@ -297,7 +297,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    case 0:
 			/* TODO */
 			if ((ti & 0x7f) < 100)
-			    printf(" %20s 0x%02x", loco_function_string[ti & 0x0f], ti);
+			    printf(" %20s 0x%02x", loco_function_string[ti & 0x7f], ti);
 			break;
 		    case 99:	/* TODO */
 			printf("\n");
