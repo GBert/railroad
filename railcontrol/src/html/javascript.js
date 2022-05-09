@@ -188,7 +188,12 @@ function drop(event) {
 	}
 	event.preventDefault();
 	var data = event.dataTransfer.getData("Text");
-	var url = "/?cmd=newposition&" + parseObjectIdentifier(data) + "&x=" + Math.floor(event.offsetX / 36) + "&y=" + Math.floor(event.offsetY / 36);
+	var x = Math.round(event.target.scrollLeft + event.offsetX, 0);
+	var y = Math.round(event.target.scrollTop + event.offsetY, 0);
+	x = Math.floor(x / 36);
+	y = Math.floor(y / 36);
+
+	var url = "/?cmd=newposition&" + parseObjectIdentifier(data) + "&x=" + x + "&y=" + y;
 	fireRequestAndForget(url);
 }
 
@@ -1570,8 +1575,10 @@ function loadLayoutContext(event)
 	event.preventDefault();
 	hideAllContextMenus();
 	showMenu('layout_context');
-	window.layoutPosX = Math.floor((event.pageX - 254) / 36);
-	window.layoutPosY = Math.floor((event.pageY - 92) / 36);
+	var x = Math.round(event.target.scrollLeft + event.offsetX, 0);
+	var y = Math.round(event.target.scrollTop + event.offsetY, 0);
+	window.layoutPosX = Math.floor(x / 36);
+	window.layoutPosY = Math.floor(y / 36);
 	return true;
 }
 
