@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2021 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -94,6 +94,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextClusters */ { "Clusters", "Gruppen", "Grupos" },
 /* TextCompileDate */ { "Compile date: {0}", "Kompilierdatum: 01}", "Fetcha compilada: {0}" },
 /* TextConfigFileReceivedWithSize */ { "Configuration file with {0} bytes received", "Konfigurationsdatei mit {0} Bytes empfangen", "Archivo de configuración recibido con {0} bytes" },
+/* TextConfigFileNotFound */ { "Config file {0} not found. Using default config file {1}.", "", "" },
 /* TextConfigMenu */ { "Configuration menu", "Konfigurationsmenu", "Navegación de configuración" },
 /* TextConfigureControlFirst */ { "Please configure a control first", "Bitte zuerst eine Zentrale konfigurieren", "Por favor configura un control antes" },
 /* TextConnectionFailed */ { "Connection to {0}:{1} failed", "Verbindung zu {0}:{1} nicht möglich", "Imposible conectar a {0}:{1}" },
@@ -548,8 +549,8 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextSettingFunction */ { "Setting function {0} of locomotive {1} to {2}", "Setze Funktion {0} der Lokomotive {1} auf {2}", "Ajusto la function {0} de la locomotora {1} a {2}" },
 /* TextSettingFunctionWithProtocol */ { "Setting function {0} of locomotive {1}/{2} to {3}", "Setze Funktion {0} der Lokomotive {1}/{2} auf {3}", "Ajusto la function {0} de la locomotora {1}/{2} a {3}" },
 /* TextSettingFunctions17_28 */ { "Setting functions 17-28 of locomotive {0} to {1} and {2}", "Setze Funktionen 17-28 der Lokomotive {0} auf {1} und {2}", "Ajusto las functionas 17-28 de la locomotora {0} a {1} y {2}" },
-/* TextSettingFunctions1_8 */ { "Setting functions 1-8 of locomotive {0} to {1}", "Setze Funktionen 1-8 der Lokomotive {0} auf {2}", "Ajusto las functionas 1-8 de la locomotora {0} a {1}" },
-/* TextSettingFunctions9_16 */ { "Setting functions 9-16 of locomotive {0} to {1}", "Setze Funktionen 9-16 der Lokomotive {0} auf {2}", "Ajusto las functionas 9-16 de la locomotora {0} a {1}" },
+/* TextSettingFunctions1_8 */ { "Setting functions 1-8 of locomotive {0} to {1}", "Setze Funktionen 1-8 der Lokomotive {0} auf {1}", "Ajusto las functionas 1-8 de la locomotora {0} a {1}" },
+/* TextSettingFunctions9_16 */ { "Setting functions 9-16 of locomotive {0} to {1}", "Setze Funktionen 9-16 der Lokomotive {0} auf {1}", "Ajusto las functionas 9-16 de la locomotora {0} a {1}" },
 /* TextSettingSpeed */ { "Setting locomotive {0} to speed {1}", "Setze Lokomotive {0} auf Geschwindigkeit {1}", "Ajusto la velocidad de la locomotora {0} a {1}" },
 /* TextSettingSpeedOrientationLight */ { "Setting locomotive {0} to speed {1} and direction {2} and light {3}", "Setze Geschwindigkeit {1}, Richtung {2} und Licht {3} der Lokomotive {0}", "Ajusto velocidad a {1}, direccion {2} y luz {3} de la locomotora {0}" },
 /* TextSettingSpeedWithProtocol */ { "Setting locomotive {0}/{1} to speed {2}", "Setze Lokomotive {0}/{1} auf Geschwindigkeit {2}", "Ajusto la velocidad de la locomotora {0}/{1} a {2}" },
@@ -592,6 +593,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextSimpleRight */ { "simple right", "einfach rechts", "simple derecha" },
 /* TextSpanish */ { "Spanisch", "Spanisch", "Español" },
 /* TextSpeed */ { "Speed", "Geschwindigkeit", "Velocidad" },
+/* TextStartArgument */ { "Start argument: {0}", "Startargument: {0}", "Argumento de inicio: {0}" },
 /* TextStartLocoAutomode */ { "Start locomotive in automode", "Starte Lokomotive im Automodus", "Poner locomotora en marcha en autómodo" },
 /* TextStartLocoTimetablemode */ { "Start locomotive in timetable mode", "Starte Lokomotive im Fahrplanmodus", "Poner locomotora en marcha en modo horario" },
 /* TextStartTrack */ { "Start track", "Startgleis", "Vía de inicio" },
