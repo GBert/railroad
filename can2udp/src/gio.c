@@ -363,7 +363,7 @@ int config_write(struct cs2_config_data_t *config_data) {
     crc = CRCCCITT(config_data->deflated_data, config_data->deflated_stream_size, 0xFFFF);
 
     if (config_data->verbose)
-	printf("\n  writing to %s - size 0x%04x crc 0x%04x 0x%04x\n", config_data->name,
+	printf("\n  writing to %s - size 0x%04x crc exp 0x%04x calc 0x%04x\n", config_data->name,
 	       config_data->deflated_stream_size, config_data->crc, crc);
 
     config_fp = fopen(filename, "wb");
@@ -380,12 +380,16 @@ int config_write(struct cs2_config_data_t *config_data) {
 	}
 	printf("\n");
     }
-    inflate_data(config_data);
+    i = inflate_data(config_data);
+    if (config_data->verbose)
+		printf("inflate returned code %i\n", i);
     fwrite(config_data->inflated_data, 1, config_data->inflated_size, config_fp);
     fclose(config_fp);
     free(filename);
     free(config_data->deflated_data);
+    config_data->deflated_data = NULL;
     free(config_data->inflated_data);
+    config_data->inflated_data = NULL;
     return 1;
 }
 
@@ -408,7 +412,7 @@ int reassemble_data(struct cs2_config_data_t *config_data, unsigned char *netfra
 
 	config_data->start = 1;
 	/* we alloc 8 bytes more to be sure that it fits */
-	config_data->deflated_data = malloc(config_data->deflated_size + 16);
+	config_data->deflated_data = realloc(config_data->deflated_data, config_data->deflated_size + 16);
 	if (config_data->deflated_data == NULL) {
 	    fprintf(stderr, "can't malloc deflated config data buffer - size 0x%04x\n", config_data->deflated_size + 8);
 	    exit(EXIT_FAILURE);
@@ -417,20 +421,22 @@ int reassemble_data(struct cs2_config_data_t *config_data, unsigned char *netfra
 	config_data->ddi = 0;
 
     } else if (memcmp(netframe, GETCONFIG_DATA, 5) == 0) {
-	memcpy(&config_data->deflated_data[config_data->ddi], &netframe[5], 8);
-	config_data->ddi += 8;
 	if (config_data->start) {
 	    memcpy(&temp, &netframe[5], 4);
 	    config_data->inflated_size = ntohl(temp);
-	    config_data->inflated_data = malloc(config_data->inflated_size);
+	    config_data->inflated_data = realloc(config_data->inflated_data, config_data->inflated_size);
 	    if (config_data->inflated_data == NULL) {
 		fprintf(stderr, "can't malloc inflated config data buffer - size 0x%04x\n", config_data->inflated_size);
 		exit(EXIT_FAILURE);
 	    }
 	    config_data->start = 0;
 	    config_data->stream = 1;
+	    memcpy(&config_data->deflated_data[0], &netframe[5], 8);
+	    config_data->ddi = 8;
 	    config_data->deflated_size_counter -= 8;
 	} else if (config_data->stream) {
+	    memcpy(&config_data->deflated_data[config_data->ddi], &netframe[5], 8);
+	    config_data->ddi += 8;
 	    if (config_data->deflated_size_counter <= 8) {
 		config_data->stream = 0;
 		config_data->deflated_stream_size = config_data->ddi;
