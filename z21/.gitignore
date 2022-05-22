@@ -1,0 +1,7 @@
+*~
+*.o
+*.d
+*.out
+*.pcap
+id
+z21emu
