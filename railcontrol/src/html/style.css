@@ -17,50 +17,41 @@ body {
 	position: absolute;
 	top: 90px;
 	bottom: 112px;
+	width: 250px;
 	border: solid 1px gray;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
 
 .loco_selector_1,
-.loco_1,
-.layout_0,
-.layer_selector_0 {
+.loco_1 {
 	left: 0px;
 }
 
 .loco_selector_2,
-.loco_2,
-.layout_1,
-.layer_selector_1 {
+.loco_2 {
 	left: 252px;
 }
 
 .loco_selector_3,
-.loco_3,
-.layout_2,
-.layer_selector_2 {
+.loco_3 {
 	left: 504px;
 }
 
 .loco_selector_4,
-.loco_4,
-.layout_3,
-.layer_selector_3 {
+.loco_4 {
 	left: 756px;
 }
 
 .loco_selector_5,
-.loco_5,
-.layout_4,
-.layer_selector_4 {
+.loco_5 {
 	left: 1008px;
 }
 
-.layout_5,
-.layer_selector_5 {
+/*.loco_selector_6,
+.loco_6 {
 	left: 1260px;
-}
+}*/
 
 .inner_loco {
 	width: 250px;
@@ -125,48 +116,19 @@ body {
 	}
 }
 
-@media (max-width: 735px) {
-	.layer_selector,
-	.layout {
-		display: none;
-	}
-
-	.loco {
-		width: calc(100% - 2px);
-	}
+@media (max-width: 503px) {
 	.status {
 		left: 0px;
 	}
 
-	.loco {
-		text-align: center;
-	}
-
-	.clock,
-	.loco_selector_2,
-	.loco_selector_3,
-	.loco_selector_4,
-	.loco_selector_5,
-	.loco_2,
-	.loco_3,
-	.loco_4,
-	.loco_5
+	.clock
 	{
 		display: none;
 		visibility: hidden;
 	}
 }
 
-@media (min-width: 736px) {
-	.layer_selector,
-	.layout {
-		display: inline-block;
-	}
-
-	.loco {
-		width: 250px;
-	}
-
+@media (min-width: 504px) {
 	.status {
 		left: 112px;
 	}
@@ -182,6 +144,7 @@ body {
 	background-image: url("/layout_background.png");
 	background-repeat: repeat, repeat;
 	background-attachment: local;
+	display: inline-block;
 }
 
 .layer_selector {
@@ -189,6 +152,7 @@ body {
 	right: 0px;
 	top: 55px;
 	height: 50px;
+	display: inline-block;
 }
 
 .infobox {
@@ -908,22 +872,25 @@ button:active {
 	100% { transform: translate(14px, 0px); }
 }
 
-.reduce_locos {
-	width: 15px;
-	height: 30px;
-	background-color: #AAA;
-	z-index: 1;
-	position: absolute;
-	left: 0;
-	bottom: 150px;
-}
-
+.reduce_locos,
 .extend_locos {
 	width: 15px;
 	height: 30px;
+	line-height: 30px;
 	background-color: #AAA;
+	color: black;
 	z-index: 1;
 	position: absolute;
-	left: 0;
 	bottom: 115px;
+	text-align: center;
+}
+
+.reduce_locos {
+	border-radius: 8px 0 0 8px;
+	left: 237px;
+}
+
+.extend_locos {
+	border-radius: 0 8px 8px 0;
+	left: 252px;
 }

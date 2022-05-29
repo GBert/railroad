@@ -3161,7 +3161,7 @@ namespace WebServer
 		buttonArguments["loco"] = to_string(locoID);
 
 		string id = "locospeed_" + to_string(locoID);
-		container.AddChildTag(HtmlTagInputSliderLocoSpeed("speed", MinSpeed, loco->GetMaxSpeed(), speed, locoID));
+		container.AddChildTag(HtmlTagInputSliderLocoSpeed(id, MinSpeed, loco->GetMaxSpeed(), speed, locoID));
 		buttonArguments["speed"] = to_string(MinSpeed);
 		container.AddChildTag(HtmlTagButtonCommand("0", id + "_0", buttonArguments));
 		buttonArguments["speed"] = to_string(loco->GetCreepingSpeed());
@@ -3319,14 +3319,14 @@ namespace WebServer
 			}
 			body.AddChildTag(locoContainer);
 		}
-		body.AddChildTag(HtmlTag("div").AddClass("layer_selector").AddClass("layer_selector_1").AddId("layer_selector").AddChildTag(HtmlTagLayerSelector()));
-		body.AddChildTag(HtmlTag("div").AddClass("layout").AddClass("layout_1").AddId("layout")
+		body.AddChildTag(HtmlTag("div").AddClass("layer_selector").AddId("layer_selector").AddChildTag(HtmlTagLayerSelector()));
+		body.AddChildTag(HtmlTag("div").AddClass("layout").AddId("layout")
 			.AddAttribute("oncontextmenu", "loadLayoutContext(event);")
 			.AddAttribute("ondragover", "allowDrop(event);")
 			.AddAttribute("ondrop", "drop(event);")
 			);
-		//body.AddChildTag(HtmlTag("div").AddClass("reduce_locos").AddId("reduce_locos").AddContent("&lt;").AddAttribute("onclick", "reduceLocos(); return false;"));
-		//body.AddChildTag(HtmlTag("div").AddClass("extend_locos").AddId("extend_locos").AddContent("&gt;").AddAttribute("onclick", "extendLocos(); return false;"));
+		body.AddChildTag(HtmlTag("div").AddClass("reduce_locos").AddId("reduce_locos").AddContent("&lt;").AddAttribute("onclick", "reduceLocos(); return false;"));
+		body.AddChildTag(HtmlTag("div").AddClass("extend_locos").AddId("extend_locos").AddContent("&gt;").AddAttribute("onclick", "extendLocos(); return false;"));
 		body.AddChildTag(HtmlTag("div").AddClass("clock").AddId("clock").AddContent("<object data=\"/station-clock.svg\" class=\"clock2\" type=\"image/svg+xml\"><param name=\"secondHand\" value=\"din 41071.1\"/><param name=\"minuteHandBehavior\" value=\"sweeping\"/><param name=\"secondHandBehavior\" value=\"steeping\"/><param name=\"axisCoverRadius\" value=\"0\"/><param name=\"updateInterval\" value=\"250\"/></object>"));
 		body.AddChildTag(HtmlTag("div").AddClass("status").AddId("status"));
 		body.AddChildTag(HtmlTag("div").AddClass("popup").AddId("popup"));

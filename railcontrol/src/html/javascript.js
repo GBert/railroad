@@ -1246,11 +1246,12 @@ function dataUpdate(event)
 	}
 	else if (command == 'locospeed')
 	{
+		var speed = argumentMap.get('speed');
 		elementName = 'locospeed_' + argumentMap.get('loco');
-		var element = document.getElementById(elementName);
-		if (element)
+		var elements = document.getElementsByName(elementName);
+		for (var i = 0; i < elements.length; ++i)
 		{
-			element.value = argumentMap.get('speed');
+			elements[i].value = speed;
 		}
 	}
 	else if (command == 'locofunction')
@@ -1433,6 +1434,13 @@ function dataUpdate(event)
 			}
 		}
 	}
+}
+
+function dataUpdateError()
+{
+	var body = document.getElementById("body");
+	body.innerHTML = '<h1>RailControl shut down</h2><p>Please start RailControl server again.</p><hr><h1>RailControl wurde heruntergefahren</h1><p>Bitte starte den RailControl server wieder.</p><hr><h1>RailControl se ha apagado</h2><p>Por favor reinicie el servidor RailControl otra vez.</p>';
+	checkAvailability();
 }
 
 function loadPopup(url)
@@ -1672,7 +1680,12 @@ function startUp()
 			return true;
 		}, true);
 	}
+	updateLocoControls();
 	loadLoco(1);
+	loadLoco(2);
+	loadLoco(3);
+	loadLoco(4);
+	loadLoco(5);
 	loadLayout();
 	sendTimestamp();
 }
@@ -1885,15 +1898,20 @@ function updateLocoControls()
 	{
 		return;
 	}
-	for (var control = 0; control <= maxNumberOfLocoControls; ++control)
+
+	maxNumberOfLocoControlsInScreen = Math.floor(document.documentElement.clientWidth / 252);
+	if (numberOfLocoControls > maxNumberOfLocoControlsInScreen)
 	{
-		layout.classList.remove("layout_" + control);
-		layer_selector.classList.remove("layer_selector_" + control);
-		if (control == numberOfLocoControls)
-		{
-			layout.classList.add("layout_" + control);
-			layer_selector.classList.add("layer_selector_" + control);
-		}
+		numberOfLocoControls = maxNumberOfLocoControlsInScreen;
+	}
+
+	var left = numberOfLocoControls * 252;
+	left += "px";
+	layout.style.left = left;
+	layerSelector.style.left = left;
+
+	for (var control = 0; control <= MaxNumberOfLocoControls; ++control)
+	{
 		var element = document.getElementById('loco_container_' + control);
 		if (!element)
 		{
@@ -1919,19 +1937,38 @@ function updateLocoControls()
 		else
 		{
 			reduce.classList.remove("hidden");
+			if (numberOfLocoControls >= maxNumberOfLocoControlsInScreen || numberOfLocoControls >= MaxNumberOfLocoControls)
+			{
+				reduce.style.left = (numberOfLocoControls * 252 - 30) + "px";
+				reduce.style.width = "30px";
+			}
+			else
+			{
+				reduce.style.left = (numberOfLocoControls * 252 - 15) + "px";
+				reduce.style.width = "15px";
+			}
 		}
 	}
 
 	var extend = document.getElementById("extend_locos");
 	if (extend)
 	{
-		if (numberOfLocoControls >= maxNumberOfLocoControls)
+		if (numberOfLocoControls >= maxNumberOfLocoControlsInScreen || numberOfLocoControls >= MaxNumberOfLocoControls)
 		{
 			extend.classList.add("hidden");
 		}
 		else
 		{
 			extend.classList.remove("hidden");
+			extend.style.left = (numberOfLocoControls * 252) + "px";
+			if (numberOfLocoControls > 0)
+			{
+				extend.style.width = "15px";
+			}
+			else
+			{
+				extend.style.width = "30px";
+			}
 		}
 	}
 }
@@ -1940,7 +1977,6 @@ function reduceLocos()
 {
 	if (numberOfLocoControls == 0)
 	{
-		alert('noting to reduce');
 		return;
 	}
 	--numberOfLocoControls;
@@ -1949,7 +1985,7 @@ function reduceLocos()
 
 function extendLocos()
 {
-	if (numberOfLocoControls >= maxNumberOfLocoControls)
+	if (numberOfLocoControls >= maxNumberOfLocoControlsInScreen)
 	{
 		return;
 	}
@@ -1957,28 +1993,25 @@ function extendLocos()
 	updateLocoControls();
 }
 
-var noSleep = new NoSleep();
-document.addEventListener('click', function enableNoSleep()
+function enableNoSleep()
 {
 	document.removeEventListener('click', enableNoSleep, false);
 	noSleep.enable();
-}, false);
-
-var updater = new EventSource('/?cmd=updater');
-updater.onmessage = function(event)
-{
-	dataUpdate(event);
-};
-updater.onerror = function()
-{
-	var body = document.getElementById("body");
-	body.innerHTML = '<h1>RailControl shut down</h2><p>Please start RailControl server again.</p><hr><h1>RailControl wurde heruntergefahren</h1><p>Bitte starte den RailControl server wieder.</p><hr><h1>RailControl se ha apagado</h2><p>Por favor reinicie el servidor RailControl otra vez.</p>';
-	checkAvailability();
-};
+}
 
 window.layoutPosX = 0;
 window.layoutPosY = 0;
 
 var numberOfLocoControls = 1;
-var maxNumberOfLocoControls = 5;
+var maxNumberOfLocoControlsInScreen = Math.floor(document.documentElement.clientWidth / 252);
+const MaxNumberOfLocoControls = 5;
 
+var noSleep = new NoSleep();
+document.addEventListener('click', enableNoSleep, false);
+
+var updater = new EventSource('/?cmd=updater');
+updater.addEventListener('message', dataUpdate);
+
+updater.addEventListener('error', dataUpdateError);
+
+window.addEventListener('resize', updateLocoControls);
