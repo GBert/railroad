@@ -1160,6 +1160,9 @@ function updateSignalStateDiv(element, state)
 	element.classList.remove('signal_aspect4');
 	element.classList.remove('signal_aspect5');
 	element.classList.remove('signal_aspect6');
+	element.classList.remove('signal_aspect7');
+	element.classList.remove('signal_stopexpected');
+	element.classList.remove('signal_dark');
 	switch (state)
 	{
 		case 'stop':
@@ -1188,6 +1191,18 @@ function updateSignalStateDiv(element, state)
 
 		case 'aspect6':
 			element.classList.add('signal_aspect6');
+			break;
+
+		case 'aspect7':
+			element.classList.add('signal_aspect7');
+			break;
+
+		case 'stopexpected':
+			element.classList.add('signal_stopexpected');
+			break;
+
+		case 'dark':
+			element.classList.add('signal_dark');
 			break;
 	}
 }

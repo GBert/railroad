@@ -22,23 +22,23 @@ along with RailControl; see the file LICENCE. If not see
 
 const std::string& GetVersionInfoGitHash()
 {
-	static const std::string gitHash = "950f2ca6463c18fd12ce3979051a3bc20c5445a2";
+	static const std::string gitHash = "b1e838f3314336271464db708452075c5385bfe7";
 	return gitHash;
 }
 
 time_t GetVersionInfoGitTimestamp()
 {
-	return 1652684044;
+	return 1653733290;
 }
 
 unsigned int GetVersionInfoGitDirty()
 {
-	return 4;
+	return 0;
 }
 
 time_t GetVersionInfoCompileTimestamp()
 {
-	return 1652684067;
+	return 1653807520;
 }
 
 const std::string& GetVersionInfoRailControlVersion()

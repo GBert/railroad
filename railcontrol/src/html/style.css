@@ -300,7 +300,10 @@ body {
 .signal_aspect3 .aspect3,
 .signal_aspect4 .aspect4,
 .signal_aspect5 .aspect5,
-.signal_aspect6 .aspect6 {
+.signal_aspect6 .aspect6,
+.signal_aspect7 .aspect7,
+.signal_stopexpected .stopexpected,
+.signal_dark .dark {
 	opacity: 1;
 }
 
@@ -356,6 +359,9 @@ body {
 .signal_aspect4 .state_aspect4,
 .signal_aspect5 .state_aspect5,
 .signal_aspect6 .state_aspect6,
+.signal_aspect7 .state_aspect7,
+.signal_stopexpected .state_stopexpected,
+.signal_dark .state_dark,
 .signal_stop .menu_stop,
 .signal_clear .menu_clear,
 .signal_aspect1 .menu_aspect1,
@@ -364,6 +370,9 @@ body {
 .signal_aspect4 .menu_aspect4,
 .signal_aspect5 .menu_aspect5,
 .signal_aspect6 .menu_aspect6,
+.signal_aspect7 .menu_aspect7,
+.signal_stopexpected .menu_stopexpected,
+.signal_dark .menu_dark,
 .switch_turnout .menu_turnout,
 .switch_straight .menu_straight,
 .switch_third .menu_third {

@@ -52,7 +52,10 @@ namespace WebServer
 			case DataModel::SignalTypeDeCombined:
 				MenuEntry(Languages::TextSignalStateStop, idText, DataModel::SignalStateStop, "stop");
 				MenuEntry(Languages::TextSignalStateClear, idText, DataModel::SignalStateClear, "clear");
-				MenuEntry(Languages::TextSignalStateStopExpected, idText, DataModel::SignalStateAspect2, "aspect2");
+				MenuEntry(Languages::TextSignalStateStopExpected, idText, DataModel::SignalStateStopExpected, "stopexpected");
+				MenuEntry(Languages::TextSignalStateShunting, idText, DataModel::SignalStateAspect4, "aspect4");
+				MenuEntry(Languages::TextSignalStateZs7, idText, DataModel::SignalStateAspect7, "aspect7");
+				MenuEntry(Languages::TextSignalStateDark, idText, DataModel::SignalStateDark, "dark");
 				imageDiv.AddAttribute("onclick", "return onClickWithMenu(event, '" + identifier + "');");
 				break;
 
@@ -72,7 +75,7 @@ namespace WebServer
 			case DataModel::SignalTypeChDwarf:
 				MenuEntry(Languages::TextSignalStateStop, idText, DataModel::SignalStateStop, "stop");
 				MenuEntry(Languages::TextSignalStateClear, idText, DataModel::SignalStateClear, "clear");
-				MenuEntry(Languages::TextSignalStateCaution, idText, DataModel::SignalStateAspect2, "aspect2");
+				MenuEntry(Languages::TextSignalStateCaution, idText, DataModel::SignalStateStopExpected, "stopexpected");
 				imageDiv.AddAttribute("onclick", "return onClickWithMenu(event, '" + identifier + "');");
 				break;
 
@@ -139,9 +142,14 @@ namespace WebServer
 					"<polygon points=\"1,1 13,1 13,30 1,30\" fill=\"black\"/>"
 					"<polyline points=\"7,31 7,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,34 10,34\" style=\"stroke:gray;stroke-width:2\"/>"
-					"<circle class=\"stop\" cx=\"7\" cy=\"10\" r=\"2.5\" fill=\"red\" opacity=\"0\"/>"
+					"<circle class=\"stop aspect4\" cx=\"7\" cy=\"10\" r=\"2.5\" fill=\"red\" opacity=\"0\"/>"
 					"<circle class=\"clear\" cx=\"5\" cy=\"15\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
-					"<circle class=\"aspect2\" cx=\"9\" cy=\"15\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>";
+					"<circle class=\"stopexpected\" cx=\"9\" cy=\"15\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
+					"<circle class=\"aspect4\" cx=\"7\" cy=\"19\" r=\"1.5\" fill=\"white\" opacity=\"0\"/>"
+					"<circle class=\"aspect4\" cx=\"3\" cy=\"23\" r=\"1.5\" fill=\"white\" opacity=\"0\"/>"
+					"<circle class=\"aspect7\" cx=\"5\" cy=\"19\" r=\"1.5\" fill=\"yellow\" opacity=\"0\"/>"
+					"<circle class=\"aspect7\" cx=\"9\" cy=\"19\" r=\"1.5\" fill=\"yellow\" opacity=\"0\"/>"
+					"<circle class=\"aspect7\" cx=\"7\" cy=\"23\" r=\"1.5\" fill=\"yellow\" opacity=\"0\"/>";
 				break;
 
 			case DataModel::SignalTypeChLDistant:
@@ -173,9 +181,9 @@ namespace WebServer
 					"<polygon points=\"1,14 5,14 13,22 13,26 1,26\" fill=\"black\"/>"
 					"<polyline points=\"7,27 7,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,30 10,30\" style=\"stroke:gray;stroke-width:2\"/>"
-					"<circle class=\"clear aspect2\" cx=\"4\" cy=\"17\" r=\"2\" fill=\"white\" opacity=\"0\"/>"
+					"<circle class=\"clear stopexpected\" cx=\"4\" cy=\"17\" r=\"2\" fill=\"white\" opacity=\"0\"/>"
 					"<circle class=\"stop clear\" cx=\"4\" cy=\"23\" r=\"2\" fill=\"white\" opacity=\"0\"/>"
-					"<circle class=\"stop aspect2\" cx=\"10\" cy=\"23\" r=\"2\" fill=\"white\" opacity=\"0\"/>";
+					"<circle class=\"stop stopexpected\" cx=\"10\" cy=\"23\" r=\"2\" fill=\"white\" opacity=\"0\"/>";
 				break;
 
 			case DataModel::SignalTypeSimpleRight:
@@ -228,6 +236,13 @@ namespace WebServer
 			case DataModel::SignalStateAspect6:
 				return "signal_aspect6";
 
+			case DataModel::SignalStateAspect7:
+				return "signal_aspect7";
+
+			case DataModel::SignalStateStopExpected:
+				return "signal_stopexpected";
+
+			case DataModel::SignalStateDark:
 			default:
 				return "signal_dark";
 		}

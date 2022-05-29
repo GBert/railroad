@@ -415,46 +415,12 @@ namespace Hardware
 		{
 			return;
 		}
-		Address address = signal->GetMappedAddress();
+		const Address address = signal->GetMappedAddress();
 		if (address == 0)
 		{
 			return;
 		}
-		DataModel::AccessoryState state = signal->GetMappedAccessoryState();
-		switch (state)
-		{
-			case DataModel::SignalStateStop:
-			case DataModel::SignalStateClear:
-				break;
-
-			case DataModel::SignalStateAspect2:
-				++address;
-				state = DataModel::AccessoryStateOff;
-				break;
-
-			case DataModel::SignalStateAspect3:
-				++address;
-				state = DataModel::AccessoryStateOn;
-				break;
-
-			case DataModel::SignalStateAspect4:
-				address += 2;
-				state = DataModel::AccessoryStateOff;
-				break;
-
-			case DataModel::SignalStateAspect5:
-				address += 2;
-				state = DataModel::AccessoryStateOn;
-				break;
-
-			case DataModel::SignalStateAspect6:
-				address += 3;
-				state = DataModel::AccessoryStateOff;
-				break;
-
-			default:
-				break;
-		}
+		const DataModel::AccessoryState state = signal->GetMappedAccessoryState();
 		instance->Accessory(signal->GetProtocol(), address, state, signal->GetAccessoryPulseDuration());
 	}
 

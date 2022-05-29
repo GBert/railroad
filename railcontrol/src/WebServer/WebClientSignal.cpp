@@ -185,14 +185,14 @@ namespace WebServer
 		mainContent.AddChildTag(HtmlTagInputCheckboxWithLabel("inverted", Languages::TextInverted, "true", inverted));
 		formContent.AddChildTag(mainContent);
 
-		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, rotation));
-
 		HtmlTag addressContent("div");
 		addressContent.AddId("tab_address");
 		addressContent.AddClass("tab_content");
 		addressContent.AddClass("hidden");
 		addressContent.AddChildTag(HtmlTag("div").AddId("addresses"));
 		formContent.AddChildTag(addressContent);
+
+		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, rotation));
 
 		// FIXME: Remove later: 2021-03-18
 		if (feedbacks.size())
@@ -225,7 +225,7 @@ namespace WebServer
 
 		Address address = Utils::Utils::GetIntegerMapEntry(arguments, "address", AddressNone);
 
-		std::map<DataModel::AccessoryState,DataModel::Signal::StateOption> stateOptions = signal->GetStateOptions();
+		const std::map<DataModel::AccessoryState,DataModel::Signal::StateOption> stateOptions = signal->GetStateOptions();
 
 		map<AddressOffset,string> selectAddressOptions;
 		selectAddressOptions[-1] = "-";
@@ -276,9 +276,15 @@ namespace WebServer
 		bool releaseWhenFree = Utils::Utils::GetBoolMapEntry(arguments, "releasewhenfree", false);
 		DataModel::AccessoryType signalType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "signaltype", DataModel::SignalTypeSimpleLeft));
 		std::map<AccessoryState,AddressOffset> offsets;
-		for (AddressOffset i = 0; i < 10; ++i)
+		for (AddressOffset i = 0; i < SignalStateMax; ++i)
 		{
 			AddressOffset address = Utils::Utils::GetIntegerMapEntry(arguments, "address" + to_string(i), -1);
+			if ((signalType == SignalTypeChDwarf || signalType == SignalTypeDeCombined) && i == SignalStateAspect2)
+			{
+				// FIXME: Remove later: 2022-05-27
+				offsets[SignalStateStopExpected] = address;
+				continue;
+			}
 			offsets[static_cast<AccessoryState>(i)] = address;
 		}
 		DataModel::AccessoryPulseDuration duration = Utils::Utils::GetIntegerMapEntry(arguments, "duration", manager.GetDefaultAccessoryDuration());
@@ -357,6 +363,14 @@ namespace WebServer
 		else if (signalStateText.compare("aspect10") == 0)
 		{
 			signalState = DataModel::SignalStateAspect10;
+		}
+		else if (signalStateText.compare("stopexpected") == 0)
+		{
+			signalState = DataModel::SignalStateStopExpected;
+		}
+		else if (signalStateText.compare("dark") == 0)
+		{
+			signalState = DataModel::SignalStateDark;
 		}
 
 		manager.SignalState(ControlTypeWebserver, signalID, signalState, false);
