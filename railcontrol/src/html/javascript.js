@@ -652,18 +652,18 @@ function decrementIntegerValue(name, min)
 
 function setToggleButton(elementName, on)
 {
-	var element = document.getElementById(elementName);
-	if (element)
+	var elements = document.getElementsByName(elementName);
+	for (var i = 0; i < elements.length; ++i)
 	{
 		if (on == 'true')
 		{
-			element.classList.remove('button_off');
-			element.classList.add('button_on');
+			elements[i].classList.remove('button_off');
+			elements[i].classList.add('button_on');
 		}
 		else
 		{
-			element.classList.remove('button_on');
-			element.classList.add('button_off');
+			elements[i].classList.remove('button_on');
+			elements[i].classList.add('button_off');
 		}
 	}
 }
