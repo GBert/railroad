@@ -44,7 +44,7 @@ Usage: can2lan -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i
 
 To compile can2udp under Debian/Ubuntu you need to install some libs:
 ```
-sudo apt-get install zlib1g-dev libpcap-dev
+sudo apt install zlib1g-dev libpcap-dev
 cd src
 make
 ```
