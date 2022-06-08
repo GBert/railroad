@@ -152,7 +152,7 @@ namespace Hardware
 				const DataModel::AccessoryPulseDuration duration)
 			{
 				AccessoryOnOrOff(protocol, address, state, true);
-				std::async(std::launch::async, AccessoryOnOrOffStatic, this, protocol, address, state, duration);
+				__attribute((unused)) auto r = std::async(std::launch::async, AccessoryOnOrOffStatic, this, protocol, address, state, duration);
 			}
 
 			// read CV value

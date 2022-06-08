@@ -315,7 +315,7 @@ void Manager::Booster(const ControlType controlType, const BoosterState state)
 		return;
 	}
 
-	std::async(std::launch::async, InitLocosStatic, this);
+	__attribute__((unused)) auto r = std::async(std::launch::async, InitLocosStatic, this);
 	initLocosDone = true;
 }
 
@@ -2356,7 +2356,7 @@ void Manager::RouteExecuteAsync(Logger::Logger* logger, const RouteID routeID)
 	{
 		return;
 	}
-	std::async(std::launch::async, Route::ExecuteStatic, logger, route);
+	__attribute__((unused)) auto r = std::async(std::launch::async, Route::ExecuteStatic, logger, route);
 }
 
 Route* Manager::GetRoute(const RouteID routeID) const

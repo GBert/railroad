@@ -93,7 +93,7 @@ namespace Hardware
 			default:
 				return;
 		}
-		std::async(std::launch::async, Manager::ProgramDccValueStatic, manager, cv, cv & 0xFF);
+		__attribute__((unused)) auto r = std::async(std::launch::async, Manager::ProgramDccValueStatic, manager, cv, cv & 0xFF);
 	}
 
 	// write DCC CV value

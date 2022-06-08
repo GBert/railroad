@@ -16,7 +16,6 @@ body {
 .loco {
 	position: absolute;
 	top: 90px;
-	bottom: 112px;
 	width: 250px;
 	border: solid 1px gray;
 	overflow-x: hidden;
@@ -116,7 +115,46 @@ body {
 	}
 }
 
-@media (max-width: 503px) {
+@media (max-height: 499px) {
+	.loco,
+	.layout {
+		bottom: 22px;
+	}
+
+	.reduce_locos,
+	.extend_locos {
+		bottom: 25px;
+	}
+
+	.status {
+		height: 20px;
+		left: 0px;
+	}
+
+	.clock
+	{
+		display: none;
+		visibility: hidden;
+	}
+}
+
+@media (min-height: 500px) {
+	.loco,
+	.layout {
+		bottom: 112px;
+	}
+
+	.reduce_locos,
+	.extend_locos {
+		bottom: 115px;
+	}
+
+	.status {
+		height: 110px;
+	}
+}
+
+@media (min-height: 500px) and (max-width: 503px) {
 	.status {
 		left: 0px;
 	}
@@ -128,7 +166,7 @@ body {
 	}
 }
 
-@media (min-width: 504px) {
+@media (min-height: 500px) and (min-width: 504px) {
 	.status {
 		left: 112px;
 	}
@@ -140,7 +178,6 @@ body {
 	position: absolute;
 	right: 0px;
 	top: 90px;
-	bottom: 112px;
 	background-image: url("/layout_background.png");
 	background-repeat: repeat, repeat;
 	background-attachment: local;
@@ -518,7 +555,6 @@ input {
 	position: absolute;
 	bottom: 0px;
 	right: 0px;
-	height: 110px;
 	border: solid 1px gray;
 	overflow-x: hidden;
 	overflow-y: scroll;
@@ -881,7 +917,6 @@ button:active {
 	color: black;
 	z-index: 1;
 	position: absolute;
-	bottom: 115px;
 	text-align: center;
 }
 

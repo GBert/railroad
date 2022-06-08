@@ -542,7 +542,7 @@ namespace WebServer
 			}
 			else if (arguments["cmd"].compare("layerselector") == 0)
 			{
-				HandleLayerSelector();
+				HandleLayerSelector(arguments);
 			}
 			else if (arguments["cmd"].compare("stopallimmediately") == 0)
 			{
@@ -1852,10 +1852,10 @@ namespace WebServer
 		ReplyResponse(ResponseInfo, Languages::TextLocoDeleted, name);
 	}
 
-	HtmlTag WebClient::HtmlTagLayerSelector() const
+	HtmlTag WebClient::HtmlTagLayerSelector(const LayerID layerID) const
 	{
 		map<string,LayerID> options = manager.LayerListByNameWithFeedback();
-		return HtmlTagSelect("layer", options).AddAttribute("onchange", "loadLayout();");
+		return HtmlTagSelect("layer", options, layerID).AddAttribute("onchange", "loadLayout();");
 	}
 
 	void WebClient::HandleLayout(const map<string, string>& arguments)
@@ -2740,12 +2740,14 @@ namespace WebServer
 	void WebClient::HandleLocoSelector(const map<string,string>& arguments)
 	{
 		const unsigned int selector = Utils::Utils::GetIntegerMapEntry(arguments, "selector", 1);
-		ReplyHtmlWithHeader(HtmlTagLocoSelector(to_string(selector)));
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco");
+		ReplyHtmlWithHeader(HtmlTagLocoSelector(to_string(selector), locoID));
 	}
 
-	void WebClient::HandleLayerSelector()
+	void WebClient::HandleLayerSelector(const map<string,string>& arguments)
 	{
-		ReplyHtmlWithHeader(HtmlTagLayerSelector());
+		const LayerID layerID = Utils::Utils::GetIntegerMapEntry(arguments, "layer");
+		ReplyHtmlWithHeader(HtmlTagLayerSelector(layerID));
 	}
 
 	void WebClient::HandleSettingsEdit()
@@ -3127,14 +3129,14 @@ namespace WebServer
 		}
 	}
 
-	HtmlTag WebClient::HtmlTagLocoSelector(const string& selector) const
+	HtmlTag WebClient::HtmlTagLocoSelector(const string& selector, const LocoID locoID) const
 	{
 		map<string,LocoID> options = manager.LocoIdsByName();
 		if (options.size() != 1)
 		{
 			options["-"] = LocoNone;
 		}
-		return HtmlTagSelect("loco_" + selector, options).AddAttribute("onchange", "loadLoco(" + selector + ");");
+		return HtmlTagSelect("loco_" + selector, options, locoID).AddAttribute("onchange", "loadLoco(" + selector + ");");
 	}
 
 	void WebClient::HandleLoco(const map<string, string>& arguments)
@@ -3202,7 +3204,7 @@ namespace WebServer
 			}
 		}
 		buttonArguments.erase("function");
-		ReplyHtmlWithHeaderAndParagraph(container);
+		ReplyHtmlWithHeader(container);
 	}
 
 	void WebClient::HandleNewPosition(const map<string, string>& arguments)
@@ -3294,7 +3296,8 @@ namespace WebServer
 
 		body.AddChildTag(menu);
 
-		for (unsigned int i = 1; i <= 5; ++i)
+		const unsigned int MaxNumberOfLocoControls = 5;
+		for (unsigned int i = 1; i <= MaxNumberOfLocoControls; ++i)
 		{
 			const string iText = to_string(i);
 			HtmlTag locoContainer("div");
