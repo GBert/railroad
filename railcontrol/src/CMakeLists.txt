@@ -87,6 +87,7 @@ Hardware/HardwareParams.h
 Hardware/Hsi88.cpp
 Hardware/Hsi88.h
 Hardware/Intellibox.h
+Hardware/Intellibox2.h
 Hardware/LocoCache.cpp
 Hardware/LocoCache.h
 Hardware/M6051.cpp
@@ -98,6 +99,8 @@ Hardware/Protocols/DccPpEx.cpp
 Hardware/Protocols/DccPpEx.h
 Hardware/Protocols/EsuCAN.cpp
 Hardware/Protocols/EsuCAN.h
+Hardware/Protocols/LocoNet.cpp
+Hardware/Protocols/LocoNet.h
 Hardware/Protocols/MaerklinCAN.cpp
 Hardware/Protocols/MaerklinCAN.h
 Hardware/Protocols/P50x.cpp

@@ -181,7 +181,8 @@ enum HardwareType : uint8_t
 	HardwareTypeDR5000 = 17,
 	HardwareTypeCS1 = 18,
 	HardwareTypeDccPpExTcp = 19,
-	HardwareTypeDccPpExSerial = 20
+	HardwareTypeDccPpExSerial = 20,
+	HardwareTypeIntellibox2 = 21
 };
 
 enum Automode : bool

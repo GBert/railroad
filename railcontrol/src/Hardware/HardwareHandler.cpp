@@ -33,6 +33,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Hardware/HardwareHandler.h"
 #include "Hardware/Hsi88.h"
 #include "Hardware/Intellibox.h"
+#include "Hardware/Intellibox2.h"
 #include "Hardware/M6051.h"
 #include "Hardware/MasterControl.h"
 #include "Hardware/MasterControl2.h"
@@ -136,6 +137,10 @@ namespace Hardware
 			case HardwareTypeDccPpExSerial:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new DccPpExSerial(params));
 				return;
+
+			case HardwareTypeIntellibox2:
+				instance = reinterpret_cast<Hardware::HardwareInterface*>(new Intellibox2(params));
+				break;
 		}
 	}
 
@@ -428,7 +433,7 @@ namespace Hardware
 	{
 		if (cv == 0)
 		{
-			return false; // cvs are one based, so cv zero is not allowed
+			return false; // CVs are one based, so CV zero is not allowed
 		}
 		if (cv == 1 && value == 0)
 		{
@@ -729,6 +734,10 @@ namespace Hardware
 
 			case HardwareTypeDccPpExSerial:
 				Hardware::DccPpExSerial::GetArgumentTypesAndHint(arguments, hint);
+				return;
+
+			case HardwareTypeIntellibox2:
+				Hardware::Intellibox2::GetArgumentTypesAndHint(arguments, hint);
 				return;
 		}
 	}

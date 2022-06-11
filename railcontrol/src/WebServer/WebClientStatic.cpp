@@ -137,6 +137,7 @@ namespace WebServer
 		hardwareList["Tams MasterControl 2"] = HardwareTypeMasterControl2;
 		hardwareList["Tams RedBox"] = HardwareTypeRedBox;
 		hardwareList["Uhlenbrock Intellibox"] = HardwareTypeIntellibox;
+		hardwareList["Uhlenbrock Intellibox II (test)"] = HardwareTypeIntellibox2;
 		hardwareList["Virtual Command Station"] = HardwareTypeVirtual;
 		return hardwareList;
 	}

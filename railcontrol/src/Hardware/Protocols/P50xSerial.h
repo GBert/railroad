@@ -45,7 +45,7 @@ namespace Hardware
 				:	P50x(params,
 						controlName + " / " + params->GetName() + " at serial port " + params->GetArg1(),
 						type),
-					serialLine(logger, params->GetArg1(), B19200, 8, 'N', 2)
+						serialLine(logger, params->GetArg1(), B19200, 8, 'N', 2)
 				{
 				}
 

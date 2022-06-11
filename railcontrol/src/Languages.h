@@ -216,6 +216,7 @@ class Languages
 			TextHintEcos,
 			TextHintHsi88,
 			TextHintIntellibox,
+			TextHintIntellibox2,
 			TextHintM6051,
 			TextHintMasterControl,
 			TextHintMasterControl2,
