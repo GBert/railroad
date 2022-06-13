@@ -271,11 +271,6 @@ namespace DataModel
 			static std::string GetLocoFunctionIcon(const LocoFunctionNr nr, const LocoFunctionIcon icon);
 
 		private:
-			bool DeserializeNew(const std::string& serialized);
-
-			// FIXME: remove later 2020-10-27
-			bool DeserializeOld(const std::string& serialized);
-
 			LocoFunctionEntry entries[NumberOfLocoFunctions];
 	};
 } // namespace DataModel

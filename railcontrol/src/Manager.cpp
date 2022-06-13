@@ -122,14 +122,6 @@ Manager::Manager(Config& config)
 	storage->AllAccessories(accessories);
 	for (auto& accessory : accessories)
 	{
-		// We set the protocol MM2 to MM when control is a CS2 or CC-Schnitte
-		// FIXME: remove again later 2020-10-27
-		if (accessory.second->GetProtocol() == ProtocolMM2
-			&& (ControlIsOfHardwareType(accessory.second->GetControlID(), HardwareTypeCS2Udp)
-				|| ControlIsOfHardwareType(accessory.second->GetControlID(), HardwareTypeCcSchnitte)))
-		{
-			accessory.second->SetProtocol(ProtocolMM);
-		}
 		// We set the protocol DCC to Server when control uses P50x protocol
 		// FIXME: remove again later 2021-05-15
 		if (accessory.second->GetProtocol() == ProtocolDCC
@@ -153,14 +145,6 @@ Manager::Manager(Config& config)
 	storage->AllSignals(signals);
 	for (auto& signal : signals)
 	{
-		// We set the protocol MM2 to MM when control is a CS2 or CC-Schnitte
-		// FIXME: remove again later 2020-10-27
-		if (signal.second->GetProtocol() == ProtocolMM2
-			&& (ControlIsOfHardwareType(signal.second->GetControlID(), HardwareTypeCS2Udp)
-				|| ControlIsOfHardwareType(signal.second->GetControlID(), HardwareTypeCcSchnitte)))
-		{
-			signal.second->SetProtocol(ProtocolMM);
-		}
 		logger->Info(Languages::TextLoadedSignal, signal.second->GetID(), signal.second->GetName());
 	}
 
@@ -173,14 +157,6 @@ Manager::Manager(Config& config)
 	storage->AllSwitches(switches);
 	for (auto& mySwitch : switches)
 	{
-		// We set the protocol MM2 to MM when control is a CS2 or CC-Schnitte
-		// FIXME: remove again later 2020-10-27
-		if (mySwitch.second->GetProtocol() == ProtocolMM2
-			&& (ControlIsOfHardwareType(mySwitch.second->GetControlID(), HardwareTypeCS2Udp)
-				|| ControlIsOfHardwareType(mySwitch.second->GetControlID(), HardwareTypeCcSchnitte)))
-		{
-			mySwitch.second->SetProtocol(ProtocolMM);
-		}
 		logger->Info(Languages::TextLoadedSwitch, mySwitch.second->GetID(), mySwitch.second->GetName());
 	}
 
@@ -199,14 +175,6 @@ Manager::Manager(Config& config)
 	storage->AllLocos(locos);
 	for (auto& loco : locos)
 	{
-		// We set the protocol MM2 to MM when control is a CS2 or CC-Schnitte
-		// FIXME: remove again later 2020-10-27
-		if (loco.second->GetProtocol() == ProtocolMM2
-			&& (ControlIsOfHardwareType(loco.second->GetControlID(), HardwareTypeCS2Udp)
-				|| ControlIsOfHardwareType(loco.second->GetControlID(), HardwareTypeCcSchnitte)))
-		{
-			loco.second->SetProtocol(ProtocolMM);
-		}
 		logger->Info(Languages::TextLoadedLoco, loco.second->GetID(), loco.second->GetName());
 	}
 

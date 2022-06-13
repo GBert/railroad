@@ -103,18 +103,6 @@ namespace DataModel
 
 	bool LocoFunctions::Deserialize(const std::string& serialized)
 	{
-		size_t count = serialized.size();
-		if (count == 0 || serialized[0] == 'f')
-		{
-			DeserializeNew(serialized);
-			return true;
-		}
-		DeserializeOld(serialized);
-		return true;
-	}
-
-	bool LocoFunctions::DeserializeNew(const std::string& serialized)
-	{
 		std::deque<std::string> functionsSerialized;
 		Utils::Utils::SplitString(serialized, "f", functionsSerialized);
 		for (std::string& functionSerialized : functionsSerialized)
@@ -145,41 +133,6 @@ namespace DataModel
 			}
 			entries[nr].timer = static_cast<LocoFunctionTimer>(Utils::Utils::StringToInteger(functionTexts.front(), 0));
 			functionTexts.pop_front();
-		}
-		return true;
-	}
-
-	// FIXME: remove later 2020-10-27
-	bool LocoFunctions::DeserializeOld(const std::string& serialized)
-	{
-		size_t count = serialized.size();
-		if (count > NumberOfLocoFunctions)
-		{
-			count = NumberOfLocoFunctions;
-		}
-		for (LocoFunctionNr nr = 0; nr < NumberOfLocoFunctions; ++nr)
-		{
-			if (nr >= count)
-			{
-				entries[nr].state = LocoFunctionStateOff;
-				entries[nr].type = LocoFunctionTypeNone;
-				entries[nr].icon = LocoFunctionIconNone;
-				entries[nr].timer = 0;
-				continue;
-			}
-			switch (serialized[nr])
-			{
-				case '1':
-					entries[nr].state = LocoFunctionStateOn;
-					break;
-
-				default:
-					entries[nr].state = LocoFunctionStateOff;
-					break;
-			}
-			entries[nr].type = LocoFunctionTypePermanent;
-			entries[nr].icon = LocoFunctionIconDefault;
-			entries[nr].timer = 0;
 		}
 		return true;
 	}

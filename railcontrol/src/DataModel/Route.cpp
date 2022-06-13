@@ -86,7 +86,7 @@ namespace DataModel
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
-		if (objectType.compare("Route") != 0 && objectType.compare("Street")) // FIXME: remove street later 2020-10-27
+		if (objectType.compare("Route") != 0)
 		{
 			return false;
 		}
@@ -103,7 +103,7 @@ namespace DataModel
 			fromTrack.Clear();
 			fromOrientation = OrientationRight;
 			toTrack.Clear();
-			toOrientation = OrientationLeft;
+			toOrientation = OrientationRight;
 			speed = SpeedTravel;
 			feedbackIdReduced = FeedbackNone;
 			feedbackIdCreep = FeedbackNone;
@@ -118,38 +118,15 @@ namespace DataModel
 			return true;
 		}
 		fromTrack = Utils::Utils::GetStringMapEntry(arguments, "fromTrack");
-		fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromDirection", OrientationRight));
-		fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", fromOrientation));
+		fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
 		toTrack = Utils::Utils::GetStringMapEntry(arguments, "toTrack");
-		std::string orientationString = Utils::Utils::GetStringMapEntry(arguments, "toDirection");
-		if (orientationString.compare("left") == 0)
-		{
-			toOrientation = OrientationLeft;
-		}
-		else if (orientationString.compare("right") == 0)
-		{
-			toOrientation = OrientationRight;
-		}
-		else if (orientationString.compare("0") == 0)
-		{
-			toOrientation = OrientationRight; // FIXME: change later to left and serialize with int 2020-10-27
-		}
-		else if (orientationString.compare("1") == 0)
-		{
-			toOrientation = OrientationLeft; // FIXME: change later to right and serialize with int 2020-10-27
-		}
-		else
-		{
-			toOrientation = OrientationRight;
-		}
-		toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", toOrientation));
+		toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		speed = static_cast<Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", SpeedTravel));
 		feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdReduced", FeedbackNone);
 		feedbackIdCreep = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdCreep", FeedbackNone);
 		feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdStop", FeedbackNone);
 		feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdOver", FeedbackNone);
-		pushpull = static_cast<PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "commuter", PushpullTypeBoth)); // FIXME: remove later 2020-10-27
-		pushpull = static_cast<PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "pushpull", pushpull));
+		pushpull = static_cast<PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "pushpull", PushpullTypeBoth));
 		propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", propulsion));
 		trainType = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "traintype", trainType));
 		minTrainLength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "mintrainlength", 0));
@@ -176,10 +153,6 @@ namespace DataModel
 		}
 		DeleteRelations(relations);
 		relations = newRelations;
-		for (auto relation : relations)
-		{
-			relation->ObjectID1(GetID()); // FIXME: remove later. In older versions the objectID has always been stored with value 0 2020-10-27
-		}
 		return true;
 	}
 

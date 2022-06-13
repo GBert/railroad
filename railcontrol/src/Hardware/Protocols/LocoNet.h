@@ -38,7 +38,10 @@ namespace Hardware
 				LocoNet(const LocoNet&) = delete;
 				LocoNet& operator=(const LocoNet&) = delete;
 
-				LocoNet(const HardwareParams* params, const std::string& controlName);
+				LocoNet(const HardwareParams* params,
+					const std::string& controlName,
+					const unsigned int dataSpeed);
+
 				virtual ~LocoNet();
 
 				inline Hardware::Capabilities GetCapabilities() const override
@@ -57,7 +60,9 @@ namespace Hardware
 
 				void Receiver();
 
-				static void CalcCheckSum(unsigned char* data, unsigned char length);
+				static void CalcCheckSum(unsigned char* data, const unsigned char length, unsigned char* checkSum);
+
+				void Parse(unsigned char* data);
 
 				volatile bool run;
 				mutable Network::Serial serialLine;

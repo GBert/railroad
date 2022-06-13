@@ -38,7 +38,7 @@ namespace Hardware
 			Intellibox2& operator=(const Intellibox2&) = delete;
 
 			inline Intellibox2(const HardwareParams* params)
-			:	Protocols::LocoNet(params, "Intellibox II")
+			:	Protocols::LocoNet(params, "Intellibox II", B115200)
 			{
 			}
 

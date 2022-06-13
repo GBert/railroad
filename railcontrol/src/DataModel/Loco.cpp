@@ -115,11 +115,9 @@ namespace DataModel
 			trackIdentifier.Clear();
 		}
 		functions.Deserialize(Utils::Utils::GetStringMapEntry(arguments, "functions", "0"));
-		orientation = (Utils::Utils::GetStringMapEntry(arguments, "direction", "right").compare("right") == 0 ? OrientationRight : OrientationLeft); // FIXME: remove later 2020-10-27
-		orientation = (static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "orientation", orientation)));
+		orientation = (static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "orientation", OrientationRight)));
 		length = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "length", 0));
-		pushpull = Utils::Utils::GetBoolMapEntry(arguments, "commuter", false);  // FIXME: remove later 2020-10-27
-		pushpull = Utils::Utils::GetBoolMapEntry(arguments, "pushpull", pushpull);
+		pushpull = Utils::Utils::GetBoolMapEntry(arguments, "pushpull", false);
 		maxSpeed = Utils::Utils::GetIntegerMapEntry(arguments, "maxspeed", MaxSpeed);
 		travelSpeed = Utils::Utils::GetIntegerMapEntry(arguments, "travelspeed", DefaultTravelSpeed);
 		reducedSpeed = Utils::Utils::GetIntegerMapEntry(arguments, "reducedspeed", DefaultReducedSpeed);
