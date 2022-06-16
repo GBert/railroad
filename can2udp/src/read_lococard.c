@@ -170,13 +170,13 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     id = le16(&loco_config->bin[1]);
     switch (id) {
     case PREAMBLE_MFX:
-	printf("ID 0x%04x type mfx\n", id);
+	printf("ID 0x%04x type: mfx\n", id);
 	break;
     case PREAMBLE_MFX2:
-	printf("ID 0x%04x type mfx\n", id);
+	printf("ID 0x%04x type: mfx\n", id);
 	break;
     case PREAMBLE_MM:
-	printf("ID 0x%04x type mm 8 functions\n", id);
+	printf("ID 0x%04x type: mm 8 functions\n", id);
 	break;
     case PREAMBLE_MFX_F32:
 	printf("ID 0x%04x type: mfx 32 functions\n", id);
