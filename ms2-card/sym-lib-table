@@ -1,3 +1,5 @@
 (sym_lib_table
-  (lib (name microsd_spi_cd)(type Legacy)(uri ${KIPRJMOD}/sd-card-conn/microsd_spi_cd.lib)(options "")(descr ""))
+  (lib (name "microsd_spi_cd")(type "Legacy")(uri "${KIPRJMOD}/sd-card-conn/microsd_spi_cd.lib")(options "")(descr ""))
+  (lib (name "MCU_RaspberryPi_RP2040")(type "Legacy")(uri "${KIPRJMOD}/MCU_RaspberryPi_RP2040.lib")(options "")(descr ""))
+  (lib (name "ms2-card-rescue")(type "Legacy")(uri "${KIPRJMOD}/ms2-card-rescue.lib")(options "")(descr ""))
 )
