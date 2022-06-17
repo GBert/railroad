@@ -4,10 +4,9 @@
 START=99
 
 start() {
-	[ -e /opt/rocrail/ ] && {
+	[ -e /opt/rocrail/bin ] && {
 		cd /opt/rocrail/
-		sleep 15
-		nohup ./rocrail -nodevcheck -l /opt/rocrail 2>&1 > /dev/null &
+		nohup ./bin/rocrail -nodevcheck -l /opt/rocrail/bin 2>&1 > /dev/null &
 		echo "$!" > /tmp/rocraild.pid
 	}
 }
