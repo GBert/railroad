@@ -34,6 +34,8 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/opt/rocrail
 	$(INSTALL_BIN) ./files/get_rocrail.sh $(1)/opt/rocrail
+	$(INSTALL_BIN) ./files/plan.xml $(1)/opt/rocrail
+	$(INSTALL_BIN) ./files/rocrail.ini $(1)/opt/rocrail
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/rocrail.init $(1)/etc/init.d/rocrail
 endef
