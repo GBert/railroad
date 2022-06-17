@@ -19,7 +19,7 @@ define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=rocrail-bin
-  DEPENDS:
+  DEPENDS:=@(arm)
   URL:=https://www.rocrail.net
   MAINTAINER:=Gerhard Bertelsmann
 endef
