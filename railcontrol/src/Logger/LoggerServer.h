@@ -28,13 +28,12 @@ along with RailControl; see the file LICENCE. If not see
 #include "Logger/LoggerClientConsole.h"
 #include "Logger/LoggerClientFile.h"
 #include "Logger/LoggerClientTcp.h"
-#include "Network/TcpServer.h"
 
 namespace Logger
 {
 	class Logger;
 
-	class LoggerServer: private Network::TcpServer
+	class LoggerServer
 	{
 		public:
 			LoggerServer(const LoggerServer&) = delete;
@@ -43,8 +42,6 @@ namespace Logger
 			Logger* GetLogger(const std::string& component);
 
 			void Send(const std::string& text);
-
-			static const unsigned short defaultLoggerPort = 2223;
 
 			static inline LoggerServer& Instance()
 			{
@@ -74,23 +71,13 @@ namespace Logger
 
 		private:
 			inline LoggerServer()
-			:	Network::TcpServer("any", defaultLoggerPort, "Logger"),
-			 	run(true),
-			 	fileLoggerStarted(false),
+			:	fileLoggerStarted(false),
 			 	consoleLoggerStarted(false)
 			{
 			}
 
 			~LoggerServer();
 
-			inline void Work(Network::TcpConnection* connection) override
-			{
-				clients.push_back(new LoggerClientTcp(connection));
-				// FIXME: clean up unused LoggerClientTcp clients
-			}
-
-
-			volatile bool run;
 			bool fileLoggerStarted;
 			bool consoleLoggerStarted;
 			std::vector<LoggerClient*> clients;

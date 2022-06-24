@@ -59,6 +59,10 @@ namespace Hardware
 			{
 			}
 
+			virtual void Start()
+			{
+			}
+
 			// get the full name of the hardware
 			inline const std::string& GetFullName() const
 			{

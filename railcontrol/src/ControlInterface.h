@@ -24,7 +24,6 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 #include <vector>
 
-#include "DataModel/AccessoryBase.h"
 #include "DataModel/AccessoryConfig.h"
 #include "DataModel/Feedback.h"
 #include "DataModel/FeedbackConfig.h"
@@ -57,6 +56,10 @@ class ControlInterface
 		}
 
 		virtual ~ControlInterface()
+		{
+		}
+
+		virtual void Start()
 		{
 		}
 

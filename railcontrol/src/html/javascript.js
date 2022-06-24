@@ -1849,7 +1849,7 @@ function checkAvailability()
 	}
 	xmlHttp.onload = function()
 	{
-		setTimeout(function() { location.reload(); }, 3000);
+		location.reload();
 	}
 	xmlHttp.open('GET', '/', true);
 	xmlHttp.send(null);

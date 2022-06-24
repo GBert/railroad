@@ -38,8 +38,13 @@ namespace Network
 			TcpServer& operator=(const TcpServer&) = delete;
 
 		protected:
-			TcpServer(const std::string& address, const unsigned short port, const std::string& threadName);
+			TcpServer(const std::string& address,
+				const unsigned short port,
+				const std::string& threadName);
+
 			virtual ~TcpServer();
+
+			void StartTcpServer();
 			void TerminateTcpServer();
 
 			virtual void Work(Network::TcpConnection* connection) = 0;
@@ -51,6 +56,8 @@ namespace Network
 			volatile bool run;
 			std::vector<std::thread> serverThreads;
 			std::string error;
+			const std::string& address;
+			const unsigned short port;
 			const std::string threadName;
 	};
 }

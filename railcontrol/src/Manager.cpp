@@ -178,9 +178,18 @@ Manager::Manager(Config& config)
 		logger->Info(Languages::TextLoadedLoco, loco.second->GetID(), loco.second->GetName());
 	}
 
-	run = true;
 	debounceRun = true;
 	debounceThread = std::thread(&Manager::DebounceWorker, this);
+
+	{
+		std::lock_guard<std::mutex> guard(controlMutex);
+		for (auto& control : controls)
+		{
+			control.second->Start();
+		}
+	}
+
+	run = true;
 	InitLocos();
 }
 
@@ -1084,6 +1093,8 @@ void Manager::AccessoryState(const ControlType controlType, const ControlID cont
 		SignalState(controlType, signal, signal->CalculateInvertedAccessoryState(state), true);
 		return;
 	}
+
+	logger->Warning(Languages::TextAccessoryControlProtocolAddressDoesNotExist, controlID, protocol, address);
 }
 
 bool Manager::AccessoryState(const ControlType controlType, const AccessoryID accessoryID, const DataModel::AccessoryState state, const bool force)

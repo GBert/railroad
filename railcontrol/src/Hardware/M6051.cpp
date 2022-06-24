@@ -147,7 +147,7 @@ namespace Hardware
 			return;
 		}
 
-		logger->Info(Languages::TextSettingAccessory, address, Languages::GetGreenRed(state), Languages::GetOnOff(on));
+		logger->Info(Languages::TextSettingAccessoryOnOff, address, Languages::GetGreenRed(state), Languages::GetOnOff(on));
 		const unsigned char stateMM = (state == DataModel::AccessoryStateOn ? 33 : 34);
 		const unsigned char addressMM = static_cast<unsigned char>(address);
 		SendTwoBytes(stateMM, addressMM);

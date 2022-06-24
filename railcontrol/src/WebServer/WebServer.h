@@ -45,6 +45,8 @@ namespace WebServer
 			WebServer(Manager& manager, const std::string& webserveraddress, const unsigned short port);
 			~WebServer();
 
+			void Start() override;
+
 			void Stop() override;
 
 			void Work(Network::TcpConnection* connection) override;

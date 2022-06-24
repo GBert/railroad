@@ -30,13 +30,6 @@ namespace Logger
 {
 	LoggerServer::~LoggerServer()
 	{
-		if (run == false)
-		{
-			return;
-		}
-
-		run = false;
-
 		// delete all client memory
 		while (clients.size() > 0)
 		{

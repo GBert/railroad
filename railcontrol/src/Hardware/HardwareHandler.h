@@ -52,10 +52,20 @@ namespace Hardware
 				Close();
 			}
 
+			virtual void Start() override
+			{
+				if (instance == nullptr)
+				{
+					return;
+				}
+				instance->Start();
+			}
+
 			inline void ReInit(const HardwareParams* params) override
 			{
 				Close();
 				Init(params);
+				Start();
 			}
 
 			inline ControlID GetControlID() const

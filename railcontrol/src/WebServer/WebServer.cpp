@@ -61,7 +61,6 @@ namespace WebServer
 		updateID(1),
 		updateAvailable(false)
 	{
-		logger->Info(Languages::TextWebServerStarted);
 		AddUpdate(Languages::TextRailControlStarted);
 
 		LogBrowserInfo(webserveraddress, port);
@@ -78,6 +77,12 @@ namespace WebServer
 			delete client;
 		}
 		logger->Info(Languages::TextWebServerStopped);
+	}
+
+	void WebServer::Start()
+	{
+		StartTcpServer();
+		logger->Info(Languages::TextWebServerStarted);
 	}
 
 	void WebServer::Stop()
