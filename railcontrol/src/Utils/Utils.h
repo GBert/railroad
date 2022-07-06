@@ -97,6 +97,10 @@ namespace Utils
 			static void CopyFile(Logger::Logger* logger, const std::string& from, const std::string& to);
 			static void RenameFile(Logger::Logger* logger, const std::string& from, const std::string& to);
 
+			static void RemoveOldBackupFiles (Logger::Logger *logger,
+				const std::string &filename,
+				unsigned int keepBackups);
+
 			static inline void SetThreadName(const std::string& name)
 			{
 				SetThreadName(name.c_str());

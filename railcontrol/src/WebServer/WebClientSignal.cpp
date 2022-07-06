@@ -66,29 +66,13 @@ namespace WebServer
 		Protocol protocol = ProtocolNone;
 		Address address = AddressDefault;
 		string name = Languages::GetText(Languages::TextNew);
-		Orientation signalOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "signalorientation", OrientationRight));
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", LayerUndeletable);
-
-		// FIXME: Remove later: 2021-03-18
-		LayoutItemSize height = Utils::Utils::GetIntegerMapEntry(arguments, "length", 1);
-
 		LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
 		DataModel::AccessoryType signalType = DataModel::SignalTypeSimpleLeft;
 		DataModel::AccessoryPulseDuration duration = manager.GetDefaultAccessoryDuration();
 		bool inverted = false;
-
-		// FIXME: Remove later: 2021-03-18
-		std::vector<FeedbackID> feedbacks;
-
-		DataModel::SelectRouteApproach selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::GetIntegerMapEntry(arguments, "selectrouteapproach", DataModel::SelectRouteSystemDefault));
-		bool allowLocoTurn = Utils::Utils::GetBoolMapEntry(arguments, "allowlocoturn", false);
-		bool releaseWhenFree = Utils::Utils::GetBoolMapEntry(arguments, "releasewhenfree", false);
-		Cluster* cluster = nullptr;
-
-		// FIXME: Remove later: 2021-03-18
-		bool automodeNeeded = false;
 
 		if (signalID > SignalNone)
 		{
@@ -100,22 +84,13 @@ namespace WebServer
 				protocol = signal->GetProtocol();
 				address = signal->GetAddress();
 				name = signal->GetName();
-				signalOrientation = signal->GetSignalOrientation();
 				posx = signal->GetPosX();
 				posy = signal->GetPosY();
 				posz = signal->GetPosZ();
-				height = signal->GetHeight();
 				rotation = signal->GetRotation();
 				signalType = signal->GetType();
 				duration = signal->GetAccessoryPulseDuration();
 				inverted = signal->GetInverted();
-				feedbacks = signal->GetFeedbacks();
-				cluster = signal->GetCluster();
-				selectRouteApproach = signal->GetSelectRouteApproach();
-				allowLocoTurn = signal->GetAllowLocoTurn();
-				releaseWhenFree = signal->GetReleaseWhenFree();
-				// FIXME: Remove later: 2021-03-18
-				automodeNeeded = manager.HasRouteFromOrToTrackBase(ObjectIdentifier(ObjectTypeSignal, signalID));
 			}
 		}
 		else if (controlId > ControlNone)
@@ -145,16 +120,6 @@ namespace WebServer
 		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("address", Languages::TextAddresses).AddAttribute("onclick", "onClickAddresses(" + to_string(signalID) + ");"));
 		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("position", Languages::TextPosition));
 
-		// FIXME: Remove later: 2021-03-18
-		if (feedbacks.size())
-		{
-			tabMenu.AddChildTag(client.HtmlTagTabMenuItem("feedback", Languages::TextFeedbacks));
-		}
-		if (automodeNeeded)
-		{
-			tabMenu.AddChildTag(client.HtmlTagTabMenuItem("automode", Languages::TextAutomode));
-		}
-
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent;
@@ -165,19 +130,7 @@ namespace WebServer
 		mainContent.AddId("tab_main");
 		mainContent.AddClass("tab_content");
 		mainContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		if (automodeNeeded)
-		{
-			mainContent.AddChildTag(HtmlTagSelectOrientationWithLabel("signalorientation", Languages::TextOrientation, signalOrientation));
-		}
 		mainContent.AddChildTag(HtmlTagSelectWithLabel("signaltype", Languages::TextType, signalTypeOptions, signalType));
-		if (automodeNeeded)
-		{
-			mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("length", Languages::TextLength, height, DataModel::Signal::MinLength, DataModel::Signal::MaxLength));
-		}
-		else
-		{
-			mainContent.AddChildTag(HtmlTagInputHidden("length", "1"));
-		}
 		mainContent.AddChildTag(client.HtmlTagControlAccessory(controlId, "signal", signalID));
 		mainContent.AddChildTag(HtmlTag("div").AddId("select_protocol").AddChildTag(client.HtmlTagMatchKeyProtocolAccessory(controlId, matchKey, protocol)));
 		mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextBaseAddress, address, 1, 2044));
@@ -193,17 +146,6 @@ namespace WebServer
 		formContent.AddChildTag(addressContent);
 
 		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, rotation));
-
-		// FIXME: Remove later: 2021-03-18
-		if (feedbacks.size())
-		{
-			formContent.AddChildTag(HtmlTagTabTrackFeedback(client, feedbacks, ObjectIdentifier(ObjectTypeSignal, signalID)));
-		}
-
-		if (automodeNeeded)
-		{
-			formContent.AddChildTag(HtmlTagTabTrackAutomode(selectRouteApproach, allowLocoTurn, releaseWhenFree, cluster));
-		}
 
 		content.AddChildTag(HtmlTag("div").AddClass("popup_content").AddChildTag(HtmlTag("form").AddId("editform").AddChildTag(formContent)));
 		content.AddChildTag(HtmlTagButtonCancel());
@@ -251,7 +193,6 @@ namespace WebServer
 	{
 		SignalID signalID = Utils::Utils::GetIntegerMapEntry(arguments, "signal", SignalNone);
 		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
-		Orientation signalOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "signalorientation", OrientationRight));
 		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
 		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		Protocol protocol = static_cast<Protocol>(Utils::Utils::GetIntegerMapEntry(arguments, "protocol", ProtocolNone));
@@ -261,19 +202,6 @@ namespace WebServer
 		LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
 		LayoutItemSize height = Utils::Utils::GetIntegerMapEntry(arguments, "length", 1);
 		LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
-		vector<FeedbackID> feedbacks;
-		unsigned int feedbackCounter = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackcounter", 1);
-		for (unsigned int feedback = 1; feedback <= feedbackCounter; ++feedback)
-		{
-			FeedbackID feedbackID = Utils::Utils::GetIntegerMapEntry(arguments, "feedback_" + to_string(feedback), FeedbackNone);
-			if (feedbackID != FeedbackNone)
-			{
-				feedbacks.push_back(feedbackID);
-			}
-		}
-		DataModel::SelectRouteApproach selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::GetIntegerMapEntry(arguments, "selectrouteapproach", DataModel::SelectRouteSystemDefault));
-		bool allowLocoTurn = Utils::Utils::GetBoolMapEntry(arguments, "allowlocoturn", false);
-		bool releaseWhenFree = Utils::Utils::GetBoolMapEntry(arguments, "releasewhenfree", false);
 		DataModel::AccessoryType signalType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "signaltype", DataModel::SignalTypeSimpleLeft));
 		std::map<AccessoryState,AddressOffset> offsets;
 		for (AddressOffset i = 0; i < SignalStateMax; ++i)
@@ -292,16 +220,11 @@ namespace WebServer
 		string result;
 		if (!manager.SignalSave(signalID,
 			name,
-			signalOrientation,
 			posX,
 			posY,
 			posZ,
 			height,
 			rotation,
-			feedbacks,
-			selectRouteApproach,
-			allowLocoTurn,
-			releaseWhenFree,
 			controlId,
 			matchKey,
 			protocol,

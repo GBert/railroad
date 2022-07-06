@@ -193,8 +193,6 @@ namespace Storage
 		sqlite.SaveObject(ObjectTypeCluster, clusterID, cluster.GetName(), serialized);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::TypeClusterTrack, clusterID);
 		SaveRelations(cluster.GetTracks());
-		sqlite.DeleteRelationsFrom(DataModel::Relation::TypeClusterSignal, clusterID);
-		SaveRelations(cluster.GetSignals());
 	}
 
 	void StorageHandler::Save(const DataModel::Track& track)
@@ -289,7 +287,6 @@ namespace Storage
 			}
 			const ClusterID clusterId = cluster->GetID();
 			cluster->AssignTracks(RelationsFrom(DataModel::Relation::TypeClusterTrack, clusterId));
-			cluster->AssignSignals(RelationsFrom(DataModel::Relation::TypeClusterSignal, clusterId));
 			clusters[clusterId] = cluster;
 		}
 	}

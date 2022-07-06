@@ -79,7 +79,6 @@ namespace WebServer
 		ClusterID clusterID = Utils::Utils::GetIntegerMapEntry(arguments, "cluster", ClusterNone);
 		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
 		vector<Relation*> tracks;
-		vector<Relation*> signals;
 
 		if (clusterID != ClusterNone)
 		{
@@ -88,7 +87,6 @@ namespace WebServer
 			{
 				name = cluster->GetName();
 				tracks = cluster->GetTracks();
-				signals = cluster->GetSignals();
 			}
 		}
 
@@ -96,10 +94,6 @@ namespace WebServer
 		HtmlTag tabMenu("div");
 		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
 		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("tracks", Languages::TextTracks));
-		if (signals.size() > 0)
-		{
-			tabMenu.AddChildTag(client.HtmlTagTabMenuItem("signals", Languages::TextSignals));
-		}
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");
@@ -114,12 +108,6 @@ namespace WebServer
 		formContent.AddChildTag(basicContent);
 
 		formContent.AddChildTag(client.HtmlTagSlaveSelect("track", tracks, GetTrackOptions(clusterID)));
-
-		// FIXME: remove again later 2021-02-10
-		if (signals.size() > 0)
-		{
-			formContent.AddChildTag(client.HtmlTagSlaveSelect("signal", signals, GetSignalOptions(signals), false));
-		}
 
 		content.AddChildTag(HtmlTag("div").AddClass("popup_content").AddChildTag(formContent));
 		content.AddChildTag(HtmlTagButtonCancel());
@@ -144,20 +132,8 @@ namespace WebServer
 			}
 		}
 
-		vector<Relation*> signals;
-		{
-			vector<SignalID> signalIds = WebClientStatic::InterpretSlaveData("signal", arguments);
-			for (auto signalId : signalIds)
-			{
-				signals.push_back(new Relation(&manager,
-					ObjectIdentifier(ObjectTypeCluster, clusterID),
-					ObjectIdentifier(ObjectTypeSignal, signalId),
-					Relation::TypeClusterSignal));
-			}
-		}
-
 		string result;
-		if (!manager.ClusterSave(clusterID, name, tracks, signals, result))
+		if (!manager.ClusterSave(clusterID, name, tracks, result))
 		{
 			client.ReplyResponse(WebClient::ResponseError, result);
 			return;
@@ -231,22 +207,5 @@ namespace WebServer
 			trackOptions[track.first] = track.second->GetID();
 		}
 		return trackOptions;
-	}
-
-	// FIXME: remove again later 2021-02-10
-	map<string,ObjectID> WebClientCluster::GetSignalOptions(const vector<Relation*>& signals) const
-	{
-		map<string, ObjectID> signalOptions;
-
-		for (auto signalRelation : signals)
-		{
-			Signal* signal = dynamic_cast<Signal*>(signalRelation->GetObject2());
-			if (signal == nullptr)
-			{
-				continue;
-			}
-			signalOptions[signal->GetName()] = signal->GetID();
-		}
-		return signalOptions;
 	}
 } // namespace WebServer

@@ -35,7 +35,6 @@ namespace WebServer
 	:	HtmlTagLayoutItem(layout),
 		track(track)
 	{
-
 		const bool occupied = track->GetFeedbackStateDelayed() == DataModel::Feedback::FeedbackStateOccupied;
 
 		const LocoID locoID = track->GetLocoDelayed();
@@ -49,10 +48,6 @@ namespace WebServer
 		{
 			case ObjectTypeTrack:
 				typeString = "track";
-				break;
-
-			case ObjectTypeSignal:
-				typeString = "signal";
 				break;
 
 			default:
@@ -154,10 +149,6 @@ namespace WebServer
 			case DataModel::TrackTypeStraight:
 			default:
 				image = "<polygon class=\"track\" points=\"15,0 21,0 21," + layoutHeight + " 15," + layoutHeight + "\"/>";
-				if (objectType != ObjectTypeTrack)
-				{
-					break;
-				}
 				const string& orientationSign = track->GetLocoOrientation() == OrientationRight ? "&rarr; " : "&larr; ";
 				const string& locoName = reserved ? orientationSign + manager.GetLocoName(locoID) : "";
 				const string textPositionX = to_string(EdgeLength * trackHeight - 1);

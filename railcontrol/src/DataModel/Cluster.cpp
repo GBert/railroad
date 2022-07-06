@@ -82,23 +82,6 @@ namespace DataModel
 			}
 			return false;
 		}
-		for (auto relation : signals)
-		{
-			Signal* signal = dynamic_cast<Signal*>(relation->GetObject2());
-			if (signal == nullptr)
-			{
-				return false;
-			}
-			if (signal->GetLockState() == DataModel::LockableItem::LockStateFree)
-			{
-				continue;
-			}
-			if (signal->GetLoco() == locoId)
-			{
-				continue;
-			}
-			return false;
-		}
 		return true;
 	}
 
@@ -121,23 +104,6 @@ namespace DataModel
 				continue;
 			}
 			if (track->GetLoco() == locoId)
-			{
-				continue;
-			}
-			return false;
-		}
-		for (auto relation : signals)
-		{
-			Signal* signal = dynamic_cast<Signal*>(relation->GetObject2());
-			if (signal == nullptr)
-			{
-				return false;
-			}
-			if (signal->GetLockState() == DataModel::LockableItem::LockStateFree)
-			{
-				continue;
-			}
-			if (signal->GetLoco() == locoId)
 			{
 				continue;
 			}
@@ -187,50 +153,6 @@ namespace DataModel
 			if (track != nullptr)
 			{
 				track->SetCluster(this);
-			}
-		}
-	}
-
-	void Cluster::DeleteSignals()
-	{
-		while (signals.size() > 0)
-		{
-			Relation* signalRelation = signals.back();
-			Signal* signal = dynamic_cast<Signal*>(signalRelation->GetObject2());
-			if (signal != nullptr)
-			{
-				signal->SetCluster(nullptr);
-			}
-			signals.pop_back();
-			delete signalRelation;
-		}
-	}
-
-	void Cluster::DeleteSignal(Signal* signalToDelete)
-	{
-		for (unsigned int index = 0; index < signals.size(); ++index)
-		{
-			if (signals[index]->GetObject2() != signalToDelete)
-			{
-				continue;
-			}
-			delete signals[index];
-			signals.erase(signals.begin() + index);
-			signalToDelete->SetCluster(nullptr);
-			return;
-		}
-	}
-
-	void Cluster::AssignSignals(const std::vector<DataModel::Relation*>& newSignals)
-	{
-		DeleteSignals();
-		signals = newSignals;
-		for (auto signalRelation : signals)
-		{
-			Signal* signal = dynamic_cast<Signal*>(signalRelation->GetObject2());
-			if (signal != nullptr)
-			{
-				signal->SetCluster(this);
 			}
 		}
 	}

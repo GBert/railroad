@@ -402,16 +402,11 @@ class Manager
 
 		bool SignalSave(SignalID signalID,
 			const std::string& name,
-			const Orientation signalOrientation,
 			const DataModel::LayoutItem::LayoutPosition x,
 			const DataModel::LayoutItem::LayoutPosition y,
 			const DataModel::LayoutItem::LayoutPosition z,
 			const DataModel::LayoutItem::LayoutItemSize height,
 			const DataModel::LayoutItem::LayoutRotation rotation,
-			const std::vector<FeedbackID>& newFeedbacks,
-			const DataModel::SelectRouteApproach selectRouteApproach,
-			const bool allowLocoTurn,
-			const bool releaseWhenFree,
 			const ControlID controlID,
 			const std::string& matchKey,
 			const Protocol protocol,
@@ -437,7 +432,6 @@ class Manager
 		bool ClusterSave(ClusterID clusterID,
 			const std::string& name,
 			const std::vector<DataModel::Relation*>& newTracks,
-			const std::vector<DataModel::Relation*>& newSignals,
 			std::string& result);
 
 		bool ClusterDelete(const ClusterID clusterID);

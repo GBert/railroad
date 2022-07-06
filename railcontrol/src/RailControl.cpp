@@ -153,6 +153,9 @@ int main (int argc, char* argv[])
 	}
 	Config config(configFileName);
 
+	unsigned int logKeepBackups = config.getValue("logkeepbackups", 10);
+	Utils::Utils::RemoveOldBackupFiles(logger, logFileName, logKeepBackups);
+
 	Manager m(config);
 
 	// wait for q followed by \n or SIGINT or SIGTERM

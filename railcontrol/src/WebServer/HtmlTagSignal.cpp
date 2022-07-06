@@ -20,8 +20,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <sstream>
 
-#include "DataModel/AccessoryBase.h"
-#include "DataModel/Signal.h"
 #include "WebServer/HtmlTagSignal.h"
 
 using std::string;
@@ -29,13 +27,11 @@ using std::to_string;
 
 namespace WebServer
 {
-	HtmlTagSignal::HtmlTagSignal(const Manager& manager, const DataModel::Signal* const signal)
-	:	HtmlTagTrackBase(manager,
-			dynamic_cast<const DataModel::TrackBase*>(signal),
-			dynamic_cast<const DataModel::LayoutItem*>(signal)
-		),
-		signal(signal)
+	HtmlTagSignal::HtmlTagSignal(__attribute__((unused)) const Manager& manager, const DataModel::Signal* const signal)
+	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(signal)),
+	 	signal(signal)
 	{
+		image += "<polygon points=\"15,0 21,0 21,36 15,36\" fill=\"white\"/>";
 		image += GetSignalImagePlain(signal);
 		const string idText = to_string(signal->GetID());
 
@@ -89,12 +85,8 @@ namespace WebServer
 		}
 		AddToolTip(signal->GetName() + " (addr=" + to_string(signal->GetAddress()) + ")");
 
-		AddContextMenuEntry(Languages::TextBlockTrack, "fireRequestAndForget('/?cmd=trackblock&" + urlIdentifier + "&blocked=true');", "track_block");
-		AddContextMenuEntry(Languages::TextUnblockTrack, "fireRequestAndForget('/?cmd=trackblock&" + urlIdentifier + "&blocked=false');", "track_unblock");
-		AddContextMenuEntry(Languages::TextReleaseTrack, "fireRequestAndForget('/?cmd=trackrelease&" + urlIdentifier + "');", "track_release");
-		AddContextMenuEntry(Languages::TextReleaseTrackAndLoco, "fireRequestAndForget('/?cmd=locorelease&" + urlIdentifier + "');", "track_loco_release");
-		AddContextMenuEntry(Languages::TextEditSignal, "loadPopup('/?cmd=signaledit&" + urlIdentifier + "');");
-		AddContextMenuEntry(Languages::TextDeleteSignal, "loadPopup('/?cmd=signalaskdelete&" + urlIdentifier + "');");
+		AddContextMenuEntry(Languages::TextEditSignal, "loadPopup('/?cmd=signaledit&signal=" + idText + "');");
+		AddContextMenuEntry(Languages::TextDeleteSignal, "loadPopup('/?cmd=signalaskdelete&signal=" + idText + "');");
 		FinishInit();
 	}
 
@@ -125,20 +117,10 @@ namespace WebServer
 
 	string HtmlTagSignal::GetSignalImagePlain(const DataModel::Signal* const signal)
 	{
-		// FIXME: <g> not needed anymore when signal is only on one side 2021-03-21
-		string image = "<g";
-		if (signal->GetSignalOrientation() == OrientationLeft)
-		{
-			image += " transform=\"rotate(180 18 ";
-			image += to_string(EdgeLength * signal->GetHeight() / 2);
-			image += ")\"";
-		}
-		image += ">";
-
 		switch (signal->GetType())
 		{
 			case DataModel::SignalTypeDeCombined:
-				image += "<polygon points=\"0,0 14,0 14,31 0,31\" fill=\"white\"/>"
+				return "<polygon points=\"0,0 14,0 14,31 0,31\" fill=\"white\"/>"
 					"<polygon points=\"1,1 13,1 13,30 1,30\" fill=\"black\"/>"
 					"<polyline points=\"7,31 7,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,34 10,34\" style=\"stroke:gray;stroke-width:2\"/>"
@@ -150,10 +132,9 @@ namespace WebServer
 					"<circle class=\"aspect7\" cx=\"5\" cy=\"19\" r=\"1.5\" fill=\"yellow\" opacity=\"0\"/>"
 					"<circle class=\"aspect7\" cx=\"9\" cy=\"19\" r=\"1.5\" fill=\"yellow\" opacity=\"0\"/>"
 					"<circle class=\"aspect7\" cx=\"7\" cy=\"23\" r=\"1.5\" fill=\"yellow\" opacity=\"0\"/>";
-				break;
 
 			case DataModel::SignalTypeChLDistant:
-				image += "<polygon points=\"0,13.5 2.5,11 11.5,11 14,13.5 14,25.5 11.5,28 2.5,28 0,25.5\" fill=\"black\"/>"
+				return "<polygon points=\"0,13.5 2.5,11 11.5,11 14,13.5 14,25.5 11.5,28 2.5,28 0,25.5\" fill=\"black\"/>"
 					"<polyline points=\"7,31 7,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,34 10,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<circle class=\"stop aspect2 aspect3 aspect6\" cx=\"3.5\" cy=\"14.5\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
@@ -161,10 +142,9 @@ namespace WebServer
 					"<circle class=\"clear aspect3 aspect5\" cx=\"3.5\" cy=\"24.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
 					"<circle class=\"clear aspect2 aspect3 aspect5 aspect6\" cx=\"10.5\" cy=\"18.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
 					"<circle class=\"aspect5\" cx=\"10.5\" cy=\"24.5\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>";
-				break;
 
 			case DataModel::SignalTypeChLMain:
-				image += "<polygon points=\"2,2.5 4.5,0 9.5,0 12,2.5 12,28.5 9.5,31 4.5,31 2,28.5\" fill=\"white\"/>"
+				return "<polygon points=\"2,2.5 4.5,0 9.5,0 12,2.5 12,28.5 9.5,31 4.5,31 2,28.5\" fill=\"white\"/>"
 					"<polygon points=\"3,3.5 5.5,1 8.5,1 11,3.5 11,27.5 8.5,30 5.5,30 3,27.5\" fill=\"black\"/>"
 					"<polyline points=\"7,31 7,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,34 10,34\" style=\"stroke:gray;stroke-width:2\"/>"
@@ -174,41 +154,35 @@ namespace WebServer
 					"<circle class=\"aspect3 aspect5\" cx=\"7\" cy=\"15.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
 					"<circle class=\"aspect2 aspect6\" cx=\"7\" cy=\"21\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
 					"<circle class=\"aspect5\" cx=\"7\" cy=\"26.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>";
-				break;
 
 			case DataModel::SignalTypeChDwarf:
-				image += "<polygon points=\"0,13 6,13 14,21 14,27 0,27\" fill=\"white\"/>"
+				return "<polygon points=\"0,13 6,13 14,21 14,27 0,27\" fill=\"white\"/>"
 					"<polygon points=\"1,14 5,14 13,22 13,26 1,26\" fill=\"black\"/>"
 					"<polyline points=\"7,27 7,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,30 10,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<circle class=\"clear stopexpected\" cx=\"4\" cy=\"17\" r=\"2\" fill=\"white\" opacity=\"0\"/>"
 					"<circle class=\"stop clear\" cx=\"4\" cy=\"23\" r=\"2\" fill=\"white\" opacity=\"0\"/>"
 					"<circle class=\"stop stopexpected\" cx=\"10\" cy=\"23\" r=\"2\" fill=\"white\" opacity=\"0\"/>";
-				break;
 
 			case DataModel::SignalTypeSimpleRight:
-				image += "<polygon points=\"22,4 26,0 32,0 36,4 36,19 32,23 26,23 22,19\" fill=\"white\"/>"
+				return "<polygon points=\"22,4 26,0 32,0 36,4 36,19 32,23 26,23 22,19\" fill=\"white\"/>"
 					"<polygon points=\"23,5 27,1 31,1 35,5 35,18 31,22 27,22 23,18\" fill=\"black\"/>"
 					"<polyline points=\"29,23 29,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"26,30 32,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<circle class=\"stop\" cx=\"29\" cy=\"7\" r=\"4\" fill=\"red\" opacity=\"0\"/>"
 					"<circle class=\"clear\" cx=\"29\" cy=\"16\" r=\"4\" fill=\"lightgreen\" opacity=\"0\"/>";
-				break;
 
 			case DataModel::SignalTypeSimpleLeft:
-				image += "<polygon points=\"0,4 4,0 10,0 14,4 14,19 10,23 4,23 0,19\" fill=\"white\"/>"
+				return "<polygon points=\"0,4 4,0 10,0 14,4 14,19 10,23 4,23 0,19\" fill=\"white\"/>"
 					"<polygon points=\"1,5 5,1 9,1 13,5 13,18 9,22 5,22 1,18\" fill=\"black\"/>"
 					"<polyline points=\"7,23 7,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,30 10,30\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<circle class=\"stop\" cx=\"7\" cy=\"7\" r=\"4\" fill=\"red\" opacity=\"0\"/>"
 					"<circle class=\"clear\" cx=\"7\" cy=\"16\" r=\"4\" fill=\"lightgreen\" opacity=\"0\"/>";
-				break;
 
 			default:
-				break;
+				return "";
 		}
-		image += "</g>";
-		return image;
 	}
 
 	string HtmlTagSignal::GetStateClassText(const DataModel::AccessoryState state)

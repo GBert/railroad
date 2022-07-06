@@ -54,7 +54,6 @@ namespace DataModel
 			virtual ~Cluster()
 			{
 				DeleteTracks();
-				DeleteSignals();
 			}
 
 			inline ObjectType GetObjectType() const override
@@ -82,19 +81,9 @@ namespace DataModel
 			void DeleteTrack(DataModel::Track* trackToDelete);
 			void AssignTracks(const std::vector<DataModel::Relation*>& newTracks);
 
-			inline const std::vector<DataModel::Relation*>& GetSignals() const
-			{
-				return signals;
-			}
-
-			void DeleteSignals();
-			void DeleteSignal(DataModel::Signal* signalToDelete);
-			void AssignSignals(const std::vector<DataModel::Relation*>& newSignals);
-
 		private:
 			Orientation orientation;
-			std::vector<DataModel::Relation*> tracks;
-			std::vector<DataModel::Relation*> signals; // FIXME: remove again later 2021-02-10
 			mutable std::mutex orientationMutex;
+			std::vector<DataModel::Relation*> tracks;
 	};
 } // namespace DataModel

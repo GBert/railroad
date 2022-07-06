@@ -47,7 +47,6 @@ namespace DataModel
 				TypeRouteAtLock = ObjectTypeRoute << 3,
 				TypeRouteAtUnlock = (ObjectTypeRoute << 3) + 1,
 				TypeClusterTrack = (ObjectTypeCluster << 3),
-				TypeClusterSignal = (ObjectTypeCluster << 3) + 1, // FIXME: remove again later 2021-02-10
 			};
 
 			typedef unsigned short Data;

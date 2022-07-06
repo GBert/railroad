@@ -34,13 +34,9 @@ namespace DataModel
 		string str = "objectType=Signal;";
 		str += AccessoryBase::Serialize();
 		str += ";";
-		str += TrackBase::Serialize();
-		str += ";";
 		str += LayoutItem::Serialize();
 		str += ";";
 		str += LockableItem::Serialize();
-		str += ";signalorientation=";
-		str += std::to_string(signalOrientation);
 		for (auto& stateAddress : stateAddressMap)
 		{
 			str += ";address";
@@ -62,12 +58,10 @@ namespace DataModel
 		}
 
 		AccessoryBase::Deserialize(arguments);
-		TrackBase::Deserialize(arguments);
 		LayoutItem::Deserialize(arguments);
 		LockableItem::Deserialize(arguments);
 		SetWidth(Width1);
 		SetVisible(VisibleYes);
-		signalOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "signalorientation", OrientationRight));
 		for (int i = 0; i < SignalStateMax; ++i)
 		{
 			int address = Utils::Utils::GetIntegerMapEntry(arguments, "address" + std::to_string(i), -1);
@@ -88,24 +82,6 @@ namespace DataModel
 		SetProtocol(accessory.GetProtocol());
 		SetMatchKey(accessory.GetMatchKey());
 		return *this;
-	}
-
-	bool Signal::ReleaseInternal(Logger::Logger* logger, const LocoID locoID)
-	{
-		bool ret = LockableItem::Release(logger, locoID);
-		if (ret == false)
-		{
-			return false;
-		}
-
-		SetAccessoryState(SignalStateStop);
-		PublishState();
-		return true;
-	}
-
-	void Signal::PublishState() const
-	{
-		manager->SignalPublishState(ControlTypeInternal, this);
 	}
 
 	void Signal::ResetStateAddressMap()

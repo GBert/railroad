@@ -60,7 +60,6 @@ namespace Storage
 			Logger::Logger* logger;
 			unsigned int keepBackups;
 
-			void RemoveOldBackupFiles();
 			inline bool Execute(const std::string& query, sqlite3_callback callback = nullptr, void* result = nullptr)
 			{
 				return Execute(query.c_str(), callback, result);

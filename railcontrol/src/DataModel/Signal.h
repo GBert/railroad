@@ -34,7 +34,7 @@ class Manager;
 
 namespace DataModel
 {
-	class Signal : public AccessoryBase, public TrackBase, public LayoutItem, public LockableItem
+	class Signal : public AccessoryBase, public LayoutItem, public LockableItem
 	{
 		public:
 			class StateOption
@@ -62,17 +62,15 @@ namespace DataModel
 			Signal(const Signal&) = delete;
 			Signal& operator=(const Signal&) = delete;
 
-			inline Signal(Manager* manager, const SignalID signalID)
+			inline Signal(__attribute__((unused)) const Manager* const manager, const SignalID signalID)
 			:	AccessoryBase(),
-				TrackBase(manager),
 				LayoutItem(signalID),
 				LockableItem(),
-				signalOrientation(OrientationRight),
 				track(nullptr)
 			{
 			}
 
-			inline Signal(Manager* manager, const std::string& serialized)
+			inline Signal(const Manager* const manager, const std::string& serialized)
 			:	Signal(manager, SignalNone)
 			{
 				Deserialize(serialized);
@@ -98,41 +96,6 @@ namespace DataModel
 
 			using HardwareHandle::Deserialize;
 			bool Deserialize(const std::string& serialized) override;
-
-			inline Orientation GetSignalOrientation() const
-			{
-				return signalOrientation;
-			}
-
-			inline void SetSignalOrientation(const Orientation orientation)
-			{
-				signalOrientation = orientation;
-			}
-
-			inline bool Reserve(Logger::Logger* logger, const LocoID locoID) override
-			{
-				return BaseReserve(logger, locoID);
-			}
-
-			inline bool ReserveForce(Logger::Logger* logger, const LocoID locoID)
-			{
-				return BaseReserveForce(logger, locoID);
-			}
-
-			inline bool Lock(Logger::Logger* logger, const LocoID locoID) override
-			{
-				return BaseLock(logger, locoID);
-			}
-
-			inline bool Release(Logger::Logger* logger, const LocoID locoID) override
-			{
-				return BaseRelease(logger, locoID);
-			}
-
-			inline bool ReleaseForce(Logger::Logger* logger, const LocoID locoID)
-			{
-				return BaseReleaseForce(logger, locoID);
-			}
 
 			inline Track* GetTrack() const
 			{
@@ -179,58 +142,11 @@ namespace DataModel
 
 			Signal& operator=(const Hardware::AccessoryCacheEntry& accessory);
 
-		protected:
-			inline bool ReserveInternal(Logger::Logger* logger, const LocoID locoID) override
-			{
-				return LockableItem::Reserve(logger, locoID);
-			}
-
-			inline bool LockInternal(Logger::Logger* logger, const LocoID locoID) override
-			{
-				return LockableItem::Lock(logger, locoID);
-			}
-
-			bool ReleaseInternal(Logger::Logger* logger, const LocoID locoID) override;
-
-			void PublishState() const override;
-
-			inline ObjectIdentifier GetObjectIdentifier() const override
-			{
-				return ObjectIdentifier(ObjectTypeSignal, GetID());
-			}
-
-			inline ObjectID GetMyID() const override
-			{
-				return GetID();
-			}
-
-			inline const std::string& GetMyName() const override
-			{
-				return GetName();
-			}
-
-			inline LocoID GetMyLoco() const override
-			{
-				return GetLoco();
-			}
-
-			inline bool IsTrackInUse() const override
-			{
-				return IsInUse();
-			}
-
-			inline LocoID GetLockedLoco() const override
-			{
-				return GetLoco();
-			}
-
 		private:
 			void ResetStateAddressMap();
 
 			std::map<AccessoryState,AddressOffset> stateAddressMap;
 
-			// FIXME: Remove later: 2021-03-18
-			Orientation signalOrientation;
 			Track* track;
 	};
 } // namespace DataModel

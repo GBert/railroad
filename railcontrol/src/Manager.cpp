@@ -1725,9 +1725,6 @@ TrackBase* Manager::GetTrackBase(const ObjectIdentifier& identifier) const
 		case ObjectTypeTrack:
 			return GetTrack(identifier.GetObjectID());
 
-		case ObjectTypeSignal:
-			return GetSignal(identifier.GetObjectID());
-
 		default:
 			return nullptr;
 	}
@@ -2912,16 +2909,11 @@ const std::string& Manager::GetSignalName(const SignalID signalID) const
 
 bool Manager::SignalSave(SignalID signalID,
 	const string& name,
-	const Orientation signalOrientation,
 	const LayoutPosition posX,
 	const LayoutPosition posY,
 	const LayoutPosition posZ,
 	const LayoutItemSize height,
 	const LayoutRotation rotation,
-	const std::vector<FeedbackID>& newFeedbacks,
-	const DataModel::SelectRouteApproach selectRouteApproach,
-	const bool allowLocoTurn,
-	const bool releaseWhenFree,
 	const ControlID controlID,
 	const string& matchKey,
 	const Protocol protocol,
@@ -2958,16 +2950,11 @@ bool Manager::SignalSave(SignalID signalID,
 	signalID = signal->GetID();
 
 	signal->SetName(CheckObjectName(signals, signalMutex, signalID, name.size() == 0 ? "S" : name));
-	signal->SetSignalOrientation(signalOrientation);
 	signal->SetPosX(posX);
 	signal->SetPosY(posY);
 	signal->SetPosZ(posZ);
 	signal->SetHeight(height);
 	signal->SetRotation(rotation);
-	signal->Feedbacks(CleanupAndCheckFeedbacksForTrack(ObjectIdentifier(ObjectTypeSignal, signalID), newFeedbacks));
-	signal->SetSelectRouteApproach(selectRouteApproach);
-	signal->SetAllowLocoTurn(allowLocoTurn);
-	signal->SetReleaseWhenFree(releaseWhenFree);
 	signal->SetControlID(controlID);
 	signal->SetMatchKey(matchKey);
 	signal->SetProtocol(protocol);
@@ -3081,13 +3068,6 @@ bool Manager::SignalDelete(const SignalID signalID,
 			return false;
 		}
 
-		FeedbackID feedbackId = signal->GetFirstFeedbackId();
-		if (feedbackId != FeedbackNone)
-		{
-			result = Logger::Logger::Format(Languages::GetText(Languages::TextSignalIsUsedByRoute), signal->GetName(), GetFeedbackName(feedbackId));
-			return false;
-		}
-
 		signals.erase(signalID);
 	}
 
@@ -3102,12 +3082,6 @@ bool Manager::SignalDelete(const SignalID signalID,
 	for (auto& control : controls)
 	{
 		control.second->SignalDelete(signalID, name, matchKey);
-	}
-
-	Cluster* cluster = signal->GetCluster();
-	if (cluster != nullptr)
-	{
-		cluster->DeleteSignal(signal);
 	}
 
 	delete signal;
@@ -3196,7 +3170,6 @@ const map<string,DataModel::Cluster*> Manager::ClusterListByName() const
 bool Manager::ClusterSave(ClusterID clusterID,
 	const string& name,
 	const vector<Relation*>& newTracks,
-	const vector<Relation*>& newSignals,
 	string& result)
 {
 	Cluster* cluster = GetCluster(clusterID);
@@ -3217,7 +3190,6 @@ bool Manager::ClusterSave(ClusterID clusterID,
 	// update existing cluster
 	cluster->SetName(CheckObjectName(clusters, clusterMutex, clusterID, name.size() == 0 ? "C" : name));
 	cluster->AssignTracks(newTracks);
-	cluster->AssignSignals(newSignals);
 
 	// save in db
 	if (storage)
@@ -3246,7 +3218,6 @@ bool Manager::ClusterDelete(const ClusterID clusterID)
 	}
 
 	cluster->DeleteTracks();
-	cluster->DeleteSignals();
 
 	if (storage)
 	{
@@ -3577,13 +3548,6 @@ void Manager::TrackBasePublishState(const DataModel::TrackBase* trackBase)
 	if (track != nullptr)
 	{
 		TrackPublishState(track);
-		return;
-	}
-
-	const Signal* signal = dynamic_cast<const Signal*>(trackBase);
-	if (signal != nullptr)
-	{
-		SignalPublishState(ControlTypeInternal, signal);
 		return;
 	}
 }

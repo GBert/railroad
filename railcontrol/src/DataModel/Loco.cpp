@@ -100,20 +100,7 @@ namespace DataModel
 		}
 		HardwareHandle::Deserialize(arguments);
 		ObjectIdentifier trackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "track");
-		if (trackIdentifier.GetObjectID() == ObjectNone)
-		{
-			// FIXME: check if really needed 2021-05-19
-			trackIdentifier.SetObjectID(static_cast<ObjectID>(Utils::Utils::GetIntegerMapEntry(arguments, "trackID", TrackNone)));
-			if (trackIdentifier.GetObjectID() != ObjectNone)
-			{
-				trackIdentifier.SetObjectType(ObjectTypeTrack);
-			}
-		}
 		trackFrom = manager->GetTrackBase(trackIdentifier);
-		if (trackFrom == nullptr)
-		{
-			trackIdentifier.Clear();
-		}
 		functions.Deserialize(Utils::Utils::GetStringMapEntry(arguments, "functions", "0"));
 		orientation = (static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "orientation", OrientationRight)));
 		length = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "length", 0));

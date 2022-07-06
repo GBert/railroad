@@ -446,11 +446,9 @@ namespace WebServer
 				text = Languages::TextSignalStateIsDark;
 				break;
 		}
-		string signalIdText(to_string(signal->GetID()));
-		string command = "signal;signal=" + signalIdText + ";state=" + stateText;
+		const string signalIdText(to_string(signal->GetID()));
+		const string command = "signal;signal=" + signalIdText + ";state=" + stateText;
 		AddUpdate(command, text, signal->GetName());
-		string command2 = "trackstate;signal=" + signalIdText;
-		TrackBaseState(command2, dynamic_cast<const DataModel::TrackBase*>(signal));
 	}
 
 	void WebServer::SignalSettings(const SignalID signalID,

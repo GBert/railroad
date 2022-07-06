@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
 #include <arpa/inet.h>
 #include <cstdarg>    // va_* in xlog
 #include <cstdio>     // printf
@@ -31,6 +32,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <sstream>
 #include <string>
 #include <sys/time.h> // gettimeofday
+#include <vector>
 
 #include "Languages.h"
 #include "Logger/Logger.h"
@@ -376,6 +378,57 @@ namespace Utils
 			logger->Info(Languages::TextRenamingFromTo, from, to);
 		}
 		std::rename(from.c_str(), to.c_str());
+	}
+
+	void Utils::RemoveOldBackupFiles (Logger::Logger *logger,
+		const std::string &filename,
+		unsigned int keepBackups)
+	{
+		DIR *dir = opendir(".");
+		if (dir == nullptr)
+		{
+			return;
+		}
+		struct dirent *ent;
+		std::vector < string > fileNames;
+		const string filenameSearch = filename + ".";
+		const size_t filenameSearchLength = filenameSearch.length() + 10;
+		while (true)
+		{
+			ent = readdir(dir);
+			if (ent == nullptr)
+			{
+				break;
+			}
+			string fileName = ent->d_name;
+			if (fileName.length() != filenameSearchLength || fileName.find(filenameSearch) == string::npos)
+			{
+				continue;
+			}
+			fileNames.push_back(ent->d_name);
+		}
+		closedir(dir);
+		std::sort(fileNames.begin(), fileNames.end());
+
+		size_t numberOfFiles = fileNames.size();
+		if (numberOfFiles == 0 || numberOfFiles < keepBackups)
+		{
+			return;
+		}
+
+		unsigned int removeBackups = fileNames.size() - keepBackups;
+		++removeBackups; // at shutdown we create another backupfile
+		for (auto &fileName : fileNames)
+		{
+			if (removeBackups == 0)
+			{
+				return;
+			}
+
+			--removeBackups;
+			logger->Info(Languages::TextRemoveBackupFile, fileName);
+			remove(fileName.c_str());
+		}
 	}
 
 	void Utils::SetMinThreadPriority()

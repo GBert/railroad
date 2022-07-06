@@ -259,15 +259,6 @@ namespace DataModel
 			executeAtUnlock = true;
 		}
 
-		if (fromTrack.GetObjectType() == ObjectTypeSignal)
-		{
-			Signal *signal = dynamic_cast<Signal*>(manager->GetTrackBase(fromTrack));
-			if (signal != nullptr && signal->GetLocoOrientation() == signal->GetSignalOrientation())
-			{
-				return manager->SignalState(ControlTypeInternal, signal, SignalStateClear, true);
-			}
-		}
-
 		return true;
 	}
 
@@ -375,15 +366,6 @@ namespace DataModel
 		for (auto relation : relationsAtLock)
 		{
 			relation->Release(logger, locoID);
-		}
-
-		if (fromTrack.GetObjectType() == ObjectTypeSignal)
-		{
-			Signal *signal = dynamic_cast<Signal*>(manager->GetTrackBase(fromTrack));
-			if (signal != nullptr && signal->GetLocoOrientation() == signal->GetSignalOrientation())
-			{
-				manager->SignalState(ControlTypeInternal, signal, SignalStateStop, true);
-			}
 		}
 
 		return LockableItem::Release(logger, locoID);
