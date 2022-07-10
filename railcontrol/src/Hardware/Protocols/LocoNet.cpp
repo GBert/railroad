@@ -263,7 +263,7 @@ namespace Hardware
 					const DataModel::AccessoryState state = static_cast<DataModel::AccessoryState>((data[2] & 0x20) >> 5);
 					const Address address = (static_cast<Address>(data[1] & 0x7F) | (static_cast<Address>(data[2] & 0x0F) << 7)) + 1;
 					logger->Info(Languages::TextSettingAccessory, address, Languages::GetGreenRed(state));
-					manager->AccessoryState(ControlTypeHardware, ControlID(), ProtocolServer, address, state);
+					manager->AccessoryState(ControlTypeHardware, controlID, ProtocolServer, address, state);
 					break;
 				}
 
@@ -322,7 +322,7 @@ namespace Hardware
 			}
 			speed <<= 3;
 			logger->Info(Languages::TextSettingSpeed, address, speed);
-			manager->LocoSpeed(ControlTypeHardware, ControlID(), ProtocolServer, address, speed);
+			manager->LocoSpeed(ControlTypeHardware, controlID, ProtocolServer, address, speed);
 
 		}
 
@@ -349,37 +349,37 @@ namespace Hardware
 			{
 				Orientation orientation = static_cast<Orientation>((data >> 5) & 0x01);
 				logger->Info(Languages::TextSettingOrientation, address, orientation);
-				manager->LocoOrientation(ControlTypeHardware, ControlID(), ProtocolServer, address, orientation);
+				manager->LocoOrientation(ControlTypeHardware, controlID, ProtocolServer, address, orientation);
 			}
 			if (dataDiff | 0x10)
 			{
 				DataModel::LocoFunctionState f0 = static_cast<DataModel::LocoFunctionState>((data >> 4) & 0x01);
 				logger->Info(Languages::TextSettingFunction, 0, address, f0);
-				manager->LocoFunctionState(ControlTypeHardware, ControlID(), ProtocolServer, address, 0, f0);
+				manager->LocoFunctionState(ControlTypeHardware, controlID, ProtocolServer, address, 0, f0);
 			}
 			if (dataDiff | 0x01)
 			{
 				DataModel::LocoFunctionState f1 = static_cast<DataModel::LocoFunctionState>((data >> 0) & 0x01);
 				logger->Info(Languages::TextSettingFunction, 1, address, f1);
-				manager->LocoFunctionState(ControlTypeHardware, ControlID(), ProtocolServer, address, 1, f1);
+				manager->LocoFunctionState(ControlTypeHardware, controlID, ProtocolServer, address, 1, f1);
 			}
 			if (dataDiff | 0x02)
 			{
 				DataModel::LocoFunctionState f2 = static_cast<DataModel::LocoFunctionState>((data >> 1) & 0x01);
 				logger->Info(Languages::TextSettingFunction, 2, address, f2);
-				manager->LocoFunctionState(ControlTypeHardware, ControlID(), ProtocolServer, address, 2, f2);
+				manager->LocoFunctionState(ControlTypeHardware, controlID, ProtocolServer, address, 2, f2);
 			}
 			if (dataDiff | 0x04)
 			{
 				DataModel::LocoFunctionState f3 = static_cast<DataModel::LocoFunctionState>((data >> 2) & 0x01);
 				logger->Info(Languages::TextSettingFunction, 3, address, f3);
-				manager->LocoFunctionState(ControlTypeHardware, ControlID(), ProtocolServer, address, 3, f3);
+				manager->LocoFunctionState(ControlTypeHardware, controlID, ProtocolServer, address, 3, f3);
 			}
 			if (dataDiff | 0x08)
 			{
 				DataModel::LocoFunctionState f4 = static_cast<DataModel::LocoFunctionState>((data >> 3) & 0x01);
 				logger->Info(Languages::TextSettingFunction, 4, address, f4);
-				manager->LocoFunctionState(ControlTypeHardware, ControlID(), ProtocolServer, address, 4, f4);
+				manager->LocoFunctionState(ControlTypeHardware, controlID, ProtocolServer, address, 4, f4);
 			}
 		}
 

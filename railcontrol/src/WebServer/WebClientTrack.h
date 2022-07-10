@@ -25,13 +25,12 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Logger/Logger.h"
 #include "Manager.h"
-#include "WebServer/WebClientTrackBase.h"
 
 namespace WebServer
 {
 	class WebClient;
 
-	class WebClientTrack : WebClientTrackBase
+	class WebClientTrack
 	{
 		public:
 			WebClientTrack() = delete;
@@ -40,7 +39,8 @@ namespace WebServer
 			:	manager(manager),
 				client(client),
 				logger(logger)
-			{}
+			{
+			}
 
 			void HandleTrackEdit(const std::map<std::string,std::string>& arguments);
 			void HandleTrackSave(const std::map<std::string,std::string>& arguments);
@@ -58,6 +58,15 @@ namespace WebServer
 			std::map<std::string,ObjectID> GetSignalOptions(const TrackID trackId = TrackNone) const;
 
 		private:
+			static HtmlTag HtmlTagTabTrackAutomode(DataModel::SelectRouteApproach selectRouteApproach,
+				const bool allowLocoTurn,
+				const bool releaseWhenFree,
+				const DataModel::Cluster* cluster);
+
+			static HtmlTag HtmlTagTabTrackFeedback(const WebClient& client,
+				const std::vector<FeedbackID>& feedbacks,
+				const TrackID trackID);
+
 			Manager& manager;
 			WebClient& client;
 			Logger::Logger* logger;

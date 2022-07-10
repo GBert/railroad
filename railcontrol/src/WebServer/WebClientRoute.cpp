@@ -85,9 +85,9 @@ namespace WebServer
 		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", LayerUndeletable);
 		DataModel::LayoutItem::Visible visible = static_cast<Visible>(Utils::Utils::GetBoolMapEntry(arguments, "visible", routeID == RouteNone && ((posx || posy) && posz >= LayerUndeletable) ? DataModel::LayoutItem::VisibleYes : DataModel::LayoutItem::VisibleNo));
 		Automode automode = static_cast<Automode>(Utils::Utils::GetBoolMapEntry(arguments, "automode", AutomodeNo));
-		ObjectIdentifier fromTrack = Utils::Utils::GetStringMapEntry(arguments, "fromtrack");
+		TrackID fromTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "fromtrack", TrackNone));
 		Orientation fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
-		ObjectIdentifier toTrack = Utils::Utils::GetStringMapEntry(arguments, "totrack");
+		TrackID toTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "totrack", TrackNone));
 		Orientation toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		Route::Speed speed = static_cast<Route::Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", Route::SpeedTravel));
 		FeedbackID feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackreduced", FeedbackNone);
@@ -308,9 +308,9 @@ namespace WebServer
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
 		Automode automode = static_cast<Automode>(Utils::Utils::GetBoolMapEntry(arguments, "automode"));
-		ObjectIdentifier fromTrack = Utils::Utils::GetStringMapEntry(arguments, "fromtrack");
+		TrackID fromTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "fromtrack", TrackNone));
 		Orientation fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
-		ObjectIdentifier toTrack = Utils::Utils::GetStringMapEntry(arguments, "totrack");
+		TrackID toTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "totrack", TrackNone));
 		Orientation toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		Route::Speed speed = static_cast<Route::Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", Route::SpeedTravel));
 		FeedbackID feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackreduced", FeedbackNone);
@@ -333,11 +333,11 @@ namespace WebServer
 			{
 				continue;
 			}
-			if (objectId == fromTrack.GetObjectID() && objectType == fromTrack.GetObjectType())
+			if (objectId == fromTrack && objectType == ObjectTypeTrack)
 			{
 				continue;
 			}
-			if (objectId == toTrack.GetObjectID() && objectType == toTrack.GetObjectType())
+			if (objectId == toTrack && objectType == ObjectTypeTrack)
 			{
 				continue;
 			}
@@ -362,11 +362,11 @@ namespace WebServer
 			{
 				continue;
 			}
-			if (objectId == fromTrack.GetObjectID() && objectType == fromTrack.GetObjectType())
+			if (objectId == fromTrack && objectType == ObjectTypeTrack)
 			{
 				continue;
 			}
-			if (objectId == toTrack.GetObjectID() && objectType == toTrack.GetObjectType())
+			if (objectId == toTrack && objectType == ObjectTypeTrack)
 			{
 				continue;
 			}
@@ -843,19 +843,13 @@ namespace WebServer
 
 	HtmlTag WebClientRoute::HtmlTagSelectTrack(const std::string& name,
 		const Languages::TextSelector label,
-		const ObjectIdentifier& identifier,
+		const TrackID trackID,
 		const Orientation orientation,
 		const string& onchange) const
 	{
 		HtmlTag tag;
-		map<string,ObjectIdentifier> tracks = manager.TrackBaseListIdentifierByName();
-		// FIXME: remove signal later and also remove Manager::TrackBaseListIdentifierByName() 2021-02-10
-		if (identifier.GetObjectType() == ObjectTypeSignal)
-		{
-			Signal* signal = manager.GetSignal(identifier.GetObjectID());
-			tracks[signal->GetName()] = ObjectIdentifier(ObjectTypeSignal, signal->GetID());
-		}
-		HtmlTagSelectWithLabel selectTrack(name + "track", label, tracks, identifier);
+		map<string,TrackID> tracks = manager.TrackListIdByName();
+		HtmlTagSelectWithLabel selectTrack(name + "track", label, tracks, trackID);
 		selectTrack.AddClass("select_track");
 		if (onchange.size() > 0)
 		{
@@ -866,14 +860,14 @@ namespace WebServer
 		return tag;
 	}
 
-	HtmlTag WebClientRoute::HtmlTagSelectFeedbacksOfTrack(const ObjectIdentifier& identifier,
+	HtmlTag WebClientRoute::HtmlTagSelectFeedbacksOfTrack(const TrackID trackID,
 		const FeedbackID feedbackIdReduced,
 		const FeedbackID feedbackIdCreep,
 		const FeedbackID feedbackIdStop,
 		const FeedbackID feedbackIdOver) const
 	{
 		HtmlTag tag;
-		map<string,FeedbackID> feedbacks = manager.FeedbacksOfTrack(identifier);
+		map<string,FeedbackID> feedbacks = manager.FeedbacksOfTrack(trackID);
 		map<string,FeedbackID> feedbacksWithNone = feedbacks;
 		feedbacksWithNone["-"] = FeedbackNone;
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackreduced", Languages::TextReducedSpeedAt, feedbacksWithNone, feedbackIdReduced).AddClass("select_feedback"));
@@ -885,7 +879,7 @@ namespace WebServer
 
 	void WebClientRoute::HandleFeedbacksOfTrack(const map<string, string>& arguments)
 	{
-		ObjectIdentifier identifier = Utils::Utils::GetStringMapEntry(arguments, "track");
-		client.ReplyHtmlWithHeader(HtmlTagSelectFeedbacksOfTrack(identifier, FeedbackNone, FeedbackNone, FeedbackNone, FeedbackNone));
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		client.ReplyHtmlWithHeader(HtmlTagSelectFeedbacksOfTrack(trackID, FeedbackNone, FeedbackNone, FeedbackNone, FeedbackNone));
 	}
 } // namespace WebServer

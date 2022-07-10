@@ -22,7 +22,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "DataModel/ObjectIdentifier.h"
 #include "DataModel/Signal.h"
-#include "DataModel/TrackBase.h"
 #include "Utils/Utils.h"
 #include "WebServer/HtmlTag.h"
 #include "WebServer/HtmlTagButtonCancel.h"
@@ -406,15 +405,15 @@ namespace WebServer
 
 	void WebClientSignal::HandleSignalRelease(const map<string, string>& arguments)
 	{
-		const ObjectIdentifier identifier(ObjectTypeSignal, Utils::Utils::GetIntegerMapEntry(arguments, "signal"));
-		bool ret = manager.TrackBaseRelease(identifier);
+		const SignalID signalID = static_cast<SignalID>(Utils::Utils::GetIntegerMapEntry(arguments, "signal"));
+		const bool ret = manager.SignalRelease(signalID);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Signal released" : "Signal not released");
 	}
 
 	void WebClientSignal::HandleSignalStates(const map<string, string>& arguments)
 	{
 		const string name = Utils::Utils::GetStringMapEntry(arguments, "name");
-		const SignalID signalId = static_cast<SwitchID>(Utils::Utils::GetIntegerMapEntry(arguments, "signal"));
+		const SignalID signalId = static_cast<SignalID>(Utils::Utils::GetIntegerMapEntry(arguments, "signal"));
 		client.ReplyHtmlWithHeader(client.HtmlTagRelationSignalState(name, signalId));
 	}
 } // namespace WebServer

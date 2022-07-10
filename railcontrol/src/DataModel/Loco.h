@@ -44,7 +44,7 @@ namespace DataModel
 {
 	class ObjectIdentifier;
 	class Route;
-	class TrackBase;
+	class Track;
 
 	class Loco : public Object, public HardwareHandle
 	{
@@ -132,7 +132,7 @@ namespace DataModel
 
 			bool AddTimeTable(ObjectIdentifier& identifier);
 
-			bool SetTrack(const DataModel::ObjectIdentifier& identifier);
+			bool SetTrack(const TrackID trackID);
 			TrackID GetTrackId();
 			bool Release();
 			bool IsRunningFromTrack(const TrackID trackID) const;
@@ -327,10 +327,10 @@ namespace DataModel
 			void PrepareDestinationFirst(Route* const route, const LocoState newState);
 			void SearchDestinationSecond();
 			void GetTimetableDestinationSecond();
-			DataModel::Route* GetDestinationFromTimeTable(const TrackBase* const track, const bool allowLocoTurn);
+			DataModel::Route* GetDestinationFromTimeTable(const Track* const track, const bool allowLocoTurn);
 			void PrepareDestinationSecond(Route* const route, const LocoState newState);
-			DataModel::Route* SearchDestination(const DataModel::TrackBase* const oldToTrack, const bool allowLocoTurn);
-			bool ReserveRoute(const TrackBase* const track, const bool allowLocoTurn, Route* const route);
+			DataModel::Route* SearchDestination(const DataModel::Track* const oldToTrack, const bool allowLocoTurn);
+			bool ReserveRoute(const Track* const track, const bool allowLocoTurn, Route* const route);
 			void FeedbackIdFirstReached();
 			void FeedbackIdStopReached();
 			void DeleteSlaves();
@@ -358,9 +358,9 @@ namespace DataModel
 
 			volatile LocoState state;
 			volatile bool requestManualMode;
-			TrackBase* trackFrom;
-			TrackBase* trackFirst;
-			TrackBase* trackSecond;
+			Track* trackFrom;
+			Track* trackFirst;
+			Track* trackSecond;
 			Route* routeFirst;
 			Route* routeSecond;
 			volatile FeedbackID feedbackIdFirst;

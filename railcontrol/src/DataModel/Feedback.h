@@ -33,7 +33,7 @@ class Manager;
 
 namespace DataModel
 {
-	class TrackBase;
+	class Track;
 
 	class Feedback : public LayoutItem
 	{
@@ -51,7 +51,7 @@ namespace DataModel
 			 	pin(FeedbackPinNone),
 			 	manager(manager),
 			 	inverted(false),
-			 	relatedObject(),
+			 	trackID(TrackNone),
 			 	track(nullptr),
 				stateCounter(0)
 			{
@@ -75,7 +75,7 @@ namespace DataModel
 
 			inline bool IsInUse() const
 			{
-				return IsRelatedObjectSet();
+				return IsRelatedTrackSet();
 			}
 
 			inline std::string GetLayoutType() const override
@@ -122,34 +122,34 @@ namespace DataModel
 				return pin;
 			}
 
-			inline void ClearRelatedObject()
+			inline void ClearRelatedTrack()
 			{
-				relatedObject.Clear();
+				trackID = TrackNone;
 				track = nullptr;
 			}
 
-			inline bool IsRelatedObjectSet() const
+			inline bool IsRelatedTrackSet() const
 			{
-				return relatedObject.IsSet();
+				return trackID != TrackNone;
 			}
 
-			inline void SetRelatedObject(const ObjectIdentifier& relatedObject)
+			inline void SetRelatedTrack(const TrackID trackID)
 			{
-				this->relatedObject = relatedObject;
+				this->trackID = trackID;
 				track = nullptr;
 			}
 
-			inline ObjectIdentifier GetRelatedObject() const
+			inline TrackID GetRelatedTrack() const
 			{
-				return relatedObject;
+				return trackID;
 			}
 
-			inline bool CompareRelatedObject(const ObjectIdentifier& compare) const
+			inline bool CompareRelatedTrack(const TrackID trackID) const
 			{
-				return relatedObject == compare;
+				return this->trackID == trackID;
 			}
 
-			inline TrackBase* GetTrack()
+			inline Track* GetTrack()
 			{
 				UpdateTrack();
 				return track;
@@ -181,8 +181,8 @@ namespace DataModel
 
 			Manager* manager;
 			bool inverted;
-			ObjectIdentifier relatedObject;
-			TrackBase* track;
+			TrackID trackID;
+			Track* track;
 			unsigned char stateCounter;
 			static const unsigned char MaxStateCounter = 10;
 			mutable std::mutex updateMutex;

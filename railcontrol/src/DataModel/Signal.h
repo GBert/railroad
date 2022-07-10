@@ -26,7 +26,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/AccessoryBase.h"
 #include "DataModel/LayoutItem.h"
 #include "DataModel/LockableItem.h"
-#include "DataModel/TrackBase.h"
+#include "DataModel/Track.h"
 #include "DataTypes.h"
 #include "Languages.h"
 

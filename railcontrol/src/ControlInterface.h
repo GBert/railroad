@@ -163,7 +163,7 @@ class ControlInterface
 
 		virtual void LocoDestinationReached(__attribute__((unused)) const DataModel::Loco* loco,
 			__attribute__((unused)) const DataModel::Route* route,
-			__attribute__((unused)) const DataModel::TrackBase* track)
+			__attribute__((unused)) const DataModel::Track* track)
 		{
 		}
 

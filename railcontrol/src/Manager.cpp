@@ -643,9 +643,9 @@ string Manager::GetRouteList() const
 	{
 		Route* r = route.second;
 		out += to_string(r->GetID()) + ";";
-		out += to_string(r->GetFromTrack().GetObjectID()) + ";";
+		out += to_string(r->GetFromTrack()) + ";";
 		out += to_string(r->GetFromOrientation()) + ";";
-		out += to_string(r->GetToTrack().GetObjectID()) + ";";
+		out += to_string(r->GetToTrack()) + ";";
 		out += to_string(r->GetToOrientation()) + ";";
 		out += r->GetName() + "\n";
 	}
@@ -1598,10 +1598,10 @@ const map<string,DataModel::Feedback*> Manager::FeedbackListByName() const
 	return out;
 }
 
-const map<string,FeedbackID> Manager::FeedbacksOfTrack(const ObjectIdentifier& identifier) const
+const map<string,FeedbackID> Manager::FeedbacksOfTrack(const TrackID trackID) const
 {
 	map<string,FeedbackID> out;
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return out;
@@ -1632,10 +1632,10 @@ bool Manager::FeedbackDelete(const FeedbackID feedbackID,
 		}
 
 		feedback = feedbacks.at(feedbackID);
-		TrackBase* trackBase = feedback->GetTrack();
-		if (trackBase != nullptr)
+		Track* track = feedback->GetTrack();
+		if (track != nullptr)
 		{
-			result = Logger::Logger::Format(Languages::GetText(Languages::TextFeedbackIsUsedByTrack), feedback->GetName(), trackBase->GetMyName());
+			result = Logger::Logger::Format(Languages::GetText(Languages::TextFeedbackIsUsedByTrack), feedback->GetName(), track->GetName());
 			return false;
 		}
 
@@ -1718,18 +1718,6 @@ const map<string,FeedbackConfig> Manager::GetUnmatchedFeedbacksOfControl(const C
 * Track                    *
 ***************************/
 
-TrackBase* Manager::GetTrackBase(const ObjectIdentifier& identifier) const
-{
-	switch (identifier.GetObjectType())
-	{
-		case ObjectTypeTrack:
-			return GetTrack(identifier.GetObjectID());
-
-		default:
-			return nullptr;
-	}
-}
-
 Track* Manager::GetTrack(const TrackID trackID) const
 {
 	std::lock_guard<std::mutex> guard(trackMutex);
@@ -1771,33 +1759,20 @@ const map<string,TrackID> Manager::TrackListIdByName() const
 	return out;
 }
 
-// FIXME: replace with TrackListByName later. 2021-02-10
-const map<string,ObjectIdentifier> Manager::TrackBaseListIdentifierByName() const
-{
-	map<string,ObjectIdentifier> out;
-	{
-		std::lock_guard<std::mutex> guard(trackMutex);
-		for (auto& track : tracks)
-		{
-			out[track.second->GetName()] = ObjectIdentifier(ObjectTypeTrack, track.second->GetID());
-		}
-	}
-	return out;
-}
-
-const std::vector<FeedbackID> Manager::CleanupAndCheckFeedbacksForTrack(const ObjectIdentifier& identifier, const std::vector<FeedbackID>& newFeedbacks)
+const std::vector<FeedbackID> Manager::CleanupAndCheckFeedbacksForTrack(const TrackID trackID,
+	const std::vector<FeedbackID>& newFeedbacks)
 {
 	Storage::TransactionGuard guard(storage);
 	{
 		std::lock_guard<std::mutex> feedbackguard(feedbackMutex);
 		for (auto& feedback : feedbacks)
 		{
-			if (feedback.second->CompareRelatedObject(identifier) == false)
+			if (feedback.second->CompareRelatedTrack(trackID) == false)
 			{
 				continue;
 			}
 
-			feedback.second->ClearRelatedObject();
+			feedback.second->ClearRelatedTrack();
 			if (storage != nullptr)
 			{
 				storage->Save(*feedback.second);
@@ -1813,12 +1788,12 @@ const std::vector<FeedbackID> Manager::CleanupAndCheckFeedbacksForTrack(const Ob
 		{
 			continue;
 		}
-		if (feedback->IsRelatedObjectSet())
+		if (feedback->IsRelatedTrackSet())
 		{
 			continue;
 		}
 		checkedFeedbacks.push_back(feedbackID);
-		feedback->SetRelatedObject(identifier);
+		feedback->SetRelatedTrack(trackID);
 		if (storage != nullptr)
 		{
 			storage->Save(*feedback);
@@ -1872,7 +1847,7 @@ bool Manager::TrackSave(TrackID trackID,
 	track->SetPosY(posY);
 	track->SetPosZ(posZ);
 	track->SetTrackType(trackType);
-	track->Feedbacks(CleanupAndCheckFeedbacksForTrack(ObjectIdentifier(ObjectTypeTrack, trackID), newFeedbacks));
+	track->Feedbacks(CleanupAndCheckFeedbacksForTrack(trackID, newFeedbacks));
 	track->AssignSignals(newSignals);
 	track->SetSelectRouteApproach(selectRouteApproach);
 	track->SetAllowLocoTurn(allowLocoTurn);
@@ -1968,14 +1943,14 @@ bool Manager::TrackDelete(const TrackID trackID,
 			return false;
 		}
 
-		ObjectIdentifier trackIdentifier(ObjectTypeTrack, trackID);
-		Route* route = GetFirstRouteFromOrToTrackBase(trackIdentifier);
+		Route* route = GetFirstRouteFromOrToTrack(trackID);
 		if (route != nullptr)
 		{
 			result = Logger::Logger::Format(Languages::GetText(Languages::TextTrackIsUsedByRoute), track->GetName(), route->GetName());
 			return false;
 		}
 
+		ObjectIdentifier trackIdentifier(ObjectTypeTrack, trackID);
 		if (ObjectIsPartOfRoute(trackIdentifier, track, result))
 		{
 			return false;
@@ -2370,9 +2345,9 @@ bool Manager::RouteSave(RouteID routeID,
 	const LayoutPosition posY,
 	const LayoutPosition posZ,
 	const Automode automode,
-	const ObjectIdentifier& fromTrack,
+	const TrackID fromTrack,
 	const Orientation fromOrientation,
-	const ObjectIdentifier& toTrack,
+	const TrackID toTrack,
 	const Orientation toOrientation,
 	const Route::Speed speed,
 	const FeedbackID feedbackIdReduced,
@@ -2400,40 +2375,13 @@ bool Manager::RouteSave(RouteID routeID,
 	}
 
 	// remove route from old track
-	ObjectIdentifier oldFromTrack = route->GetFromTrack();
-	TrackBase* oldTrack = GetTrackBase(oldFromTrack);
+	Track* oldTrack = GetTrack(route->GetFromTrack());
 	if (oldTrack != nullptr)
 	{
 		oldTrack->RemoveRoute(route);
 		if (storage != nullptr)
 		{
-			switch (oldFromTrack.GetObjectType())
-			{
-				case ObjectTypeTrack:
-				{
-					Track* track = dynamic_cast<Track*>(oldTrack);
-					if (track == nullptr)
-					{
-						break;
-					}
-					storage->Save(*track);
-					break;
-				}
-
-				case ObjectTypeSignal:
-				{
-					Signal* signal = dynamic_cast<Signal*>(oldTrack);
-					if (signal == nullptr)
-					{
-						break;
-					}
-					storage->Save(*signal);
-					break;
-				}
-
-				default:
-					break;
-			}
+			storage->Save(*oldTrack);
 		}
 	}
 
@@ -2470,9 +2418,9 @@ bool Manager::RouteSave(RouteID routeID,
 	}
 	else
 	{
-		route->SetFromTrack(ObjectIdentifier());
+		route->SetFromTrack(TrackNone);
 		route->SetFromOrientation(OrientationRight);
-		route->SetToTrack(ObjectIdentifier());
+		route->SetToTrack(TrackNone);
 		route->SetToOrientation(OrientationLeft);
 		route->SetSpeed(Route::SpeedTravel);
 		route->SetFeedbackIdReduced(FeedbackNone);
@@ -2488,26 +2436,13 @@ bool Manager::RouteSave(RouteID routeID,
 	}
 
 	//Add new route
-	ObjectIdentifier newFromTrack = route->GetFromTrack();
-	TrackBase* newTrack = GetTrackBase(newFromTrack);
+	Track* newTrack = GetTrack(route->GetFromTrack());
 	if (newTrack != nullptr)
 	{
 		newTrack->AddRoute(route);
 		if (storage != nullptr)
 		{
-			switch (newFromTrack.GetObjectType())
-			{
-				case ObjectTypeTrack:
-					storage->Save(*dynamic_cast<Track*>(newTrack));
-					break;
-
-				case ObjectTypeSignal:
-					storage->Save(*dynamic_cast<Signal*>(newTrack));
-					break;
-
-				default:
-					break;
-			}
+			storage->Save(*dynamic_cast<Track*>(newTrack));
 		}
 	}
 
@@ -2623,12 +2558,12 @@ bool Manager::RouteDelete(const RouteID routeID,
 	return true;
 }
 
-Route* Manager::GetFirstRouteFromOrToTrackBase(const ObjectIdentifier& identifier) const
+Route* Manager::GetFirstRouteFromOrToTrack(const TrackID trackID) const
 {
 	std::lock_guard<std::mutex> guard(routeMutex);
 	for (auto& route : routes)
 	{
-		if (route.second->GetToTrack() == identifier || route.second->GetFromTrack() == identifier)
+		if (route.second->GetToTrack() == trackID || route.second->GetFromTrack() == trackID)
 		{
 			return route.second;
 		}
@@ -3056,13 +2991,6 @@ bool Manager::SignalDelete(const SignalID signalID,
 		}
 
 		ObjectIdentifier signalIdentifier(ObjectTypeSignal, signalID);
-		Route* route = GetFirstRouteFromOrToTrackBase(signalIdentifier);
-		if (route != nullptr)
-		{
-			result = Logger::Logger::Format(Languages::GetText(Languages::TextSignalIsUsedByRoute), signal->GetName(), route->GetName());
-			return false;
-		}
-
 		if (ObjectIsPartOfRoute(signalIdentifier, signal, result))
 		{
 			return false;
@@ -3140,6 +3068,16 @@ void Manager::SignalRemoveMatchKey(const SignalID signalId)
 		return;
 	}
 	signal->ClearMatchKey();
+}
+
+bool Manager::SignalRelease(const SignalID signalID)
+{
+	Signal* signal = GetSignal(signalID);
+	if (signal == nullptr)
+	{
+		return false;
+	}
+	return signal->Release(logger, LocoNone);
 }
 
 /***************************
@@ -3402,9 +3340,9 @@ bool Manager::TextDelete(const TextID textID, string& result)
 * Automode                 *
 ***************************/
 
-bool Manager::LocoIntoTrackBase(Logger::Logger* logger, const LocoID locoID, const ObjectIdentifier& trackIdentifier)
+bool Manager::LocoIntoTrack(Logger::Logger* logger, const LocoID locoID, const TrackID trackID)
 {
-	TrackBase* track = GetTrackBase(trackIdentifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
@@ -3416,32 +3354,32 @@ bool Manager::LocoIntoTrackBase(Logger::Logger* logger, const LocoID locoID, con
 		return false;
 	}
 
-	bool reserved = track->BaseReserveForce(logger, locoID);
+	bool reserved = track->ReserveForce(logger, locoID);
 	if (reserved == false)
 	{
 		return false;
 	}
 
-	reserved = loco->SetTrack(trackIdentifier);
+	reserved = loco->SetTrack(trackID);
 	if (reserved == false)
 	{
-		track->BaseRelease(logger, locoID);
+		track->Release(logger, locoID);
 		return false;
 	}
 
-	reserved = track->BaseLock(logger, locoID);
+	reserved = track->Lock(logger, locoID);
 	if (reserved == false)
 	{
 		loco->Release();
-		track->BaseRelease(logger, locoID);
+		track->Release(logger, locoID);
 		return false;
 	}
 
 	const string& locoName = loco->GetName();
-	const string& trackName = track->GetMyName();
+	const string& trackName = track->GetName();
 	logger->Info(Languages::TextLocoIsOnTrack, locoName, trackName);
 
-	TrackBasePublishState(track);
+	TrackPublishState(track);
 	return true;
 }
 
@@ -3473,25 +3411,25 @@ bool Manager::LocoReleaseInternal(Loco* loco)
 	return true;
 }
 
-bool Manager::TrackBaseRelease(const ObjectIdentifier& identifier)
+bool Manager::TrackRelease(const TrackID trackID)
 {
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
 	}
-	return track->BaseReleaseForce(logger, LocoNone);
+	return track->ReleaseForce(logger, LocoNone);
 }
 
-bool Manager::LocoReleaseOnTrackBase(const ObjectIdentifier& identifier)
+bool Manager::LocoReleaseOnTrack(const TrackID trackID)
 {
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
 	}
-	LocoID locoID = track->GetMyLoco();
-	track->BaseReleaseForce(logger, locoID);
+	LocoID locoID = track->GetLoco();
+	track->ReleaseForce(logger, locoID);
 	Loco* loco = GetLoco(locoID);
 	if (loco == nullptr)
 	{
@@ -3500,56 +3438,47 @@ bool Manager::LocoReleaseOnTrackBase(const ObjectIdentifier& identifier)
 	return LocoReleaseInternal(loco);
 }
 
-bool Manager::TrackBaseStartLoco(const ObjectIdentifier& identifier, const DataModel::Loco::AutoModeType type)
+bool Manager::TrackStartLoco(const TrackID trackID,
+	const DataModel::Loco::AutoModeType type)
 {
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
 	}
-	return LocoStart(track->GetMyLoco(), type);
+	return LocoStart(track->GetLoco(), type);
 }
 
-bool Manager::TrackBaseStopLoco(const ObjectIdentifier& identifier)
+bool Manager::TrackStopLoco(const TrackID trackID)
 {
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
 	}
-	return LocoStop(track->GetMyLoco());
+	return LocoStop(track->GetLoco());
 }
 
-void Manager::TrackBaseBlock(const ObjectIdentifier& identifier, const bool blocked)
+void Manager::TrackBlock(const TrackID trackID, const bool blocked)
 {
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return;
 	}
 	track->SetBlocked(blocked);
-	TrackBasePublishState(track);
+	TrackPublishState(track);
 }
 
-void Manager::TrackBaseSetLocoOrientation(const ObjectIdentifier& identifier, const Orientation orientation)
+void Manager::TrackSetLocoOrientation(const TrackID trackID, const Orientation orientation)
 {
-	TrackBase* track = GetTrackBase(identifier);
+	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return;
 	}
 	track->SetLocoOrientation(orientation);
-	TrackBasePublishState(track);
-}
-
-void Manager::TrackBasePublishState(const DataModel::TrackBase* trackBase)
-{
-	const Track* track = dynamic_cast<const Track*>(trackBase);
-	if (track != nullptr)
-	{
-		TrackPublishState(track);
-		return;
-	}
+	TrackPublishState(track);
 }
 
 void Manager::TrackPublishState(const DataModel::Track* track)
@@ -3572,7 +3501,7 @@ bool Manager::RouteRelease(const RouteID routeID)
 	return route->Release(logger, locoID);
 }
 
-bool Manager::LocoDestinationReached(const Loco* loco, const Route* route, const TrackBase* track)
+bool Manager::LocoDestinationReached(const Loco* loco, const Route* route, const Track* track)
 {
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)

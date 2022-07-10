@@ -731,12 +731,13 @@ function onClickFeedback(feedbackID)
 
 function onClickSignal(signalID)
 {
+	var identifier = 'si_' + signalID;
 	if (modifierKeyPressed(event))
 	{
 		rotateObject(identifier);
 		return;
 	}
-	var element = document.getElementById('si_' + signalID);
+	var element = document.getElementById(identifier);
 	var url = '/?cmd=signalstate';
 	url += '&state=' + (element.classList.contains('signal_clear') ? 'stop' : 'clear');
 	url += '&signal=' + signalID;

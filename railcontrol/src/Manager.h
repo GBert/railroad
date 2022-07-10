@@ -89,9 +89,6 @@ class Manager
 			return ProtocolsOfControl(AddressTypeAccessory, controlID);
 		}
 
-		DataModel::TrackBase* GetTrackBase(const DataModel::ObjectIdentifier& identifier) const;
-		void TrackBasePublishState(const DataModel::TrackBase* trackBase);
-
 		// loco
 		std::string GetLocoList() const;
 		std::string GetRouteList() const;
@@ -225,7 +222,7 @@ class Manager
 		}
 
 		const std::map<std::string,DataModel::Feedback*> FeedbackListByName() const;
-		const std::map<std::string,FeedbackID> FeedbacksOfTrack(const DataModel::ObjectIdentifier& identifier) const;
+		const std::map<std::string,FeedbackID> FeedbacksOfTrack(const TrackID trackID) const;
 
 		const std::map<std::string,DataModel::FeedbackConfig> FeedbackConfigByName() const;
 
@@ -291,8 +288,6 @@ class Manager
 		bool TrackDelete(const TrackID trackID,
 			std::string& result);
 
-		const std::map<std::string,DataModel::ObjectIdentifier> TrackBaseListIdentifierByName() const;
-
 		// switch
 		bool SwitchState(const ControlType controlType, const SwitchID switchID, const DataModel::AccessoryState state, const bool force);
 		DataModel::Switch* GetSwitch(const SwitchID switchID) const;
@@ -355,9 +350,9 @@ class Manager
 			const DataModel::LayoutItem::LayoutPosition posY,
 			const DataModel::LayoutItem::LayoutPosition posZ,
 			const Automode automode,
-			const DataModel::ObjectIdentifier& fromTrack,
+			const TrackID fromTrack,
 			const Orientation fromOrientation,
-			const DataModel::ObjectIdentifier& toTrack,
+			const TrackID toTrack,
 			const Orientation toOrientation,
 			const DataModel::Route::Speed speed,
 			const FeedbackID feedbackIdReduced,
@@ -370,11 +365,11 @@ class Manager
 		bool RouteDelete(const RouteID routeID,
 			std::string& result);
 
-		DataModel::Route* GetFirstRouteFromOrToTrackBase(const DataModel::ObjectIdentifier& identifier) const;
+		DataModel::Route* GetFirstRouteFromOrToTrack(const TrackID trackID) const;
 
-		inline bool HasRouteFromOrToTrackBase(const DataModel::ObjectIdentifier& identifier) const
+		inline bool HasRouteFromOrToTrack(const  TrackID trackID) const
 		{
-			return (GetFirstRouteFromOrToTrackBase(identifier) != nullptr);
+			return (GetFirstRouteFromOrToTrack(trackID) != nullptr);
 		}
 
 		// layer
@@ -425,6 +420,8 @@ class Manager
 		DataModel::Signal* GetSignalByMatchKey(const ControlID controlId, const std::string& matchKey) const;
 		void SignalRemoveMatchKey(const SignalID signalId);
 
+		bool SignalRelease(const SignalID signalID);
+
 		// cluster
 		DataModel::Cluster* GetCluster(const ClusterID clusterID) const;
 		const std::map<std::string,DataModel::Cluster*> ClusterListByName() const;
@@ -459,23 +456,23 @@ class Manager
 			std::string& result);
 
 		// automode
-		bool LocoIntoTrackBase(Logger::Logger* logger, const LocoID locoID, const DataModel::ObjectIdentifier& trackIdentifier);
+		bool LocoIntoTrack(Logger::Logger* logger, const LocoID locoID, const TrackID trackID);
 		bool LocoRelease(const LocoID locoID);
-		bool TrackBaseRelease(const DataModel::ObjectIdentifier& objectIdentifier);
-		bool LocoReleaseOnTrackBase(const DataModel::ObjectIdentifier& objectIdentifier);
+		bool TrackRelease(const TrackID trackID);
+		bool LocoReleaseOnTrack(const TrackID trackID);
 
-		bool TrackBaseStartLoco(const DataModel::ObjectIdentifier& objectIdentifier,
+		bool TrackStartLoco(const TrackID trackID,
 			const DataModel::Loco::AutoModeType type);
 
-		bool TrackBaseStopLoco(const DataModel::ObjectIdentifier& objectIdentifier);
-		void TrackBaseBlock(const DataModel::ObjectIdentifier& objectIdentifier, const bool blocked);
-		void TrackBaseSetLocoOrientation(const DataModel::ObjectIdentifier& objectIdentifier, const Orientation orientation);
+		bool TrackStopLoco(const TrackID trackID);
+		void TrackBlock(const TrackID trackID, const bool blocked);
+		void TrackSetLocoOrientation(const TrackID trackID, const Orientation orientation);
 		void TrackPublishState(const DataModel::Track* track);
 		bool RouteRelease(const RouteID routeID);
 
 		bool LocoDestinationReached(const DataModel::Loco* loco,
 			const DataModel::Route* route,
-			const DataModel::TrackBase* track);
+			const DataModel::Track* track);
 
 		bool LocoStart(const LocoID locoID,
 			const DataModel::Loco::AutoModeType type);
@@ -705,7 +702,9 @@ class Manager
 			}
 		}
 
-		const std::vector<FeedbackID> CleanupAndCheckFeedbacksForTrack(const DataModel::ObjectIdentifier& identifier, const std::vector<FeedbackID>& newFeedbacks);
+		const std::vector<FeedbackID> CleanupAndCheckFeedbacksForTrack(const TrackID trackID,
+			const std::vector<FeedbackID>& newFeedbacks);
+
 		void DebounceWorker();
 
 		template<class ID, class T>
@@ -774,7 +773,10 @@ class Manager
 			}
 		}
 
-		bool LocoIntoTrackBase(Logger::Logger *logger, DataModel::Loco* loco, const ObjectType objectType, DataModel::TrackBase* track);
+		bool LocoIntoTrack(Logger::Logger *logger,
+			DataModel::Loco* loco,
+			const ObjectType objectType,
+			DataModel::Track* track);
 
 		void InitLocos();
 

@@ -40,7 +40,7 @@ namespace DataModel
 		str += ";inverted=" + to_string(inverted);
 		str += ";state=" + to_string(stateCounter > 0);
 		str += ";matchkey=" + matchKey;
-		str += ";" + relatedObject.Serialize();
+		str += ";track=" + to_string(trackID);
 		return str;
 	}
 
@@ -62,7 +62,16 @@ namespace DataModel
 		inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted", false);
 		stateCounter = Utils::Utils::GetBoolMapEntry(arguments, "state", FeedbackStateFree) ? MaxStateCounter : 0;
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		relatedObject.Deserialize(arguments);
+		trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		if (trackID == TrackNone)
+		{
+			// FIXME: 2022-07-10 remove identifier later
+			ObjectIdentifier trackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "track");
+			if (trackIdentifier.GetObjectType() == ObjectTypeTrack)
+			{
+				trackID = trackIdentifier.GetObjectID();
+			}
+		}
 		return true;
 	}
 
@@ -101,19 +110,7 @@ namespace DataModel
 			return;
 		}
 
-		switch (relatedObject.GetObjectType())
-		{
-			case ObjectTypeTrack:
-				track = dynamic_cast<TrackBase*>(manager->GetTrack(relatedObject.GetObjectID()));
-				break;
-
-			case ObjectTypeSignal:
-				track = dynamic_cast<TrackBase*>(manager->GetSignal(relatedObject.GetObjectID()));
-				break;
-
-			default:
-				break;
-		}
+		track = manager->GetTrack(trackID);
 	}
 
 	void Feedback::UpdateTrackState(const FeedbackState state)

@@ -25,13 +25,12 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Logger/Logger.h"
 #include "Manager.h"
-#include "WebServer/WebClientTrackBase.h"
 
 namespace WebServer
 {
 	class WebClient;
 
-	class WebClientSignal : WebClientTrackBase
+	class WebClientSignal
 	{
 		public:
 			WebClientSignal() = delete;

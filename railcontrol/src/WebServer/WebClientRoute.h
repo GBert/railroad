@@ -73,11 +73,11 @@ namespace WebServer
 
 			HtmlTag HtmlTagSelectTrack(const std::string& name,
 				const Languages::TextSelector label,
-				const DataModel::ObjectIdentifier& identifier,
+				const TrackID trackID,
 				const Orientation orientation,
 				const std::string& onchange = "") const;
 
-			HtmlTag HtmlTagSelectFeedbacksOfTrack(const DataModel::ObjectIdentifier& identifier,
+			HtmlTag HtmlTagSelectFeedbacksOfTrack(const TrackID trackID,
 				const FeedbackID feedbackIdReduced,
 				const FeedbackID feedbackIdCreep,
 				const FeedbackID feedbackIdStop,

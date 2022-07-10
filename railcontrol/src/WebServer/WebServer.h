@@ -69,7 +69,7 @@ namespace WebServer
 			void LayerDelete(const LayerID layerID, const std::string& name) override;
 			void LayerSettings(const LayerID layerID, const std::string& name) override;
 			void LocoDelete(const LocoID locoID, const std::string& name, const std::string& matchKey) override;
-			void LocoDestinationReached(const DataModel::Loco* loco, const DataModel::Route* route, const DataModel::TrackBase* track) override;
+			void LocoDestinationReached(const DataModel::Loco* loco, const DataModel::Route* route, const DataModel::Track* track) override;
 			void LocoOrientation(const ControlType controlType, const DataModel::Loco* loco, const Orientation direction) override;
 
 			void LocoFunction(const ControlType controlType,
@@ -120,8 +120,6 @@ namespace WebServer
 			void AddUpdate(const std::string& command, const std::string& status);
 
 			void AddUpdate(const Languages::TextSelector status);
-
-			void TrackBaseState(std::string& command, const DataModel::TrackBase* track);
 
 			void LogBrowserInfo(const std::string& webserveraddress, const unsigned short port);
 

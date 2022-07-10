@@ -137,7 +137,7 @@ namespace DataModel
 			}
 
 			bool FromTrackOrientation(Logger::Logger* logger,
-				const DataModel::ObjectIdentifier& identifier,
+				const TrackID trackID,
 				const Orientation trackOrientation,
 				const DataModel::Loco* loco,
 				const bool allowLocoTurn);
@@ -228,12 +228,12 @@ namespace DataModel
 				return automode;
 			}
 
-			inline void SetFromTrack(const ObjectIdentifier& fromTrack)
+			inline void SetFromTrack(const TrackID fromTrack)
 			{
 				this->fromTrack = fromTrack;
 			}
 
-			inline const ObjectIdentifier& GetFromTrack() const
+			inline TrackID GetFromTrack() const
 			{
 				return fromTrack;
 			}
@@ -248,12 +248,12 @@ namespace DataModel
 				return fromOrientation;
 			}
 
-			inline void SetToTrack(const ObjectIdentifier& toTrack)
+			inline void SetToTrack(const TrackID toTrack)
 			{
 				this->toTrack = toTrack;
 			}
 
-			inline const ObjectIdentifier& GetToTrack() const
+			inline TrackID GetToTrack() const
 			{
 				return toTrack;
 			}
@@ -358,9 +358,9 @@ namespace DataModel
 			Length minTrainLength;
 			Length maxTrainLength;
 			Automode automode;
-			ObjectIdentifier fromTrack;
+			TrackID fromTrack;
 			Orientation fromOrientation;
-			ObjectIdentifier toTrack;
+			TrackID toTrack;
 			Orientation toOrientation;
 
 			Speed speed;

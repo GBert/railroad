@@ -39,7 +39,7 @@ namespace DataModel
 	 	executeAtUnlock(false)
 	{
 		Deserialize(serialized);
-		TrackBase* track = manager->GetTrackBase(fromTrack);
+		Track* track = manager->GetTrack(fromTrack);
 		if (track == nullptr)
 		{
 			return;
@@ -61,11 +61,9 @@ namespace DataModel
 		{
 			return str;
 		}
-		str += ";fromTrack=";
-		str += fromTrack;
+		str += ";fromTrack=" + to_string(fromTrack);
 		str += ";fromorientation=" + to_string(fromOrientation);
-		str += ";toTrack=";
-		str += toTrack;
+		str += ";toTrack=" + to_string(toTrack);
 		str += ";toorientation=" + to_string(toOrientation);
 		str += ";speed=" + to_string(speed);
 		str += ";feedbackIdReduced=" + to_string(feedbackIdReduced);
@@ -100,9 +98,9 @@ namespace DataModel
 		automode = static_cast<Automode>(Utils::Utils::GetBoolMapEntry(arguments, "automode", AutomodeNo));
 		if (automode == AutomodeNo)
 		{
-			fromTrack.Clear();
+			fromTrack = TrackNone;
 			fromOrientation = OrientationRight;
-			toTrack.Clear();
+			toTrack = TrackNone;
 			toOrientation = OrientationRight;
 			speed = SpeedTravel;
 			feedbackIdReduced = FeedbackNone;
@@ -117,9 +115,27 @@ namespace DataModel
 			waitAfterRelease = 0;
 			return true;
 		}
-		fromTrack = Utils::Utils::GetStringMapEntry(arguments, "fromTrack");
+		fromTrack = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "fromTrack", TrackNone));
+		if (fromTrack == TrackNone)
+		{
+			// FIXME: 2022-07-10 remove identifier later
+			ObjectIdentifier fromTrackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "fromTrack");
+			if (fromTrackIdentifier.GetObjectType() == ObjectTypeTrack)
+			{
+				fromTrack = fromTrackIdentifier.GetObjectID();
+			}
+		}
 		fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
-		toTrack = Utils::Utils::GetStringMapEntry(arguments, "toTrack");
+		toTrack = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "toTrack", TrackNone));
+		if (toTrack == TrackNone)
+		{
+			// FIXME: 2022-07-10 remove identifier later
+			ObjectIdentifier toTrackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "toTrack");
+			if (toTrackIdentifier.GetObjectType() == ObjectTypeTrack)
+			{
+				toTrack = toTrackIdentifier.GetObjectID();
+			}
+		}
 		toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		speed = static_cast<Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", SpeedTravel));
 		feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdReduced", FeedbackNone);
@@ -157,7 +173,7 @@ namespace DataModel
 	}
 
 	bool Route::FromTrackOrientation(Logger::Logger* logger,
-		const ObjectIdentifier& identifier,
+		const TrackID trackID,
 		const Orientation trackOrientation,
 		const Loco* loco,
 		const bool allowLocoTurn)
@@ -167,7 +183,7 @@ namespace DataModel
 			return false;
 		}
 
-		if (fromTrack != identifier)
+		if (fromTrack != trackID)
 		{
 			return false;
 		}
@@ -212,7 +228,7 @@ namespace DataModel
 
 		if (allowLocoTurn == true && locoPushpull == true)
 		{
-			TrackBase* trackBase = manager->GetTrackBase(fromTrack);
+			Track* trackBase = manager->GetTrack(fromTrack);
 			if (trackBase != nullptr)
 			{
 				bool allowTrackTurn = trackBase->GetAllowLocoTurn();
@@ -279,13 +295,13 @@ namespace DataModel
 
 		if (automode == AutomodeYes)
 		{
-			TrackBase* track = manager->GetTrackBase(toTrack);
+			Track* track = manager->GetTrack(toTrack);
 			if (track == nullptr)
 			{
 				ReleaseInternal(logger, locoID);
 				return false;
 			}
-			if (track->BaseReserve(logger, locoID) == false)
+			if (track->Reserve(logger, locoID) == false)
 			{
 				ReleaseInternal(logger, locoID);
 				return false;
@@ -321,13 +337,13 @@ namespace DataModel
 
 		if (automode == AutomodeYes)
 		{
-			TrackBase* track = manager->GetTrackBase(toTrack);
+			Track* track = manager->GetTrack(toTrack);
 			if (track == nullptr)
 			{
 				ReleaseInternal(logger, locoID);
 				return false;
 			}
-			if (track->BaseLock(logger, locoID) == false)
+			if (track->Lock(logger, locoID) == false)
 			{
 				ReleaseInternal(logger, locoID);
 				return false;
@@ -373,10 +389,10 @@ namespace DataModel
 
 	void Route::ReleaseInternalWithToTrack(Logger::Logger* logger, const LocoID locoID)
 	{
-		TrackBase* track = manager->GetTrackBase(toTrack);
+		Track* track = manager->GetTrack(toTrack);
 		if (track != nullptr)
 		{
-			track->BaseRelease(logger, locoID);
+			track->Release(logger, locoID);
 		}
 		ReleaseInternal(logger, locoID);
 	}

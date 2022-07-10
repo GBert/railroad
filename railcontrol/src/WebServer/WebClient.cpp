@@ -1115,8 +1115,8 @@ namespace WebServer
 		}
 		else
 		{
-			ObjectIdentifier identifier(arguments);
-			ret = manager.LocoReleaseOnTrackBase(identifier);
+			TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+			ret = manager.LocoReleaseOnTrack(trackID);
 		}
 		ReplyHtmlWithHeaderAndParagraph(ret ? "Loco released" : "Loco not released");
 	}
@@ -1290,7 +1290,7 @@ namespace WebServer
 	}
 
 	HtmlTag WebClient::HtmlTagSelectFeedbackForTrack(const unsigned int counter,
-		const ObjectIdentifier& objectIdentifier,
+		const TrackID trackID,
 		const FeedbackID feedbackID) const
 	{
 		string counterString = to_string(counter);
@@ -1305,7 +1305,7 @@ namespace WebServer
 		map<string, FeedbackID> feedbackOptions;
 		for (auto& feedback : feedbacks)
 		{
-			if (feedback.second->IsRelatedObjectSet() && !feedback.second->CompareRelatedObject(objectIdentifier))
+			if (feedback.second->IsRelatedTrackSet() && !feedback.second->CompareRelatedTrack(trackID))
 			{
 				continue;
 			}
@@ -1356,9 +1356,9 @@ namespace WebServer
 
 	void WebClient::HandleFeedbackAdd(const map<string, string>& arguments)
 	{
-		unsigned int counter = Utils::Utils::GetIntegerMapEntry(arguments, "counter", 1);
-		ObjectIdentifier identifier(arguments);
-		ReplyHtmlWithHeader(HtmlTagSelectFeedbackForTrack(counter, identifier));
+		const unsigned int counter = Utils::Utils::GetIntegerMapEntry(arguments, "counter", 1);
+		const TrackID trackID = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
+		ReplyHtmlWithHeader(HtmlTagSelectFeedbackForTrack(counter, trackID));
 	}
 
 	map<string,ObjectID> WebClient::GetLocoSlaveOptions(const LocoID locoID) const

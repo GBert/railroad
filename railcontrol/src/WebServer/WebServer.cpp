@@ -48,7 +48,7 @@ using std::vector;
 
 using DataModel::Loco;
 using DataModel::Route;
-using DataModel::TrackBase;
+using DataModel::Track;
 
 namespace WebServer
 {
@@ -319,15 +319,9 @@ namespace WebServer
 
 	void WebServer::TrackState(const DataModel::Track* track)
 	{
-		string command = "trackstate;track=" + to_string(track->GetID());
-		TrackBaseState(command, dynamic_cast<const DataModel::TrackBase*>(track));
-	}
-
-	void WebServer::TrackBaseState(string& command, const DataModel::TrackBase* track)
-	{
 		const DataModel::Loco* loco = manager.GetLoco(track->GetLocoDelayed());
 		const bool reserved = loco != nullptr;
-		const string& trackName = track->GetMyName();
+		const string& trackName = track->GetName();
 		const string& locoName = reserved ? loco->GetName() : "";
 		const bool occupied = track->GetFeedbackStateDelayed() == DataModel::Feedback::FeedbackStateOccupied;
 		const bool blocked = track->GetBlocked();
@@ -336,7 +330,9 @@ namespace WebServer
 		const string blockedText = (blocked ? "true" : "false");
 		const string reservedText = (reserved ? "true" : "false");
 		const string orientationText = (orientation ? "true" : "false");
-		command += ";occupied=" + occupiedText
+		string command = "trackstate;track="
+			+ to_string(track->GetID())
+			+ ";occupied=" + occupiedText
 			+ ";reserved=" + reservedText
 			+ ";blocked=" + blockedText
 			+ ";orientation=" + orientationText
@@ -509,15 +505,15 @@ namespace WebServer
 		AddUpdate(command.str(), Languages::TextRouteIsReleased, manager.GetRouteName(routeID));
 	}
 
-	void WebServer::LocoDestinationReached(const Loco* loco, const Route* route, const TrackBase* track)
+	void WebServer::LocoDestinationReached(const Loco* loco, const Route* route, const Track* track)
 	{
 		string command("locoDestinationReached;loco=");
 		command += to_string(loco->GetID());
 		command += ";route=";
 		command += to_string(route->GetID());
-		command += ";";
-		command += track->GetObjectIdentifier();
-		AddUpdate(command, Languages::TextLocoHasReachedDestination, loco->GetName(), track->GetMyName(), route->GetName());
+		command += ";track=";
+		command += to_string(track->GetID());
+		AddUpdate(command, Languages::TextLocoHasReachedDestination, loco->GetName(), track->GetName(), route->GetName());
 	}
 
 	void WebServer::LocoStart(const LocoID locoID, const std::string& name)

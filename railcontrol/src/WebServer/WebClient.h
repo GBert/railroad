@@ -170,7 +170,7 @@ namespace WebServer
 			HtmlTag HtmlTagProtocolAccessory(const ControlID controlID, const Protocol selectedProtocol);
 
 			HtmlTag HtmlTagSelectFeedbackForTrack(const unsigned int counter,
-				const DataModel::ObjectIdentifier& identifier,
+				const TrackID trackID,
 				const FeedbackID feedbackID = FeedbackNone) const;
 
 			HtmlTag HtmlTagRelationSignalState(const std::string& name,

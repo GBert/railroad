@@ -22,7 +22,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "DataModel/ObjectIdentifier.h"
 #include "DataModel/Track.h"
-#include "DataModel/TrackBase.h"
 #include "Utils/Utils.h"
 #include "WebServer/HtmlTag.h"
 #include "WebServer/HtmlTagButtonCancel.h"
@@ -187,7 +186,7 @@ namespace WebServer
 
 		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, rotation));
 
-		formContent.AddChildTag(HtmlTagTabTrackFeedback(client, feedbacks, ObjectIdentifier(ObjectTypeTrack, trackID)));
+		formContent.AddChildTag(HtmlTagTabTrackFeedback(client, feedbacks, trackID));
 
 		formContent.AddChildTag(client.HtmlTagSlaveSelect("signal", signals, GetSignalOptions(trackID)));
 
@@ -371,35 +370,35 @@ namespace WebServer
 	void WebClientTrack::HandleTrackSetLoco(const map<string, string>& arguments)
 	{
 		HtmlTag content;
-		ObjectIdentifier identifier(arguments);
-		TrackBase* track = manager.GetTrackBase(identifier);
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		Track* track = manager.GetTrack(trackID);
 		if (track == nullptr)
 		{
-			client.ReplyResponse(WebClient::ResponseError, identifier.GetObjectType() == ObjectTypeTrack ? Languages::TextTrackDoesNotExist : Languages::TextSignalDoesNotExist);
+			client.ReplyResponse(WebClient::ResponseError, Languages::TextTrackDoesNotExist);
 			return;
 		}
 
 
-		if (track->IsTrackInUse())
+		if (track->IsInUse())
 		{
-			client.ReplyHtmlWithHeaderAndParagraph(identifier.GetObjectType() == ObjectTypeTrack ? Languages::TextTrackIsUsedByLoco : Languages::TextSignalIsUsedByLoco, track->GetMyName(), manager.GetLocoName(track->GetMyLoco()));
+			client.ReplyHtmlWithHeaderAndParagraph(Languages::TextTrackIsUsedByLoco, track->GetName(), manager.GetLocoName(track->GetLoco()));
 			return;
 		}
 
 		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
 		if (locoID != LocoNone)
 		{
-			bool ret = manager.LocoIntoTrackBase(logger, locoID, identifier);
-			string trackName = track->GetMyName();
+			bool ret = manager.LocoIntoTrack(logger, locoID, trackID);
+			string trackName = track->GetName();
 			ret ? client.ReplyResponse(WebClient::ResponseInfo, Languages::TextLocoIsOnTrack, manager.GetLocoName(locoID), trackName)
 				: client.ReplyResponse(WebClient::ResponseError, Languages::TextUnableToAddLocoToTrack, manager.GetLocoName(locoID), trackName);
 			return;
 		}
 
 		map<string,LocoID> locos = manager.LocoListFree();
-		content.AddChildTag(HtmlTag("h1").AddContent(Languages::TextSelectLocoForTrack, track->GetMyName()));
+		content.AddChildTag(HtmlTag("h1").AddContent(Languages::TextSelectLocoForTrack, track->GetName()));
 		content.AddChildTag(HtmlTagInputHidden("cmd", "tracksetloco"));
-		content.AddChildTag(HtmlTagInputHidden(identifier));
+		content.AddChildTag(HtmlTagInputHidden("track", to_string(trackID)));
 		content.AddChildTag(HtmlTagSelectWithLabel("loco", Languages::TextLoco, locos));
 		content.AddChildTag(HtmlTag("br"));
 		content.AddChildTag(HtmlTagButtonCancel());
@@ -409,39 +408,89 @@ namespace WebServer
 
 	void WebClientTrack::HandleTrackRelease(const map<string, string>& arguments)
 	{
-		ObjectIdentifier identifier(ObjectTypeTrack, Utils::Utils::GetIntegerMapEntry(arguments, "track"));
-		bool ret = manager.TrackBaseRelease(identifier);
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		bool ret = manager.TrackRelease(trackID);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Track released" : "Track not released");
 	}
 
 	void WebClientTrack::HandleTrackStartLoco(const map<string, string>& arguments)
 	{
-		ObjectIdentifier identifier(arguments);
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
 		Loco::AutoModeType type = static_cast<Loco::AutoModeType>(Utils::Utils::GetIntegerMapEntry(arguments, "automodetype", Loco::AutoModeTypeFull));
-		bool ret = manager.TrackBaseStartLoco(identifier, type);
+		bool ret = manager.TrackStartLoco(trackID, type);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Loco started" : "Loco not started");
 	}
 
 	void WebClientTrack::HandleTrackStopLoco(const map<string, string>& arguments)
 	{
-		ObjectIdentifier identifier(arguments);
-		bool ret = manager.TrackBaseStopLoco(identifier);
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		bool ret = manager.TrackStopLoco(trackID);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Loco stopped" : "Loco not stopped");
 	}
 
 	void WebClientTrack::HandleTrackBlock(const map<string, string>& arguments)
 	{
 		bool blocked = Utils::Utils::GetBoolMapEntry(arguments, "blocked");
-		ObjectIdentifier identifier(arguments);
-		manager.TrackBaseBlock(identifier, blocked);
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		manager.TrackBlock(trackID, blocked);
 		client.ReplyHtmlWithHeaderAndParagraph(blocked ? "Block received" : "Unblock received");
 	}
 
 	void WebClientTrack::HandleTrackOrientation(const map<string, string>& arguments)
 	{
 		Orientation orientation = (Utils::Utils::GetBoolMapEntry(arguments, "orientation") ? OrientationRight : OrientationLeft);
-		ObjectIdentifier identifier(arguments);
-		manager.TrackBaseSetLocoOrientation(identifier, orientation);
+		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+		manager.TrackSetLocoOrientation(trackID, orientation);
 		client.ReplyHtmlWithHeaderAndParagraph("Loco orientation of track set");
+	}
+
+	HtmlTag WebClientTrack::HtmlTagTabTrackFeedback(const WebClient& client,
+		const std::vector<FeedbackID>& feedbacks,
+		const TrackID trackID)
+	{
+		unsigned int feedbackCounter = 0;
+		HtmlTag existingFeedbacks("div");
+		existingFeedbacks.AddId("feedbackcontent");
+		for (auto feedbackID : feedbacks)
+		{
+			existingFeedbacks.AddChildTag(client.HtmlTagSelectFeedbackForTrack(++feedbackCounter, trackID, feedbackID));
+		}
+		existingFeedbacks.AddChildTag(HtmlTag("div").AddId("div_feedback_" + to_string(feedbackCounter + 1)));
+
+		HtmlTag feedbackContent("div");
+		feedbackContent.AddId("tab_feedback");
+		feedbackContent.AddClass("tab_content");
+		feedbackContent.AddClass("hidden");
+		feedbackContent.AddChildTag(HtmlTagInputHidden("feedbackcounter", to_string(feedbackCounter)));
+		feedbackContent.AddChildTag(existingFeedbacks);
+		HtmlTagButton newButton(Languages::TextNew, "newfeedback");
+		newButton.AddAttribute("onclick", "addFeedback();return false;");
+		newButton.AddClass("wide_button");
+		feedbackContent.AddChildTag(newButton);
+		feedbackContent.AddChildTag(HtmlTag("br"));
+		return feedbackContent;
+	}
+
+	HtmlTag WebClientTrack::HtmlTagTabTrackAutomode(DataModel::SelectRouteApproach selectRouteApproach,
+		const bool allowLocoTurn,
+		const bool releaseWhenFree,
+		const Cluster* cluster)
+	{
+		HtmlTag automodeContent("div");
+		automodeContent.AddId("tab_automode");
+		automodeContent.AddClass("tab_content");
+		automodeContent.AddClass("hidden");
+
+		automodeContent.AddChildTag(WebClientStatic::HtmlTagSelectSelectRouteApproach(selectRouteApproach));
+
+		automodeContent.AddChildTag(HtmlTagInputCheckboxWithLabel("allowlocoturn", Languages::TextAllowLocoTurn, "false", allowLocoTurn));
+
+		automodeContent.AddChildTag(HtmlTagInputCheckboxWithLabel("releasewhenfree", Languages::TextReleaseWhenFree, "true", releaseWhenFree));
+
+		if (cluster != nullptr)
+		{
+			automodeContent.AddChildTag(HtmlTagInputTextWithLabel("cluster", Languages::TextCluster, cluster->GetName(), HtmlTagInput::StyleDisabled));
+		}
+		return automodeContent;
 	}
 } // namespace WebServer
