@@ -20,6 +20,9 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <algorithm>
+#include <ctime>
+
 #include "Hardware/HardwareInterface.h"
 #include "Hardware/HardwareParams.h"
 #include "Hardware/Protocols/LocoNetLocoCache.h"
@@ -45,10 +48,19 @@ namespace Hardware
 
 				virtual ~LocoNet();
 
+				inline void Start() override
+				{
+					SendRequestLocoData(0x7F);
+					Utils::Utils::SleepForMilliseconds(25);
+					SendRequestLocoData(0);
+					Utils::Utils::SleepForMilliseconds(25);
+				}
+
 				inline Hardware::Capabilities GetCapabilities() const override
 				{
 					return Hardware::CapabilityLoco
-						| Hardware::CapabilityAccessory;
+						| Hardware::CapabilityAccessory
+						| Hardware::CapabilityFeedback;
 				}
 
 				void GetLocoProtocols(std::vector<Protocol>& protocols) const override
@@ -84,7 +96,7 @@ namespace Hardware
 				virtual void LocoFunction(const Protocol protocol,
 					const Address address,
 					const DataModel::LocoFunctionNr function,
-					const DataModel::LocoFunctionState on);
+					const DataModel::LocoFunctionState on) override;
 
 				virtual void AccessoryOnOrOff(__attribute__((unused)) const Protocol protocol,
 					const Address address,
@@ -92,6 +104,10 @@ namespace Hardware
 					const bool on) override;
 
 			private:
+				// longest known LocoNet-Command
+				// also defined in subclass SendingQueueEntry
+				static const unsigned char MaxDataLength = 0x0E;
+
 				enum OpCodes : unsigned char
 				{
 					OPC_BUSY         = 0x81,
@@ -115,10 +131,65 @@ namespace Hardware
 					OPC_SW_STATE     = 0xBC,
 					OPC_SW_ACK       = 0xBD,
 					OPC_LOCO_ADR     = 0xBF,
-					OPC_LOCO_FUNC2   = 0xD4,
 					OPC_SL_RD_DATA   = 0xE7,
-					OPC_WR_SL_DATA   = 0xEF
+					OPC_WR_SL_DATA   = 0xEF,
+					// Intellibox-II codes
+					OPC_LOCO_FUNC2   = 0xD4
 				};
+
+				class SendingQueueEntry
+				{
+					public:
+						inline SendingQueueEntry()
+						:	size(0),
+						 	timestamp(0)
+						{
+						}
+
+						inline SendingQueueEntry(unsigned char size, const unsigned char* data)
+						:	size(std::min(size, static_cast<unsigned char>(MaxDataLength))),
+						 	timestamp(time(nullptr))
+						{
+							memcpy(this->data, data, this->size);
+						}
+
+						inline SendingQueueEntry(const SendingQueueEntry& rhs) = default;
+
+						inline SendingQueueEntry& operator=(const SendingQueueEntry& rhs) = default;
+
+						inline unsigned char GetSize() const
+						{
+							return size;
+						}
+
+						inline unsigned char GetTimestamp() const
+						{
+							return timestamp;
+						}
+
+						inline void SetTimestamp()
+						{
+							timestamp = time(nullptr);
+						}
+
+						inline const unsigned char* GetData() const
+						{
+							return data;
+						}
+
+						inline void Reset()
+						{
+							size = 0;
+							timestamp = 0;
+						}
+
+					private:
+						volatile unsigned char size;
+						unsigned char data[MaxDataLength];
+						volatile time_t timestamp;
+				};
+
+				void Sender();
 
 				void Receiver();
 
@@ -126,17 +197,45 @@ namespace Hardware
 
 				void Parse(unsigned char* data);
 
+				Address CheckSlot(const unsigned char slot);
+
+				void ParseSlotReadData(const unsigned char* data);
+
+				inline Address ParseLocoAddress(const unsigned char data1, const unsigned char data2)
+				{
+					return static_cast<Address>(data1 & 0x7F) | (static_cast<Address>(data2 & 0x3F) << 7);
+				}
+
 				void ParseSpeed(const Address address, const unsigned char data);
 
 				static unsigned char CalcSpeed(const Speed speed);
 
-				void ParseOrientationF0F4(const unsigned char slot, const Address address, const unsigned char data);
+				void ParseOrientationF0F4(const unsigned char slot, const Address address, const uint8_t data);
+
+				void ParseF5F8(const unsigned char slot, const Address address, const uint8_t data);
+
+				void ParseF9F12(const unsigned char slot, const Address address, const uint8_t data);
+
+				void ParseFunction(const Address address,
+					const uint32_t data,
+					const DataModel::LocoFunctionNr nr,
+					const uint8_t shift);
+
+				void ParseF13F44(const unsigned char slot, const Address address, const unsigned char* data);
+
+				void ParseSensorData(const unsigned char* data);
 
 				void Send2ByteCommand(const unsigned char data0);
 
 				void Send4ByteCommand(const unsigned char data0,
 					const unsigned char data1,
 					const unsigned char data2);
+
+				void Send6ByteCommand(const unsigned char data0,
+					const unsigned char data1,
+					const unsigned char data2,
+					const unsigned char data3,
+					const unsigned char data4);
 
 				inline void SendRequestLocoData(const unsigned char slot)
 				{
@@ -155,18 +254,38 @@ namespace Hardware
 					Send4ByteCommand(OPC_LOCO_SPD, slot, CalcSpeed(speed));
 				}
 
-				inline void SendLocoOrientationF0F4(const unsigned char slot, const unsigned char orientationF0F4)
+				inline void SendLocoOrientationF0F4(const unsigned char slot, const uint8_t orientationF0F4)
 				{
 					Send4ByteCommand(OPC_LOCO_DIRF, slot, orientationF0F4);
 				}
 
-				unsigned char SetOrientationF0F4Bit(const unsigned char slot, const bool on, const unsigned char shift);
+				inline void SendLocoF5F8(const unsigned char slot, const uint8_t f5F8)
+				{
+					Send4ByteCommand(OPC_LOCO_SND, slot, f5F8);
+				}
+
+				inline void SendLocoF9F12(const unsigned char slot, const uint8_t f9F12)
+				{
+					Send4ByteCommand(OPC_LOCO_FUNC, slot, f9F12);
+				}
+
+				uint8_t SetOrientationF0F4Bit(const unsigned char slot, const bool on, const unsigned char shift);
+
+				uint8_t SetF5F8Bit(const unsigned char slot, const bool on, const unsigned char shift);
+
+				uint8_t SetF9F12Bit(const unsigned char slot, const bool on, const unsigned char shift);
+
+				uint32_t SetF13F44Bit(const unsigned char slot, const bool on, const unsigned char shift);
 
 				volatile bool run;
 				mutable Network::Serial serialLine;
+				std::thread senderThread;
 				std::thread receiverThread;
 
 				LocoNetLocoCache locoCache;
+
+				Utils::ThreadSafeQueue<SendingQueueEntry> sendingQueue;
+				SendingQueueEntry entryToVerify;
 		};
 	} // namespace
 } // namespace

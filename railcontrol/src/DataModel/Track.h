@@ -233,10 +233,11 @@ namespace DataModel
 				return feedbacks.size() == 0 ? FeedbackNone : feedbacks[0];
 			}
 
-			bool Reserve(Logger::Logger* logger, const LocoID locoID);
+			bool Reserve(Logger::Logger* logger, const LocoID locoID) override;
+			bool Lock(Logger::Logger* logger, const LocoID locoID) override;
+			bool Release(Logger::Logger* logger, const LocoID locoID) override;
+
 			bool ReserveForce(Logger::Logger* logger, const LocoID locoID);
-			bool Lock(Logger::Logger* logger, const LocoID locoID);
-			bool Release(Logger::Logger* logger, const LocoID locoID);
 			bool ReleaseForce(Logger::Logger* logger, const LocoID locoID);
 
 			inline const std::vector<DataModel::Relation*>& GetSignals() const

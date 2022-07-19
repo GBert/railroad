@@ -29,8 +29,7 @@ using std::to_string;
 namespace WebServer
 {
 	HtmlTagTrack::HtmlTagTrack(const Manager& manager, const DataModel::Track* track)
-	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(track)),
-		track(track)
+	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(track))
 	{
 		const bool occupied = track->GetFeedbackStateDelayed() == DataModel::Feedback::FeedbackStateOccupied;
 

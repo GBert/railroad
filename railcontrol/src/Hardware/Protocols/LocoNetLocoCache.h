@@ -20,6 +20,8 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <cstdint>
+
 #include "DataTypes.h"
 
 namespace Hardware
@@ -31,7 +33,10 @@ namespace Hardware
 			public:
 				inline LocoNetLocoCacheEntry()
 				:	address(0),
-					orientationF0F4(0)
+					orientationF0F4(0),
+					f5F8(0),
+					f9F12(0),
+					f13F44(0)
 				{
 				}
 
@@ -45,18 +50,51 @@ namespace Hardware
 					return address;
 				}
 
-				inline void SetOrientationF0F4(const unsigned char orientationF0F4)
+				inline void SetOrientationF0F4(const uint8_t orientationF0F4)
 				{
 					this->orientationF0F4 = orientationF0F4;
 				}
 
-				inline unsigned char GetOrientationF0F4()
+				inline uint8_t GetOrientationF0F4()
 				{
 					return orientationF0F4;
 				}
 
+				inline void SetF5F8(const uint8_t f5F8)
+				{
+					this->f5F8 = f5F8;
+				}
+
+				inline unsigned char GetF5F8()
+				{
+					return f5F8;
+				}
+
+				inline void SetF9F12(const uint8_t f9F12)
+				{
+					this->f9F12 = f9F12;
+				}
+
+				inline uint8_t GetF9F12()
+				{
+					return f9F12;
+				}
+
+				inline void SetF13F44(const uint32_t f13F44)
+				{
+					this->f13F44 = f13F44;
+				}
+
+				inline uint32_t GetF13F44()
+				{
+					return f13F44;
+				}
+
 				Address address;
-				unsigned char orientationF0F4;
+				uint8_t orientationF0F4;
+				uint8_t f5F8;
+				uint8_t f9F12;
+				uint32_t f13F44;
 		};
 
 		class LocoNetLocoCache
@@ -103,7 +141,7 @@ namespace Hardware
 					return entries[slot].GetAddress();
 				}
 
-				inline void SetOrientationF0F4(const unsigned char slot, const unsigned char orientationF0F4)
+				inline void SetOrientationF0F4(const unsigned char slot, const uint8_t orientationF0F4)
 				{
 					if (slot == 0 || slot > MaxLocoNetSlot)
 					{
@@ -112,13 +150,67 @@ namespace Hardware
 					entries[slot].SetOrientationF0F4(orientationF0F4);
 				}
 
-				inline unsigned char GetOrientationF0F4(const unsigned char slot)
+				inline uint8_t GetOrientationF0F4(const unsigned char slot)
 				{
 					if (slot == 0 || slot > MaxLocoNetSlot)
 					{
 						return 0;
 					}
 					return entries[slot].GetOrientationF0F4();
+				}
+
+				inline void SetF5F8(const unsigned char slot, const uint8_t f5F8)
+				{
+					if (slot == 0 || slot > MaxLocoNetSlot)
+					{
+						return;
+					}
+					entries[slot].SetF5F8(f5F8);
+				}
+
+				inline uint8_t GetF5F8(const unsigned char slot)
+				{
+					if (slot == 0 || slot > MaxLocoNetSlot)
+					{
+						return 0;
+					}
+					return entries[slot].GetF5F8();
+				}
+
+				inline void SetF9F12(const unsigned char slot, const uint8_t f9F12)
+				{
+					if (slot == 0 || slot > MaxLocoNetSlot)
+					{
+						return;
+					}
+					entries[slot].SetF9F12(f9F12);
+				}
+
+				inline uint8_t GetF9F12(const unsigned char slot)
+				{
+					if (slot == 0 || slot > MaxLocoNetSlot)
+					{
+						return 0;
+					}
+					return entries[slot].GetF9F12();
+				}
+
+				inline void SetF13F44(const unsigned char slot, const uint32_t f13F44)
+				{
+					if (slot == 0 || slot > MaxLocoNetSlot)
+					{
+						return;
+					}
+					entries[slot].SetF13F44(f13F44);
+				}
+
+				inline uint32_t GetF13F44(const unsigned char slot)
+				{
+					if (slot == 0 || slot > MaxLocoNetSlot)
+					{
+						return 0;
+					}
+					return entries[slot].GetF13F44();
 				}
 
 				static const unsigned char MinLocoNetSlot = 1;

@@ -132,8 +132,6 @@ namespace Utils
 			static bool GetComPorts(std::vector<unsigned char>& comPorts);
 #endif
 
-			static unsigned int RandInt();
-
 			static inline void Copy8Bytes(const unsigned char* const from, unsigned char* const to)
 			{
 				*(reinterpret_cast<uint64_t*>(to)) = *(reinterpret_cast<const uint64_t*>(from));

@@ -34,7 +34,7 @@ namespace DataModel
 	enum LocoFunctionState : uint8_t
 	{
 		LocoFunctionStateOff = 0,
-		LocoFunctionStateOn
+		LocoFunctionStateOn = 1
 	};
 
 	enum LocoFunctionType : uint8_t

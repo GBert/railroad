@@ -54,8 +54,6 @@ namespace WebServer
 			}
 
 		private:
-			const DataModel::Track* track;
-
 			std::string urlIdentifier;
 	};
 } // namespace WebServer

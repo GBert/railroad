@@ -489,13 +489,6 @@ namespace Utils
 	}
 #endif
 
-	unsigned int Utils::RandInt()
-	{
-		struct timeval timestamp;
-		gettimeofday(&timestamp, NULL);
-		return static_cast<unsigned int>((timestamp.tv_sec << 20) | (timestamp.tv_usec & 0xFFFFF));
-	}
-
 	bool Utils::HostResolves(const string& host)
 	{
 		struct addrinfo hints;

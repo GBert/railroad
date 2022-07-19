@@ -138,7 +138,7 @@ namespace Hardware
 
 		void MaerklinCAN::GenerateUidHash()
 		{
-			uid = Utils::Utils::RandInt();
+			uid = rand();
 			string uidString = Utils::Utils::IntegerToHex(uid);
 			// FIXME: params->SetArg5(uidString);
 			hash = CalcHash(uid);

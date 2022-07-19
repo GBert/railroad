@@ -30,14 +30,14 @@ namespace Utils
 	class ThreadSafeQueue
 	{
 		public:
-			inline ThreadSafeQueue(void)
+			inline ThreadSafeQueue()
 			:	queue(),
 				mutex(),
 				run(true)
 			{
 			}
 
-			inline ~ThreadSafeQueue(void)
+			inline ~ThreadSafeQueue()
 			{
 				Terminate();
 			}
@@ -49,15 +49,11 @@ namespace Utils
 				cv.notify_all();
 			}
 
-			T Dequeue(void)
+			T Dequeue()
 			{
 				std::unique_lock<std::mutex> lock(mutex);
-				while (true)
+				while (queue.empty())
 				{
-					if (!queue.empty())
-					{
-						break;
-					}
 					if (run == false)
 					{
 						return T();
