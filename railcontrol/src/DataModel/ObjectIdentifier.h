@@ -24,7 +24,6 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 
 #include "DataTypes.h"
-#include "Utils/Utils.h"
 
 namespace DataModel
 {
@@ -53,6 +52,8 @@ namespace DataModel
 				Deserialize(arguments);
 			}
 
+			inline ObjectIdentifier(const ObjectIdentifier& other) = default;
+
 			inline std::string Serialize() const
 			{
 				return GetObjectTypeAsString() + "=" + GetObjectIdAsString();
@@ -80,7 +81,7 @@ namespace DataModel
 			}
 
 			inline bool operator!=(const ObjectIdentifier& other) const
-				{
+			{
 				return !(*this == other);
 			}
 

@@ -20,6 +20,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <ctime>
 #include <map>
 #include <string>
 
@@ -133,7 +134,7 @@ namespace DataModel
 			inline void SetAccessoryState(const AccessoryState state)
 			{
 				this->accessoryState = state;
-				lastUsed = time(nullptr);
+				lastUsed = std::time(nullptr);
 				++counter;
 			}
 

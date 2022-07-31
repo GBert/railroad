@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include <ctime>
 #include <map>
 #include <string>
 
@@ -123,7 +124,7 @@ namespace Storage
 		{
 			return;
 		}
-		Utils::Utils::CopyFile(logger, filename, filename + "." + std::to_string(time(0)));
+		Utils::Utils::CopyFile(logger, filename, filename + "." + std::to_string(std::time(nullptr)));
 	}
 
 	int SQLite::CallbackListTables(void* v, int argc, char **argv, __attribute__((unused)) char **colName)

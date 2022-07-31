@@ -30,26 +30,26 @@ namespace Hardware
 {
 	class HardwareParams;
 
-	class Intellibox2 : public Protocols::LocoNet
+	class LocoNetAdapter63820 : public Protocols::LocoNet
 	{
 		public:
-			Intellibox2() = delete;
-			Intellibox2(const Intellibox2&) = delete;
-			Intellibox2& operator=(const Intellibox2&) = delete;
+			LocoNetAdapter63820() = delete;
+			LocoNetAdapter63820(const LocoNetAdapter63820&) = delete;
+			LocoNetAdapter63820& operator=(const LocoNetAdapter63820&) = delete;
 
-			inline Intellibox2(const HardwareParams* params)
-			:	Protocols::LocoNet(params, "Intellibox II", B115200)
+			inline LocoNetAdapter63820(const HardwareParams* params)
+			:	Protocols::LocoNet(params, "LocoNet Adapter 63820", B115200)
 			{
 			}
 
-			virtual ~Intellibox2()
+			virtual ~LocoNetAdapter63820()
 			{
 			}
 
 			static inline void GetArgumentTypesAndHint(std::map<unsigned char,ArgumentType>& argumentTypes, std::string& hint)
 			{
 				argumentTypes[1] = ArgumentTypeSerialPort;
-				hint = Languages::GetText(Languages::TextHintIntellibox2);
+				hint = Languages::GetText(Languages::TextHintLocoNetAdapter63820);
 			}
 	};
 } // namespace

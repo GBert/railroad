@@ -125,6 +125,7 @@ namespace WebServer
 		hardwareList["DCC++EX TCP (testing)"] = HardwareTypeDccPpExTcp;
 		hardwareList["ESU Ecos (beta)"] = HardwareTypeEcos;
 		hardwareList["Fleischmann TwinCenter"] = HardwareTypeTwinCenter;
+		hardwareList["KM1 System Control 7"] = HardwareTypeSystemControl7;
 		hardwareList["LDT HSI-88 RS-232"] = HardwareTypeHsi88;
 		hardwareList["LokStoreDigital LoDi-Rektor (beta)"] = HardwareTypeRektor;
 		hardwareList["Märklin Central Station 1 (CS1) (beta)"] = HardwareTypeCS1;
@@ -136,8 +137,10 @@ namespace WebServer
 		hardwareList["Tams MasterControl"] = HardwareTypeMasterControl;
 		hardwareList["Tams MasterControl 2"] = HardwareTypeMasterControl2;
 		hardwareList["Tams RedBox"] = HardwareTypeRedBox;
+		hardwareList["Uhlenbrock Adapter 63120"] = HardwareTypeLocoNetAdapter63120;
+		hardwareList["Uhlenbrock Adapter 63820"] = HardwareTypeLocoNetAdapter63820;
 		hardwareList["Uhlenbrock Intellibox"] = HardwareTypeIntellibox;
-		hardwareList["Uhlenbrock Intellibox II (test)"] = HardwareTypeIntellibox2;
+		hardwareList["Uhlenbrock Intellibox II"] = HardwareTypeIntellibox2;
 		hardwareList["Virtual Command Station"] = HardwareTypeVirtual;
 		return hardwareList;
 	}

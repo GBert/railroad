@@ -182,7 +182,10 @@ enum HardwareType : uint8_t
 	HardwareTypeCS1 = 18,
 	HardwareTypeDccPpExTcp = 19,
 	HardwareTypeDccPpExSerial = 20,
-	HardwareTypeIntellibox2 = 21
+	HardwareTypeIntellibox2 = 21,
+	HardwareTypeLocoNetAdapter63120 = 22,
+	HardwareTypeLocoNetAdapter63820 = 23,
+	HardwareTypeSystemControl7 = 24
 };
 
 enum Automode : bool

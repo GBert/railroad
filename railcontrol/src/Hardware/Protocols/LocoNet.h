@@ -104,51 +104,52 @@ namespace Hardware
 					const bool on) override;
 
 			private:
-				// longest known LocoNet-Command
-				// also defined in subclass SendingQueueEntry
-				static const unsigned char MaxDataLength = 0x0E;
+				// longest known LocoNet-Command is OPC_SL_RD_DATA_EXP (Uhlenbrock Extension)
+				static const unsigned char MaxDataLength = 0x15;
 
 				enum OpCodes : unsigned char
 				{
-					OPC_BUSY         = 0x81,
-					OPC_GPOFF        = 0x82,
-					OPC_GPON         = 0x83,
-					OPC_IDLE         = 0x85,
-					OPC_LOCO_SPD     = 0xA0,
-					OPC_LOCO_DIRF    = 0xA1,
-					OPC_LOCO_SND     = 0xA2,
-					OPC_LOCO_FUNC    = 0xA3,
-					OPC_SW_REQ       = 0xB0,
-					OPC_SW_REP       = 0xB1,
-					OPC_INPUT_REP    = 0xB2,
-					OPC_LONG_ACK     = 0xB4,
-					OPC_SLOT_STAT1   = 0xB5,
-					OPC_CONSIST_FUNC = 0xB6,
-					OPC_UNLINK_SLOTS = 0xB8,
-					OPC_LINK_SLOTS   = 0xB9,
-					OPC_MOVE_SLOTS   = 0xBA,
-					OPC_RQ_SL_DATA   = 0xBB,
-					OPC_SW_STATE     = 0xBC,
-					OPC_SW_ACK       = 0xBD,
-					OPC_LOCO_ADR     = 0xBF,
-					OPC_SL_RD_DATA   = 0xE7,
-					OPC_WR_SL_DATA   = 0xEF,
+					OPC_BUSY           = 0x81,
+					OPC_GPOFF          = 0x82,
+					OPC_GPON           = 0x83,
+					OPC_IDLE           = 0x85,
+					OPC_LOCO_SPD       = 0xA0,
+					OPC_LOCO_DIRF      = 0xA1,
+					OPC_LOCO_SND       = 0xA2,
+					OPC_LOCO_FUNC      = 0xA3,
+					OPC_SW_REQ         = 0xB0,
+					OPC_SW_REP         = 0xB1,
+					OPC_INPUT_REP      = 0xB2,
+					OPC_LONG_ACK       = 0xB4,
+					OPC_SLOT_STAT1     = 0xB5,
+					OPC_CONSIST_FUNC   = 0xB6,
+					OPC_UNLINK_SLOTS   = 0xB8,
+					OPC_LINK_SLOTS     = 0xB9,
+					OPC_MOVE_SLOTS     = 0xBA,
+					OPC_RQ_SL_DATA     = 0xBB,
+					OPC_SW_STATE       = 0xBC,
+					OPC_SW_ACK         = 0xBD,
+					OPC_LOCO_ADR       = 0xBF,
+					OPC_SL_RD_DATA     = 0xE7,
+					OPC_WR_SL_DATA     = 0xEF,
 					// Intellibox-II codes
-					OPC_LOCO_FUNC2   = 0xD4
+					OPC_LOCO_XADR      = 0xBE,
+					OPC_EXP_CMD        = 0xD4,
+					OPC_UNKNOWN_1      = 0xE5,
+					OPC_SL_RD_DATA_EXP = 0xE6,
+					OPC_WR_SL_DATA_EXP = 0xEE
 				};
 
 				class SendingQueueEntry
 				{
 					public:
 						inline SendingQueueEntry()
-						:	size(0),
-						 	timestamp(0)
+						:	size(0)
 						{
 						}
 
 						inline SendingQueueEntry(unsigned char size, const unsigned char* data)
-						:	size(std::min(size, static_cast<unsigned char>(MaxDataLength))),
-						 	timestamp(time(nullptr))
+						:	size(std::min(size, static_cast<unsigned char>(MaxDataLength)))
 						{
 							memcpy(this->data, data, this->size);
 						}
@@ -162,16 +163,6 @@ namespace Hardware
 							return size;
 						}
 
-						inline unsigned char GetTimestamp() const
-						{
-							return timestamp;
-						}
-
-						inline void SetTimestamp()
-						{
-							timestamp = time(nullptr);
-						}
-
 						inline const unsigned char* GetData() const
 						{
 							return data;
@@ -180,13 +171,11 @@ namespace Hardware
 						inline void Reset()
 						{
 							size = 0;
-							timestamp = 0;
 						}
 
 					private:
 						volatile unsigned char size;
 						unsigned char data[MaxDataLength];
-						volatile time_t timestamp;
 				};
 
 				void Sender();
@@ -286,6 +275,8 @@ namespace Hardware
 
 				Utils::ThreadSafeQueue<SendingQueueEntry> sendingQueue;
 				SendingQueueEntry entryToVerify;
+				mutable std::mutex entryToVerifyMutex;
+				std::condition_variable entryToVerifyCV;
 		};
 	} // namespace
 } // namespace

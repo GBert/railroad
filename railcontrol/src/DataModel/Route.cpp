@@ -18,6 +18,7 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include <ctime>
 #include <map>
 #include <string>
 
@@ -268,7 +269,7 @@ namespace DataModel
 				return false;
 			}
 		}
-		lastUsed = time(nullptr);
+		lastUsed = std::time(nullptr);
 		++counter;
 		if (isInUse)
 		{

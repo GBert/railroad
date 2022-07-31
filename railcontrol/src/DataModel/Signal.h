@@ -49,6 +49,8 @@ namespace DataModel
 					{
 					}
 
+					inline StateOption(const StateOption&) = default;
+
 					inline operator Languages::TextSelector() const
 					{
 						return text;

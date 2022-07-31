@@ -33,15 +33,18 @@ namespace Hardware
 			public:
 				Z21TurnoutCacheEntry(const Z21TurnoutCacheEntry&) = delete;
 
-				Z21TurnoutCacheEntry()
-					: protocol(ProtocolNone)
+				inline Z21TurnoutCacheEntry()
+				:	protocol(ProtocolNone)
 				{
 				}
 
-				Z21TurnoutCacheEntry(const Protocol protocol)
-					: protocol(protocol)
+				inline Z21TurnoutCacheEntry& operator=(const Protocol protocol)
 				{
+					this->protocol = protocol;
+					return *this;
 				}
+
+				inline Z21TurnoutCacheEntry& operator=(const Z21TurnoutCacheEntry&) = delete;
 
 				Protocol protocol;
 		};
@@ -51,13 +54,12 @@ namespace Hardware
 			public:
 				Z21TurnoutCache& operator=(const Z21TurnoutCache&) = delete;
 
-				void SetProtocol(const Address address, const Protocol protocol)
+				inline void SetProtocol(const Address address, const Protocol protocol)
 				{
-					Z21TurnoutCacheEntry entry(protocol);
-					cache[address] = entry;
+					cache[address] = protocol;
 				}
 
-				Protocol GetProtocol(const Address address)
+				inline Protocol GetProtocol(const Address address)
 				{
 					if (cache.count(address) == 0)
 					{

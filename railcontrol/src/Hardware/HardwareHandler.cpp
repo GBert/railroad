@@ -34,12 +34,15 @@ along with RailControl; see the file LICENCE. If not see
 #include "Hardware/Hsi88.h"
 #include "Hardware/Intellibox.h"
 #include "Hardware/Intellibox2.h"
+#include "Hardware/LocoNetAdapter63120.h"
+#include "Hardware/LocoNetAdapter63820.h"
 #include "Hardware/M6051.h"
 #include "Hardware/MasterControl.h"
 #include "Hardware/MasterControl2.h"
 #include "Hardware/OpenDcc.h"
 #include "Hardware/RedBox.h"
 #include "Hardware/Rektor.h"
+#include "Hardware/SystemControl7.h"
 #include "Hardware/TwinCenter.h"
 #include "Hardware/Virtual.h"
 #include "Hardware/Z21.h"
@@ -140,6 +143,18 @@ namespace Hardware
 
 			case HardwareTypeIntellibox2:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new Intellibox2(params));
+				break;
+
+			case HardwareTypeLocoNetAdapter63120:
+				instance = reinterpret_cast<Hardware::HardwareInterface*>(new LocoNetAdapter63120(params));
+				break;
+
+			case HardwareTypeLocoNetAdapter63820:
+				instance = reinterpret_cast<Hardware::HardwareInterface*>(new LocoNetAdapter63820(params));
+				break;
+
+			case HardwareTypeSystemControl7:
+				instance = reinterpret_cast<Hardware::HardwareInterface*>(new SystemControl7(params));
 				break;
 		}
 	}
@@ -738,6 +753,18 @@ namespace Hardware
 
 			case HardwareTypeIntellibox2:
 				Hardware::Intellibox2::GetArgumentTypesAndHint(arguments, hint);
+				return;
+
+			case HardwareTypeLocoNetAdapter63120:
+				Hardware::LocoNetAdapter63120::GetArgumentTypesAndHint(arguments, hint);
+				return;
+
+			case HardwareTypeLocoNetAdapter63820:
+				Hardware::LocoNetAdapter63820::GetArgumentTypesAndHint(arguments, hint);
+				return;
+
+			case HardwareTypeSystemControl7:
+				Hardware::SystemControl7::GetArgumentTypesAndHint(arguments, hint);
 				return;
 		}
 	}
