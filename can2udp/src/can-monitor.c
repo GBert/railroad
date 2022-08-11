@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.22\n\n");
+    fprintf(stderr, "   Version 3.23\n\n");
     fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -776,7 +776,31 @@ void decode_frame(struct can_frame *frame) {
 	    printf("Lok Discovery - Protokoll Kennung 0x%02X", frame->data[0]);
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
-	    printf("Lok Discovery - 0x%08X Protokoll Kennung 0x%02X", uid, frame->data[4]);
+	    if (frame->data[4] <=32) {
+		printf("Lok Discovery - 0x%08X Protokoll Range 0 - %d", uid, frame->data[4]);
+	    } else switch (frame->data[4]) {
+		case 0x21:
+		    printf("Lok Discovery - 0x%08X Protokoll Erkennung MM2 20kHz", uid);
+		    break;
+		case 0x22:
+		    printf("Lok Discovery - 0x%08X Protokoll Erkennung MM2 40kHz", uid);
+		    break;
+		case 0x23:
+		case 0x24:
+		case 0x25:
+		    printf("Lok Discovery - 0x%08X Protokoll Erkennung DCC", uid);
+		    break;
+		case 0x26:
+		case 0x27:
+		    printf("Lok Discovery - 0x%08X Protokoll Erkennung SX1", uid);
+		    break;
+		case 0x28:
+		    printf("Lok Discovery - 0x%08X Protokoll Erkennung mfx Zubehör", uid);
+		    break;
+		default:
+		    printf("Lok Discovery - 0x%08X Protokoll Erkennung 0x%02x", uid, frame->data[4]);
+		    break;
+	    }
 	}
 	if (frame->can_dlc == 6) {
 	    uid = be32(frame->data);
