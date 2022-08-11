@@ -803,7 +803,7 @@ void decode_frame(struct can_frame *frame) {
 	    printf("Lok Discovery - Erkennen alle Protokolle");
 	if (frame->can_dlc == 1) {
 	    printf("Lok Discovery - ");
-	    print_loc_proto(frame->data[4]);
+	    print_loc_proto(frame->data[0]);
 	}
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
