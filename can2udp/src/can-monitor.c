@@ -807,7 +807,7 @@ void decode_frame(struct can_frame *frame) {
 	}
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
-	    printf("Lok Discovery - 0x%08X", uid);
+	    printf("Lok Discovery - 0x%08X ", uid);
 	    print_loc_proto(frame->data[4]);
 	}
 	if (frame->can_dlc == 6) {
