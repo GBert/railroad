@@ -749,6 +749,35 @@ void cdb_extension_set_grd(struct can_frame *frame) {
     }
 }
 
+void print_loc_proto(uint8_t proto) {
+    if (proto <= 32) {
+	printf("Protokoll Range 0 - %d", proto);
+    } else switch (proto) {
+	case 0x21:
+	    printf("Protokoll Erkennung MM2 20kHz");
+	    break;
+	case 0x22:
+	    printf("Protokoll Erkennung MM2 40kHz");
+	    break;
+	case 0x23:
+	case 0x24:
+	case 0x25:
+	    printf("Protokoll Erkennung DCC");
+	    break;
+	case 0x26:
+	case 0x27:
+	    printf("Protokoll Erkennung SX1");
+	    break;
+	case 0x28:
+	    printf("Protokoll Erkennung mfx Zubehör");
+	    break;
+	default:
+	    printf("Protokoll Erkennung 0x%02x", proto);
+	    break;
+    }
+}
+
+
 void decode_frame(struct can_frame *frame) {
     uint32_t id, kennung, function, uid, cv_number, cv_index;
     uint16_t paket, crc, kenner, kontakt, value;
@@ -772,35 +801,14 @@ void decode_frame(struct can_frame *frame) {
     case 0x03:
 	if (frame->can_dlc == 0)
 	    printf("Lok Discovery - Erkennen alle Protokolle");
-	if (frame->can_dlc == 1)
-	    printf("Lok Discovery - Protokoll Kennung 0x%02X", frame->data[0]);
+	if (frame->can_dlc == 1) {
+	    printf("Lok Discovery - ");
+	    print_loc_proto(frame->data[4]);
+	}
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
-	    if (frame->data[4] <=32) {
-		printf("Lok Discovery - 0x%08X Protokoll Range 0 - %d", uid, frame->data[4]);
-	    } else switch (frame->data[4]) {
-		case 0x21:
-		    printf("Lok Discovery - 0x%08X Protokoll Erkennung MM2 20kHz", uid);
-		    break;
-		case 0x22:
-		    printf("Lok Discovery - 0x%08X Protokoll Erkennung MM2 40kHz", uid);
-		    break;
-		case 0x23:
-		case 0x24:
-		case 0x25:
-		    printf("Lok Discovery - 0x%08X Protokoll Erkennung DCC", uid);
-		    break;
-		case 0x26:
-		case 0x27:
-		    printf("Lok Discovery - 0x%08X Protokoll Erkennung SX1", uid);
-		    break;
-		case 0x28:
-		    printf("Lok Discovery - 0x%08X Protokoll Erkennung mfx Zubehör", uid);
-		    break;
-		default:
-		    printf("Lok Discovery - 0x%08X Protokoll Erkennung 0x%02x", uid, frame->data[4]);
-		    break;
-	    }
+	    printf("Lok Discovery - 0x%08X", uid);
+	    print_loc_proto(frame->data[4]);
 	}
 	if (frame->can_dlc == 6) {
 	    uid = be32(frame->data);
