@@ -429,9 +429,13 @@ void command_system(struct can_frame *frame) {
 	    printf("System: Geraetekennung UID 0x%08X ist 0x%04X", uid, wert);
 	}
 	break;
+    /* Modellzeit */
     case 0x20:
-	printf("System: Systemzeit UID 0x%08X Stunde %d Minute %d Faktor %d",
-	       uid, frame->data[5], frame->data[6], frame->data[7]);
+	if (frame->data[7])
+	    printf("System: Uhrzeit UID 0x%08X %d:%d Faktor %d (1:%d)",
+	            uid, frame->data[5], frame->data[6], frame->data[7], 60/frame->data[7]);
+	else
+	    printf("System: Uhrzeit UID 0x%08X %d:%d angehalten", uid, frame->data[5], frame->data[6]);
 	break;
     case 0x30:
 	printf("System: mfx Seek von 0x%08X:", uid);
