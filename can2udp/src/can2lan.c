@@ -413,7 +413,7 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 }
 
 int main(int argc, char **argv) {
-    int n, i, max_fds, opt, max_tcp_i, nready, conn_fd, timeout, ret, tcp_client[MAX_TCP_CONN];
+    int n, i, max_fds, opt, max_tcp_i, nready, conn_fd, timeout, ret, tcp_client[MAX_TCP_CONN], tcp_client2[MAX_TCP_CONN];
     struct sigaction sigact;
     sigset_t blockset, emptyset;
     struct can_frame frame;
@@ -684,8 +684,8 @@ int main(int argc, char **argv) {
     }
     /* prepare TCP clients array */
     max_tcp_i = -1;		/* index into tcp_client[] array */
-    for (i = 0; i < MAX_TCP_CONN; i++)
-	tcp_client[i] = -1;	/* -1 indicates available entry */
+    memset(tcp_client, -1, sizeof(tcp_client));
+    memset(tcp_client2, -1, sizeof(tcp_client2));
 
     /* prepare second TCP socket */
     st2 = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -909,9 +909,23 @@ int main(int argc, char **argv) {
 	    }
 	    syslog(LOG_NOTICE, "%s: new client: %s port %d conn fd: %d max fds: %d\n", __func__,
 			 inet_ntop(AF_INET, &(tcp_addr2.sin_addr), buffer, sizeof(buffer)), ntohs(tcp_addr2.sin_port), conn_fd, max_fds);
-	    FD_SET(conn_fd, &all_fds);	/* add new descriptor to set */
+	    for (i = 0; i < MAX_TCP_CONN; i++) {
+		if (tcp_client2[i] < 0) {
+		    tcp_client2[i] = conn_fd;	/* save new TCP client descriptor */
+		    break;
+		}
+	    }
+	    if (i == MAX_TCP_CONN) {
+		fprintf(stderr, "too many TCP clients\n");
+		syslog(LOG_ERR, "%s: too many TCP clients\n", __func__);
+	    }
+
+	    FD_SET(conn_fd, &all_fds);		/* add new descriptor to set */
 	    max_fds = MAX(conn_fd, max_fds);	/* for select */
 	    max_tcp_i = MAX(i, max_tcp_i);	/* max index in tcp_client[] array */
+
+	    if (--nready <= 0)
+		continue;	/* no more readable descriptors */
 	}
 
 	/* check for already connected TCP clients */
