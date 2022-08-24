@@ -1,4 +1,4 @@
-// ddl.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+// ddl.h - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* $Id: ddl.h 1419 2009-12-10 20:06:19Z gscholz $ */
 
@@ -18,7 +18,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <libxml/tree.h>        /*xmlDocPtr, xmlNodePtr */
 
@@ -28,7 +27,7 @@
 #define MAXDATA     20
 
 //Timeout in Sekunden für "fast Refresh" nach neuem Lokkommando
-#define FAST_REFRESH_TIMEOUT 60
+#define FAST_REFRESH_TIMEOUT 10
 
 #define MAX_MARKLIN_ADDRESS 256
 
@@ -53,7 +52,7 @@ typedef struct _tMaerklinPacketPool {
 
 /* data types for mfx packet pool */
 typedef struct _tMFXPacket {
-    time_t timeLastUpdate;
+    gl_data_t *glptr;
     char packet[PKTSIZE];
     int packet_size;
 } tMFXPacket;
@@ -114,6 +113,7 @@ typedef struct _DDL_DATA {
     int NMRA_GA_OFFSET;         /* offset for ga base address 0/1*/
     int PROGRAM_TRACK;          /* 0: suppress SM commands to PT address */
     int BOOSTER_COMM;			/* feedback communication with boosters */
+    int AUTO_MFX_SEARCH;		/* automatic search for mfx decoders */
     char FB_DEVNAME[16];		/* name of feedback UART device  */
     char MCS_DEVNAME[16];		/* name of CAN interface for mCS */
     bus_t FWD_M_ACCESSORIES;	/* bus used for MM accessories   */
@@ -123,7 +123,6 @@ typedef struct _DDL_DATA {
     unsigned int uid;           /* Für MFX die UID der Zentrale */
 
     long long short_detected;
-    char NMRA_idle_data[4 * 256]; //Worst Case SPI Mode
 
     //"Normaler" Refresh Zyklus
     tRefreshInfo refreshInfo;
@@ -164,17 +163,16 @@ int init_bus_DDL(bus_t busnumber);
 #define QM2FXPKT    3
 #define QM1FUNCPKT  4
 #define QM1SOLEPKT  5
-#define QNBLOCOPKT  6
-#define QNBACCPKT   7
-#define QMFX0PKT    8		/* mfx without feedback */
-#define QMFX1PKTD   9		/* mfx with simple feedback for discovery */
-#define QMFX1PKTV   10		/* mfx with simple feedback for verify */
+#define QNBLOCOPKT  10
+#define QNBACCPKT   11
+#define QNPROCPKT   12
+#define QMFX0PKT    18		/* mfx without feedback */
+#define QMFX1PKTD   19		/* mfx with simple feedback for discovery */
+#define QMFX1PKTV   20		/* mfx with simple feedback for verify */
 //MFX, 8 bis 64 Bit (1 bis 8 Byte) Rückmeldung
-#define QMFX8PKT    11
-#define QMFX16PKT   12
-#define QMFX32PKT   13
-//Paket ist nicht mehr gültig, da durch höher priorisiertes bereits überholt
-#define QOVERRIDE   100
+#define QMFX8PKT    21
+#define QMFX16PKT   22
+#define QMFX32PKT   23
 
 char *get_maerklin_packet(bus_t busnumber, int adr, int fx);
 void update_MaerklinPacketPool(bus_t busnumber, int adr,
@@ -184,7 +182,7 @@ void update_MaerklinPacketPool(bus_t busnumber, int adr,
 void update_NMRAPacketPool(bus_t busnumber, int adr,
                            char const *const packet, int packet_size,
                            char const *const fx_packet, int fx_packet_size);
-void update_MFXPacketPool(bus_t busnumber, int adr,
+void update_MFXPacketPool(bus_t busnumber, gl_data_t *glp,
                           char const *const packet, int packet_size);
 
 void send_packet(bus_t busnumber, char *packet,
@@ -217,3 +215,4 @@ void handle_seek(bus_t busnumber, uint8_t *data, uint32_t uid);
 void send_seek_cmd(char scmd, char sdat);
 
 #endif
+

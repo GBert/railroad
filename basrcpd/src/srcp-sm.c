@@ -1,4 +1,4 @@
-// srcp-sm.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
+// srcp-sm.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller 
 
 /***************************************************************************
                          srcp-sm.c  -  description
@@ -274,7 +274,7 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
                     if (addr == 0) {					// SET ^ GET x GM 0 BIND
                     	if (command == VERIFY && value != result)
 							status = SRCP_WRONGVALUE;
-       	                minfo[0] = 3;	minfo[1] = 9;	
+       	                minfo[0] = 3;	minfo[1] = 9;	// registration counter	
 						minfo[2] = result >> 8; minfo[3] = result & 0xFF;
                     	info_mcs(busnumber, 1, 0, minfo);
                     	value = result;
@@ -303,7 +303,7 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
 						minfo[2] = typeaddr & 0xFF;
 						minfo[3] = value;
 						minfo[4] = 0x80;	//result;
-						info_mcs(busnumber, 0x11, addr, minfo);
+						info_mcs(busnumber, 0x11, (addr | 0x4000), minfo);
 					}
                     break;
         	}

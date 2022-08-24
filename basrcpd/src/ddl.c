@@ -1,4 +1,4 @@
-// ddl.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+// ddl.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* $Id: ddl.c 1456 2010-02-28 20:01:39Z gscholz $ */
 
@@ -169,11 +169,9 @@
 //1: 0xFF, 0x00
 //0: 0xFF, 0xFF, 0x00, 0x00
 #define SPI_BAUDRATE_NMRA_2 (SPI_BAUDRATE_NMRA * 2)
-//NMRA Idle Paket als direkt für SPI
-static struct spi_ioc_transfer spi_nmra_idle;
 
 //SPI Baudrate für MFX.
-//Auch hier müssen wir auf sicher 96 Bytes kkommen um im DMA Modus zu sein und keine Pause zwischen den Bytes zu haben.
+//Auch hier müssen wir auf sicher 96 Bytes kommen um im DMA Modus zu sein und keine Pause zwischen den Bytes zu haben.
 //1 Bit in MFX sind immer 100us. 1 Bit wird auf ein SPI Byte gelegt, also für ein Bit 100 / 8 = 12.5us -> 80000 Baud
 //Grösse Paket wird damit (mit Sync Muster) für das kleinst mögliche Paket, das wir senden:
 #define SPI_BAUDRATE_MFX 80000
@@ -188,6 +186,15 @@ static struct spi_ioc_transfer spi_nmra_idle;
 // - Total        : 50 Bit
 //Auch hier kommt nun deshalb wieder die doppelte Baudrate ins Spiel, damit wären wir bei 2*50=100 Bytes.
 //1 MFX Bit -> 2 SPI Bytes
+//Und mit mehr als 16 Funktionen haben wir ein neues minimales Paket:
+// - 0            :  4 Bit -> Sicherstellen, dass Startpegel immer 0 ist
+// - Sync         :  5 Bit
+// - 10AAAAAAA    :  9 Bit Adresse (Minimal bei 7 Bit Adresse)
+// - Kommando     : 12 Bit "Funktion einzeln" 3+7+1+1
+// - Checksumme   :  8 Bit
+// - Sync         : 10 Bit
+// - Total        : 48 Bit
+//Und Glück gehabt, wir sind mit mal 2 gerade auf 96 gekommen...
 #define SPI_BAUDRATE_MFX_2 (SPI_BAUDRATE_MFX * 2)
 #define MFX_STARTSTOP_0_BYTES 8
 //11 Sync für RDS Rückmeldung
@@ -206,6 +213,7 @@ static struct spi_ioc_transfer spi_nmra_idle;
 
 static struct termios sercomm_mfx;
 static unsigned char feedbackbuf[64];
+static int waitread;
 
 static pthread_t feedbackThread;
 static void *thr_Manage_DDL(void *);
@@ -227,9 +235,7 @@ static void *thr_feedbackThread(void *threadParam)
   		if (ddl->resumeSM < 0) ddl->allowSM = true;
         // wait for a command which should generate feedback
     	read(ddl->feedbackPipe[0], &event, sizeof(event));
-		syslog_bus(ddl->ownbusnr, DBG_INFO, "Value read in idle state: %d", event);
   		ddl->allowSM = false;
-
         ddl->fbData.fbbytnum = 0;
     	tt.tv_sec = 0;
         tt.tv_usec = 0;
@@ -265,7 +271,6 @@ static void *thr_feedbackThread(void *threadParam)
             	syslog_bus(ddl->ownbusnr, DBG_ERROR, "select exception in line %d: %s",
 								__LINE__, strerror(errno));
 			else if (nready == 0) {
-				syslog_bus(ddl->ownbusnr, DBG_INFO, "T I M E O U T");
                 if (ddl->BOOSTER_COMM)
                         send_seek_cmd(0, 0);    // stop waiting for data
                 if (ddl->fbData.pktcode > QMFX0PKT) handleMFXtimeout();
@@ -586,13 +591,6 @@ static void init_NMRAPacketPool(bus_t busnumber)
     /* put idle packet in packet pool */
     j = translateBitstream2Packetstream(busnumber, idle_packet, idle_pktstr);
     update_NMRAPacketPool(busnumber, 128, idle_pktstr, j, idle_pktstr, j);
-
-    /* generate and override idle_data */
-    memset (&spi_nmra_idle, 0, sizeof (spi_nmra_idle)) ;
-    spi_nmra_idle.len = convertNMRAPacketToSPIStream(busnumber, idle_pktstr, __DDL->NMRA_idle_data);
-    spi_nmra_idle.tx_buf =  (unsigned long)__DDL->NMRA_idle_data;
-    spi_nmra_idle.bits_per_word = 8;
-    spi_nmra_idle.speed_hz = SPI_BAUDRATE_NMRA_2;
 }
 
 void update_NMRAPacketPool(bus_t busnumber, int adr,
@@ -654,9 +652,7 @@ static void reset_MFXPacketPool(bus_t busnumber)
     int i;
     int result;
 
-    if (stopMFXThreads() != 0) {
-      syslog_bus(busnumber, DBG_ERROR, "stopMFXThreads failed.");
-    }
+    stopMFXSearch();
 
     result = pthread_mutex_lock(&__DDL->mfx_pktpool_mutex);
     if (result != 0) {
@@ -899,18 +895,18 @@ static void init_MFXPacketPool(bus_t busnumber)
                    "pthread_mutex_unlock() failed: %s (errno = %d).",
                    strerror(result), result);
     }
-    if (startMFXThreads(busnumber, __DDL->feedbackPipe[0])!= 0) {
-        syslog_bus(busnumber, DBG_ERROR,
-                   "startMFXThreads failed.");
+	if (startMFXManagement(busnumber, __DDL->AUTO_MFX_SEARCH) != 0) {
+		syslog_bus(busnumber, DBG_ERROR, "startMFXManagement failed.");
     }
 }
 
-void update_MFXPacketPool(bus_t busnumber, int adr,
+void update_MFXPacketPool(bus_t busnumber, gl_data_t *glp,
                            char const *const packet, int packet_size)
 {
 //  printf("update_MFXPacketPool(busnumber=%d, adr=%d, packet, packet_size=%d\n", busnumber, adr, packet_size);
     int i, found;
     int result;
+	int adr = glp->id;
 
     found = 0;
     for (i = 0; i <= __DDL->MFXPacketPool.NrOfKnownAddresses && !found; i++) {
@@ -935,7 +931,7 @@ void update_MFXPacketPool(bus_t busnumber, int adr,
     }
     memcpy(__DDL->MFXPacketPool.packets[adr]->packet, packet, packet_size);
     __DDL->MFXPacketPool.packets[adr]->packet_size = packet_size;
-    __DDL->MFXPacketPool.packets[adr]->timeLastUpdate = time(NULL);
+	__DDL->MFXPacketPool.packets[adr]->glptr = glp;
 
     if (!found) {
         __DDL->MFXPacketPool.knownAddresses[__DDL->MFXPacketPool.NrOfKnownAddresses] = adr;
@@ -955,7 +951,7 @@ long long timeSince(struct timeval tv)
 {
 	struct timeval now = { 0, 0 };
 	gettimeofday(&now, NULL);
-	return (now.tv_sec - tv.tv_sec) * 1000000 + now.tv_usec - tv.tv_usec;
+	return ((long long) now.tv_sec - tv.tv_sec) * 1000000 + now.tv_usec - tv.tv_usec;
 }
 
 /* checks shortcut situation for persistency */
@@ -976,10 +972,10 @@ static int checkShortcut(bus_t busnumber)
     	if (__DDL->short_detected == 0) {
         	gettimeofday(&tv_shortcut, NULL);
             __DDL->short_detected =
-                    tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
+                    (long long) tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
         }
         gettimeofday(&tv_shortcut, NULL);
-        long long short_now = tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
+        long long short_now = (long long) tv_shortcut.tv_sec * 1000000 + tv_shortcut.tv_usec;
         if (__DDL->SHORTCUTDELAY <=
                 (short_now - __DDL->short_detected)) {
         	syslog_bus(busnumber, DBG_INFO,
@@ -1107,7 +1103,8 @@ void send_packet(bus_t busnumber, char *packet,
         case QMFX16PKT:
         case QMFX32PKT:
 			i = rxstartwait_comport(&sercomm_mfx);
-			syslog_bus(busnumber, DBG_DEBUG, "rxstartwait_comport returned %d", i);
+			if (i) syslog_bus(busnumber, DBG_DEBUG,
+						"rxstartwait_comport failed: %s", strerror(errno));
             write(__DDL->feedbackPipe[1], &packet_type, 1);
         case QMFX0PKT:
             __DDL->spiLastMM = 0;
@@ -1128,11 +1125,14 @@ void send_packet(bus_t busnumber, char *packet,
                 return;
               }
             }
-			if (packet_type != QMFX0PKT) {
-				i = read_comport(busnumber, sizeof(feedbackbuf), feedbackbuf);
-				if (i) serialMFXresult(feedbackbuf, i);
-			}
+			if (packet_type != QMFX0PKT) waitread = 2;
 			break;
+	}
+	if (waitread) {			// delayed read of feedback because of processing time
+		if (--waitread == 0) {
+			i = read_comport(busnumber, sizeof(feedbackbuf), feedbackbuf);
+			if (i) serialMFXresult(feedbackbuf, i);
+		}
 	}
 }
 
@@ -1214,9 +1214,19 @@ static bool refresh_loco_one(bus_t busnumber, bool fast) {
     if (adr > 0) {
       tMFXPacket* tMp = __DDL->MFXPacketPool.packets[adr];
       if (tMp == NULL) return 0;
-      if (fast != ((time(NULL) - tMp->timeLastUpdate) > FAST_REFRESH_TIMEOUT)) {
+	  gl_data_t *glp = tMp->glptr;
+      if (fast != ((time(NULL) - glp->updatime.tv_sec) > FAST_REFRESH_TIMEOUT)) {
         refreshGesendet = true;
         send_packet(busnumber, tMp->packet, tMp->packet_size, QMFX0PKT, 1);
+        // refresh next function of Fx16-31 if available
+		if (glp->n_func > 16) {
+			glp->lastfunc++;
+			if ((glp->lastfunc < 16) || (glp->lastfunc >= glp->n_func))
+						glp->lastfunc = 16;
+			bool value = ((glp->funcs) >> (glp->lastfunc)) & 1;
+        	// printf("Loco %d Fx=%d value=%d\n", adr, glp->lastfunc, value);
+			send_LocoFx16_32(adr, glp->lastfunc, value, 1);
+			}
       }
       do {
         refreshInfo -> last_refreshed_mfx_loco++;
@@ -1228,7 +1238,7 @@ static bool refresh_loco_one(bus_t busnumber, bool fast) {
         //Bei Fast Zyklus wird die nächste Lok mit neuem Kommando gesucht,
         //bei "normal" die nächste Lok ohne neues Kommando
         adr = __DDL->MFXPacketPool.knownAddresses[refreshInfo -> last_refreshed_mfx_loco];
-      } while (fast != ((time(NULL) - __DDL->MFXPacketPool.packets[adr] -> timeLastUpdate) <= FAST_REFRESH_TIMEOUT));
+      } while (fast != ((time(NULL) - __DDL->MFXPacketPool.packets[adr]->glptr->updatime.tv_sec) <= FAST_REFRESH_TIMEOUT));
     }
     else {
       //Keine MFX Lok vorhanden -> mit nächstem Protokoll weitermachen
@@ -1450,6 +1460,7 @@ int readconfig_DDL(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
     __DDL->NMRA_GA_OFFSET = 0;  /* offset for ga base address 0 or 1  */
     __DDL->PROGRAM_TRACK = 1;   /* 0: suppress SM commands to PT address */
     __DDL->BOOSTER_COMM = 0;	/* feedback communication with boosters */
+    __DDL->AUTO_MFX_SEARCH = 0;	/* automatic search for mfx decoders */
     __DDL->FB_DEVNAME[0] = 0;	/* name of feedback UART device  */
     __DDL->MCS_DEVNAME[0] = 0;	/* if empty you do not use such a device */
     __DDL->FWD_M_ACCESSORIES = busnumber;	/* default is own bus */
@@ -1568,6 +1579,14 @@ int readconfig_DDL(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
                 xmlFree(txt);
             }
         }
+        else if (xmlStrcmp(child->name, BAD_CAST "mfx_search") == 0) {
+            txt = xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+            if (txt != NULL) {
+                __DDL->AUTO_MFX_SEARCH = (xmlStrcmp(txt, BAD_CAST "yes")
+                                        == 0) ? true : false;
+                xmlFree(txt);
+            }
+        }
         else if (xmlStrcmp(child->name, BAD_CAST "fb_device") == 0) {
             txt = xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
             if (txt != NULL) {
@@ -1598,9 +1617,7 @@ int readconfig_DDL(xmlDocPtr doc, xmlNodePtr node, bus_t busnumber)
         }
         else
             syslog_bus(busnumber, DBG_WARN,
-                       "WARNING, unknown tag found: \"%s\"!\n",
-                       child->name);;
-
+                       "WARNING, unknown tag found: \"%s\"!\n", child->name);
         child = child->next;
     }                           /* while */
 
@@ -2092,3 +2109,4 @@ static void *thr_Manage_DDL(void *v)
     pthread_cleanup_pop(1);
     return NULL;
 }
+

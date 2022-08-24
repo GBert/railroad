@@ -37,6 +37,7 @@ config.h        erzeugt per config-Script, modifiziert
     2102    korrekte Versionsangabe
     2110    korrekte Versionsangabe
     2112    korrekte Versionsangabe
+    2208    korrekte Versionsangabe
 ddl.c           aus Sigg-srcpd Rev96, modifiziert BaPi, SPI-Timing
     1803    MCS-Anssteuerung eingebaut
     1806    Optimierungen
@@ -53,6 +54,8 @@ ddl.c           aus Sigg-srcpd Rev96, modifiziert BaPi, SPI-Timing
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
     2110    Überarbeitung der mfx-Paketerzeugung
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2208    Auslesen der mfx-UID
+    2208    Anpasung wegen Wiederholungen bei 32 Funktionen
     ** UART-Methoden entfernen
 ddl.h           aus Sigg-srcpd Rev96, original
     1803    MCS-Anssteuerung eingebaut
@@ -64,6 +67,8 @@ ddl.h           aus Sigg-srcpd Rev96, original
     2102    Vorbereitung Programmiergleisunterstützung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2208    Auslesen der mfx-UID
+    2208    schnelleres Umschalten von fast auf normal Refresh
 ddl_maerklin.c  aus Sigg-srcpd Rev96, modifiziert -> Original
     1803    GL-Cachezugriff angepasst
     1809    erweiterte Lokadressierung
@@ -87,12 +92,16 @@ ddl_mfx.c       aus Sigg-srcpd Rev96, modifiziert -> Original + BaPi
     2102    Verbesserung bei Notstop und Richtungswechsel
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2208    Auslesen der mfx-UID
+    2208    Anpasung wegen Wiederholungen bei 32 Funktionen
 ddl_mfx.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1806    Optimierungen
     1905    Optimierungen Signalerzeugung, Parameterprüfung
     1907    Vereinfachung der Threadstruktur zur Signalerzeugung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2208    Auslesen der mfx-UID
+    2208    Anpasung wegen Wiederholungen bei 32 Funktionen
 ddl_nmra.c      aus Sigg-srcpd Rev96, original
     1803    kleine Optimierungen
     1806    unbenutzen Code ausgeklammert
@@ -129,7 +138,9 @@ mcs-gateway.c   neu 180307
     2102    Vorbereitung Programmiergleisunterstützung
     2102    Ignorieren von MS1-CAN-Meldungen
     2110    Vorbereitung mfx-Rückmeldung durch Booster
+    2208    Lokzyklus beenden hinzugefügt
 netservice.c    unverändert aus Original-srcpd Stand 1710
+    2208    Userabfrage auf effektiven User geändert
 netservice.h    unverändert aus Original-srcpd Stand 1710
 platform.c      neu ab 1806
     2112    cppcheck-Meldungen beseitigt
@@ -168,6 +179,7 @@ srcp-gl.c       aus Sigg-srcpd Rev96, modifiziert -> Original
     2110    Korrekturen beim Locking 
     2110    Aufräumen und cppcheck-Warnungen beseitigt
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2208    Anpasung wegen Wiederholungen bei 32 Funktionen
 srcp-gl.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1803    MCS-Anssteuerung eingebaut
     1806    aufgeräumt
@@ -176,6 +188,7 @@ srcp-gl.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1905    Optimierungen 
     2102    Verbesserung bei Notstop und Richtungswechsel
     2110    Korrekturen beim Locking 
+    2208    Anpasung wegen Wiederholungen bei 32 Funktionen
 srcp-gm.c       unverändert aus Original-srcpd Stand 1710
     2112    Umstellung auf zukunftsfähiges Zeitformat
 srcp-gm.h       unverändert aus Original-srcpd Stand 1710
@@ -203,6 +216,7 @@ srcp-sm.c       aus Sigg-srcpd Rev96, original
     2102    Vorbereitung Programmiergleisunterstützung
     2110    Vorbereitung mfx-Rückmeldung UART und/oder Booster
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2208    Korrektur für Auslesen von mfx-Konfigurationswerten
 srcp-sm.h       aus Sigg-srcpd Rev96, original
     1806    Anpassungen für mfx
     1809    Konfigurationsschnittstelle für MCS

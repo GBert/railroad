@@ -1,4 +1,4 @@
-// ddl-mfx.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
+// ddl-mfx.h - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -21,19 +21,14 @@
 #ifndef __DDL_MFX_H__
 #define __DDL_MFX_H__
 
-#include <stdbool.h>  
+#include <stdbool.h>
 #include "config-srcpd.h"
 
-typedef struct _tMFXRDSFeedback {
-    bool ok; //true OK (Bei 1 Bit Rückmeldungen immer OK), false Error (keine Rückmeldung oder CRC Fehler)
-//    MFXRDSBits bits; //Anzahl Rückmeldebits
-    unsigned char feedback[8]; //Die Rückmeldung (wenn ok)
-} tMFXRDSFeedback;
 
 typedef struct _tMFXRead {
 	uint32_t decuid;
     int addr;
-    int cvline;	
+    int cvline;
     int cvindex;
     int cvnmbr;
     int repcount;
@@ -47,25 +42,30 @@ bool checkMfxCRC(uint8_t *buff, int n);
  * - MFX Verwaltung (Lokanmekdungen etc.)
  * - MFX RDS Rückmeldungen
  * @param busnumber SRCP Bus
- * @param fdRDSNewRx Pipe, über die der RDS Rückmeldungsthread neue Aufträge erhält.
- *                   Es wir jeweils "MFXRDSBits" übertragen.
+ * @param search
  * @return 0 für OK, !=0 für Fehler
  */
-int startMFXThreads(bus_t busnumber, int fdRDSNewRx);
+int startMFXManagement(bus_t busnumber, int search);
 
 /**
- * Alle MFX Threads terminieren.
- * @return 0 für OK, !=0 für Fehler
+ * stop the mfx search for new decoders
  */
-int stopMFXThreads();
- 
+void stopMFXSearch();
+
 long mfxManagement(bus_t busnumber);
 
 /* signal generating functions for maerklin mfx */
 
 /**
-  Generate the packet for MFX-decoder with 9-bit
-  address and 128 speed steps and up to 32 functions
+ * Senden eines MFX Pakets für Fx 16-31
+ * @param address Lokadresse
+ * @param func Funktionsnummer, könnte 0 bis 127 sein, hier sinnvoll ist aber nur 16-31.
+ * @param value Zustand der funktion ein/aus
+ */
+void send_LocoFx16_32(int address, int func, bool value, int xmits);
+
+/**
+  Generate the packet for MFX-decoder with 128 speed steps and up to 16 functions
   @param pointer to GL data
 */
 void comp_mfx_loco(bus_t bus, gl_data_t *glp);
@@ -80,10 +80,10 @@ void newGLInit(int adresse, uint32_t uid);
 
 /**
  * Schienenadresse im Dekoder löschen -> Dekoder ist nicht mehr angemeldet.
- * @param adresse Aktuell zugeordnete Schienenadresse.
+ * @param sid	actual SID
  */
-void sendDekoderTerm(int adresse);
- 
+void sendDekoderTerm(int sid);
+
 /**
  * MFX spezifische INIT Parameter ermitteln.
  * @param gl Lok, zu der die MFX spezifischen INIT Paramater ermittelt werden sollen.

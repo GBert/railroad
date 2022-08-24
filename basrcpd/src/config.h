@@ -1,13 +1,13 @@
-// config.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+// config.h - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* Activate IP V6 */
 #define ENABLE_IPV6 1
 
 /* which PI is used */
 #define BANANAPI 1
-/* #undef RASPBERRYPI - für BPI geändert RM */
+
 #define RASPBERRYPI 1
-#define BANANAPI_BOARD 1
+
 /* Raspberry PI 1 Board Version 1 found */
 /* #undef RASPBERRYPI_BOARD_V1 */
 
@@ -55,4 +55,4 @@
 //#define USE_ZIMO 1
 
 /* Version number of package */
-#define VERSION "2112"
+#define VERSION "2208"

@@ -1,4 +1,4 @@
-// ddl_mfx.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+// ddl_mfx.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -17,7 +17,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <ctype.h>
-#include <semaphore.h>
 #include "config.h"
 #include "ddl_mfx.h"
 #include "syslogmessage.h"
@@ -45,17 +44,15 @@
 #define MFX_FX_COUNT 16
 
 //MFX Verwaltungsthread
-//static pthread_t mfxManageThread;
+static uint32_t decoderUId;
 static uint16_t registrationCounter;
-static int searchstep = 0;
+static int searchstep = 1;
+static int autosearch;
 
 //MFX RDS Feedback thread
 static bus_t busnumber = 0;
-static int fdRDSNewRx; //Handle auf Pipe über die der RDS Rückmelde Thread Aufträge erhält
 
 static tMFXRead mfxread;
-static tMFXRDSFeedback rdsFeedback; //RDS Rückmeldungen
-static sem_t semRDSFeedback; //Semaphore zur Medlung von neuen RDS Daten
 
 //Konfig Cache einer Lok, alle Konfigregister [CVNr10Bit][Index6Bit]
 #define CV_SIZE 1024
@@ -69,38 +66,6 @@ static sem_t semRDSFeedback; //Semaphore zur Medlung von neuen RDS Daten
  */
 static bool sm = false;
 
-/**
- * MFX RDS Rückmeldung ist eingetroffen.
- * @param mfxRDSFeedback RDS Rückmeldung
- */
-/*void newMFXRDSFeedback(tMFXRDSFeedback mfxRDSFeedback) {
-  rdsFeedback = mfxRDSFeedback;
-  if (sem_post(&semRDSFeedback) != 0) {
-    syslog_bus(busnumber, DBG_ERROR, "newMFXRDSFeedback sem_post fail");
-  }
-}		*/
-
-/**
- * Warten auf eine neue RDS Antwort.
- * @return true wenn ok, false = Fehler
- */
-static bool waitRDS() {
-  struct timespec timeout;
-  timeout.tv_sec = 1;
-  timeout.tv_nsec = 0;
-  while (true) {
-    // if (
-	    printf("waitRDS sem_wait %d, errno %d\n", sem_timedwait(&semRDSFeedback, &timeout), errno);
-		// == 0) {
-      return true;
-//    }
-    if (! buses[busnumber].power_state) {
-      //Power Off -> nicht mehr warten
-      //printf("waitRDS sem_wait Timeout\n");
-      return false;
-    }
-  }
-}
 
 #if 0
 // HACK: das brauchen wir wohl nicht
@@ -137,7 +102,7 @@ void describeGLmfx(gl_data_t *gl, char *msg)
 }
 #endif
 /**
- * Fügt n Bits in einen Ausgabestrem hinzu.
+ * Fügt n Bits in einen Ausgabestream hinzu.
  * @param bits Bis zu 32 Bits die hinzugefügt werden sollen.
  *             MSB wird immer zuerst.
  * @param len Anzahl Bits die hinzugefügt werden soll (ab LSB Bit in "bits")
@@ -197,7 +162,6 @@ static void addAdrBits(int address, char *stream, unsigned int *pos) {
 static void addCRCBits(char *stream, unsigned int *pos) {
   uint16_t crc = 0x007F; // nicht nur 8 Bit, um Carry zu erhalten
   unsigned int i;
-//  const int CRC_LEN = 8;
   unsigned int count = *pos + CRC_LEN;
   for (i = 0; i < count; i++) {
     crc = (crc << 1) + ((stream[1 + (i / 8)] & (1 << (i % 8))) ? 1 : 0);
@@ -218,37 +182,36 @@ static void addCRCBits(char *stream, unsigned int *pos) {
  */
 static unsigned int sendMFXPaket(int address, char *stream, int packetTyp, int xmits)
 {
-  //Da nur ein Paket mit MFX Rückmeldung unterwegs sein kann, muss die Semaphore zur RDS Rückmeldung hier immer auf 0 stehen.
-  //Durch Timeout beim warten wegen z.B. Power Off und doch noch Ausführen Feedbackbefehl bei Power On
-  //könnte es sein, dass die Semaphore deshalb bereits auf >0 steht.
-/*  if (packetTyp != QMFX0PKT) {
-    int value;
-    while (true) {
-      if (sem_getvalue(&semRDSFeedback, &value) == 0) {
-        if (value > 0) {
-          sem_trywait(&semRDSFeedback);
-        }
-        else {
-          break;
-        }
-      }
-      else {
-        //Sollte nicht vorkommen ....
-        break;
-      }
-    }
-  }		*/
-
 	unsigned int sizeStream = ((stream[0] + 7) / 8) + 1; //+7 damit immer bei int Division aufgerundet wird
 	send_packet(busnumber, stream, sizeStream, packetTyp, xmits);
 	return sizeStream;
 }
 
 /**
+ * Senden eines MFX Pakets für Fx 16-31
+ * @param address Lokadresse
+ * @param func Funktionsnummer, könnte 0 bis 127 sein, hier sinnvoll ist aber nur 16-31.
+ * @param value Zustand der funktion ein/aus
+ */
+void send_LocoFx16_32(int address, int func, bool value, int xmits)
+{
+	char packetstream[PKTSIZE];
+	unsigned int pos = 0;
+	memset(packetstream, 0, PKTSIZE);
+	
+	addAdrBits(address, packetstream, &pos);
+	addBits(0b100, 3, packetstream, &pos); 		// switch one function
+	addBits(func, 7, packetstream, &pos);		// number of function
+	addBits(0, 1, packetstream, &pos);
+	addBits(value ? 1 : 0, 1, packetstream, &pos); // new state
+	addCRCBits(packetstream, &pos);
+	sendMFXPaket(address, packetstream, QMFX0PKT, xmits);
+}
+
+/**
   Generate the packet for MFX-decoder with 128 speed steps and up to 16 functions
   @param pointer to GL data
 */
-
 void comp_mfx_loco(bus_t bus, gl_data_t *glp)
 {
 	char packetstream[PKTSIZE] = { 0 };
@@ -318,31 +281,22 @@ void comp_mfx_loco(bus_t bus, gl_data_t *glp)
   	}
   	addCRCBits(packetstream, &pos);
   	unsigned int sizeStream = sendMFXPaket(address, packetstream, QMFX0PKT, 2);
-  	update_MFXPacketPool(bus, address, packetstream, sizeStream);
+  	update_MFXPacketPool(bus, glp, packetstream, sizeStream);
 
-  //Wenn mehr als 16 MFX Funktionen vorhanden sind -> geänderte Funktionen extra senden
-  //Format des Bitstreams für Funktion Einzelansteuerung (9 Bit Adresse):
-  //110AAAAAAAAA100NNNNNNN0FCCCCCCCC
-  if (nfuncs > 16) {
-      uint32_t fxChange = glp->funcschange & 0xffff0000;
-      glp->funcschange &= ~fxChange;
-      int i;
-      for (i=16; i<32; i++) {
-        if ((fxChange & (1U << i)) != 0) {
-			syslog_bus(bus, DBG_DEBUG, "COMP MFX Loco. Adr=%d, nfuncs=%d, Fx%d=%d",
+	//Wenn mehr als 16 MFX Funktionen vorhanden sind -> geänderte Funktionen extra senden
+	//Format des Bitstreams für Funktion Einzelansteuerung (9 Bit Adresse):
+	//110AAAAAAAAA100NNNNNNN0FCCCCCCCC
+	if (nfuncs > 16) {
+		uint32_t fxChange = glp->funcschange & 0xffff0000;
+		glp->funcschange &= ~fxChange;
+		for (int i=16; i<32; i++) {
+			if ((fxChange & (1U << i)) != 0) {
+				syslog_bus(bus, DBG_DEBUG, "COMP MFX Loco. Adr=%d, nfuncs=%d, Fx%d=%d",
 		  						address, nfuncs, i, (funcs >> i) & 1);
-          	memset(packetstream, 0, PKTSIZE);
-          	pos = 0;
-          	addAdrBits(address, packetstream, &pos);
-          	addBits(0b100, 3, packetstream, &pos); 		// switch one function
-          	addBits(i, 7, packetstream, &pos); 			// number of function
-          	addBits(0, 1, packetstream, &pos);
-          	addBits((funcs >> i) & 1, 1, packetstream, &pos); // new state
-          	addCRCBits(packetstream, &pos);
-          	sendMFXPaket(address, packetstream, QMFX0PKT, 2);
+				send_LocoFx16_32(address, i, (funcs >> i) & 1, 2);
+			}
 		}
-      }
-  }
+	}
 }
 
 #define REG_COUNTER_FILE SYSCONFDIR"/srcpd.regcount"
@@ -412,7 +366,7 @@ static void sendUIDandRegCounter(uint32_t uid, uint16_t registrationCounter)
  * @param adresse SID des Dekoders
  * @param dekoderUID Die UID des Dekoders (0=SID im Dekoder löschen)
  */
-static void sendDekoderExist(int adresse, uint32_t dekoderUID)
+static void sendDekoderExist(int adresse, uint32_t dekoderUID, bool noverify)
 {
 	char packetstream[PKTSIZE] = { 0 };
   //Format des Bitstreams:
@@ -427,7 +381,7 @@ static void sendDekoderExist(int adresse, uint32_t dekoderUID)
   addCRCBits(packetstream, &pos);
 
 	unsigned int packetTyp;
-	if (dekoderUID == 0)
+	if (noverify)
 		packetTyp = QMFX0PKT;		// no verification when assignment removed
 	else
 		packetTyp = QMFX1PKTV;
@@ -442,7 +396,7 @@ static void sendDekoderExist(int adresse, uint32_t dekoderUID)
  *                   Wenn ein neuer Dekoder gefunden wurde wird dessen UID zurückgegeben.
  * @return true Wenn ein Dekoder auf die Suche reagiert hat und neu angemeldet werden muss.
  */
-static bool sendSearchNewDecoder(unsigned int countUIDBits, uint32_t *dekoderUID)
+static void sendSearchNewDecoder(uint32_t dekoderUID, unsigned int countUIDBits)
 {
   //printf("Suche Dekoder C=%d, UID=%u\n", countUIDBits, *dekoderUID);
 	char packetstream[PKTSIZE] = { 0 };
@@ -456,46 +410,17 @@ static bool sendSearchNewDecoder(unsigned int countUIDBits, uint32_t *dekoderUID
   addAdrBits(0, packetstream, &pos); //Adresse 0
   addBits(0b111010, 6, packetstream, &pos); //Kommando Dekoder Suche
   addBits(countUIDBits, 6, packetstream, &pos); //6 Bit Count relevante UID Bits
-  addBits(*dekoderUID, 32, packetstream, &pos); //32 Bit UID
+  addBits(dekoderUID, 32, packetstream, &pos); //32 Bit UID
   addCRCBits(packetstream, &pos);
 
-  sendMFXPaket(0, packetstream, QMFX1PKTD, 1);
-
-  //Warten auf Antwort
-  if (! waitRDS()) {
-    return false;
-  }
-  //Falls ein Dekoder geantwortet hat wird nun das nächste Bit der UID gesucht
-  if (rdsFeedback.feedback[0]) {
-    //printf("MFX Dekoder suche OK C=%d, UID=%u\n", countUIDBits, *dekoderUID);
-    if (countUIDBits >= 32) {
-      //Alle UID Bist sind ermittelt, Dekoder ist gefunden.
-      //printf("MFX Dekoder UID ermittelt:%u\n", *dekoderUID);
-      //Falls UID==0 ist, war das eine Störung, kann kein Dekoder sein.
-      return (*dekoderUID != 0);
-    }
-    countUIDBits++;
-    //Rekursiv weiter suchen. Nächstes Bit 0.
-    if (! sendSearchNewDecoder(countUIDBits, dekoderUID)) {
-      //Keine Antwort, mit UID Bit 1 testen
-      *dekoderUID |= 0x80000000 >> (countUIDBits - 1);
-      if (! sendSearchNewDecoder(countUIDBits, dekoderUID)) {
-        //Fehler, Dekoder hat auf einem weiteren Bit mit 0 und 1 nicht geantwortet -> Abbruch
-        return false;
-      }
-    }
-    //Nächstes Bit ist ermittelt
-    return true;
-  }
-  //printf("Keine Antwort\n");
-  return false;
+	sendMFXPaket(0, packetstream, QMFX1PKTD, 1);
 }
 
 /**
  * Neuer Lok Schienenadresse zuweisen.
  * @param dekoderUID UID des neuen Dekoders
  */
-void assignSID(uint32_t dekoderUID, unsigned int sid)
+static void assignSID(uint32_t dekoderUID, unsigned int sid)
 {
 	syslog_bus(busnumber, DBG_INFO, "New SID %d for UID %u", sid, dekoderUID);
 	char packetstream[PKTSIZE] = { 0 };
@@ -512,7 +437,8 @@ void assignSID(uint32_t dekoderUID, unsigned int sid)
   addBits(dekoderUID, 32, packetstream, &pos); //32 Bit UID
   addCRCBits(packetstream, &pos);
 
-  sendMFXPaket(0, packetstream, QMFX0PKT, 2);
+	sendMFXPaket(0, packetstream, QMFX0PKT, 2);
+	if ((searchstep == 1) && autosearch) searchstep = 0;	// restart automatic search
 }
 
 /**
@@ -584,6 +510,7 @@ static uint32_t getNextMFXLok(int *adr) {
 }
 #endif
 
+#if 0
 /**
  * Vorhandene Loks nach UID durchsuchen.
  * @param adrBekannt Bekannte Lokadresse mit "uid". Diese wird bei der Suche ignoriert.
@@ -610,7 +537,9 @@ static int searchLokUID(int adrBekannt, uint32_t uid) {
   }
   return glAddr;
 }
+#endif
 
+#if 0
 /**
  * Neues MFX Lok Init Kommando empfangen.
  * Wenn diese Lok bereits unter anderer Adresse vorhanden ist -> neue Adresse übernehmen, alte Lok löschen, neue Adresszuordnung senden.
@@ -630,6 +559,7 @@ void newGLInit(int adresse, uint32_t uid) {
     }
   }
 }
+#endif
 
 #if 0
 /**
@@ -679,112 +609,17 @@ static unsigned int getSID(uint32_t dekoderUID, bool *bereitsVorhanden) {
 long mfxManagement(bus_t busnum)
 {
 	DDL_DATA *ddl = (DDL_DATA*)buses[busnum].driverdata;
-	if (searchstep == 0) sendUIDandRegCounter(ddl -> uid, registrationCounter);
+	if ((searchstep < 2) || (searchstep == 32))
+		sendUIDandRegCounter(ddl->uid, registrationCounter);
 
-	// TODO: search for new decoders and increment searchstep accordingly
-    uint32_t dekoderUID = 0;
-    if (searchstep) sendSearchNewDecoder(0, &dekoderUID);
-
-    return ((searchstep == 0) ? 1000000 : 100000);	// next call in about 1s or 0.1
+	if (searchstep != 1) {
+		unsigned int bitnum = searchstep >> 1;		// bits to be checked
+		if (searchstep & 1) decoderUId |= 1 << (32 - bitnum);
+		else if (searchstep == 0) decoderUId = 0;	// start from 0
+		sendSearchNewDecoder(decoderUId, bitnum);
+	}
+	return ((searchstep < 2) ? 1000000 : 300000);	// next call in about 1s or 0.3s
 }
-
-#if 0
-static void *thr_mfxManageThread(void *threadParam) {
-  DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
-  //UID dieser Zentrale
-  uint32_t uid = ddl -> uid;
-  //Neuanmeldezähler mit letztem gespeichertem Wert laden
-  /*uint16_t*/ registrationCounter = loadRegistrationCounter();
-  syslog_bus(busnumber, DBG_INFO, "ReRegistration counter = %d", registrationCounter);
-  //Aktuelle Lok SID für periodische Dekoder Existenzabfrage
-//  int lokAdrExist = 0;
-  //Erste MFX UID, zu der ein "DekoderExist" gesendet wurde. Zur Erkennung, wenn ein Durchgang über alle MFX Loks fertig ist
-//  uint32_t firstUID = 0;
-  //Zähler Anzahl "assignSID" Durchläufe nach Power Up-Down
-//  int countUIDLoops = 0;
-  for (;;) {
-    if (buses[busnumber].power_state) {
-      //Bus ist ein -> UID / Neuanmeldezähler versenden, neue Dekoder suchen
-      sendUIDandRegCounter(uid, registrationCounter);
-      usleep(INTERVALL_UID);
-// HACK: disable automatic PING and re-BIND by server
-      //Periodische Existenzabfrage an alle angemeldeten Dekoder.
-      //Rückmeldung wird nie ausgewertet, ich überwache sowieso nicht die ganze Anlage mit MFX fähigen Boostern
-      uint32_t uidExist = getNextMFXLok(&lokAdrExist);
-      if (uidExist != 0) {
-        sendDekoderExist(lokAdrExist, uidExist);
-        //Hier kommt noch ein kleiner Kunstgriff:
-        //Periodische Widerholung MFX Schienenadresszuordnungen.
-        //Damit werden Loks, die ihre Zuordnung gelöscht haben, gleich wieder angemeldet, auch dann, wenn sie auf einem
-        //nicht MFX rückmeldefähigen Abschnitt (Booster) stehen.
-        if (firstUID == uidExist) {
-          //Ein Durchgang über alle MFX Lok abgeschlossen
-          countUIDLoops++;
-        }
-        if ((countUIDLoops % LOOP_UID_SID_REPEAT) == 0) {
-          assignSID(uidExist, lokAdrExist);
-        }
-        if (firstUID == 0) {
-          //1. UID Merken
-          firstUID = uidExist;
-        }
-      }
-      //Wenn SM aktiv ist machen wir hier nichts mehr. Loksuche ist unterbrochen bis SM wieder ausgeschaltet wird.
-      if (0) {		// HACK: disable temporarely (! sm) {
-        //Suche nach noch nicht angemeldeten MFX Dekodern
-        uint32_t dekoderUID = 0;
-        //Wenn eine Dekoder UID 0 gefunden wurde, wird dies ignoriert. Die sollte es nicht geben,
-        //kann aber ermittelt werden, wenn durch eine Störung die RDS 1 Bit Rückmeldung dauerend erkannt wird.
-        if ((sendSearchNewDecoder(0, &dekoderUID)) && (dekoderUID != 0)) {
-          //Neuem MFX Dekoder die nächste freie Schienenadresse zuweisen
-          bool bereitsVorhanden;
-          int adresse = getSID(dekoderUID, &bereitsVorhanden);
-          syslog_bus(busnumber, DBG_INFO,
-                     "Neue MFX Lok gefunden. UID=%u, zugewiesene Adresse=%d", dekoderUID, adresse);
-          //Neuanmeldezähler Inkrement
-          registrationCounter++;
-          saveRegistrationCounter(registrationCounter);
-// HACK: das brauchen wir wohl nicht
-          //Lokname und Funktionen abfragen, wenn es eine neue Lok ist
-          if (! bereitsVorhanden) {
-            char lokName[17];
-            memset(lokName, 0, sizeof(lokName));
-            uint32_t lokFunktionen[MFX_FX_COUNT];
-            memset(lokFunktionen, 0, sizeof(lokFunktionen));
-            if (readLokNameFx(adresse, lokName, lokFunktionen)) {
-              //Alle notwendigen Dekodereigenschaften konnten ausgelesen werden
-              //->SRCP INIT Meldung der neuen Lok absetzen.
-              //Zusätzliche MFX Daten so  zusammenstellen, wie sie mit "INIT" kommen müssen:
-              //<UID> <"Lokname"> <fx0> .. <fx15>
-              char optData[(MFX_FX_COUNT + 1) * (10+1) + 16 + 2 + 1 + 10]; //Länge UID und fx max 10, Name 16+2 plus Spaces und etwas Reserve ...
-              optData[0] = 0;
-              getMFXInitParam(dekoderUID, /*lokName, lokFunktionen,*/ optData);
-              //printf("INIT MFX Lok Optdata: %s\n", optData);
-              if (cacheInitGL(busnumber, adresse, 'X', 0, 128, MFX_FX_COUNT, optData) != SRCP_OK) {
-                syslog_bus(busnumber, DBG_ERROR, "MFX cacheInitGL fail");
-              }
-            }
-            else {
-              syslog_bus(busnumber, DBG_WARN,
-                         "MFX Lokname und Funktionen konnten nicht gelesen werden. SID=%d Neuanmeldung", adresse);
-              //Dekoder SID löschen, Dekoder wird sich wieder neu anmleden
-              sendDekoderTerm(adresse);
-            }
-          }
-        }
-      }
-    }
-    else {
-      //Beim nächsten Power Up wider von vorne beginnen mit SID Zuordnungen senden
-      firstUID = 0;
-      lokAdrExist = 0;
-      countUIDLoops = 0;
-    }
-    usleep(INTERVALL_UID);
-  }
-  return NULL;
-}
-#endif
 
 bool checkMfxCRC(uint8_t *buff, int n)
 {
@@ -803,63 +638,99 @@ bool checkMfxCRC(uint8_t *buff, int n)
  * - MFX Verwaltung (Lokanmekdungen etc.)
  * - MFX RDS Rückmeldungen
  * @param busnumber SRCP Bus
- * @param fdRDSNewRx Pipe, über die der RDS Rückmeldungsthread neue Aufträge erhält.
- *                   Es wir jeweils "MFXRDSBits" übertragen.
  * @return 0 für OK, !=0 für Fehler
  */
-int startMFXThreads(bus_t _busnumber, int _fdRDSNewRx)
+int startMFXManagement(bus_t _busnumber, int search)
 {
 	if (busnumber) return 2;		// don't start threads twice
-  	busnumber = _busnumber;
-  	fdRDSNewRx = _fdRDSNewRx;
+	busnumber = _busnumber;
 
 	registrationCounter = loadRegistrationCounter();
 	syslog_bus(busnumber, DBG_INFO,
 				"ReRegistration counter initialized with %d", registrationCounter);
-
-  if (sem_init(&semRDSFeedback, 0, 0) != 0) {
-    syslog_bus(busnumber, DBG_ERROR,
-               "sem_init fail");
-    return 1;
-  }
-  return 0;
+	autosearch = search;
+	searchstep = autosearch ? 0 : 1;
+	return 0;
 }
 
 /**
- * Alle MFX Threads terminieren.
- * @return 0 für OK, !=0 für Fehler
+ * stop the mfx search for new decoders
  */
-int stopMFXThreads()
+void stopMFXSearch()
 {
-  if (sem_destroy(&semRDSFeedback) != 0) {
-    return 1;
-  }
-  return 0;
+	searchstep = 1;
 }
 
 /**
  * Schienenadresse im Dekoder löschen -> Dekoder ist nicht mehr angemeldet.
- * @param adresse Aktuell zugeordnete Schienenadresse.
+ * @param sid	actual SID
  */
-void sendDekoderTerm(int adresse) {
-  sendDekoderExist(adresse, 0);
+void sendDekoderTerm(int sid) {
+  sendDekoderExist(sid, 0, true);
 }
 
 //---------------------------- SM ----------------------------------------
+
+/**
+ * generate mfx discovery report
+ */
+static int discoveryReport(uint8_t askval)
+{
+	char minfo[4], info[250];
+	struct timeval now;
+
+	minfo[0] = 2;						// send actual partial id
+	minfo[1] = searchstep >> 1;
+	minfo[2] = askval;
+	info_mcs(busnumber, 0x03, decoderUId, minfo);
+	if ((minfo[1] == 32) && askval) {
+		minfo[0] = 1;					// send final id
+		info_mcs(busnumber, 0x03, decoderUId, minfo);
+
+		gettimeofday(&now, NULL);
+		sprintf(info, "%lld.%.3ld 100 INFO %lu SM %u MFXDISCOVERY\n",
+				(long long) now.tv_sec, (long) (now.tv_usec / 1000),
+				busnumber, decoderUId);
+		enqueueInfoMessage(info);
+
+		syslog_bus(busnumber, DBG_INFO, "Discovery of decoder with UID %X", decoderUId);
+		return 1;		// discovery completed
+	}
+	return 0;			// discovery ongoing
+}
 
 /**
  * handle result received via serial feedback port
  */
 void serialMFXresult(uint8_t *buf, int len)
 {
+	char dbgmsg[200];
 	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
-	syslog_bus(busnumber, DBG_DEBUG, "read_comport read %d bytes", len);
-	for (int n=0; n<len; n++)
-		syslog_bus(busnumber, DBG_DEBUG, "read data %d was 0x%02X", n, buf[n]);
+	uint8_t	event = 0x43;
+
+	for (int n=0; n<len; n++) sprintf(dbgmsg + 3 * n, " %02X", buf[n]);
+	syslog_bus(busnumber, DBG_DEBUG, "read data len %d:%s", len, dbgmsg);
 
 	ddl->fbData.serask = buf[0];
-	uint8_t	event = 0x43;	// HACK: send something wired for test
-	write(ddl->feedbackPipe[1], &event, 1);
+	if (ddl->fbData.fbbytnum) {		// reply for a read command
+		int minreq = 4 + 2 * ddl->fbData.fbbytnum;
+//		syslog_bus(busnumber, DBG_DEBUG, "minimum required data length: %d", minreq);
+
+		if ((len >= minreq) && (buf[1] = 0xA)) {
+			for (int n = 0; n <= ddl->fbData.fbbytnum; n++) {
+				ddl->fbData.serfbdata[n] = (buf[2*n+2] << 4) | (buf[2*n+3] & 0xF); 
+//				syslog_bus(busnumber, DBG_DEBUG, "ser data %d is 0x%02X", n, ddl->fbData.serfbdata[n]);
+			}
+			if (checkMfxCRC(ddl->fbData.serfbdata, ddl->fbData.fbbytnum)) {
+				syslog_bus(busnumber, DBG_DEBUG, "CRC OK");
+				event = 0x42;
+				write(ddl->feedbackPipe[1], &event, 1);
+			}
+		}
+		else syslog_bus(busnumber, DBG_DEBUG, 
+			"mfx rec data framing error: len %d, min %d, start code 0x%X", len, minreq, buf[1]);
+	}
+	else write(ddl->feedbackPipe[1], &event, 1);
 }
 
 /**
@@ -907,7 +778,10 @@ void handleMFXacknowledge(uint8_t askval)
 	syslog_bus(busnumber, DBG_INFO, "MFX - A C K  auf Code %d", ddl->fbData.pktcode);
 
 	switch (ddl->fbData.pktcode) {
-	case QMFX1PKTD:		// TODO: handle discovery packet - carrier detected
+	case QMFX1PKTD:						// handle discovery packet - carrier detected
+					if (discoveryReport(askval)) searchstep = 1;	// suspend
+					else if (searchstep & 1) searchstep++;	// try next bit set to 0
+					else searchstep += 2;
 					break;
 	case QMFX1PKTV:	minfo[0] = 3;		// send verify response with ASK
 					minfo[1] = mfxread.addr >> 8;
@@ -934,7 +808,14 @@ void handleMFXtimeout(void)
 	syslog_bus(busnumber, DBG_INFO, "MFX - TIMEOUT auf Code %d", ddl->fbData.pktcode);
 
 	switch (ddl->fbData.pktcode) {
-	case QMFX1PKTD:		// TODO: handle discovery packet - NO carrier detected
+	case QMFX1PKTD:					// handle discovery packet - NO carrier detected
+					if (searchstep) discoveryReport(0);
+					if (searchstep & 1) {
+						syslog_bus(busnumber, DBG_INFO,
+							"Discoyery restarted due to error at step %d", searchstep);
+						searchstep = 0;					// try again from start
+					}
+					else if (searchstep) searchstep++;	// try with bit set to 1
 					break;
 	case QMFX1PKTV:	minfo[0] = 2;		// send verify response with SID = 0
 					minfo[1] = 0;
@@ -947,7 +828,7 @@ void handleMFXtimeout(void)
 					minfo[0] = 2;		// send read config fail responses
 					minfo[1] = (mfxread.cvline >> 8) | (mfxread.cvindex << 2);
 					minfo[2] = mfxread.cvline & 0xFF;
-					info_mcs(busnumber, 0x0F, mfxread.addr, minfo);
+					info_mcs(busnumber, 0x0F, mfxread.addr | 0x4000, minfo);
 				}
 	}
 }
@@ -967,8 +848,7 @@ void resumeMfxGetCV(void)
  * @param smOn true=SM ein, false=SM aus
  */
 void setMfxSM(bool smOn) {
-  sm = smOn;
-  //printf("MFX SM %d\n", sm);
+	sm = smOn;
 }
 
 /**
@@ -1039,18 +919,24 @@ int smMfxSetBind(int address, uint32_t uid)
     if (! buses[busnumber].power_state) return -2;
 
 	assignSID(uid, address);
+    gl_data_t *p = get_gldata_ptr(busnumber, address | 0x4000);
+    if (p) p->decuid = uid;
 	return 0;
 }
 
 /* MFX VERIFY */
+// if  uid == 0 then do unbind
 int smMfxVerBind(int address, uint32_t uid)
 {
 	if (address == 0) return registrationCounter;
 
-    if (! buses[busnumber].power_state) return -2;
+	if (! buses[busnumber].power_state) return -2;
 	mfxread.decuid = uid;
 	mfxread.addr = address;		// remember task details for continueing and answering
 
-	sendDekoderExist(address, uid);
+	sendDekoderExist(address, uid, false);
+    gl_data_t *p = get_gldata_ptr(busnumber, address | 0x4000);
+    if (p) p->decuid = uid;
 	return 0;
 }
+

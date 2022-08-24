@@ -1,6 +1,6 @@
 // mcs-gateway.c : gateway between Märklin CS CAN commands and srcpd
 //
-// C 2018 - 2021 Rainer Müller
+// C 2018 - 2022 Rainer Müller
 // Das Programm unterliegt den Bedingungen der GNU General Public License 3 (GPL3).
 
 //#include <errno.h>
@@ -12,6 +12,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <linux/can/error.h>
+#include <sys/ioctl.h>
 //#include <unistd.h>
 
 #include "config.h"
@@ -152,6 +153,10 @@ void *thr_handleCAN(void *vp)
 									continue;		// reply after done
     					// Emergency Stopp
     					case 0x03:  handle_mcs_dir(mcs_bus, uid, 4);
+									break;
+    					// Terminate
+    					case 0x04:  if (uid == ownuid) cacheCleanGL(mcs_bus);
+									else cacheTermGL(mcs_bus, uid);
 									break;
 						// Protokoll
     					case 0x05:  if (handle_mcs_prot(mcs_bus, uid, frame.data[5])

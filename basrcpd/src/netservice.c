@@ -1,3 +1,5 @@
+// netservice.c - adapted for basrcpd project 2022 by Rainer Müller
+
 /* cvs: $Id: netservice.c 1735 2016-04-17 09:40:50Z gscholz $             */
 
 /*
@@ -30,13 +32,11 @@ static pthread_t netservice_tid;
 
 void change_privileges()
 {
-    struct group *group;
-    struct passwd *passwd;
     char *grp = ((SERVER_DATA *) buses[0].driverdata)->groupname;
     char *uid = ((SERVER_DATA *) buses[0].driverdata)->username;
 
-
     if (grp != NULL) {
+        struct group *group;
         if ((group = getgrnam(grp)) != NULL ||
             (group = getgrgid((gid_t) atoi(grp))) != NULL) {
             if (setegid(group->gr_gid) != 0) {
@@ -54,6 +54,7 @@ void change_privileges()
     }
 
     if (uid != NULL) {
+        struct passwd *passwd;
         if ((passwd = getpwnam(uid)) != NULL ||
             (passwd = getpwuid((uid_t) atoi(uid))) != NULL) {
             if (seteuid(passwd->pw_uid) != 0) {
@@ -99,7 +100,6 @@ void *thr_handlePort(void *v)
 {
     int last_cancel_state, last_cancel_type;
     pthread_t ttid;
-    int result;
 
     net_thread_t *ntd = (net_thread_t *) malloc(sizeof(net_thread_t));
     if (ntd == NULL)
@@ -165,9 +165,7 @@ void *thr_handlePort(void *v)
         fsaddr = (struct sockaddr *) &fsin;
         socklen = sizeof(sin);
     }
-    if (getuid() == 0) {
-        change_privileges();
-    }
+    change_privileges();	// when coming here, we had up to now root priviledges
 
     sock_opt = 1;
     if (setsockopt(ntd->socket, SOL_SOCKET, SO_REUSEADDR, &sock_opt,
@@ -252,7 +250,7 @@ void *thr_handlePort(void *v)
         }
 
         /* hand over client service to "thr_doClient()" from clientservice.c */
-        result = pthread_create(&ttid, NULL, thr_doClient, asn);
+        int result = pthread_create(&ttid, NULL, thr_doClient, asn);
         if (result != 0) {
             syslog_bus(0, DBG_ERROR, "Create thread for network client "
                        "failed: %s (errno = %d). Terminating...\n",
@@ -271,13 +269,10 @@ void *thr_handlePort(void *v)
 /* create network connection thread */
 void create_netservice_thread()
 {
-    int result;
     unsigned short int port;
-
     port = ((SERVER_DATA *) buses[0].driverdata)->TCPPORT;
 
-    /*TODO: search for other solution than doubled type cast */
-    result = pthread_create(&netservice_tid, NULL, thr_handlePort,
+    int result = pthread_create(&netservice_tid, NULL, thr_handlePort,
                             (void *) (unsigned long int) port);
 
     if (result != 0) {
@@ -294,10 +289,9 @@ void create_netservice_thread()
 /* cancel network connection thread */
 void cancel_netservice_thread()
 {
-    int result;
     void *thr_result;
 
-    result = pthread_cancel(netservice_tid);
+    int result = pthread_cancel(netservice_tid);
     if (result != 0)
         syslog_bus(0, DBG_ERROR,
                    "Netservice thread cancel failed: %s (errno = %d).",

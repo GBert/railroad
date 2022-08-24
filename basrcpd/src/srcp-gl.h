@@ -1,4 +1,4 @@
-// srcp-gl.h - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
+// srcp-gl.h - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* $Id: srcp-gl.h 1346 2009-06-06 18:15:28Z mtrute $ */
 
@@ -48,13 +48,14 @@ typedef struct _GLSTATE {
     uint16_t id;                /* address  */
     uint8_t  n_fs;
     uint8_t  speed;             /* Sollgeschwindigkeit skal. auf 0..14 */
-    char direction;             /* 0/1/2                               */
+    int8_t direction;           /* 0/1/2, -1                           */
     uint32_t funcs;             /* Fx, F1, ... F31                     */
     uint32_t funcschange;
     uint8_t	 speedchange;
-    uint8_t  cachedspeed; 
-    char cacheddirection;  	   
-    struct timeval tv;          /* Last time of change                 */
+    uint8_t  cachedspeed;
+    int8_t cacheddirection;
+    uint8_t	 lastfunc;			/* last repeated function number       */
+    struct timeval updatime;    /* Last time of change                 */
     struct timeval inittime;
     struct timeval locktime;
     long int lockduration;
@@ -93,6 +94,7 @@ void unlock_gl_bysessionid(sessionid_t sessionid);
 void unlock_gl_bytime(void);
 int describeLOCKGL(bus_t busnumber, uint32_t locid, char *reply);
 void debugGL(bus_t busnumber, gl_data_t *glp);
+gl_data_t * get_gldata_ptr(bus_t bus, uint32_t locid);
 
 int handle_mcs_prot(bus_t bus, uint32_t locid, int val);
 int handle_mcs_speed(bus_t bus, uint32_t locid, int val);
@@ -100,3 +102,4 @@ int handle_mcs_dir(bus_t bus, uint32_t locid, int val);
 int handle_mcs_func(bus_t bus, uint32_t locid, int funr, int val);
 
 #endif
+

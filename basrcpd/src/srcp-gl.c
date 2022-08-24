@@ -1,4 +1,4 @@
-// srcp-gl.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+// srcp-gl.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller
 
 /* $Id: srcp-gl.c 1740 2016-04-24 12:36:36Z gscholz $ */
 
@@ -90,7 +90,7 @@ uint32_t getglid(gl_data_t *p)
 /*	evaluates index to glstate table,
 	returns a NULL ptr if invalid, else a ptr to an index or to 0 if free
 */
-uint16_t * getGLIndex(bus_t bus, uint32_t locid, char prot)
+static uint16_t * getGLIndex(bus_t bus, uint32_t locid, char prot)
 {
 	if ((bus <= num_buses) && (gl[bus].gldir != NULL)) {
 		if ((locid < MAXSRCPGL) && prot) gl[bus].gldir->proto[locid] = prot;
@@ -272,12 +272,12 @@ void cacheSetGL(bus_t busnumber, gl_data_t *glp, gl_data_t *l)
     if ((addr >= MAXSRCPGL) || (gl[busnumber].gldir->proto[addr] == 0)) addr = getglid(glp);
    	glp->cacheddirection = l->direction;
     glp->cachedspeed = l->speed;
-    gettimeofday(&glp->tv, NULL);
+    gettimeofday(&glp->updatime, NULL);
     if (glp->state == glsTerm) {
        	rc = SRCP_INFO;
         snprintf(msg, sizeof(msg), "%lld.%.3ld 102 INFO %lu GL %d\n",
-                (long long) glp->tv.tv_sec,
-				(long) (glp->tv.tv_usec / 1000), busnumber, addr);
+                (long long) glp->updatime.tv_sec,
+				(long) (glp->updatime.tv_usec / 1000), busnumber, addr);
         // delete all data of terminated entry
         uint16_t *gli = getGLIndex(busnumber, getglid(glp) | MCSADDRINDICATOR, 0);
         *gli = 0;
@@ -306,7 +306,7 @@ int cacheInitGL(bus_t busnumber, uint32_t locid, const char protocol,
 		        rc = bus_supports_protocol(busnumber, protocol);
 				if (rc != SRCP_OK) return rc;
         		gettimeofday(&p->inittime, NULL);
-        		p->tv = p->inittime;
+        		p->updatime = p->inittime;
         		p->n_fs = n_fs ? n_fs : 14;
         		p->n_func = n_func;
         		p->protocolversion = protoversion;
@@ -402,8 +402,8 @@ int cacheInfoGL(bus_t busnumber, uint32_t locid, char *msg)
     if (i && (gl[busnumber].glstate[i].state == glsActive)) {
     	char *tmp;
         sprintf(msg, "%lld.%.3ld 100 INFO %lu GL %u %d %d %d %d",
-                (long long) gl[busnumber].glstate[i].tv.tv_sec,
-                (long) (gl[busnumber].glstate[i].tv.tv_usec / 1000),
+                (long long) gl[busnumber].glstate[i].updatime.tv_sec,
+                (long) (gl[busnumber].glstate[i].updatime.tv_usec / 1000),
                 busnumber, locid,
 				gl[busnumber].glstate[i].direction,
                 gl[busnumber].glstate[i].speed,
@@ -607,7 +607,7 @@ void debugGL(bus_t busnumber, gl_data_t *glp)
 }
 
 // Helpers for the mcs-Gateway
-static gl_data_t * get_gldata_ptr(bus_t bus, uint32_t locid)
+gl_data_t * get_gldata_ptr(bus_t bus, uint32_t locid)
 {
 	gl_data_t *p = NULL;
     uint16_t *gli = getGLIndex(bus, locid, 0);
@@ -637,7 +637,7 @@ static gl_data_t * get_gldata_ptr(bus_t bus, uint32_t locid)
 				}
 				// TODO: was muss sonst noch initialisiert werden ?    z.B.
 				gettimeofday(&p->inittime, NULL);
-				p->tv = p->inittime;
+				p->updatime = p->inittime;
         		if (bus_supports_protocol(bus, p->protocol) == SRCP_OK) {
         			if (buses[bus].init_gl_func) {
     					if ((*buses[bus].init_gl_func) (p, "") == SRCP_OK) {
