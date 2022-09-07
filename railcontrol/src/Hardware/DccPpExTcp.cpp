@@ -27,7 +27,7 @@ namespace Hardware
 {
 	DccPpExTcp::DccPpExTcp(const HardwareParams* params)
 	:	DccPpEx(params,
-			"DCC++EX TCP / " + params->GetName() + " at IP " + params->GetArg1(),
+			"DCC-EX TCP / " + params->GetName() + " at IP " + params->GetArg1(),
 			params->GetName()),
 	 	connection(Network::TcpClient::GetTcpClientConnection(logger, params->GetArg1(), Port))
 	{

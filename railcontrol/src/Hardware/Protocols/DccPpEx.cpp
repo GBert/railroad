@@ -167,7 +167,7 @@ namespace Hardware
 
 		void DccPpEx::Receiver()
 		{
-			Utils::Utils::SetThreadName("DCC++EX");
+			Utils::Utils::SetThreadName("DCC-EX");
 			logger->Info(Languages::TextReceiverThreadStarted);
 			while (true)
 			{
@@ -213,7 +213,7 @@ namespace Hardware
 				{
 					return;
 				}
-				switch(buffer[pos])
+				switch(buffer[pos++])
 				{
 					case 'Q':
 					{
@@ -257,7 +257,7 @@ namespace Hardware
 					++pos;
 					continue;
 				}
-				if (c >= '0' && c <= '9')
+				if (c < '0' || c > '9')
 				{
 					break;
 				}
