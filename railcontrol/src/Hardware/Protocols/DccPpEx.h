@@ -93,12 +93,6 @@ namespace Hardware
 					const CvNumber cv,
 					const CvValue value) override;
 
-				void FeedbackDelete(const FeedbackID feedbackID,
-					const std::string& name) override;
-
-				void FeedbackSettings(const FeedbackID feedbackID,
-					const std::string& name) override;
-
 			protected:
 				inline DccPpEx(const HardwareParams* params,
 				    const std::string& fullName,

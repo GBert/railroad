@@ -145,26 +145,6 @@ namespace Hardware
 			SendInternal(buffer);
 		}
 
-		void DccPpEx::FeedbackDelete(const FeedbackID feedbackID,
-			__attribute__((unused)) const std::string& name)
-		{
-			string buffer("<S ");
-			buffer += to_string(feedbackID);
-			buffer += "><E>";
-			SendInternal(buffer);
-		}
-
-		void DccPpEx::FeedbackSettings(const FeedbackID feedbackID,
-			__attribute__((unused)) const std::string& name)
-		{
-			string buffer("<S ");
-			buffer += to_string(feedbackID);
-			buffer += " ";
-			buffer += to_string(feedbackID);
-			buffer += " 1><E>";
-			SendInternal(buffer);
-		}
-
 		void DccPpEx::Receiver()
 		{
 			Utils::Utils::SetThreadName("DCC-EX");
