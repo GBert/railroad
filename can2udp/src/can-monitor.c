@@ -150,9 +150,9 @@ void writeYellow(const char *s) {
 #endif
 
 void print_usage(char *prg) {
-    fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 3.23\n\n");
-    fprintf(stderr, "         -i <can int>      CAN interface - default can0\n");
+    fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
+    fprintf(stderr, "   Version 4.00\n\n");
+    fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
     fprintf(stderr, "         -l <candump file> read candump file instead from CAN socket\n");
@@ -1669,6 +1669,7 @@ int main(int argc, char **argv) {
     fd_set read_fds;
     char timestamp[32];
     int selint = 0;
+    int live_capture = 0;
 
     strcpy(ifr.ifr_name, "can0");
     memset(pcap_file, 0, sizeof(pcap_file));
@@ -1811,8 +1812,11 @@ int main(int argc, char **argv) {
 	return (EXIT_SUCCESS);
     }
 
-    /* do we have a PCAP file ? */
-    if (pcap_file[0] != 0) {
+    if (!strstr(ifr.ifr_name, "can"))
+	live_capture = 1;
+
+    /* do we have a PCAP file or live capture ? */
+    if ((pcap_file[0] != 0) || live_capture) {
 	unsigned int pkt_counter = 1;
 	struct tcphdr *mytcp;
 	struct udphdr *myudp;
@@ -1825,10 +1829,18 @@ int main(int argc, char **argv) {
 	uint16_t sport, dport;
 	memset(timestamp, 0, sizeof(timestamp));
 
-	handle = pcap_open_offline(pcap_file, errbuf);
-	if (handle == NULL) {
-	    fprintf(stderr, "Couldn't open pcap file %s: %s\n", pcap_file, errbuf);
-	    return (EXIT_FAILURE);
+	if (live_capture) {
+	    handle = pcap_open_live(ifr.ifr_name, 1500, 1, 50, errbuf);
+	    if (handle == NULL) {
+		fprintf(stderr, "Couldn't open interface %s: %s\n", ifr.ifr_name, errbuf);
+		return (EXIT_FAILURE);
+	    }
+	} else {
+	    handle = pcap_open_offline(pcap_file, errbuf);
+	    if (handle == NULL) {
+		fprintf(stderr, "Couldn't open pcap file %s: %s\n", pcap_file, errbuf);
+		return (EXIT_FAILURE);
+	    }
 	}
 	int caplinktype = pcap_datalink(handle);
 	if (verbose)
