@@ -73,8 +73,8 @@ gb2-update: crc-ccitt.o gb2-update.o
 scan2lan: crc-ccitt.o sgio.o scan2lan.o
 	$(CC) $(CFLAGS) -o scan2lan crc-ccitt.o sgio.o scan2lan.o -lz
 
-can2lan: crc-ccitt.o gio.o can2lan.o
-	$(CC) $(CFLAGS) -o can2lan crc-ccitt.o gio.o can2lan.o -lz
+can2lan: ascii-frame.o crc-ccitt.o gio.o can2lan.o
+	$(CC) $(CFLAGS) -o can2lan ascii-frame.o crc-ccitt.o gio.o can2lan.o -lz
 
 ms2wifi: ms2wifi.o
 	$(CC) $(CFLAGS) -o ms2wifi ms2wifi.o
