@@ -1927,8 +1927,10 @@ int main(int argc, char **argv) {
 		int size_payload = packet_length - (IPHDR_LEN + tcp_offset);
 		unsigned char *dump = (unsigned char *)pkt_ptr + IPHDR_LEN + tcp_offset;
 
+		dport = ntohs(mytcp->th_dport);
+		sport = ntohs(mytcp->th_sport);
 		/* look for HTTP */
-		if ((ntohs(mytcp->th_dport) == 80) || (ntohs(mytcp->th_sport) == 80)) {
+		if (sport == 80 || dport == 80) {
 		    if (size_payload) {
 			if (verbose) {
 			    printf("%s ", timestamp);
@@ -1944,8 +1946,6 @@ int main(int argc, char **argv) {
 		    }
 		    continue;
 		}
-		dport = ntohs(mytcp->th_dport);
-		sport = ntohs(mytcp->th_sport);
 		if ((dport != 15730) && (sport != 15730) &&
 		    (dport != 15731) && (sport != 15731) && (dport != 15732) && (sport != 15732))
 		    continue;
