@@ -1868,7 +1868,7 @@ int main(int argc, char **argv) {
 		} else if (ether_type == 0x000C) {	/* CAN ? */
 		    ether_offset = 0;
 		} else {
-		    if (verbose)
+		    if (verbose && !live_capture)
 			fprintf(stderr, "Unknown ethernet type, %04X, skipping...\n", ether_type);
 		    continue;
 		}
