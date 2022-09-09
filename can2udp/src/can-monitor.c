@@ -1812,6 +1812,7 @@ int main(int argc, char **argv) {
 	return (EXIT_SUCCESS);
     }
 
+    /* TODO : check the interface capabilities not the name */
     if (!strstr(ifr.ifr_name, "can"))
 	live_capture = 1;
 
