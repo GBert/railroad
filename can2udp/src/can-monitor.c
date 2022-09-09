@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 4.00\n\n");
+    fprintf(stderr, "   Version 4.01\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -1957,16 +1957,28 @@ int main(int argc, char **argv) {
 			       ntohs(mytcp->th_dport));
 			printf("  packet_length %d\n", size_payload);
 		    }
-		    for (int i = 0; i < size_payload; i += 13) {
+		    /* TCP port 15732 uses clear text */
+		    if ((sport == 15732) || (dport == 15732)) {
 			printf("%s %.3d>", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
-			frame_to_can(dump + i, &frame);
-			print_can_frame(F_N_TCP_FORMAT_STRG, &frame);
-			if (check_cs1_frame(frame.can_id))
-			    decode_frame_cs1(&frame);
+			printf (" TCP Port 15732      ");
+			if (sport == 15732)
+			    printf(CYN);
 			else
-			    decode_frame(&frame);
-			/* print_content(dump, size_payload); */
+			    printf(YEL);
+			printf ("      %.*s", size_payload, dump);
 			printf(RESET);
+		    } else {
+			for (int i = 0; i < size_payload; i += 13) {
+			    printf("%s %.3d>", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
+			    frame_to_can(dump + i, &frame);
+			    print_can_frame(F_N_TCP_FORMAT_STRG, &frame);
+			    if (check_cs1_frame(frame.can_id))
+				decode_frame_cs1(&frame);
+			    else
+				decode_frame(&frame);
+			    /* print_content(dump, size_payload); */
+			    printf(RESET);
+			}
 		    }
 		}
 	    }
