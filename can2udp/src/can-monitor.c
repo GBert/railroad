@@ -1375,10 +1375,10 @@ void decode_frame(struct can_frame *frame) {
 		    printf("UID 0x%08X ", uid);
 		    switch (frame->data[4]) {
 		    case 0x01:{
-			    printf("Bestätigung duch ");
+			    printf("Bestätigung durch ");
 			    switch (frame->data[5]) {
 			    case 0x51:
-				printf("MäCAN Busankppler");
+				printf("MäCAN Busankoppler");
 				break;
 			    case 0x52:
 				printf("MäCAN MP5x16");
