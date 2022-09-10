@@ -811,6 +811,7 @@ void decode_frame(struct can_frame *frame) {
 	}
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
+	    /* print decimal if MM2 (0x21 || 0x22) */
 	    if (frame->data[4] == 0x21 || frame->data[4] == 0x22)
 		printf("Lok Discovery - Adresse %d ", uid);
 	    else
