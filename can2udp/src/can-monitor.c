@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 4.01\n\n");
+    fprintf(stderr, "   Version 4.02\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -811,7 +811,10 @@ void decode_frame(struct can_frame *frame) {
 	}
 	if (frame->can_dlc == 5) {
 	    uid = be32(frame->data);
-	    printf("Lok Discovery - Adresse %d ", uid);
+	    if (frame->data[4] == 0x21 || frame->data[4] == 0x22)
+		printf("Lok Discovery - Adresse %d ", uid);
+	    else
+		printf("Lok Discovery - 0x%08X ", uid);
 	    print_loc_proto(frame->data[4]);
 	}
 	if (frame->can_dlc == 6) {
