@@ -291,7 +291,8 @@ void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame
 	}
     }
     if (frame->can_dlc <= 8)
-	for (int i = 0; i < frame->can_dlc; i++) fprintf(fp, "%02X", frame->data[i]);
+	for (int i = 0; i < frame->can_dlc; i++)
+	    fprintf(fp, "%02X", frame->data[i]);
     fprintf(fp, "\n");
 }
 
@@ -451,7 +452,7 @@ void command_system(struct can_frame *frame) {
     case 0x20:
 	if (frame->data[7])
 	    printf("System: Uhrzeit UID 0x%08X %d:%d Faktor %d (1:%d)",
-	            uid, frame->data[5], frame->data[6], frame->data[7], 60/frame->data[7]);
+		    uid, frame->data[5], frame->data[6], frame->data[7], 60 / frame->data[7]);
 	else
 	    printf("System: Uhrzeit UID 0x%08X %d:%d angehalten", uid, frame->data[5], frame->data[6]);
 	break;
@@ -774,7 +775,8 @@ void cdb_extension_set_grd(struct can_frame *frame) {
 void print_loc_proto(uint8_t proto) {
     if (proto <= 32) {
 	printf("Protokoll mfx Range 0 - %d", proto);
-    } else switch (proto) {
+    } else
+	switch (proto) {
 	case 0x21:
 	    printf("Protokoll Erkennung MM2 20kHz");
 	    break;
@@ -796,7 +798,7 @@ void print_loc_proto(uint8_t proto) {
 	default:
 	    printf("Protokoll Erkennung 0x%02x", proto);
 	    break;
-    }
+	}
 }
 
 void decode_frame(struct can_frame *frame) {
@@ -1770,10 +1772,12 @@ int main(int argc, char **argv) {
 		ts = *localtime(&rawtime);
 		strftime(datum, sizeof(datum), "%Y%m%d.%H%M%S", &ts);
 		pos_r = line;
-		while (!isalpha(*pos_r)) pos_r++;
+		while (!isalpha(*pos_r))
+		    pos_r++;
 		printf(RESET "%s.%03d  %.5s", datum, milli, pos_r - 1);
 		memset(&aframe, 0, sizeof(aframe));
-		while (!isspace(*pos_r)) pos_r++;
+		while (!isspace(*pos_r))
+		    pos_r++;
 		candump_to_can(pos_r, &aframe);
 		analyze_frame(&aframe);
 	    }
@@ -1997,12 +2001,12 @@ int main(int argc, char **argv) {
 		    /* TCP port 15732 uses clear text */
 		    if ((sport == 15732) || (dport == 15732)) {
 			printf("%s %.3d>", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
-			printf (" TCP Port 15732      ");
+			printf(" TCP Port 15732      ");
 			if (sport == 15732)
 			    printf(CYN);
 			else
 			    printf(YEL);
-			printf ("      %.*s", size_payload, dump);
+			printf("      %.*s", size_payload, dump);
 			printf(RESET);
 		    } else {
 			for (int i = 0; i < size_payload; i += 13) {
@@ -2015,10 +2019,10 @@ int main(int argc, char **argv) {
 				decode_frame(&frame);
 			    /* print_content(dump, size_payload); */
 			    printf(RESET);
-			   if (fdump) {
+			    if (fdump) {
 				frame.can_id |= CAN_EFF_FLAG;
 				write_candumpfile(fdump, header.ts, "tcp", &frame);
-			   }
+			    }
 			}
 		    }
 		}
