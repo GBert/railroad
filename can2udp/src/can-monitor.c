@@ -151,18 +151,19 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 4.02\n\n");
+    fprintf(stderr, "   Version 4.10\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
     fprintf(stderr, "         -l <candump file> read candump file instead from CAN socket\n");
     fprintf(stderr, "         -t <rocrail file> read Rocrail file instead from CAN socket\n");
+    fprintf(stderr, "         -d                dump to candump file\n\n");
     fprintf(stderr, "         -v                verbose output for TCP/UDP and errorframes\n\n");
     fprintf(stderr, "         -x                expose config data\n\n");
     fprintf(stderr, "         -h                show this help\n\n");
 }
 
-int time_stamp(char *timestamp) {
+struct timeval time_stamp(char *timestamp) {
     struct timeval tv;
     struct tm *tm;
 
@@ -170,7 +171,7 @@ int time_stamp(char *timestamp) {
     tm = localtime(&tv.tv_sec);
 
     sprintf(timestamp, "%02d:%02d:%02d.%03d", tm->tm_hour, tm->tm_min, tm->tm_sec, (int)tv.tv_usec / 1000);
-    return 0;
+    return tv;
 }
 
 void frame_to_can(unsigned char *netframe, struct can_frame *frame) {
@@ -275,6 +276,23 @@ void print_ascii_data(struct can_frame *frame) {
 	    putchar(46);
     }
     printf("'\n");
+}
+
+void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame *frame) {
+
+    fprintf(fp, "(%ld.%06ld) %s ", tv.tv_sec, tv.tv_usec, name);
+    if (frame->can_id & (CAN_EFF_FLAG | CAN_ERR_FLAG)) {
+	fprintf(fp, "%08X#", frame->can_id & ~CAN_EFF_FLAG);
+    } else {
+	fprintf(fp, "%03X#", frame->can_id & CAN_SFF_MASK);
+	if (frame->can_id & CAN_RTR_FLAG) {
+	    fprintf(fp, "R%d\n", frame->can_dlc);
+	    return;
+	}
+    }
+    if (frame->can_dlc <= 8)
+	for (int i = 0; i < frame->can_dlc; i++) fprintf(fp, "%02X", frame->data[i]);
+    fprintf(fp, "\n");
 }
 
 #if 0
@@ -755,7 +773,7 @@ void cdb_extension_set_grd(struct can_frame *frame) {
 
 void print_loc_proto(uint8_t proto) {
     if (proto <= 32) {
-	printf("Protokoll Range 0 - %d", proto);
+	printf("Protokoll mfx Range 0 - %d", proto);
     } else switch (proto) {
 	case 0x21:
 	    printf("Protokoll Erkennung MM2 20kHz");
@@ -780,7 +798,6 @@ void print_loc_proto(uint8_t proto) {
 	    break;
     }
 }
-
 
 void decode_frame(struct can_frame *frame) {
     uint32_t id, kennung, function, uid, cv_number, cv_index;
@@ -1245,6 +1262,7 @@ void decode_frame(struct can_frame *frame) {
 		free(config_data.deflated_data);
 	    config_data.deflated_data = malloc((size_t)config_data.deflated_size + 8);
 	    config_data.deflated_size_counter = 0;
+	    memset(config_data.name, 0, sizeof(config_data.name));
 	    printf("Config Data Stream: Länge 0x%08X CRC 0x%04X (unbekannt 0x%02X)\n",
 		   config_data.deflated_size, config_data.crc, frame->data[6]);
 	    break;
@@ -1674,6 +1692,7 @@ int main(int argc, char **argv) {
     char timestamp[32];
     int selint = 0;
     int live_capture = 0;
+    FILE *fdump = NULL;
 
     strcpy(ifr.ifr_name, "can0");
     memset(pcap_file, 0, sizeof(pcap_file));
@@ -1682,7 +1701,7 @@ int main(int argc, char **argv) {
 
     signal(SIGINT, INThandler);
 
-    while ((opt = getopt(argc, argv, "i:r:l:t:svxh?")) != -1) {
+    while ((opt = getopt(argc, argv, "i:r:l:t:dsvxh?")) != -1) {
 	switch (opt) {
 	case 'i':
 	    strncpy(ifr.ifr_name, optarg, sizeof(ifr.ifr_name) - 1);
@@ -1695,6 +1714,11 @@ int main(int argc, char **argv) {
 	    break;
 	case 't':
 	    strncpy(roctrc_file, optarg, sizeof(roctrc_file) - 1);
+	    break;
+	case 'd':
+	    fdump = fopen("candump.log", "w");
+	    if (!fdump)
+		fprintf(stderr, "\ncan't open file candump.log for writing - error: %s\n", strerror(errno));
 	    break;
 	case 's':
 	    selint = 1;
@@ -1745,10 +1769,12 @@ int main(int argc, char **argv) {
 		rawtime = time;
 		ts = *localtime(&rawtime);
 		strftime(datum, sizeof(datum), "%Y%m%d.%H%M%S", &ts);
-		pos_r = strstr(line, "can");
-		memset(&aframe, 0, sizeof(aframe));
-		candump_to_can(pos_r + 5, &aframe);
+		pos_r = line;
+		while (!isalpha(*pos_r)) pos_r++;
 		printf(RESET "%s.%03d  %.5s", datum, milli, pos_r - 1);
+		memset(&aframe, 0, sizeof(aframe));
+		while (!isspace(*pos_r)) pos_r++;
+		candump_to_can(pos_r, &aframe);
 		analyze_frame(&aframe);
 	    }
 	}
@@ -1886,6 +1912,8 @@ int main(int argc, char **argv) {
 		    print_can_frame(F_N_CAN_FORMAT_STRG, &frame);
 		    decode_frame(&frame);
 		    printf(RESET);
+		    if (fdump)
+			write_candumpfile(fdump, header.ts, "can", &frame);
 		}
 		continue;
 	    }
@@ -1924,6 +1952,10 @@ int main(int argc, char **argv) {
 		    else
 			decode_frame(&frame);
 		    printf(RESET);
+		    if (fdump) {
+			frame.can_id |= CAN_EFF_FLAG;
+			write_candumpfile(fdump, header.ts, "udp", &frame);
+		    }
 		}
 	    }
 	    if (ip_hdr->ip_p == IPPROTO_TCP) {
@@ -1983,6 +2015,10 @@ int main(int argc, char **argv) {
 				decode_frame(&frame);
 			    /* print_content(dump, size_payload); */
 			    printf(RESET);
+			   if (fdump) {
+				frame.can_id |= CAN_EFF_FLAG;
+				write_candumpfile(fdump, header.ts, "tcp", &frame);
+			   }
 			}
 		    }
 		}
@@ -2028,12 +2064,14 @@ int main(int argc, char **argv) {
 	    /* received a CAN frame */
 	    if (FD_ISSET(sc, &read_fds)) {
 		printf(RESET);
-		time_stamp(timestamp);
 		if (read(sc, &frame, sizeof(struct can_frame)) < 0) {
 		    fprintf(stderr, "error reading CAN frame: %s\n", strerror(errno));
 		} else {
+		    struct timeval tv = time_stamp(timestamp);
 		    printf("%s ", timestamp);
 		    analyze_frame(&frame);
+		    if (fdump)
+			write_candumpfile(fdump, tv, ifr.ifr_name, &frame);
 		}
 	    }
 	}
