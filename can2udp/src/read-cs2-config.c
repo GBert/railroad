@@ -517,7 +517,7 @@ void sort_td_by_id(void) {
     HASH_SORT(track_data, td_id_sort);
 }
 
-void print_pages(void) {
+void print_track_pages(void) {
     struct track_page_t *s;
 
     for (s = track_page; s != NULL; s = s->hh.next) {
