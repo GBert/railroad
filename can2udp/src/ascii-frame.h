@@ -10,5 +10,7 @@
 #ifndef _ASCII_FRAME_H_
 #define _ASCII_FRAME_H_
 
+int decode_ascii_frame(int tcp_socket, unsigned char *netframe, int length);
+
 #endif /* _ASCII_FRAME_H_ */
 

@@ -9,12 +9,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "ascii-frame.h"
 
-int decode_ascii_frame(FILE *fd) {
+int decode_ascii_frame(int tcp_socket, unsigned char *netframe, int length) {
+    printf("got ASCII frame\n");
 
-    fprintf(fd, "ok;");
+    send(tcp_socket, netframe, length, 0);
 
     return EXIT_SUCCESS;
 }

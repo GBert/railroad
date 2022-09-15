@@ -11,6 +11,7 @@
  */
 
 #include "can2lan.h"
+#include "ascii-frame.h"
 
 static char *CAN_FORMAT_STRG      = "      CAN->   0x%08X R [%d]";
 static char *UDP_FORMAT_STRG      = "->CAN>UDP     0x%08X   [%d]";
@@ -974,6 +975,34 @@ int main(int argc, char **argv) {
 			    }
 			}
 		    }
+		}
+		if (--nready <= 0)
+		    break;	/* no more readable descriptors */
+	    }
+	}
+	/* packet on the second TCP port */
+	for (i = 0; i <= max_tcp_i; i++) {	/* check all clients for data */
+	    tcp_socket = tcp_client2[i];
+	    if (tcp_socket < 0)
+		continue;
+            if (FD_ISSET(tcp_socket, &read_fds)) {
+                if (cs2_config_data.verbose && !background) {
+                    time_stamp(timestamp);
+                    printf("%s TCP2 socket packet from: %s\n", timestamp, inet_ntop(AF_INET, &tcp_addr2.sin_addr, buffer, sizeof(buffer)));
+                }
+		n = read(tcp_socket, netframe, MAXDG);
+		if (!n) {
+		    /* connection closed by client */
+		    if (cs2_config_data.verbose && !background) {
+			time_stamp(timestamp);
+			printf("%s client %s closed connection\n", timestamp, inet_ntop(AF_INET, &tcp_addr2.sin_addr, buffer, sizeof(buffer)));
+		    }
+		    syslog(LOG_NOTICE, "%s: client %s closed connection\n", __func__, inet_ntop(AF_INET, &tcp_addr2.sin_addr, buffer, sizeof(buffer)));
+		    close(tcp_socket);
+		    FD_CLR(tcp_socket, &all_fds);
+		    tcp_client2[i] = -1;
+		} else {
+		    decode_ascii_frame(tcp_socket, netframe, n);
 		}
 		if (--nready <= 0)
 		    break;	/* no more readable descriptors */
