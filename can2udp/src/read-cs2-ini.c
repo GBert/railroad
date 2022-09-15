@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     printf("reading track pages ...\n");
     read_track_config(track_file);
     sort_tp_by_id();
-    print_pages();
+    print_track_pages();
     printf("reading track files ...\n");
     read_track_pages(config_data.directory);
     printf("sorting track data ...\n");
