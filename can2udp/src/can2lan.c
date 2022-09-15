@@ -12,6 +12,12 @@
 
 #include "can2lan.h"
 #include "ascii-frame.h"
+#include "read-cs2-config.h"
+
+extern struct track_page_t *track_page;
+extern struct track_data_t *track_data;
+extern struct loco_data_t *loco_data;
+extern struct magnet_data_t *magnet_data;
 
 static char *CAN_FORMAT_STRG      = "      CAN->   0x%08X R [%d]";
 static char *UDP_FORMAT_STRG      = "->CAN>UDP     0x%08X   [%d]";
@@ -84,7 +90,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.7\n\n");
+    fprintf(stderr, "   Version 1.8\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -434,6 +440,7 @@ int main(int argc, char **argv) {
     char *bcast_interface;
     char *searchif;
     char *tempsp;
+    char *loco_file;
     struct cs2_config_data_t cs2_config_data;
     uint32_t id, mask;
 
@@ -598,6 +605,13 @@ int main(int argc, char **argv) {
     cs2_config_data.dir = config_dir;
 
     page_name = read_track_file(config_file, page_name);
+
+    /* read loco data */
+    if (asprintf(&loco_file, "%s/%s", config_dir, loco_name) < 0)
+	fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
+    else
+	read_loco_data(loco_file, CONFIG_FILE);
+    free(loco_file);
 
     /* we are trying to setup a UDP socket */
     if (udp_dst_address[0]) {
