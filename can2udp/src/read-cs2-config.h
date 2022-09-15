@@ -43,7 +43,7 @@ int td_id_sort(struct track_data_t *a, struct track_data_t *b);
 int tp_id_sort(struct track_page_t *a, struct track_page_t *b);
 void sort_tp_by_id(void);
 void sort_td_by_id(void);
-void print_pages(void);
+void print_track_pages(void);
 void print_gbstats(void);
 void print_tracks(void);
 void print_loco(FILE *file, struct loco_data_t *l, unsigned int mask);
