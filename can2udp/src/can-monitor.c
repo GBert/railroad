@@ -1865,7 +1865,7 @@ int main(int argc, char **argv) {
 	memset(timestamp, 0, sizeof(timestamp));
 
 	if (live_capture) {
-	    handle = pcap_open_live(ifr.ifr_name, 1500, 1, 50, errbuf);
+	    handle = pcap_open_live(ifr.ifr_name, 1514, 1, 50, errbuf);
 	    if (handle == NULL) {
 		fprintf(stderr, "Couldn't open interface %s: %s\n", ifr.ifr_name, errbuf);
 		return (EXIT_FAILURE);
