@@ -1882,6 +1882,8 @@ int main(int argc, char **argv) {
 	    printf("Analyzing file %s with capture link type %d\n", pcap_file, caplinktype);
 
 	while ((packet = pcap_next(handle, &header)) != NULL) {
+	    if (packet == NULL)
+		continue;
 	    pkt_counter++;
 	    /* header contains information about the packet (e.g. timestamp) */
 	    /* cast a pointer to the packet data */
