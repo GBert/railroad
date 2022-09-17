@@ -10,6 +10,7 @@
 
 #ifndef _CAN2LAN_H_
 #define _CAN2LAN_H_
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>

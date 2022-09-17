@@ -441,6 +441,7 @@ int main(int argc, char **argv) {
     char *searchif;
     char *tempsp;
     char *loco_file;
+    char *loco_name;
     struct cs2_config_data_t cs2_config_data;
     uint32_t id, mask;
 

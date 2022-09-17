@@ -46,6 +46,5 @@ void print_tracks(void);
 int read_track_data(char *config_file);
 int read_track_config(char *config_file);
 void read_track_pages(char *dir);
-int read_loco_data(char *config_file);
 
 #endif /* _READ_CS2_INI_H */

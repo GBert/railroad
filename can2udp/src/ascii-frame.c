@@ -7,13 +7,14 @@
  * ----------------------------------------------------------------------------
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #include "ascii-frame.h"
-#include "cs2-config.h"
+#include "read-cs2-config.h"
 #include "uthash.h"
 
 extern struct loco_data_t *loco_data;

@@ -11,6 +11,7 @@
  */
 #ifndef _SCAN2LAN_H_
 #define _SCAN2LAN_H_
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>
