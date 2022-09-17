@@ -862,12 +862,14 @@ int main(int argc, char **argv) {
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
 			if (!trigger_data.background && trigger_data.verbose)
 				printf("send CAN PING Answer\n");
-			system("/usr/bin/cansend can0 0031B311#43425553010C0040");
+			if (system("/usr/bin/cansend can0 0031B311#43425553010C0040") < 0)
+			    fprintf(stderr, "system error: /usr/bin/cansend can0 0031B311#43425553010C0040\n");
 		    }
 		    /* start Railcontrol when loco "Lokliste" and F2 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 2)) {
 			if (system("pidof railcontrol 2>&1 > /dev/null")) {
-			    system("/etc/init.d/railcontrol start");
+			    if (system("/etc/init.d/railcontrol start") < 0)
+				fprintf(stderr, "system error: /etc/init.d/railcontrol start\n");
 			    if (!trigger_data.background && trigger_data.verbose)
 				printf("Starting Railcontrol\n");
 			} else {

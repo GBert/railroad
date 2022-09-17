@@ -42,7 +42,7 @@
 
 static char *GB2_DEFAULT_FILENAME  = "016-gb2.bin";
 static char *MS2_DEFAULT_FILENAME  = "050-ms2.bin";
-static char *MS2X_DEFAULT_FILENAME = "051-ms2.bin";
+/* static char *MS2X_DEFAULT_FILENAME = "051-ms2.bin"; */
 
 #define GB2_BLOCK_SHIFT		9	/* 2^9 = 512 */
 #define GB2_BLOCK_SIZE		(1<<GB2_BLOCK_SHIFT)
