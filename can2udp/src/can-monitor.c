@@ -1881,7 +1881,7 @@ int main(int argc, char **argv) {
 	if (verbose)
 	    printf("Analyzing file %s with capture link type %d\n", pcap_file, caplinktype);
 
-	while ((packet = pcap_next(handle, &header)) != NULL) {
+	while (((packet = pcap_next(handle, &header)) != NULL) || live_capture) {
 	    if (packet == NULL)
 		continue;
 	    pkt_counter++;
