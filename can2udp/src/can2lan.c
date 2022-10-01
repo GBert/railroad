@@ -441,7 +441,6 @@ int main(int argc, char **argv) {
     char *searchif;
     char *tempsp;
     char *loco_file;
-    char *loco_name;
     struct cs2_config_data_t cs2_config_data;
     uint32_t id, mask;
 
@@ -608,7 +607,7 @@ int main(int argc, char **argv) {
     page_name = read_track_file(config_file, page_name);
 
     /* read loco data */
-    if (asprintf(&loco_file, "%s/%s", config_dir, loco_name) < 0)
+    if (asprintf(&loco_file, "%s%s", config_dir, "lokomotive.cs2") < 0)
 	fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
     else
 	read_loco_data(loco_file, CONFIG_FILE);
