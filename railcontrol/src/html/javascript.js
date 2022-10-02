@@ -380,6 +380,13 @@ function onClickProgramRead(cv)
 	}
 	var cv = parseInt(cvElement.value) + (parseInt(index) * 1024);
 
+	var valueElement = document.getElementById('valueraw');
+	if (!valueElement)
+	{
+		return false;
+	}
+	valueElement.value = '-';
+
 	var url = '?cmd=programread&control=' + control + '&mode=' + mode + '&address=' + address + '&cv=' + cv;
 	fireRequestAndForget(url);
 	return false;

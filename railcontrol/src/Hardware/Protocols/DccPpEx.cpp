@@ -127,6 +127,29 @@ namespace Hardware
 			buffer += to_string(cv);
 			buffer += " ";
 			buffer += to_string(value);
+			buffer += ">";
+			SendInternal(buffer);
+		}
+
+		void DccPpEx::ProgramRead(const ProgramMode mode,
+			__attribute__((unused)) const Address address,
+			const CvNumber cv)
+		{
+			switch(mode)
+			{
+				case ProgramModeDccDirect:
+					ProgramReadProgram(cv);
+					return;
+
+				default:
+					return;
+			}
+		}
+
+		void DccPpEx::ProgramReadProgram(const CvNumber cv)
+		{
+			string buffer("<R ");
+			buffer += to_string(cv);
 			buffer += " 8 9>";
 			SendInternal(buffer);
 		}
@@ -213,6 +236,25 @@ namespace Hardware
 						break;
 					}
 
+					case 'r':
+					{
+						// read CV value
+						ParseInt(buffer, pos); // should be 8, sent in ProgramReadProgram
+						ParsePipe(buffer, pos);
+						ParseInt(buffer, pos); // should be 9, sent in ProgramReadProgram
+						ParsePipe(buffer, pos);
+						const CvNumber cv = ParseInt(buffer, pos);
+						const int value = ParseInt(buffer, pos);
+						if (value < 0)
+						{
+							// read error
+							break;
+						}
+						logger->Info(Languages::TextProgramReadValue, cv, static_cast<CvValue>(value));
+						manager->ProgramValue(cv, value);
+						break;
+					}
+
 					default:
 						// other answer does not matter
 						break;
@@ -226,14 +268,17 @@ namespace Hardware
 			}
 		}
 
-		unsigned int DccPpEx::ParseInt(const string& buffer, unsigned int& pos)
+		int DccPpEx::ParseInt(const string& buffer, unsigned int& pos)
 		{
+			ParseSpace(buffer, pos);
+			bool minus = false;
 			int out = 0;
 			while (buffer.size() > pos)
 			{
 				const char c = buffer[pos];
-				if (c == ' ')
+				if (c == '-')
 				{
+					minus = true;
 					++pos;
 					continue;
 				}
@@ -245,7 +290,37 @@ namespace Hardware
 				out += c - '0';
 				++pos;
 			}
-			return out;
+			return minus ? -out : out;
+		}
+
+		void DccPpEx::ParseSpace(const string& buffer, unsigned int& pos)
+		{
+			while (buffer.size() > pos)
+			{
+				const char c = buffer[pos];
+				if (c != ' ')
+				{
+					return;
+				}
+				++pos;
+			}
+		}
+
+		bool DccPpEx::ParsePipe(const string& buffer, unsigned int& pos)
+		{
+			if (buffer.size() <= pos)
+			{
+				return false;
+			}
+
+			const char c = buffer[pos];
+			if (c != '|')
+			{
+				return false;
+			}
+
+			++pos;
+			return true;
 		}
 	} // namespace
 } // namespace

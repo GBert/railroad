@@ -44,6 +44,7 @@ namespace Hardware
 						| CapabilityFeedback
 						| CapabilityProgram
 						| CapabilityProgramDccDirectWrite
+						| CapabilityProgramDccDirectRead
 						| CapabilityProgramDccPomLocoWrite;
 				}
 
@@ -93,6 +94,10 @@ namespace Hardware
 					const CvNumber cv,
 					const CvValue value) override;
 
+				void ProgramRead(const ProgramMode mode,
+					const Address address,
+					const CvNumber cv) override;
+
 			protected:
 				inline DccPpEx(const HardwareParams* params,
 				    const std::string& fullName,
@@ -124,6 +129,8 @@ namespace Hardware
 				void ProgramWriteProgram(const CvNumber cv,
 					const CvValue value);
 
+				void ProgramReadProgram(const CvNumber cv);
+
 				inline bool SendInternal(const std::string& buffer)
 				{
 					logger->Hex(buffer);
@@ -150,7 +157,11 @@ namespace Hardware
 
 				void Parse(const std::string& buffer);
 
-				unsigned int ParseInt(const std::string& buffer, unsigned int& pos);
+				int ParseInt(const std::string& buffer, unsigned int& pos);
+
+				void ParseSpace(const std::string& buffer, unsigned int& pos);
+
+				bool ParsePipe(const std::string& buffer, unsigned int& pos);
 
 				DccPpExLocoCache locoCache;
 
