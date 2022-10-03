@@ -66,13 +66,22 @@ int sql_insert_locos(sqlite3 * db) {
     char *sql;
 
     i = 1;
+    j = 1;
     char *ip_s = "192.168.0.9";
     char *uuid_s = "42849456-5902-4F87-951F-616E57387CA1.png";
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
-	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, %s, %s, 0, %d, %d, 1, %d, , , 0, , , , , , , , , , , , "
-		 "0, , 0, %s, 0, 0, 0, 786, 0, 0, 1024, , 0, 0)", i, loco_data->name, uuid_s, loco_data->vmax, loco_data->uid, i - 1, ip_s);
+	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
+		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, uuid_s, l->vmax, l->uid, i - 1, ip_s);
 	SQL_EXEC();
+	for (n = 0; n++; n < 32) {
+	    if (l->function) {
+		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, %s, %s, %d, %s, %d, %d, %d);"
+				j, i, 0,   n, 0, 1);
+		SQL_EXEC();
+		j++;
+	    }
+	}
 	i++;
     }
     return EXIT_SUCCESS;
