@@ -55,16 +55,7 @@ int sql_update_history(sqlite3 * db) {
     int ret;
 
     char *sql = "INSERT INTO update_history VALUES(1, 'ios', '18.11.21, 06:41:18 Mitteleuropäische Normalzeit', '1.4.2', 1000, 100);";
-    ret = sqlite3_exec(db, sql, 0, 0, &err_msg);
-    if (ret != SQLITE_OK) {
-
-	fprintf(stderr, "SQL error: %s\n", err_msg);
-
-	sqlite3_free(err_msg);
-	sqlite3_close(db);
-
-	return EXIT_FAILURE;
-    }
+    SQL_EXEC();
     return EXIT_SUCCESS;
 }
 
@@ -81,16 +72,7 @@ int sql_insert_locos(sqlite3 * db) {
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, %s, %s, 0, %d, %d, 1, %d, , , 0, , , , , , , , , , , , "
 		 "0, , 0, %s, 0, 0, 0, 786, 0, 0, 1024, , 0, 0)", i, loco_data->name, uuid_s, loco_data->vmax, loco_data->uid, i - 1, ip_s);
-	ret = sqlite3_exec(db, sql, 0, 0, &err_msg);
-	if (ret != SQLITE_OK) {
-
-	    fprintf(stderr, "SQL error: %s\n", err_msg);
-
-	    sqlite3_free(err_msg);
-	    sqlite3_close(db);
-
-	    return EXIT_FAILURE;
-	}
+	SQL_EXEC();
 	i++;
     }
     return EXIT_SUCCESS;
