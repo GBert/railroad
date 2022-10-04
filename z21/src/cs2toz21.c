@@ -72,13 +72,15 @@ int sql_insert_locos(sqlite3 * db) {
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
-		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, uuid_s, l->vmax, l->uid, i - 1, ip_s);
+		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, uuid_s, l->tmax, l->uid, i - 1, ip_s);
+	printf("%s\n", sql);
 	SQL_EXEC();
 	for (n = 0; n < 32; n++) {
-	    if (l->function) {
-		/* asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, %s, %s, %d, %s, %d, %d, %d);",
-				j, i, 0,   n, 0, 1);
-		SQL_EXEC(); */
+	    if (l->function[n].type) {
+		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', '0.0', %d, 'bugle', %d, %d, %d);",
+				j, i, 0,    n,    n, 1, 0);
+		printf("%s\n", sql);
+		SQL_EXEC();
 		j++;
 	    }
 	}
