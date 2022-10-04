@@ -54,7 +54,10 @@ int sql_update_history(sqlite3 * db) {
     char *err_msg;
     int ret;
 
-    char *sql = "INSERT INTO update_history VALUES(1, 'ios', '18.11.21, 06:41:18 Mitteleuropäische Normalzeit', '1.4.2', 1000, 100);";
+    char *sql="DELETE FROM update_history;";
+    SQL_EXEC();
+
+    sql = "INSERT INTO update_history VALUES(1, 'ios', '18.11.21, 06:41:18 Mitteleuropäische Normalzeit', '1.4.2', 1000, 100);";
     SQL_EXEC();
     return EXIT_SUCCESS;
 }
@@ -69,6 +72,11 @@ int sql_insert_locos(sqlite3 * db) {
     j = 1;
     char *ip_s = "192.168.0.9";
     char *uuid_s = "42849456-5902-4F87-951F-616E57387CA1.png";
+
+    sql ="DELETE FROM vehicles;";
+    SQL_EXEC();
+    sql ="DELETE FROM functions;";
+    SQL_EXEC();
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
