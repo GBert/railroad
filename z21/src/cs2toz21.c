@@ -77,8 +77,8 @@ int sql_insert_locos(sqlite3 * db) {
 	SQL_EXEC();
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', '0.0', %d, 'bugle', %d, %d, %d);",
-				j, i, 0,    n,    n, 1, 0);
+		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, 'bugle', %d, %d, %d);",
+				j, i, 0,   l->function[n].duration, n,    n, 1, 0);
 		printf("%s\n", sql);
 		SQL_EXEC();
 		j++;
