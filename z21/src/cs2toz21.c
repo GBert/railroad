@@ -83,6 +83,7 @@ int send_udp_broadcast(void) {
     int destination_port = Z21PORT;
     int local_port = Z21PORT;
     memset(&baddr, 0, sizeof(baddr));
+    memset(&baddr, 0, sizeof(saddr));
 
     /* prepare udp destination struct with defaults */
     s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
@@ -131,7 +132,7 @@ int send_udp_broadcast(void) {
 
     asprintf(&timestamp, "%llu", millisecondsSinceEpoch);
 
-    if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof(baddr)) != strlen(timestamp)) 
+    if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof(baddr)) != strlen(timestamp))
 	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
 
     if ((sa = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -139,12 +140,19 @@ int send_udp_broadcast(void) {
 	exit(EXIT_FAILURE);
     }
 
+    FD_ZERO(&readfds);
     while (1) {
-        FD_ZERO(&readfds);
         FD_SET(sa, &readfds);
 
+        if (select(sa + 1, &readfds, NULL, NULL, NULL) < 0) {
+            fprintf(stderr, "select error: %s\n", strerror(errno));
+        };
+
 	if (FD_ISSET(sa, &readfds)) {
+	   printf("received UDP packet\n");
 	   if ((len = read(sa, udpframe, MAXDG)) > 0) {
+		udpframe[len] = 0;
+		printf("%s\n", udpframe);
 	   }
 	}
     }
