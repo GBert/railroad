@@ -135,11 +135,6 @@ int send_udp_broadcast(void) {
     if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof(baddr)) != strlen(timestamp))
 	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
 
-    if ((sa = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-	fprintf(stderr, "UDP socket error: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
-    }
-
     FD_ZERO(&readfds);
     while (1) {
         FD_SET(sa, &readfds);
