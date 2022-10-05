@@ -11,6 +11,23 @@
  * CS2 lokonotive.cs2 to Z21 SQLite converter
  */
 
+
+/*
+ * Epoch Time: 1664630770.036
+ * Src: 192.168.0.171, Dst: 255.255.255.255
+ * User Datagram Protocol, Src Port: 51312, Dst Port: 5728
+ *    Destination Port: 5728
+ * Data (13 bytes)
+ *
+ * 0000  31 36 36 34 36 33 30 37 36 39 39 38 32            1664630769982
+ *
+ *
+ *  Epoch Time [ms]: 1664630770036 - 1664630769982 => 54 ms
+ *
+ *  Summary:
+ *  UDP Broadcast (255.255.255.255) packet with destination port 5728 with Unix epoch timestamp [ms] string
+ */
+
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
@@ -18,6 +35,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -28,7 +46,9 @@
 
 #include "read-cs2-config.h"
 
+#define MAXDG		4096	/* maximum datagram size */
 #define MAXLINE         256
+#define Z21PORT		5728
 
 #define SQL_EXEC() do { \
 ret = sqlite3_exec(db, sql, 0, 0, &err_msg); \
@@ -40,6 +60,7 @@ if (ret != SQLITE_OK) { \
 }\
 } while (0)
 
+unsigned char udpframe[MAXDG];
 char config_dir[MAXLINE] = "/www/config/";
 extern struct loco_data_t *loco_data;
 
@@ -50,10 +71,92 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -v                  verbose\n\n");
 }
 
+int send_udp_broadcast(void) {
+    int len, s, sa, sb;
+    struct sockaddr_in baddr, saddr;
+    struct timeval tv;
+    char *timestamp;
+    fd_set readfds;
+
+    const int on = 1;
+
+    int destination_port = Z21PORT;
+    int local_port = Z21PORT;
+    memset(&baddr, 0, sizeof(baddr));
+
+    /* prepare udp destination struct with defaults */
+    s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
+    if (s <= 0) {
+        if (s == 0) {
+            fprintf(stderr, "UDP IP invalid\n");
+        } else {
+            fprintf(stderr, "invalid address family\n");
+        }
+        exit(EXIT_FAILURE);
+    }
+
+    baddr.sin_port = htons(destination_port);
+
+    /* prepare UDP sending socket */
+    if ((sb = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        fprintf(stderr, "Send UDP socket error %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    if (setsockopt(sb, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0) {
+        fprintf(stderr, "UDP set socket option error: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    /* prepare receiving socket */
+    if ((sa = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	fprintf(stderr, "UDP socket error: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
+    }
+
+    saddr.sin_family = AF_INET;
+    saddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    saddr.sin_port = htons(local_port);
+
+    if (bind(sa, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
+        fprintf(stderr, "UDP bind error: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    /* get timestamp */
+    gettimeofday(&tv, NULL);
+
+    unsigned long long millisecondsSinceEpoch =
+    (unsigned long long)(tv.tv_sec) * 1000 +
+    (unsigned long long)(tv.tv_usec) / 1000;
+
+    asprintf(&timestamp, "%llu", millisecondsSinceEpoch);
+
+    if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof(baddr)) != strlen(timestamp)) 
+	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
+
+    if ((sa = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	fprintf(stderr, "UDP socket error: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+        FD_ZERO(&readfds);
+        FD_SET(sa, &readfds);
+
+	if (FD_ISSET(sa, &readfds)) {
+	   if ((len = read(sa, udpframe, MAXDG)) > 0) {
+	   }
+	}
+    }
+
+    return EXIT_SUCCESS;
+}
+
 int sql_update_history(sqlite3 * db) {
     char *err_msg;
     int ret;
 
+    /* delete existing data */
     char *sql="DELETE FROM update_history;";
     SQL_EXEC();
 
@@ -73,6 +176,7 @@ int sql_insert_locos(sqlite3 * db) {
     char *ip_s = "192.168.0.9";
     char *uuid_s = "42849456-5902-4F87-951F-616E57387CA1.png";
 
+    /* delete existing data */
     sql ="DELETE FROM vehicles;";
     SQL_EXEC();
     sql ="DELETE FROM functions;";
@@ -148,6 +252,7 @@ int main(int argc, char **argv) {
     }
     sql_update_history(db);
     sql_insert_locos(db);
+    send_udp_broadcast();
     sqlite3_close(db);
     return EXIT_SUCCESS;
 }
