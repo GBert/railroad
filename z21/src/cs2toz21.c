@@ -28,6 +28,17 @@
  *  UDP Broadcast (255.255.255.255) packet with destination port 5728 with Unix epoch timestamp [ms] string
  */
 
+/*
+ * {"os":"android","appVersion":"1.4.6","deviceName":"Z21 Emulator","deviceType":"OpenWRT",
+ * "request":"device_information_request","buildNumber":6076,"apiVersion":1}
+ */
+
+/*
+ * {"owningDevice":{"os":"ios","appVersion":"1.4.6","deviceName":"iPad von Gerhard","deviceType":"iPad7,3",
+ *  "request":"device_information_request","buildNumber":6076,"apiVersion":1},"fileName":"MeineAnlage.z21",
+ *  "request":"file_transfer_info","fileSize":744444}
+ */
+
 #define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
@@ -71,11 +82,44 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -v                  verbose\n\n");
 }
 
+int send_tcp_data(struct sockaddr_in *client_sa) {
+    int st;
+    struct sockaddr_in server_sa;
+    char *offer;
+
+    /* prepare TCP client socket */
+    if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	fprintf(stderr, "can't create TCP socket: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
+    }
+
+    memset(&server_sa, 0, sizeof(server_sa));
+    server_sa.sin_family = AF_INET;
+    /* copy IP adresse from UDP request */
+    memcpy(&server_sa.sin_addr.s_addr, &client_sa->sin_addr.s_addr, 4);
+    server_sa.sin_port = htons(Z21PORT);
+
+    if (connect(st, (struct sockaddr *)&server_sa, sizeof(server_sa))) {
+	fprintf(stderr, "can't connect to TCP socket : %s\n", strerror(errno));
+	return(EXIT_FAILURE);
+    }
+    asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.6\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
+		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"MeineAnlage.z21\","
+		     "\"request\":\"file_transfer_info\",\"fileSize\":744444}\n");
+    printf("send TCP\n%s", offer);
+    send(st, offer, strlen(offer), 0);
+
+    return EXIT_SUCCESS;
+}
+
 int send_udp_broadcast(void) {
-    int len, s, sa, sb;
+    int n, s, sa, sb;
     struct sockaddr_in baddr, saddr;
+    struct sockaddr_in client;
     struct timeval tv;
     char *timestamp;
+    char buffer[64];
+    socklen_t len;
     fd_set readfds;
 
     const int on = 1;
@@ -84,6 +128,7 @@ int send_udp_broadcast(void) {
     int local_port = Z21PORT;
     memset(&baddr, 0, sizeof(baddr));
     memset(&baddr, 0, sizeof(saddr));
+    memset(&baddr, 0, sizeof(client));
 
     /* prepare udp destination struct with defaults */
     s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
@@ -136,19 +181,23 @@ int send_udp_broadcast(void) {
 	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
 
     FD_ZERO(&readfds);
+    FD_SET(sa, &readfds);
     while (1) {
-        FD_SET(sa, &readfds);
-
         if (select(sa + 1, &readfds, NULL, NULL, NULL) < 0) {
             fprintf(stderr, "select error: %s\n", strerror(errno));
         };
 
 	if (FD_ISSET(sa, &readfds)) {
-	   printf("received UDP packet\n");
-	   if ((len = read(sa, udpframe, MAXDG)) > 0) {
-		udpframe[len] = 0;
+	    n = recvfrom(sa, udpframe, sizeof (udpframe), 0, &client, &len);
+	    printf("received UDP packet len %u from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
+	    if (n > 0) {
+		udpframe[n+1] = 0;
 		printf("%s\n", udpframe);
-	   }
+		/* only look for real IP adresse not 0.0.0.0 */
+		if (ntohl(client.sin_addr.s_addr) != 0) {
+		    send_tcp_data(&client);
+		}
+	    }
 	}
     }
 
@@ -188,13 +237,13 @@ int sql_insert_locos(sqlite3 * db) {
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
 		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, uuid_s, l->tmax, l->uid, i - 1, ip_s);
-	printf("%s\n", sql);
+	/* printf("%s\n", sql); */
 	SQL_EXEC();
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
 		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, 'bugle', %d, %d, %d);",
 				j, i, 0,   l->function[n].duration, n,    n, 1, 0);
-		printf("%s\n", sql);
+		/* printf("%s\n", sql); */
 		SQL_EXEC();
 		j++;
 	    }
