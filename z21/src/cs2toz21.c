@@ -41,18 +41,21 @@
 
 #define _GNU_SOURCE
 #include <assert.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <sqlite3.h>
 
 #include "read-cs2-config.h"
@@ -83,9 +86,25 @@ void print_usage(char *prg) {
 }
 
 int send_tcp_data(struct sockaddr_in *client_sa) {
-    int st;
+    int buf_len, fd, st;
     struct sockaddr_in server_sa;
     char *offer;
+    void *p;
+    struct stat file_stat;
+    char filename[] = {"/tmp/Data.z21"};
+
+    fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+	fprintf(stderr, "can't open Z21 data %s: %s\n", filename, strerror(errno));
+	return EXIT_FAILURE;
+    }
+
+    if (fstat(fd, &file_stat) < 0) {
+	fprintf(stderr, "can't get Z21 data %s size: %s\n", filename, strerror(errno));
+	return EXIT_FAILURE;
+    }
+
+    printf("Filesize %ld", file_stat.st_size);
 
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -105,9 +124,36 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     }
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.6\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
 		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"MeineAnlage.z21\","
-		     "\"request\":\"file_transfer_info\",\"fileSize\":744444}\n");
+		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", file_stat.st_size);
     printf("send TCP\n%s", offer);
     send(st, offer, strlen(offer), 0);
+
+    buf_len = strlen(offer);
+
+    memset(offer, 0, buf_len);
+
+    printf("Waiting for <install>\n");
+
+    if (recv(st, offer, buf_len, 0) < 0) {
+	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
+	return EXIT_FAILURE;
+    }
+
+    p = mmap(NULL, file_stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
+
+    if (strncmp(offer, "install", 7) == 0 ) {
+        if (send(st, p, file_stat.st_size, 0) < 0) {
+	    fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
+	    return EXIT_FAILURE;
+	} else {
+	    if (close(st)) {
+		fprintf(stderr, "error closing TCP stream: %s\n", strerror(errno));
+		return EXIT_FAILURE;
+	    }
+	}
+    }
+
+    printf("exit <install>\n");
 
     return EXIT_SUCCESS;
 }
