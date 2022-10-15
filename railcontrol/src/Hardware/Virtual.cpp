@@ -78,8 +78,16 @@ namespace Hardware
 				logger->Info(Languages::TextProgramMfxRead, address, cv);
 				break;
 
+			case ProgramModeDccRegister:
+				logger->Info(Languages::TextProgramDccRegisterRead, cv);
+				break;
+
+			case ProgramModeDccPage:
+				logger->Info(Languages::TextProgramDccPageRead, cv);
+				break;
+
 			case ProgramModeDccDirect:
-				logger->Info(Languages::TextProgramDccRead, cv);
+				logger->Info(Languages::TextProgramDccDirectRead, cv);
 				break;
 
 			case ProgramModeDccPomLoco:
@@ -113,8 +121,16 @@ namespace Hardware
 				logger->Info(Languages::TextProgramMfxWrite, address, cv, value);
 				break;
 
+			case ProgramModeDccRegister:
+				logger->Info(Languages::TextProgramDccRegisterWrite, cv, value);
+				break;
+
+			case ProgramModeDccPage:
+				logger->Info(Languages::TextProgramDccPageWrite, cv, value);
+				break;
+
 			case ProgramModeDccDirect:
-				logger->Info(Languages::TextProgramDccWrite, cv, value);
+				logger->Info(Languages::TextProgramDccDirectWrite, cv, value);
 				break;
 
 			case ProgramModeDccPomLoco:

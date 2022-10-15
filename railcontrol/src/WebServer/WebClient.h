@@ -214,6 +214,10 @@ namespace WebServer
 			HtmlTag HtmlTagProgramModeSelector(const ControlID controlID, ProgramMode& mode) const;
 			HtmlTag HtmlTagCvFields(const ControlID controlID, const ProgramMode programMode) const;
 
+			HtmlTag HtmlTagInput8BitValueWithLabel() const;
+
+			HtmlTag HtmlTagInputBitValue(std::string name) const;
+
 			std::map<std::string,ObjectID> GetLocoSlaveOptions(const LocoID locoID = LocoNone) const;
 
 			void HandleSelectLoco(const std::map<std::string, std::string>& arguments);

@@ -36,7 +36,7 @@ namespace WebServer
 		AddClass("div_integer");
 		HtmlTagInput input("text", name, std::to_string(value));
 		input.AddClass("integer");
-		input.AddAttribute("onchange", "checkIntegerValue('" + name + "', " + minString + ", " + maxString + ");");
+		input.AddAttribute("oninput", "checkIntegerValue('" + name + "', " + minString + ", " + maxString + ");");
 		AddChildTag(input);
 
 		AddChildTag(HtmlTagButtonMinus(name, min));

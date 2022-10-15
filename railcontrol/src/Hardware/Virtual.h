@@ -48,6 +48,10 @@ namespace Hardware
 					| Hardware::CapabilityProgramMmPomWrite
 					| Hardware::CapabilityProgramMfxRead
 					| Hardware::CapabilityProgramMfxWrite
+					| Hardware::CapabilityProgramDccRegisterRead
+					| Hardware::CapabilityProgramDccRegisterWrite
+					| Hardware::CapabilityProgramDccPageRead
+					| Hardware::CapabilityProgramDccPageWrite
 					| Hardware::CapabilityProgramDccDirectRead
 					| Hardware::CapabilityProgramDccDirectWrite
 					| Hardware::CapabilityProgramDccPomLocoRead

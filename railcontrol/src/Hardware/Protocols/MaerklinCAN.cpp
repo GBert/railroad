@@ -242,7 +242,7 @@ namespace Hardware
 			switch (mode)
 			{
 				case ProgramModeDccDirect:
-					logger->Info(Languages::TextProgramDccRead, cv);
+					logger->Info(Languages::TextProgramDccDirectRead, cv);
 					protocol = ProtocolDCC;
 					break;
 
@@ -283,13 +283,13 @@ namespace Hardware
 					break;
 
 				case ProgramModeDccDirect:
-					logger->Info(Languages::TextProgramDccWrite, cv, value);
+					logger->Info(Languages::TextProgramDccDirectWrite, cv, value);
 					protocol = ProtocolDCC;
 					addressInternal = 0;
 					break;
 
 				case ProgramModeDccPomLoco:
-					logger->Info(Languages::TextProgramDccWrite, address, cv, value);
+					logger->Info(Languages::TextProgramDccPomLocoWrite, address, cv, value);
 					protocol = ProtocolDCC;
 					controlFlags = 1 << 7;
 					break;

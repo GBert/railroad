@@ -439,6 +439,7 @@ label {
 	width: 120px;
 }
 
+.narrow_label .dropdowncontainer,
 .narrow_label .dropdown {
 	width: 450px;
 }

@@ -40,7 +40,9 @@ namespace WebServer
 				AddChildTag(HtmlTag("br"));
 			}
 
-			virtual ~HtmlTagInputCheckboxWithLabel() {}
+			virtual ~HtmlTagInputCheckboxWithLabel()
+			{
+			}
 
 			virtual HtmlTag AddAttribute(const std::string& name, const std::string& value) override
 			{

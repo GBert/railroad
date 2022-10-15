@@ -30,7 +30,8 @@ namespace WebServer
 	{
 		public:
 			HtmlTagInputCheckbox() = delete;
-			HtmlTagInputCheckbox(const std::string& name, const std::string& value, const bool checked)
+
+			inline HtmlTagInputCheckbox(const std::string& name, const std::string& value, const bool checked = false)
 			:	HtmlTagInput("checkbox", name, value)
 			{
 				if (checked)

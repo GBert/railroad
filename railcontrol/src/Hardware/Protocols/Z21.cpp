@@ -326,7 +326,7 @@ namespace Hardware
 			switch (mode)
 			{
 				case ProgramModeDccDirect:
-					logger->Info(Languages::TextProgramDccRead, cv);
+					logger->Info(Languages::TextProgramDccDirectRead, cv);
 					ProgramDccRead(cv);
 					break;
 
@@ -356,7 +356,7 @@ namespace Hardware
 					break;
 
 				case ProgramModeDccDirect:
-					logger->Info(Languages::TextProgramDccWrite, cv, static_cast<int>(value));
+					logger->Info(Languages::TextProgramDccDirectWrite, cv, static_cast<int>(value));
 					ProgramDccWrite(cv, value);
 					break;
 

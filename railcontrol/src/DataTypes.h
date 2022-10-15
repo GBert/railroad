@@ -220,13 +220,14 @@ enum Orientation : bool
 enum ProgramMode : uint8_t
 {
 	ProgramModeNone,
+	ProgramModeDccDirect,
+	ProgramModeDccPomLoco,
+	ProgramModeDccPomAccessory,
 	ProgramModeMm,
 	ProgramModeMmPom,
 	ProgramModeMfx,
-	ProgramModeDccRegister,
-	ProgramModeDccDirect,
-	ProgramModeDccPomLoco,
-	ProgramModeDccPomAccessory
+	ProgramModeDccPage,
+	ProgramModeDccRegister
 };
 
 typedef uint16_t CvNumber;

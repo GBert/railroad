@@ -448,11 +448,14 @@ namespace Hardware
 	{
 		if (cv == 0)
 		{
-			return false; // CVs are one based, so CV zero is not allowed
+			// CVs are one based, so CV zero is not allowed
+			return false;
 		}
 		if (cv == 1 && value == 0)
 		{
-			return false; // loco/accessory address zero is not allowed for DCC decoders and can not be undone. It would destroy some DCC decoders.
+			// loco/accessory address zero is not allowed for DCC decoders and can not be undone.
+			// It would destroy some DCC decoders. Therefore we do not allow this.
+			return false;
 		}
 		CvNumber maxCv;
 		switch (mode)
@@ -462,14 +465,16 @@ namespace Hardware
 				maxCv = 0x100;
 				break;
 
+			case ProgramModeDccRegister:
+			case ProgramModeDccPage:
 			case ProgramModeDccDirect:
 			case ProgramModeDccPomLoco:
-			case ProgramModeMfx:
-				maxCv = 0x4000;
+			case ProgramModeDccPomAccessory:
+				maxCv = 0x400;
 				break;
 
-			case ProgramModeDccPomAccessory:
-				maxCv = 0x800;
+			case ProgramModeMfx:
+				maxCv = 0x4000;
 				break;
 
 			default:
