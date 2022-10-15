@@ -129,11 +129,9 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     send(st, offer, strlen(offer), 0);
 
     buf_len = strlen(offer);
-
     memset(offer, 0, buf_len);
 
     printf("Waiting for <install>\n");
-
     if (recv(st, offer, buf_len, 0) < 0) {
 	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
 	return EXIT_FAILURE;
@@ -153,7 +151,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	}
     }
 
-    printf("exit <install>\n");
+    printf("data send complete\n");
 
     return EXIT_SUCCESS;
 }
