@@ -36,7 +36,9 @@ namespace Hardware
 				controlName + " / " + params->GetName() + " at serial port " + params->GetArg1(),
 			   params->GetName()),
 			run(true),
-			serialLine(logger, params->GetArg1(), dataSpeed, 8, 'N', 1)
+			serialLine(logger, params->GetArg1(), dataSpeed, 8, 'N', 1),
+			lastCv(0),
+			isProgramming(false)
 		{
 			receiverThread = std::thread(&Hardware::Protocols::LocoNet::Receiver, this);
 			senderThread = std::thread(&Hardware::Protocols::LocoNet::Sender, this);
@@ -198,6 +200,253 @@ namespace Hardware
 			unsigned char addressHigh = static_cast<unsigned char>(((addressLocoNet >> 7) & 0x000F) | ((state & 0x01) << 5) | ((on & 0x01) << 4));
 			Send4ByteCommand(OPC_SW_REQ, addressLow, addressHigh);
 		}
+
+		void LocoNet::ProgramWrite(const ProgramMode mode,
+			__attribute__((unused)) const Address address,
+			const CvNumber cv,
+			const CvValue value)
+		{
+			switch(mode)
+			{
+				case ProgramModeMm:
+				case ProgramModeDccRegister:
+				case ProgramModeDccPage:
+				case ProgramModeDccDirect:
+					ProgramStart();
+					ProgramPT(true, mode, cv, value);
+					lastCv = cv;
+					break;
+
+				/**
+				 * actually not used
+				case ProgramModeDccPomLoco:
+					ProgramMain(address, cv, value);
+					lastCv = cv;
+					break;
+				 */
+
+				default:
+					break;
+			}
+		}
+
+		void LocoNet::ProgramRead(const ProgramMode mode,
+			__attribute__((unused)) const Address address,
+			const CvNumber cv)
+		{
+			switch(mode)
+			{
+				case ProgramModeDccRegister:
+				case ProgramModeDccPage:
+				case ProgramModeDccDirect:
+					ProgramStart();
+					ProgramPT(false, mode, cv);
+					lastCv = cv;
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		void LocoNet::ProgramStart()
+		{
+			unsigned char data[0x07];
+			data[0] = 0xE5;
+			data[1] = 0x07;
+			data[2] = 0x01;
+			data[3] = 0x49;
+			data[4] = 0x42;
+			data[5] = 0x41;
+			// data[6] is set in SendXByteCommand
+
+			SendXByteCommand(data, sizeof(data));
+			isProgramming = true;
+		}
+
+		void LocoNet::ProgramEnd()
+		{
+			unsigned char data[0x07];
+			data[0] = 0xE5;
+			data[1] = 0x07;
+			data[2] = 0x01;
+			data[3] = 0x49;
+			data[4] = 0x42;
+			data[5] = 0x40;
+			// data[6] is set in SendXByteCommand
+
+			SendXByteCommand(data, sizeof(data));
+			isProgramming = false;
+		}
+
+		/**
+ 	 	 * Reverse Engineered with a KM1 System control 7, but it does not work properly.
+		void LocoNet::ProgramMain(const Address address,
+			const CvNumber cv,
+			const CvValue value)
+		{
+			unsigned char data[0x1F]; // 31 bytes
+			data[0] = OPC_PROGRAM;
+			data[1] = 0x1F;
+			data[2] = 0x01;
+			data[3] = 0x49;
+			data[4] = 0x42;
+			data[5] = 0x71 | ((cv >> 4) & 0x08) | ((address >> 6) & 0x02);
+			data[6] = 0x5E;
+			data[7] = (address & 0x7F);
+			data[8] = ((address >> 1) & 0x7F);
+			data[9] = (cv & 0x7F);
+			data[10] = 0x00;
+			data[11] = ((cv >> 8) & 0x7F);
+			data[12] = (value & 0x7F);
+			data[13] = 0x00;
+			data[14] = 0x00;
+			data[15] = 0x10;
+			data[16] = 0x00;
+			data[17] = 0x00;
+			data[18] = 0x00;
+			data[19] = 0x00;
+			data[20] = 0x00;
+			data[21] = 0x00;
+			data[22] = 0x00;
+			data[23] = 0x00;
+			data[24] = 0x00;
+			data[25] = 0x00;
+			data[26] = 0x00;
+			data[27] = 0x00;
+			data[28] = 0x00;
+			data[29] = 0x00;
+			data[30] = 0x00;
+			//data[31] is set in SendXByteCommand
+
+	        SendXByteCommand(data, sizeof(data));
+		}
+		*/
+
+		void LocoNet::ProgramPT(const bool write,
+			const ProgramMode mode,
+			const CvNumber cv,
+			const CvValue value)
+		{
+			unsigned char data[0x1F]; // 31 bytes
+			switch(mode)
+			{
+				case ProgramModeMm:
+					data[6] = 0x62;
+					break;
+
+				case ProgramModeDccRegister:
+					data[6] = 0x6C;
+					break;
+
+				case ProgramModeDccPage:
+					data[6] = 0x6E;
+					break;
+
+				case ProgramModeDccDirect:
+					data[6] = 0x70;
+					break;
+
+				default:
+					return;
+			}
+			data[0] = OPC_PROGRAM;
+			data[1] = 0x1F;
+			data[2] = 0x01;
+			data[3] = 0x49;
+			data[4] = 0x42;
+			data[5] = 0x71 | ((value >> 4) & 0x08) | ((cv >> 6) & 0x02);
+			data[6] |= static_cast<unsigned char>(write);
+			data[7] = (cv & 0x7F);
+			data[8] = (cv >> 8);
+			data[9] = (value & 0x7F);
+			data[10] = 0x00;
+			data[11] = 0x00;
+			data[12] = 0x00;
+			data[13] = 0x00;
+			data[14] = 0x00;
+			data[15] = 0x10;
+			data[16] = 0x00;
+			data[17] = 0x00;
+			data[18] = 0x00;
+			data[19] = 0x00;
+			data[20] = 0x00;
+			data[21] = 0x00;
+			data[22] = 0x00;
+			data[23] = 0x00;
+			data[24] = 0x00;
+			data[25] = 0x00;
+			data[26] = 0x00;
+			data[27] = 0x00;
+			data[28] = 0x00;
+			data[29] = 0x00;
+			data[30] = 0x00;
+			//data[31] is set in SendXByteCommand
+
+	        SendXByteCommand(data, sizeof(data));
+		}
+
+		/*
+		 * This code is written according the Digitrax LocoNet Persional Use Edition 1.0
+		 * It does not work with Uhlenbrock controls...
+
+		void LocoNet::Program(const bool write,
+			const ProgramMode mode,
+			const Address address,
+			const CvNumber cv,
+			const CvValue value)
+		{
+			unsigned char data[0x0E]; // 14 bytes
+			data[0] = OPC_WR_SL_DATA;
+			// data[1] is set in SendXByteCommand with sizeof(data)
+			data[2] = ProgrammingSlot; // slot 124
+			// data[3]
+			switch(mode)
+			{
+				case ProgramModeDccRegister:
+					data[3] = 0x33; // reserved D0 and D1 must be set to 1
+					data[5] = 0x00;
+					data[6] = 0x00;
+					break;
+
+				case ProgramModeDccPage:
+					data[3] = 0x23; // reserved D0 and D1 must be set to 1
+					data[5] = 0x00;
+					data[6] = 0x00;
+
+				case ProgramModeDccDirect:
+					data[3] = 0x2B; // reserved D0 and D1 must be set to 1
+					data[5] = 0x00;
+					data[6] = 0x00;
+					break;
+
+				case ProgramModeDccPomLoco:
+					data[3] = 0x27;
+					data[5] = static_cast<unsigned char>((address >> 7) & 0x7F);
+					data[6] = static_cast<unsigned char>(address & 0x7F);
+					break;
+
+				default:
+					return;
+			}
+			data[3] |= (static_cast<unsigned char>(write) << 6);
+
+			data[4] = 0x00;
+			// TRK
+			data[7] = 0x00;
+			// CVH
+			data[8] = ((cv >> 4) & 0x30) | ((cv >> 7) & 0x01) | ((value >> 6) & 0x02);
+			// CVL
+			data[9] = static_cast<unsigned char>(cv & 0x7F);
+			// DATA7
+			data[10] = static_cast<unsigned char>(value & 0x7F);
+			data[11] = 0x00;
+			data[12] = 0x00;
+			// data[13] is checksum and is calculated in SendXByteCommand
+
+			SendXByteCommand(data, sizeof(data));
+		}
+		*/
 
 		void LocoNet::Sender()
 		{
@@ -368,30 +617,6 @@ namespace Hardware
 					manager->Booster(ControlTypeHardware, BoosterStateStop);
 					return;
 
-				case OPC_SW_REQ: // 0xB0
-				{
-					const bool on = static_cast<bool>((data[2] & 0x10) >> 4);
-					if (!on)
-					{
-						return;
-					}
-					const DataModel::AccessoryState state = static_cast<DataModel::AccessoryState>((data[2] & 0x20) >> 5);
-					const Address address = (static_cast<Address>(data[1] & 0x7F) | (static_cast<Address>(data[2] & 0x0F) << 7)) + 1;
-					logger->Info(Languages::TextSettingAccessory, address, Languages::GetGreenRed(state));
-					manager->AccessoryState(ControlTypeHardware, controlID, ProtocolServer, address, state);
-					return;
-				}
-
-				case OPC_INPUT_REP: // 0xB2
-				{
-					ParseSensorData(data);
-					return;
-				}
-
-				case OPC_SL_RD_DATA: // 0xE7
-					ParseSlotReadData(data);
-					return;
-
 				case OPC_LOCO_SPD: // 0xA0
 				{
 					const Address address = CheckSlot(data[1]);
@@ -439,6 +664,30 @@ namespace Hardware
 					return;
 				}
 
+				case OPC_SW_REQ: // 0xB0
+				{
+					const bool on = static_cast<bool>((data[2] & 0x10) >> 4);
+					if (!on)
+					{
+						return;
+					}
+					const DataModel::AccessoryState state = static_cast<DataModel::AccessoryState>((data[2] & 0x20) >> 5);
+					const Address address = (static_cast<Address>(data[1] & 0x7F) | (static_cast<Address>(data[2] & 0x0F) << 7)) + 1;
+					logger->Info(Languages::TextSettingAccessory, address, Languages::GetGreenRed(state));
+					manager->AccessoryState(ControlTypeHardware, controlID, ProtocolServer, address, state);
+					return;
+				}
+
+				case OPC_INPUT_REP: // 0xB2
+				{
+					ParseSensorData(data);
+					return;
+				}
+
+				case OPC_LONG_ACK: // 0xB4
+					// Long ACK is not parsed
+					return;
+
 				case OPC_EXP_CMD: // 0xD4
 				{
 					// This is an Uhlenbrock Intellibox II extension
@@ -451,6 +700,18 @@ namespace Hardware
 					ParseF13F44(slot, address, data);
 					return;
 				}
+
+				case OPC_PEER_XFER: // 0xE5
+					// Peer Xfer is not parsed
+					return;
+
+				case OPC_SL_RD_DATA: // 0xE7
+					ParseSlotReadData(data);
+					return;
+
+				case OPC_PROGRAM: // 0xED
+					ParseProgram(data);
+					return;
 
 				default:
 					logger->Debug(Languages::TextCommandUnknown, Utils::Utils::IntegerToHex(data[0]));
@@ -471,58 +732,100 @@ namespace Hardware
 
 		void LocoNet::ParseSlotReadData(const unsigned char* data)
 		{
-			if (data[1] != 0x0E)
+			const unsigned char dataLength = data[1];
+			if (dataLength != 0x0E)
 			{
 				return;
 			}
 			const unsigned char slot = data[2];
-			if (slot == 0)
+			switch (slot)
 			{
-				const unsigned char ib[] = { 0x00, 0x00, 0x02, 0x00, 0x07, 0x00, 0x00, 0x00, 0x49, 0x42, 0x18 };
-				if (memcmp(ib, data + 3, 11) == 0)
-				{
-					logger->Info(Languages::TextConnectedTo, "Intellibox / TwinCenter");
+				case SlotHardwareType:
+					ParseSlotHardwareType(data);
 					return;
-				}
 
-				const unsigned char ib2[] = { 0x02, 0x42, 0x03, 0x00, 0x07, 0x00, 0x00, 0x15, 0x49, 0x42, 0x4C };
-				if (memcmp(ib2, data + 3, 11) == 0)
-				{
-					logger->Info(Languages::TextConnectedTo, "Intellibox II / IB-Basic / IB-Com");
+				case SlotProgramming:
+					ParseSlotProgramming(data);
 					return;
-				}
 
-				const unsigned char sc7[] = { 0x02, 0x42, 0x03, 0x00, 0x06, 0x00, 0x00, 0x15, 0x49, 0x42, 0x4D };
-				if (memcmp(sc7, data + 3, 11) == 0)
-				{
-					logger->Info(Languages::TextConnectedTo, "System Control 7");
+				default:
+					ParseSlotLocoData(data);
 					return;
-				}
+			}
+		}
 
-				const unsigned char daisy[] = { 0x00, 0x44, 0x02, 0x00, 0x07, 0x00, 0x59, 0x01, 0x49, 0x42, 0x04 };
-				if (memcmp(daisy, data + 3, 11) == 0)
-				{
-					logger->Info(Languages::TextConnectedTo, "Daisy");
-					return;
-				}
-
-				const unsigned char adapter63820[] = { 0x00, 0x4C, 0x01, 0x00, 0x07, 0x00, 0x49, 0x02, 0x49, 0x42, 0x1C };
-				if (memcmp(adapter63820, data + 3, 11) == 0)
-				{
-					logger->Info(Languages::TextConnectedTo, "Adapter 63820");
-					return;
-				}
-
-				const unsigned char digitraxChief[] = { 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11 };
-				if (memcmp(digitraxChief, data + 3, 11) == 0)
-				{
-					logger->Info(Languages::TextConnectedTo, "Digitrax Chief");
-					return;
-				}
-
-				logger->Info(Languages::TextUnknownHardware);
+		void LocoNet::ParseSlotHardwareType(const unsigned char* data)
+		{
+			const unsigned char ib[] = { 0x00, 0x00, 0x02, 0x00, 0x07, 0x00, 0x00, 0x00, 0x49, 0x42, 0x18 };
+			if (memcmp(ib, data + 3, 11) == 0)
+			{
+				logger->Info(Languages::TextConnectedTo, "Intellibox / TwinCenter");
 				return;
 			}
+
+			const unsigned char ib2[] = { 0x02, 0x42, 0x03, 0x00, 0x07, 0x00, 0x00, 0x15, 0x49, 0x42, 0x4C };
+			if (memcmp(ib2, data + 3, 11) == 0)
+			{
+				logger->Info(Languages::TextConnectedTo, "Intellibox II / IB-Basic / IB-Com");
+				return;
+			}
+
+			const unsigned char sc7[] = { 0x02, 0x42, 0x03, 0x00, 0x06, 0x00, 0x00, 0x15, 0x49, 0x42, 0x4D };
+			if (memcmp(sc7, data + 3, 11) == 0)
+			{
+				logger->Info(Languages::TextConnectedTo, "System Control 7");
+				return;
+			}
+
+			const unsigned char daisy[] = { 0x00, 0x44, 0x02, 0x00, 0x07, 0x00, 0x59, 0x01, 0x49, 0x42, 0x04 };
+			if (memcmp(daisy, data + 3, 11) == 0)
+			{
+				logger->Info(Languages::TextConnectedTo, "Daisy");
+				return;
+			}
+
+			const unsigned char adapter63820[] = { 0x00, 0x4C, 0x01, 0x00, 0x07, 0x00, 0x49, 0x02, 0x49, 0x42, 0x1C };
+			if (memcmp(adapter63820, data + 3, 11) == 0)
+			{
+				logger->Info(Languages::TextConnectedTo, "Adapter 63820");
+				return;
+			}
+
+			const unsigned char digitraxChief[] = { 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11 };
+			if (memcmp(digitraxChief, data + 3, 11) == 0)
+			{
+				logger->Info(Languages::TextConnectedTo, "Digitrax Chief");
+				return;
+			}
+
+			logger->Info(Languages::TextUnknownHardware);
+		}
+
+		void LocoNet::ParseSlotProgramming(const unsigned char* data)
+		{
+			if (data[4] != 0)
+			{
+				return;
+			}
+			CvNumber cv = (static_cast<CvNumber>(data[9]) & 0x7F) | ((static_cast<CvNumber>(data[8]) & 0x01) << 7) | ((static_cast<CvNumber>(data[8]) & 0x30) << 5);
+			if (cv == 0)
+			{
+				cv = lastCv;
+			}
+
+			const CvValue value =  (static_cast<CvValue>(data[10]) & 0x7F) | ((static_cast<CvValue>(data[8]) & 0x02) << 6);
+			logger->Info(Languages::TextProgramReadValue, cv, value);
+			manager->ProgramValue(cv, value);
+
+			if (isProgramming)
+			{
+				ProgramEnd();
+			}
+		}
+
+		void LocoNet::ParseSlotLocoData(const unsigned char* data)
+		{
+			const unsigned char slot = data[2];
 			const Address address = ParseLocoAddress(data[4], data[9]);
 			logger->Debug(Languages::TextSlotHasAddress, slot, address);
 
@@ -530,6 +833,38 @@ namespace Hardware
 			ParseSpeed(address, data[5]);
 			ParseOrientationF0F4(slot, address, data[6]);
 			ParseF5F8(slot, address, data[10]);
+		}
+
+		void LocoNet::ParseProgram(const unsigned char* data)
+		{
+			if (data[1] != 0x1F)
+			{
+				return;
+			}
+			switch (data[6])
+			{
+				/*
+				 * actually not used because it can't be verified
+				case 0x5E:
+					// PoM
+					lastCv = static_cast<CvNumber>(data[9] & 0x7F) | static_cast<CvNumber>((data[5] & 0x08) << 4) | static_cast<CvNumber>((data[11] & 0x7F) << 8);
+					break;
+				 */
+
+				case 0x6C: // register read
+				case 0x6D: // register write
+				case 0x6E: // page read
+				case 0x6F: // page write
+				case 0x70: // direct read
+				case 0x71: // direct write
+					// Program track
+					lastCv = static_cast<CvNumber>(data[7] & 0x7F) | static_cast<CvNumber>((data[5] & 0x08) << 4) | static_cast<CvNumber>((data[8] & 0x7F) << 8);
+					break;
+
+				default:
+					// unknown programming method
+					break;
+			}
 		}
 
 		void LocoNet::ParseSpeed(const Address address, const unsigned char data)
@@ -744,6 +1079,13 @@ namespace Hardware
 			buffer[4] = data4;
 			CalcCheckSum(buffer, 5, buffer + 5);
 			sendingQueue.Enqueue(SendingQueueEntry(sizeof(buffer), buffer));
+		}
+
+		void LocoNet::SendXByteCommand(unsigned char* data, unsigned char dataLength)
+		{
+			data[1] = dataLength;
+			CalcCheckSum(data, dataLength - 1, data + dataLength - 1);
+			sendingQueue.Enqueue(SendingQueueEntry(dataLength, data));
 		}
 
 		uint8_t LocoNet::SetOrientationF0F4Bit(const unsigned char slot, const bool on, const unsigned char shift)

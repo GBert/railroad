@@ -1491,16 +1491,17 @@ function dataUpdate(event)
 		var cv = argumentMap.get('cv');
 		var cvElementName = 'cvraw';
 		var cvElement = document.getElementById(cvElementName);
-		if (cvElement &&  cvElement.value == cv)
+		if (cvElement)
 		{
-			var value = argumentMap.get('value');
-			var valueElementName = 'valueraw';
-			var valueElement = document.getElementById(valueElementName);
-			if (valueElement)
-			{
-				valueElement.value = value;
-				update_valueraw();
-			}
+			cvElement.value = cv;
+		}
+		var value = argumentMap.get('value');
+		var valueElementName = 'valueraw';
+		var valueElement = document.getElementById(valueElementName);
+		if (valueElement)
+		{
+			valueElement.value = value;
+			update_valueraw();
 		}
 	}
 }

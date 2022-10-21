@@ -29,7 +29,8 @@ along with RailControl; see the file LICENCE. If not see
 #include "Logger/Logger.h"
 #include "Network/Serial.h"
 
-// protocol specification at https://www.digitrax.com/static/apps/cms/media/documents/loconet/loconetpersonaledition.pdf
+// Protocol specification at https://www.digitrax.com/static/apps/cms/media/documents/loconet/loconetpersonaledition.pdf
+// Programming specification does not fit for Uhlenbrock Intellibox II
 
 namespace Hardware
 {
@@ -60,7 +61,15 @@ namespace Hardware
 				{
 					return Hardware::CapabilityLoco
 						| Hardware::CapabilityAccessory
-						| Hardware::CapabilityFeedback;
+						| Hardware::CapabilityFeedback
+						| Hardware::CapabilityProgram
+						| Hardware::CapabilityProgramMmWrite
+						| Hardware::CapabilityProgramDccRegisterRead
+						| Hardware::CapabilityProgramDccRegisterWrite
+						| Hardware::CapabilityProgramDccPageRead
+						| Hardware::CapabilityProgramDccPageWrite
+						| Hardware::CapabilityProgramDccDirectRead
+						| Hardware::CapabilityProgramDccDirectWrite;
 				}
 
 				void GetLocoProtocols(std::vector<Protocol>& protocols) const override
@@ -98,14 +107,23 @@ namespace Hardware
 					const DataModel::LocoFunctionNr function,
 					const DataModel::LocoFunctionState on) override;
 
-				virtual void AccessoryOnOrOff(__attribute__((unused)) const Protocol protocol,
+				virtual void AccessoryOnOrOff(const Protocol protocol,
 					const Address address,
 					const DataModel::AccessoryState state,
 					const bool on) override;
 
+				virtual void ProgramWrite(const ProgramMode mode,
+					const Address address,
+					const CvNumber cv,
+					const CvValue value) override;
+
+				virtual void ProgramRead(const ProgramMode mode,
+					const Address address,
+					const CvNumber cv) override;
+
 			private:
-				// longest known LocoNet-Command is OPC_SL_RD_DATA_EXP (Uhlenbrock Extension)
-				static const unsigned char MaxDataLength = 0x15;
+				// longest known LocoNet-Command is OPC_START_PROGRAM (Uhlenbrock Extension)
+				static const unsigned char MaxDataLength = 0x1F;
 
 				enum OpCodes : unsigned char
 				{
@@ -130,15 +148,21 @@ namespace Hardware
 					OPC_SW_STATE       = 0xBC,
 					OPC_SW_ACK         = 0xBD,
 					OPC_LOCO_ADR       = 0xBF,
+					OPC_PEER_XFER      = 0xE5, // Intellibox-II see below
 					OPC_SL_RD_DATA     = 0xE7,
+					OPC_IMM_PACKET     = 0xED, // Intellibox-II see below
 					OPC_WR_SL_DATA     = 0xEF,
 					// Intellibox-II codes
 					OPC_LOCO_XADR      = 0xBE,
 					OPC_EXP_CMD        = 0xD4,
-					OPC_UNKNOWN_1      = 0xE5,
-					OPC_SL_RD_DATA_EXP = 0xE6,
-					OPC_WR_SL_DATA_EXP = 0xEE
+					OPC_START_PROGRAM  = 0xE5, // not documented
+					OPC_SL_RD_DATA_EXT = 0xE6,
+					OPC_PROGRAM        = 0xED, // not documented
+					OPC_WR_SL_DATA_EXT = 0xEE
 				};
+
+				static const unsigned char SlotHardwareType = 0;
+				static const unsigned char SlotProgramming = 124;
 
 				class SendingQueueEntry
 				{
@@ -190,6 +214,14 @@ namespace Hardware
 
 				void ParseSlotReadData(const unsigned char* data);
 
+				void ParseSlotHardwareType(const unsigned char* data);
+
+				void ParseSlotProgramming(const unsigned char* data);
+
+				void ParseSlotLocoData(const unsigned char* data);
+
+				void ParseProgram(const unsigned char* data);
+
 				inline Address ParseLocoAddress(const unsigned char data1, const unsigned char data2)
 				{
 					return static_cast<Address>(data1 & 0x7F) | (static_cast<Address>(data2 & 0x3F) << 7);
@@ -225,6 +257,8 @@ namespace Hardware
 					const unsigned char data2,
 					const unsigned char data3,
 					const unsigned char data4);
+
+				void SendXByteCommand(unsigned char* data, unsigned char dataLength);
 
 				inline void SendRequestLocoData(const unsigned char slot)
 				{
@@ -266,6 +300,19 @@ namespace Hardware
 
 				uint32_t SetF13F44Bit(const unsigned char slot, const bool on, const unsigned char shift);
 
+				void ProgramStart();
+
+				void ProgramEnd();
+
+//				void ProgramMain(const Address address,
+//					const CvNumber cv,
+//					const CvValue value);
+
+				void ProgramPT(const bool write,
+					const ProgramMode mode,
+					const CvNumber cv,
+					const CvValue value = 0);
+
 				volatile bool run;
 				mutable Network::Serial serialLine;
 				std::thread senderThread;
@@ -277,6 +324,9 @@ namespace Hardware
 				SendingQueueEntry entryToVerify;
 				mutable std::mutex entryToVerifyMutex;
 				std::condition_variable entryToVerifyCV;
+
+				CvNumber lastCv;
+				bool isProgramming;
 		};
 	} // namespace
 } // namespace
