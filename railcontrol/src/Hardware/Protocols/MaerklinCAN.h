@@ -186,18 +186,18 @@ namespace Hardware
 
 				enum CanDeviceType : uint16_t
 				{
-					CanDeviceGfp = 0x0000,
-					CanDeviceGleisbox = 0x0010,
-					CanDeviceGleisbox_2 = 0x0011, // undocumented
+					CanDeviceGfp         = 0x0000,
+					CanDeviceGleisbox    = 0x0010,
+					CanDeviceGleisbox_2  = 0x0011, // undocumented
 					CanDeviceConnect6021 = 0x0020,
-					CanDeviceMs2 = 0x0030,
-					CanDeviceMs2_2 = 0x0032, // undocumented
-					CanDeviceMs2_3 = 0x0033, // undocumented
-					CanDeviceSRSEII = 0x0040, // SRSEII project
-					CanDeviceCs2Slave_2 = 0xeeee, // undocumented
-					CanDeviceWireless = 0xffe0,
-					CanDeviceCs2Slave = 0xfff0, // undocumented
-					CanDeviceCs2Master = 0xffff
+					CanDeviceMs2         = 0x0030,
+					CanDeviceMs2_2       = 0x0032, // undocumented
+					CanDeviceMs2_3       = 0x0033, // undocumented
+					CanDeviceLinkS88     = 0x0040, // undocumented
+					CanDeviceCs2Slave_2  = 0xeeee, // undocumented
+					CanDeviceWireless    = 0xffe0,
+					CanDeviceCs2Slave    = 0xfff0, // undocumented
+					CanDeviceCs2Master   = 0xffff
 				};
 
 //				enum CanFileType : uint8_t
@@ -355,6 +355,13 @@ namespace Hardware
 				static inline Address ParseAddress(const unsigned char* const buffer)
 				{
 					return static_cast<Address>(Utils::Utils::DataBigEndianToInt(buffer + 5));
+				}
+
+				static inline FeedbackPin ParseFeedbackPin(const unsigned char* const buffer)
+				{
+					FeedbackPin pin = static_cast<FeedbackPin>(Utils::Utils::DataBigEndianToInt(buffer + 5));
+					pin = (pin & 0x03FF) | ((pin & 0x00FF0000) >> 4);
+					return pin;
 				}
 
 				static inline CanHash ParseHash(const unsigned char* const buffer)

@@ -151,7 +151,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextDeleteText */ { "Delete text", "Text löschen", "Eliminar texto" },
 /* TextDeleteTrack */ { "Delete track", "Gleis löschen", "Eliminar vía" },
 /* TextDestinationTrack */ { "Destination track", "Zielgleis", "Vía de destino" },
-/* TextDeviceOnCanBus */ { "CAN-device {0} with hash {1} and software version {2}.{3} found.", "CAN-Gerät {0} mit Hash {1} und Softwareversion {2}.{3} gefunden.", "Encontrado dispositivo {0} con hash {1} y version {2}.{3}." },
+/* TextDeviceOnCanBus */ { "CAN-device {0} with hash {1}, device ID {2} and software version {3}.{4} found.", "CAN-Gerät {0} mit Hash {1}, Geräte-Kennung {2} und Softwareversion {3}.{4} gefunden.", "Encontrado dispositivo {0} con hash {1}, identificador {2} y version {3}.{4}." },
 /* TextDifferentOrientations */ { "Locomotive and route {0} have different running directions", "Lokomotive und Fahrstrasse {0} haben verschiedene Fahrtrichtungen", "Tren e itinerario {0} tienen sentidos de la marcha differentes" },
 /* TextDifferentPropulsions */ { "Locomotive and route {0} have different propulsion types", "Lokomotive und Fahrstrasse {0} haben verschiedene Antriebsformen", "Tren e itinerario {0} tienen ajustes de propulsión differentes" },
 /* TextDifferentPushpullTypes */ { "Locomotive and route {0} have different push-pull types", "Lokomotive und Fahrstrasse {0} haben verschiedene Wendezugeinstellungen", "Tren e itinerario {0} tienen ajustes de push-pull differentes" },

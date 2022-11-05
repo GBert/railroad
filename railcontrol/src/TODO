@@ -1,4 +1,3 @@
-- Layout ein-/ausblenden, mehrere Loksteuerungen
 - Rückmelder-Gleis als Relation speichern
 - Mehrfachtraktion als separate Lok anzeigen, einzelne Loks trotzdem separat steuerbar
 - Notaus bei Rückmelder an/aus
@@ -14,7 +13,6 @@
 - Synchronisieren der CS2 Lok-Datenbank (RailControl->CS2)
 - Anbinden von SPROG DCC
 - Anbinden von Zimo-Zentralen
-- Anbinden von LocoNet-Zentralen
 - Anbinden von BidiB-Zentralen
 - Anbinden von uCon-Zentralen
 - Anbinden von USBtin-Märklin-CAN
