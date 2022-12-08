@@ -8,6 +8,8 @@
  */
 
 /* Thanks to Stefan Krauss and the SocketCAN team
+ *
+ * With contributions from Rainer Mueller
  */
 
 #include "can2lan.h"
@@ -90,7 +92,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.81\n\n");
+    fprintf(stderr, "   Version 1.82\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -179,6 +181,16 @@ int copy_cs2_config(struct cs2_config_data_t *cs2_config_data) {
 	syslog(LOG_ERR, "%s: can't clone CAN member config - no CAN member TCP connection yet\n", __func__);
     }
     return 0;
+}
+
+void emit_change_broadcast(struct can_frame frame, int *tcp_socket_list, int snmbr) {
+    char config_name[9];
+
+    uint8_t fill = frame.can_id & 0xFF;
+    strncpy(config_name, (char *)frame.data, 8);
+    syslog(LOG_NOTICE, "%s: config request >%s<\n", __func__, config_name);
+    config_name[8] = '\0';
+    send_tcp_config_data(config_name, config_dir, frame.can_id, tcp_socket_list, snmbr, CRC | COMPRESSED | BCCHANGE, fill);
 }
 
 int check_data_udp(int udp_socket, struct sockaddr *baddr, struct cs2_config_data_t *cs2_config_data, unsigned char *netframe) {
@@ -327,12 +339,12 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 	    if (strcmp("loks", config_name) == 0) {
 		ret = 1;
 		syslog(LOG_NOTICE, "%s: sending lokomotive.cs2\n", __func__);
-		send_tcp_config_data("lokomotive.cs2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("lokomotive.cs2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    } else if (strcmp("mags", config_name) == 0) {
 		ret = 1;
 		syslog(LOG_NOTICE, "%s: sending magnetartikel.cs2\n", __func__);
-		send_tcp_config_data("magnetartikel.cs2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("magnetartikel.cs2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    } else if (strncmp("gbs-", config_name, 4) == 0) {
 		int page_number;
@@ -343,7 +355,7 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 		    if (page_name[page_number]) {
 			strcat(gbs_name, page_name[page_number]);
 			syslog(LOG_NOTICE, "%s: sending %s\n", __func__, gbs_name);
-			send_tcp_config_data(gbs_name, config_dir, canid, tcp_socket, CRC | COMPRESSED);
+			send_tcp_config_data(gbs_name, config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 			break;
 		    }
 		}
@@ -352,12 +364,12 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 	    } else if (strcmp("gbs", config_name) == 0) {
 		ret = 1;
 		syslog(LOG_NOTICE, "%s: sending gleisbild.cs2\n", __func__);
-		send_tcp_config_data("gleisbild.cs2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("gleisbild.cs2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    } else if (strcmp("fs", config_name) == 0) {
 		ret = 1;
 		syslog(LOG_NOTICE, "%s: sending fahrstrassen.cs2\n", __func__);
-		send_tcp_config_data("fahrstrassen.cs2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("fahrstrassen.cs2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    }
 	    /* TODO : these files depends on different internal states */
@@ -365,25 +377,25 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 		ret = 1;
 		/* fprintf(stderr, "%s: lokstat (lokomotive.sr2) not implemented yet\n", __func__); */
 		syslog(LOG_NOTICE, "%s: sending lokomotive.sr2\n", __func__);
-		send_tcp_config_data("lokomotive.sr2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("lokomotive.sr2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    } else if (strcmp("magstat", config_name) == 0) {
 		ret = 1;
 		/* fprintf(stderr, "%s: magstat (magnetartikel.sr2) not implemented yet\n\n", __func__); */
 		syslog(LOG_NOTICE, "%s: sending magnetartikel.sr2\n", __func__);
-		send_tcp_config_data("magnetartikel.sr2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("magnetartikel.sr2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    } else if (strcmp("gbsstat", config_name) == 0) {
 		ret = 1;
 		/* fprintf(stderr, "%s: gbsstat (gleisbild.sr2) not implemented yet\n\n", __func__); */
 		syslog(LOG_NOTICE, "%s: sending gleisbild.sr2\n", __func__);
-		send_tcp_config_data("gleisbild.sr2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("gleisbild.sr2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    } else if (strcmp("fsstat", config_name) == 0) {
 		ret = 1;
 		/* fprintf(stderr, "%s: fsstat (fahrstrassen.sr2) not implemented yet\n\n", __func__); */
 		syslog(LOG_NOTICE, "%s: sending fahrstrassen.sr2\n", __func__);
-		send_tcp_config_data("fahrstrassen.sr2", config_dir, canid, tcp_socket, CRC | COMPRESSED);
+		send_tcp_config_data("fahrstrassen.sr2", config_dir, canid, &tcp_socket, 1, CRC | COMPRESSED, 0);
 		break;
 	    }
 	    break;
@@ -636,7 +648,7 @@ int main(int argc, char **argv) {
 		s = inet_pton(AF_INET, udp_dst_address, &baddr.sin_addr);
 		if (s > 0)
 		    break;
-		}
+	    }
 	    sleep(1);
 	}
     }
@@ -843,17 +855,21 @@ int main(int argc, char **argv) {
 	    }
 	    /* if CAN Frame is EFF do it */
 	    if (frame.can_id & CAN_EFF_FLAG) {	/* only EFF frames are valid */
-		/* send UDP frame */
-		frame_to_net(sb, (struct sockaddr *)&baddr, (struct can_frame *)&frame);
-		print_can_frame(UDP_FORMAT_STRG, netframe, cs2_config_data.verbose && !background);
-		/* send CAN frame to all connected TCP clients */
-		/* TODO: need all clients the packets ? */
-		for (i = 0; i <= max_tcp_i; i++) {	/* check all clients for data */
-		    tcp_socket = tcp_client[i];
-		    if (tcp_socket < 0)
-			continue;
-		    frame_to_net(tcp_socket, (struct sockaddr *)&tcp_addr, (struct can_frame *)&frame);
-		    print_can_frame(CAN_TCP_FORMAT_STRG, netframe, cs2_config_data.verbose && !background);
+		if (((frame.can_id & 0x1FFFF00) == 0x0434700) && (frame.can_dlc == 8)) {
+		    emit_change_broadcast(frame, tcp_client, max_tcp_i + 1);
+		} else {
+		    /* send UDP frame */
+		    frame_to_net(sb, (struct sockaddr *)&baddr, (struct can_frame *)&frame);
+		    print_can_frame(UDP_FORMAT_STRG, netframe, cs2_config_data.verbose && !background);
+		    /* send CAN frame to all connected TCP clients */
+		    /* TODO: need all clients the packets ? */
+		    for (i = 0; i <= max_tcp_i; i++) {	/* check all clients for data */
+			tcp_socket = tcp_client[i];
+			if (tcp_socket < 0)
+			    continue;
+			frame_to_net(tcp_socket, (struct sockaddr *)&tcp_addr, (struct can_frame *)&frame);
+			print_can_frame(CAN_TCP_FORMAT_STRG, netframe, cs2_config_data.verbose && !background);
+		    }
 		}
 	    }
 	}
@@ -874,7 +890,7 @@ int main(int argc, char **argv) {
 		    net_to_net(sb, (struct sockaddr *)&baddr, netframe, CAN_ENCAP_SIZE);
 		    print_can_frame(UDP_UDP_FORMAT_STRG, netframe, cs2_config_data.verbose && !background);
 		} else {
-		/* send packet on CAN */
+		    /* send packet on CAN */
 		    ret = frame_to_can(sc, netframe);
 		    print_can_frame(NET_UDP_FORMAT_STRG, netframe, cs2_config_data.verbose && !background);
 		    check_data_udp(sb, (struct sockaddr *)&baddr, &cs2_config_data, netframe);
@@ -999,11 +1015,11 @@ int main(int argc, char **argv) {
 	    tcp_socket = tcp_client2[i];
 	    if (tcp_socket < 0)
 		continue;
-            if (FD_ISSET(tcp_socket, &read_fds)) {
-                if (cs2_config_data.verbose && !background) {
-                    time_stamp(timestamp);
-                    printf("%s TCP2 socket packet from: %s\n", timestamp, inet_ntop(AF_INET, &tcp_addr2.sin_addr, buffer, sizeof(buffer)));
-                }
+	    if (FD_ISSET(tcp_socket, &read_fds)) {
+		if (cs2_config_data.verbose && !background) {
+		    time_stamp(timestamp);
+		    printf("%s TCP2 socket packet from: %s\n", timestamp, inet_ntop(AF_INET, &tcp_addr2.sin_addr, buffer, sizeof(buffer)));
+		}
 		n = read(tcp_socket, netframe, MAXDG);
 		if (!n) {
 		    /* connection closed by client */

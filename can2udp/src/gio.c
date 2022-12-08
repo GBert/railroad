@@ -29,8 +29,6 @@ extern unsigned char GETCONFIG[];
 extern struct timeval last_sent;
 extern char *cs2_configs[][2];
 extern char **page_name;
-
-extern unsigned char netframe[MAXDG];
 extern struct filter_t filter[2];
 
 /* The following macro calls a zlib routine and checks the return
@@ -212,6 +210,7 @@ int net_to_net(int net_socket, struct sockaddr *net_addr, unsigned char *netfram
 int frame_to_net(int net_socket, struct sockaddr *net_addr, struct can_frame *frame) {
     int s;
     uint32_t canid;
+    unsigned char netframe[CAN_ENCAP_SIZE];
 
     if (filter[0].use) {
 	if ((frame->can_id & filter[0].mask) == filter[0].id)
@@ -335,11 +334,10 @@ char *search_interface(char *search) {
 		}
 	    }
 	}
-     }
-     freeifaddrs(ifap);
-     return NULL;
+    }
+    freeifaddrs(ifap);
+    return NULL;
 }
-
 
 int config_write(struct cs2_config_data_t *config_data) {
     FILE *config_fp;
@@ -382,7 +380,7 @@ int config_write(struct cs2_config_data_t *config_data) {
     }
     i = inflate_data(config_data);
     if (config_data->verbose)
-		printf("inflate returned code %i\n", i);
+	printf("inflate returned code %i\n", i);
     fwrite(config_data->inflated_data, 1, config_data->inflated_size, config_fp);
     fclose(config_fp);
     free(filename);
@@ -507,7 +505,7 @@ int reassemble_data(struct cs2_config_data_t *config_data, unsigned char *netfra
 			sprintf((char *)&newframe[5], "gbs-%d", config_data->track_index);
 			if (config_data->verbose)
 			    printf("getting track %s filename %s\n", &newframe[5], config_data->name);
-		        syslog(LOG_NOTICE, "%s: getting track %s filename %s\n", __func__, &newframe[5], config_data->name);
+			syslog(LOG_NOTICE, "%s: getting track %s filename %s\n", __func__, &newframe[5], config_data->name);
 			net_to_net(config_data->cs2_tcp_socket, NULL, newframe, CAN_ENCAP_SIZE);
 			config_data->track_index++;
 		    } else {
@@ -591,8 +589,8 @@ static void strm_init(z_stream * strm) {
     CALL_ZLIB(deflateInit2(strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY));
 }
 
-int send_tcp_config_data(char *filename, char *config_dir, uint32_t canid, int tcp_socket, int flags) {
-    /* uint16_t crc; */
+int send_tcp_config_data(char *filename, char *config_dir, uint32_t canid,
+			 int *tcp_socket_list, int socket_nmbr, int flags, uint8_t fill) {
     uint32_t temp32, canid_be, nbytes = 0;
     uint8_t *config;
     uint8_t *out;
@@ -601,8 +599,6 @@ int send_tcp_config_data(char *filename, char *config_dir, uint32_t canid, int t
     uint16_t crc, temp16;
     uint8_t netframe[MAXMTU];
     int on = 1;
-
-    out = NULL;
 
     config = read_config_file(filename, config_dir, &nbytes);
     if (config == NULL) {
@@ -626,12 +622,13 @@ int send_tcp_config_data(char *filename, char *config_dir, uint32_t canid, int t
 	strm.avail_out = CHUNK;
 	/* store deflated file beginning at byte 5 */
 	strm.next_out = &out[4];
-	CALL_ZLIB(deflate(&strm, Z_FINISH));
+	i = deflate(&strm, Z_FINISH);
 	deflated_size = CHUNK - strm.avail_out;
-	if (strm.avail_out == 0) {
-	    /* printf("%s: compressed file to large : %d filesize %d strm.avail_out\n", __func__, nbytes, strm.avail_out); */
-	    deflateEnd(&strm);
-	    free(config);
+	deflateEnd(&strm);
+	free(config);
+	if (i != Z_STREAM_END) {
+	    fprintf(stderr, "%s: bad status %d when compressing file %s\n", __func__, i, filename);
+	    syslog(LOG_ERR, "%s: bad status %d when compressing file %s\n", __func__, i, filename);
 	    free(out);
 	    return -1;
 	}
@@ -655,77 +652,75 @@ int send_tcp_config_data(char *filename, char *config_dir, uint32_t canid, int t
 	/* prepare first CAN frame   */
 	/* delete response bit and set canid to config data stream */
 	canid_be = htonl((canid & 0xFFFEFFFFUL) | 0x00020000UL);
-	memcpy(&netframe[0], &canid_be, 4);
-	/* CAN DLC is 6 */
-	netframe[4] = 0x06;
-	temp32 = htonl(deflated_size + 4);
-	memcpy(&netframe[5], &temp32, 4);
-	temp16 = htons(crc);
-	memcpy(&netframe[9], &temp16, 2);
-	netframe[11] = 0x00;
-	netframe[12] = 0x00;
 
-	if (net_to_net(tcp_socket, NULL, netframe, CAN_ENCAP_SIZE)) {
-	    deflateEnd(&strm);
-	    free(config);
-	    free(out);
-	    return -1;
-	}
+	// repeat from here in case of broadcast
+	for (int sn = 0; sn < socket_nmbr; sn++) {	/* check all clients for data */
+	    if (tcp_socket_list[sn] < 0)
+		continue;
 
-	/* loop until all packets send */
-	src_i = 0;
-	do {
-	    n_packets = 0;
-	    i = 0;
-	    do {
-		memcpy(&netframe[i], &canid_be, 4);
-		i += 4;
-		/* CAN DLC is always 8 */
-		netframe[i] = 0x08;
-		i++;
-		memcpy(&netframe[i], &out[src_i], 8);
-		i += 8;
-		src_i += 8;
-		n_packets++;
-	    } while ((src_i < padded_nbytes) && (n_packets < MAX_PACKETS));
-
-	    /* disable Nagle - force PUSH */
-	    if (setsockopt(tcp_socket, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
-		fprintf(stderr, "error disabling Nagle - TCP_NODELAY on: %s\n", strerror(errno));
-		return -1;
+	    memcpy(&netframe[0], &canid_be, 4);
+	    /* CAN DLC is 6 */
+	    netframe[4] = 0x06;
+	    temp32 = htonl(deflated_size + 4);
+	    memcpy(&netframe[5], &temp32, 4);
+	    temp16 = htons(crc);
+	    memcpy(&netframe[9], &temp16, 2);
+	    netframe[11] = 0x00;
+	    netframe[12] = 0x00;
+	    if (flags & BCCHANGE) {
+		netframe[4] = 0x07;
+		netframe[11] = fill;
 	    }
-	    /* printf("send %3d bytes by TCP\n", i); */
-	    /* don't use frame_to_net because we have more then 13 (CAN_ENCAP_SIZE) bytes to send */
-	    if (net_to_net(tcp_socket, NULL, netframe, i)) {
+	    if (net_to_net(tcp_socket_list[sn], NULL, netframe, CAN_ENCAP_SIZE)) {
 		perror("error sending TCP data\n");
-		deflateEnd(&strm);
-		free(config);
 		free(out);
 		return -1;
 	    }
 	    /* disable Nagle - force PUSH */
-	    if (setsockopt(tcp_socket, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
+	    if (setsockopt(tcp_socket_list[sn], IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
 		fprintf(stderr, "error disabling Nagle - TCP_NODELAY on: %s\n", strerror(errno));
-		return -1;
 	    }
-	    /* small sleep (reschedule) */
-	    usec_sleep(1000);
-	} while (src_i < padded_nbytes);
+
+	    /* loop until all packets send */
+	    src_i = 0;
+	    do {
+		n_packets = 0;
+		i = 0;
+		do {
+		    memcpy(&netframe[i], &canid_be, 4);
+		    i += 4;
+		    /* CAN DLC is always 8 */
+		    netframe[i] = 0x08;
+		    i++;
+		    memcpy(&netframe[i], &out[src_i], 8);
+		    i += 8;
+		    src_i += 8;
+		    n_packets++;
+		} while ((src_i < padded_nbytes) && (n_packets < MAX_PACKETS));
+
+		/* printf("send %3d bytes by TCP\n", i); */
+		/* don't use frame_to_net because we have more then 13 (CAN_ENCAP_SIZE) bytes to send */
+		if (net_to_net(tcp_socket_list[sn], NULL, netframe, i)) {
+		    perror("error sending TCP data\n");
+		    free(out);
+		    return -1;
+		}
+		/* small sleep (reschedule) */
+		usec_sleep(1000);
+	    } while (src_i < padded_nbytes);
 #if 0
-	/* print compressed data */
-	temp32 = i;
-	for (i = 0; i < temp32; i++) {
-	    if ((i % CAN_ENCAP_SIZE) == 0) {
-		printf("\n");
+	    /* print compressed data */
+	    temp32 = i;
+	    for (i = 0; i < temp32; i++) {
+		if ((i % CAN_ENCAP_SIZE) == 0) {
+		    printf("\n");
+		}
+		printf("%02x ", netframe[i]);
 	    }
-	    printf("%02x ", netframe[i]);
-	}
-	printf("\n");
+	    printf("\n");
 #endif
-	deflateEnd(&strm);
-    }
-    free(config);
-    if (out)
+	}
 	free(out);
+    }
     return 0;
 }

@@ -54,6 +54,7 @@
 
 #define	CRC			0x01
 #define COMPRESSED		0x02
+#define BCCHANGE		0x04
 #define TERM_SPEED		B500000
 
 #define fprint_syslog(pipe, spipe, text) \
@@ -136,7 +137,7 @@ uint8_t * read_config_file(char *filename, char *config_dir, uint32_t *nbytes);
 int time_stamp(char *timestamp);
 uint16_t generateHash(uint32_t uid);
 char **read_track_file(char *filename, char **page_name);
-int send_tcp_config_data(char *filename, char *config_dir,  uint32_t canid, int tcp_socket, int flags);
+int send_tcp_config_data(char *filename, char *config_dir, uint32_t canid, int *tcp_socket_list, int socket_nmbr, int flags, uint8_t fill);
 void print_can_frame(char *format_string, unsigned char *netframe, int verbose);
 int net_to_net(int net_socket, struct sockaddr *net_addr, unsigned char *netframe, int length);
 int frame_to_can(int can_socket, unsigned char *netframe);
