@@ -146,11 +146,8 @@ namespace DataModel
 				return speed;
 			}
 
-			inline void SetFunctionState(const DataModel::LocoFunctionNr nr,
-				const DataModel::LocoFunctionState state)
-			{
-				functions.SetFunctionState(nr, state);
-			}
+			void SetFunctionState(const DataModel::LocoFunctionNr nr,
+				const DataModel::LocoFunctionState state);
 
 			inline DataModel::LocoFunctionState GetFunctionState(const DataModel::LocoFunctionNr nr) const
 			{

@@ -748,6 +748,16 @@ namespace DataModel
 		}
 	}
 
+	void Loco::SetFunctionState(const DataModel::LocoFunctionNr nr,
+		const DataModel::LocoFunctionState state)
+	{
+		functions.SetFunctionState(nr, state);
+		for (auto slave : slaves)
+		{
+			manager->LocoFunctionState(ControlTypeInternal, slave->ObjectID2(), nr, state);
+		}
+	}
+
 	void Loco::SetOrientation(const Orientation orientation)
 	{
 		this->orientation = orientation;
