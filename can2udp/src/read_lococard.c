@@ -41,12 +41,15 @@
 #define PREAMBLE_MFX2		0x00F5
 #define PREAMBLE_MFX_F32	0x0117
 
-static char *I2C_DEF_PATH = "/sys/bus/i2c/devices/1-0050/eeprom";
+static char *I2C_DEF_PATH  = "/sys/bus/i2c/devices/1-0050/eeprom";
+static char *BCASTFILENAME = "/www/config/bclocard";
+static char *BCASTTRIGGER  = "cansend can0 00434763#62636C6F63617264";
 
 void print_usage(char *prg) {
-    fprintf(stderr, "\nUsage: %s -v -f FILE\n", prg);
-    fprintf(stderr, "   Version 0.4\n\n");
+    fprintf(stderr, "\nUsage: %s -v FILE\n", prg);
+    fprintf(stderr, "   Version 0.5\n\n");
     fprintf(stderr, "         -o                  lokomotive.cs2 style output\n");
+    fprintf(stderr, "         -b                  broadcast output to clients\n");
     fprintf(stderr, "         -h                  this help\n");
     fprintf(stderr, "         -v                  verbose output\n\n");
 }
@@ -394,7 +397,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 }
 
 int main(int argc, char **argv) {
-    int cs2_output, opt, verbose;
+    int cs2_output, opt, verbose, broadcast;
     struct loco_config_t loco_config;
     struct loco_data_t loco_data;
     char *filename;
@@ -405,8 +408,9 @@ int main(int argc, char **argv) {
     memset(&loco_config, 0, sizeof(loco_config));
     memset(&loco_data, 0, sizeof(loco_data));
     verbose = 1;
+    broadcast = 0;
 
-    while ((opt = getopt(argc, argv, "ovh?")) != -1) {
+    while ((opt = getopt(argc, argv, "ovbh?")) != -1) {
 	switch (opt) {
 
 	case 'o':
@@ -414,6 +418,9 @@ int main(int argc, char **argv) {
 	    break;
 	case 'v':
 	    verbose = 1;
+	    break;
+	case 'b':
+	    broadcast = 1;
 	    break;
 	case 'h':
 	case '?':
@@ -451,6 +458,19 @@ int main(int argc, char **argv) {
     if (cs2_output)
 	print_loco(stdout, &loco_data, 0);
 
+    if (broadcast) {
+	FILE *bcfile = fopen(BCASTFILENAME, "w");
+	if (bcfile) {
+	    fprintf(bcfile, "[lokomotive]\n");
+	    print_loco(bcfile, &loco_data, 0);
+	    fclose(bcfile);
+	    int rc = system(BCASTTRIGGER);
+	    if (rc)
+		printf("Error occured: system return code is %d\n", rc);
+	} else {
+	    fprintf(stderr, "Opening file %s failed\n", BCASTFILENAME);
+	}
+    }
     check_free(filename);
     check_free(loco_data.mfxAdr);
     check_free(loco_data.icon);

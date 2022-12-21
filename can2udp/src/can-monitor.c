@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 4.10\n\n");
+    fprintf(stderr, "   Version 4.11\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -1269,6 +1269,12 @@ void decode_frame(struct can_frame *frame) {
 		   config_data.deflated_size, config_data.crc, frame->data[6]);
 	    break;
 	case 8:
+	    if ((frame->can_id & 0x01FFFF00UL) == 0x00434700) {
+		memset(s, 0, sizeof(s));
+		memcpy(s, frame->data, frame->can_dlc);
+		printf("Config Data Broadcast Trigger ID 0x%02X für Datei %s\n", (frame->can_id & 0xFF), s);
+		break;
+	    }
 	    if (config_data.deflated_size_counter < config_data.deflated_size) {
 		memcpy(config_data.deflated_data + config_data.deflated_size_counter, frame->data, 8);
 		config_data.deflated_size_counter += 8;
