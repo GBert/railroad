@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-set(RAILCONTROL_VERSION "21")
+set(RAILCONTROL_VERSION "22")
 
 project(CMakeTest)
 
@@ -58,8 +58,6 @@ DataModel/Text.cpp
 DataModel/Text.h
 DataModel/Track.cpp
 DataModel/Track.h
-DataModel/TrackBase.cpp
-DataModel/TrackBase.h
 DataTypes.h
 Fallthrough.h
 Hardware/AccessoryCache.cpp
@@ -90,6 +88,8 @@ Hardware/Intellibox.h
 Hardware/Intellibox2.h
 Hardware/LocoCache.cpp
 Hardware/LocoCache.h
+Hardware/LocoNetAdapter63120.h
+Hardware/LocoNetAdapter63820.h
 Hardware/M6051.cpp
 Hardware/M6051.h
 Hardware/MasterControl.h
@@ -101,6 +101,7 @@ Hardware/Protocols/EsuCAN.cpp
 Hardware/Protocols/EsuCAN.h
 Hardware/Protocols/LocoNet.cpp
 Hardware/Protocols/LocoNet.h
+Hardware/Protocols/LocoNetLocoCache.h
 Hardware/Protocols/MaerklinCAN.cpp
 Hardware/Protocols/MaerklinCAN.h
 Hardware/Protocols/P50x.cpp
@@ -217,8 +218,6 @@ WebServer/HtmlTagText.cpp
 WebServer/HtmlTagText.h
 WebServer/HtmlTagTrack.cpp
 WebServer/HtmlTagTrack.h
-WebServer/HtmlTagTrackBase.cpp
-WebServer/HtmlTagTrackBase.h
 WebServer/Response.cpp
 WebServer/Response.h
 WebServer/ResponseCsv.cpp
@@ -243,8 +242,6 @@ WebServer/WebClientText.cpp
 WebServer/WebClientText.h
 WebServer/WebClientTrack.cpp
 WebServer/WebClientTrack.h
-WebServer/WebClientTrackBase.cpp
-WebServer/WebClientTrackBase.h
 WebServer/WebServer.cpp
 WebServer/WebServer.h
 Version.cpp.in
