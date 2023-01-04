@@ -93,6 +93,11 @@ namespace WebServer
 			static const std::map<std::string,HardwareType> ListHardwareNames();
 
 			static std::vector<ObjectID> InterpretSlaveData(const std::string& prefix, const std::map<std::string,std::string>& arguments);
+
+			static HtmlTag HtmlTagTabMenuItem(const std::string& tabName,
+				const Languages::TextSelector buttonValue,
+				const bool selected = false,
+				const bool hidden = false);
 	};
 
 } // namespace WebServer

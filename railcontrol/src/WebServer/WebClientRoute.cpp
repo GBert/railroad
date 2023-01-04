@@ -129,11 +129,11 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("relationatlock", Languages::TextAtLock));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("relationatunlock", Languages::TextAtUnlock));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("position", Languages::TextPosition));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("automode", Languages::TextAutomode));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("relationatlock", Languages::TextAtLock));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("relationatunlock", Languages::TextAtUnlock, false, !automode));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");
@@ -203,7 +203,7 @@ namespace WebServer
 
 		HtmlTagInputCheckboxWithLabel checkboxAutomode("automode", Languages::TextAutomode, "automode", static_cast<bool>(automode));
 		checkboxAutomode.AddId("automode");
-		checkboxAutomode.AddAttribute("onchange", "onChangeCheckboxShowHide('automode', 'tracks');");
+		checkboxAutomode.AddAttribute("onchange", "onChangeCheckboxShowHide('automode', 'tracks', 'tab_button_relationatunlock');");
 		automodeContent.AddChildTag(checkboxAutomode);
 
 		HtmlTag tracksDiv("div");

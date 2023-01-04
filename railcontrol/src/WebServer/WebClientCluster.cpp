@@ -92,8 +92,8 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("tracks", Languages::TextTracks));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("tracks", Languages::TextTracks));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");

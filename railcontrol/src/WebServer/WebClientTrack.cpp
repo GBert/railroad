@@ -126,11 +126,11 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("main", Languages::TextBasic, true));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("position", Languages::TextPosition));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("feedback", Languages::TextFeedbacks));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("signals", Languages::TextSignals));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("automode", Languages::TextAutomode));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedback", Languages::TextFeedbacks));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("signals", Languages::TextSignals));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");

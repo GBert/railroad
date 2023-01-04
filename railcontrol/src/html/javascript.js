@@ -868,7 +868,7 @@ function showContextMenu(event, ID)
 	return false;
 }
 
-function onChangeCheckboxShowHide(checkboxId, divId)
+function onChangeCheckboxShowHide(checkboxId, divId, tabId)
 {
 	var checkbox = document.getElementById(checkboxId);
 	if (!checkbox)
@@ -881,6 +881,20 @@ function onChangeCheckboxShowHide(checkboxId, divId)
 		return;
 	}
 	div.hidden = !checkbox.checked;
+
+	var tab = document.getElementById(tabId);
+	if (!tab)
+	{
+		return;
+	}
+	if (checkbox.checked)
+	{
+		tab.classList.remove("hidden");
+	}
+	else
+	{
+		tab.classList.add("hidden");
+	}
 }
 
 function onChangeTrackType()

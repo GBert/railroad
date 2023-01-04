@@ -119,18 +119,19 @@ namespace WebServer
 	const std::map<string,HardwareType> WebClientStatic::ListHardwareNames()
 	{
 		std::map<string,HardwareType> hardwareList;
-		hardwareList["CC-Schnitte"] = HardwareTypeCcSchnitte;
+		// Keys should not contain more then 30 characters
+		hardwareList["CAN-Digital-Bahn CC-Schnitte"] = HardwareTypeCcSchnitte;
 		hardwareList["Digikeijs DR5000"] = HardwareTypeDR5000;
-		hardwareList["DCC-EX Serial (testing)"] = HardwareTypeDccPpExSerial;
-		hardwareList["DCC-EX TCP (testing)"] = HardwareTypeDccPpExTcp;
+		hardwareList["DCC-EX Serial"] = HardwareTypeDccPpExSerial;
+		hardwareList["DCC-EX TCP"] = HardwareTypeDccPpExTcp;
 		hardwareList["ESU Ecos (beta)"] = HardwareTypeEcos;
 		hardwareList["Fleischmann TwinCenter"] = HardwareTypeTwinCenter;
 		hardwareList["KM1 System Control 7"] = HardwareTypeSystemControl7;
 		hardwareList["LDT HSI-88 RS-232"] = HardwareTypeHsi88;
 		hardwareList["LokStoreDigital LoDi-Rektor (beta)"] = HardwareTypeRektor;
-		hardwareList["Märklin Central Station 1 (CS1) (beta)"] = HardwareTypeCS1;
-		hardwareList["Märklin Central Station 2/3 (CS2/CS3) TCP"] = HardwareTypeCS2Tcp;
-		hardwareList["Märklin Central Station 2/3 (CS2/CS3) UDP"] = HardwareTypeCS2Udp;
+		hardwareList["Märklin Central Station 1 (beta)"] = HardwareTypeCS1;
+		hardwareList["Märklin Central Station 2/3 TCP"] = HardwareTypeCS2Tcp;
+		hardwareList["Märklin Central Station 2/3 UDP"] = HardwareTypeCS2Udp;
 		hardwareList["Märklin Interface 6050/6051"] = HardwareTypeM6051;
 		hardwareList["OpenDCC Z1"] = HardwareTypeOpenDcc;
 		hardwareList["Roco Z21"] = HardwareTypeZ21;
@@ -313,5 +314,26 @@ namespace WebServer
 		std::sort(ids.begin(), ids.end());
 		ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
 		return ids;
+	}
+
+	HtmlTag WebClientStatic::HtmlTagTabMenuItem(const std::string& tabName,
+		const Languages::TextSelector buttonValue,
+		const bool selected,
+		const bool hidden)
+	{
+		HtmlTag button("button");
+		button.AddClass("tab_button");
+		button.AddId("tab_button_" + tabName);
+		button.AddAttribute("onclick", "ShowTab('" + tabName + "');");
+		button.AddContent(buttonValue);
+		if (selected)
+		{
+			button.AddClass("tab_button_selected");
+		}
+		if (hidden)
+		{
+			button.AddClass("hidden");
+		}
+		return button;
 	}
 } // namespace WebServer

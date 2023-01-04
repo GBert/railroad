@@ -1317,20 +1317,6 @@ namespace WebServer
 		return content;
 	}
 
-	HtmlTag WebClient::HtmlTagTabMenuItem(const std::string& tabName, const Languages::TextSelector buttonValue, const bool selected) const
-	{
-		HtmlTag button("button");
-		button.AddClass("tab_button");
-		button.AddId("tab_button_" + tabName);
-		button.AddAttribute("onclick", "ShowTab('" + tabName + "');");
-		button.AddContent(buttonValue);
-		if (selected)
-		{
-			button.AddClass("tab_button_selected");
-		}
-		return button;
-	}
-
 	void WebClient::HandleSlaveAdd(const map<string, string>& arguments)
 	{
 		string priorityString = Utils::Utils::GetStringMapEntry(arguments, "priority", "1");
@@ -1443,10 +1429,10 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("functions", Languages::TextFunctions));
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("slaves", Languages::TextMultipleUnit));
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("automode", Languages::TextAutomode));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("functions", Languages::TextFunctions));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("slaves", Languages::TextMultipleUnit));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");
@@ -2021,8 +2007,8 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("main", Languages::TextBasic, true));
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("position", Languages::TextPosition));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent;
@@ -2264,8 +2250,8 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("main", Languages::TextBasic, true));
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("position", Languages::TextPosition));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent;
@@ -2558,8 +2544,8 @@ namespace WebServer
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("main", Languages::TextBasic, true));
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("position", Languages::TextPosition));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");
@@ -3017,14 +3003,14 @@ namespace WebServer
 		HtmlTag content;
 		content.AddChildTag(HtmlTag("h1").AddContent(Languages::TextProgrammer));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(HtmlTagTabMenuItem("raw", Languages::TextDirect, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("raw", Languages::TextDirect, true));
 		if (controlCountMm > 0)
 		{
-			tabMenu.AddChildTag(HtmlTagTabMenuItem("mm", Languages::TextMaerklinMotorola));
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("mm", Languages::TextMaerklinMotorola));
 		}
 		if (controlCountDcc > 0)
 		{
-			tabMenu.AddChildTag(HtmlTagTabMenuItem("dcc", Languages::TextDcc));
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("dcc", Languages::TextDcc));
 		}
 		content.AddChildTag(tabMenu);
 

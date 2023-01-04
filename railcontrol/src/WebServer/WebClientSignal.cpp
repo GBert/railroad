@@ -115,9 +115,9 @@ namespace WebServer
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("main", Languages::TextBasic, true));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("address", Languages::TextAddresses).AddAttribute("onclick", "onClickAddresses(" + to_string(signalID) + ");"));
-		tabMenu.AddChildTag(client.HtmlTagTabMenuItem("position", Languages::TextPosition));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("address", Languages::TextAddresses).AddAttribute("onclick", "onClickAddresses(" + to_string(signalID) + ");"));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
 
 		content.AddChildTag(tabMenu);
 

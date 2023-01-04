@@ -140,10 +140,6 @@ namespace WebServer
 				ReplyHtmlWithHeaderAndParagraph(Logger::Logger::Format(Languages::GetText(text), args...));
 			}
 
-			HtmlTag HtmlTagTabMenuItem(const std::string& tabName,
-				const Languages::TextSelector buttonValue,
-				const bool selected = false) const;
-
 			HtmlTag HtmlTagSlaveSelect(const std::string& prefix,
 				const std::vector<DataModel::Relation*>& relations,
 				const std::map<std::string,ObjectID>& options,
