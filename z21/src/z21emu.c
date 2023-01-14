@@ -96,7 +96,7 @@ static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
-    fprintf(stderr, "   Version 1.2\n\n");
+    fprintf(stderr, "   Version 1.3\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -p <port>           primary UDP port for the server - default %d\n", PRIMARY_UDP_PORT);
     fprintf(stderr, "         -s <port>           secondary UDP port for the server - default %d\n", SECONDARY_UDP_PORT);
@@ -379,10 +379,10 @@ void set_loco_id(unsigned char *data, uint16_t loco_id) {
 	data[2] = 0x00;
 	data[3] = loco_id;
     } else if (loco_id < 0x2000) {
-	data[2] |= 0x40;
+	data[2] |= 0x40 + (loco_id >> 8);
 	data[3] = loco_id & 0xff;
     } else if (loco_id < 0x3FFF) {
-	data[2] |= 0xC0;
+	data[2] |= 0xC0 + (loco_id >> 8);
 	data[3] = loco_id & 0xff;
     }
 }
