@@ -379,10 +379,10 @@ void set_loco_id(unsigned char *data, uint16_t loco_id) {
 	data[2] = 0x00;
 	data[3] = loco_id;
     } else if (loco_id < 0x2000) {
-	data[2] |= 0x40 + (loco_id >> 8);
+	data[2] |= 0x40 + ((loco_id - 0x0100) >> 8);
 	data[3] = loco_id & 0xff;
     } else if (loco_id < 0x3FFF) {
-	data[2] |= 0xC0 + (loco_id >> 8);
+	data[2] |= 0xC0 + ((loco_id - 0x2000) >> 8);
 	data[3] = loco_id & 0xff;
     }
 }
