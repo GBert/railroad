@@ -21,6 +21,16 @@
 #define XPN_LAN_SOURCE		0
 #define XPN_TTY_SOURCE		1
 
+/* offset for the Z21 loco number
+   0x0000 - 0x007F mm2_prg   address + 0x0000
+   0x0080 - 0x00FF mm2_dil   address + 0x0080 * TODO *
+   0x0100 - 0x1FFF mfx       address + 0x0100
+   0x2000 - 0x3FFF dcc       address + 0x2000
+*/
+#define MM1_Z21EMU_OFFSET	0x0000
+#define MFX_Z21EMU_OFFSET	0x0100
+#define DCC_Z21EMU_OFFSET	0x2000
+
 #define v_printf(verbose, ...) \
 	do { if ((verbose)) { printf(__VA_ARGS__);} } while (0)
 
