@@ -210,7 +210,7 @@ int net_to_net(int net_socket, struct sockaddr *net_addr, unsigned char *netfram
 int frame_to_net(int net_socket, struct sockaddr *net_addr, struct can_frame *frame) {
     int s;
     uint32_t canid;
-    unsigned char netframe[CAN_ENCAP_SIZE];
+    extern unsigned char netframe[MAXDG];
 
     if (filter[0].use) {
 	if ((frame->can_id & filter[0].mask) == filter[0].id)
