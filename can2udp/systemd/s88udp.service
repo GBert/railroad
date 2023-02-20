@@ -1,0 +1,19 @@
+[Unit]
+Description=Maerklin S88 UDP Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+RemainAfterExit=yes
+SuccessExitStatus=5 6
+ExecStart=/usr/sbin/s88udp -m1 -p 15730
+
+[Install] 
+WantedBy = multi-user.target
+
