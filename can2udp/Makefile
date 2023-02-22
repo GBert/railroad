@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=can2udp
-PKG_RELEASE:=2.43
+PKG_RELEASE:=2.44
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_BUILD_PARALLEL:=1
@@ -109,6 +109,7 @@ ifneq (,$(findstring mt76x8,$(CONFIG_TARGET_SUBTARGET)))
 	$(INSTALL_BIN) ./files/maecanserver.init $(1)/etc/init.d/maecanserver
 	$(INSTALL_BIN) ./files/clone-ms2-loco.init $(1)/etc/init.d/clone-ms2-loco
 	$(INSTALL_BIN) ./files/ms2-loco-list.init $(1)/etc/init.d/ms2-loco-list
+	$(INSTALL_BIN) ./files/wake-up-links88.init $(1)/etc/init.d/wake-up-links88
 	$(INSTALL_DIR) $(1)/root
 	$(INSTALL_BIN) ./files/no-pic.sh $(1)/root
 endif
