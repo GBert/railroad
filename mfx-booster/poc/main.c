@@ -10,8 +10,11 @@ enum pulse_types {
     FOUR_LONG
 };
 
+float divider;
+
 void printhelp() {
     puts("\nCommands:");
+    puts("i\t: info");
     puts("s\t: send single short pulse (58us)");
     puts("S\t: send single long pulse (100us)");
     puts("d\t: send 4 short pulse");
@@ -36,6 +39,9 @@ int main(void) {
         char c = getchar();
         printf("%c", c);
         switch (c) {
+            case 'i':
+		printf("\n PIO devider: %f\n", divider);
+		break;
             case 's':
 		pulse_type = SINGLE_SHORT;
                 break;
@@ -60,23 +66,24 @@ int main(void) {
                 break;
         }
 	switch (pulse_type) {
+	    /* delay decrement by 4us  -> 54 (58us) and 112 (116us) */
 	    case SINGLE_SHORT:
-		pio_sm_put_blocking(pio, sm, 0x00351035);
+		pio_sm_put_blocking(pio, sm, 0x00361036);
 		break;
 	    case SINGLE_LONG:
-		pio_sm_put_blocking(pio, sm, 0x005F105F);
+		pio_sm_put_blocking(pio, sm, 0x00701070);
 		break;
 	    case FOUR_SHORT:
-		pio_sm_put_blocking(pio, sm, 0x00351035);
-		pio_sm_put_blocking(pio, sm, 0x00351035);
-		pio_sm_put_blocking(pio, sm, 0x00351035);
-		pio_sm_put_blocking(pio, sm, 0x00351035);
+		pio_sm_put_blocking(pio, sm, 0x00361036);
+		pio_sm_put_blocking(pio, sm, 0x00361036);
+		pio_sm_put_blocking(pio, sm, 0x00361036);
+		pio_sm_put_blocking(pio, sm, 0x00361036);
 		break;
 	    case FOUR_LONG:
-		pio_sm_put_blocking(pio, sm, 0x005F105F);
-		pio_sm_put_blocking(pio, sm, 0x005F105F);
-		pio_sm_put_blocking(pio, sm, 0x005F105F);
-		pio_sm_put_blocking(pio, sm, 0x005F105F);
+		pio_sm_put_blocking(pio, sm, 0x00701070);
+		pio_sm_put_blocking(pio, sm, 0x00701070);
+		pio_sm_put_blocking(pio, sm, 0x00701070);
+		pio_sm_put_blocking(pio, sm, 0x00701070);
 		break;
 	    default:
 		break;

@@ -11,19 +11,18 @@
 
 loop:
     out x, 12
-    out pins, 1
-    out y, 3      [1]
+    out pins, 4
 wait_loop1:
     jmp x-- wait_loop1
-    out x, 12
-    out pins, 1
-    out y, 3
+    out x, 12 [1]
+    out pins, 4
 wait_loop2:
     jmp x-- wait_loop2
     jmp loop
 
 % c-sdk {
 #include "hardware/clocks.h"
+extern float divider;
 
 static inline void pulse_program_init(PIO pio, uint sm, uint offset, uint pin) {
     pio_sm_config c = pulse_program_get_default_config(offset);
@@ -36,10 +35,13 @@ static inline void pulse_program_init(PIO pio, uint sm, uint offset, uint pin) {
     // Set the pin direction to output at the PIO
     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 
-
+    /* using 1us resolution */
     float div = (float)clock_get_hz(clk_sys) / 1000000;
+    divider = div;
     sm_config_set_clkdiv(&c, div);
-
+    /* join RX/TX FIFO -> 4 + 4 entries */
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+    /* set auto pull */
     sm_config_set_out_shift(&c, true, true, 32);
 
     // Load our configuration, and jump to the start of the program
