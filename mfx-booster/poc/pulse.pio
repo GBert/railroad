@@ -1,24 +1,18 @@
 ;
-; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
-;
-; SPDX-License-Identifier: BSD-3-Clause
 ;
 
 .program pulse
 
 ; Repeatedly get one word of data from the TX FIFO, stalling when the FIFO is
-; empty. Write the least significant bit to the OUT pin group.
+; empty. Write the least four significant bits to the OUT pin group.
 
-loop:
+pulse:
+    ; auto pull is enabled so wait until data is available
     out x, 12
     out pins, 4
-wait_loop1:
-    jmp x-- wait_loop1
-    out x, 12 [1]
-    out pins, 4
-wait_loop2:
-    jmp x-- wait_loop2
-    jmp loop
+pulse_wait:
+    jmp x-- pulse_wait
+    jmp pulse
 
 % c-sdk {
 #include "hardware/clocks.h"
