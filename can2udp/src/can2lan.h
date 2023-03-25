@@ -40,7 +40,7 @@
 #include <syslog.h>
 
 #define MAXLINE			1024		/* max string length     */
-#define MAX_TCP_CONN		16		/* max TCP clients       */
+#define MAX_TCP_CONN		64		/* max TCP clients       */
 #define CAN_ENCAP_SIZE 		13		/* maximum datagram size */
 #define MAXDG   		(CAN_ENCAP_SIZE*512)	/* maximum datagram size */
 #define MAXMTU   		1400		/* maximum MTU           */
