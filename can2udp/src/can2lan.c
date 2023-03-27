@@ -92,7 +92,7 @@ void signal_handler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c <config_dir> -u <udp_port> -t <tcp_port> -d <udp_dest_port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.84\n\n");
+    fprintf(stderr, "   Version 1.85\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory\n");
     fprintf(stderr, "         -u <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -t <port>           listening TCP port for the server - default 15731\n");
@@ -436,6 +436,7 @@ int main(int argc, char **argv) {
     socklen_t tcp_client_length = sizeof(tcp_addr);
     fd_set all_fds, read_fds;
     int s = 0;
+    unsigned int tcp_connections = 0;
     struct timespec ts;
     char *udp_dst_address;
     char *bcast_interface;
@@ -890,30 +891,33 @@ int main(int argc, char **argv) {
 	if (FD_ISSET(st, &read_fds)) {
 	    conn_fd = accept(st, (struct sockaddr *)&tcp_addr, &tcp_client_length);
 	    if (cs2_config_data.verbose && !background) {
-		printf("new client: %s, port %d conn fd: %d max fds: %d\n", inet_ntop(AF_INET, &(tcp_addr.sin_addr),
-			buffer, sizeof(buffer)), ntohs(tcp_addr.sin_port), conn_fd, max_fds);
+		printf("new client request: %s, port %d conn fd: %d max fds: %d active tcp_cons: %d\n", inet_ntop(AF_INET, &(tcp_addr.sin_addr),
+			buffer, sizeof(buffer)), ntohs(tcp_addr.sin_port), conn_fd, max_fds, tcp_connections);
 	    }
-	    syslog(LOG_NOTICE, "%s: new client: %s port %d conn fd: %d max fds: %d\n", __func__,
-			 inet_ntop(AF_INET, &(tcp_addr.sin_addr), buffer, sizeof(buffer)), ntohs(tcp_addr.sin_port), conn_fd, max_fds);
-	    for (i = 0; i < MAX_TCP_CONN; i++) {
-		if (tcp_client[i] < 0) {
-		    tcp_client[i] = conn_fd;	/* save new TCP client descriptor */
-		    break;
-		}
-	    }
-	    if (i == MAX_TCP_CONN) {
+	    syslog(LOG_NOTICE, "%s: new client request: %s port %d conn fd: %d max fds: %d active tcp_cons: %d\n", __func__,
+			 inet_ntop(AF_INET, &(tcp_addr.sin_addr), buffer, sizeof(buffer)), ntohs(tcp_addr.sin_port), conn_fd, max_fds, tcp_connections);
+
+	    if (tcp_connections == MAX_TCP_CONN) {
+		shutdown(conn_fd, SHUT_RDWR);
 		fprintf(stderr, "too many TCP clients\n");
 		syslog(LOG_ERR, "%s: too many TCP clients\n", __func__);
+	    } else {
+		tcp_connections++;
+		for (i = 0; i < MAX_TCP_CONN; i++) {
+		    if (tcp_client[i] < 0) {
+			tcp_client[i] = conn_fd;	/* save new TCP client descriptor */
+			break;
+		    }
+		}
+		FD_SET(conn_fd, &all_fds);		/* add new descriptor to set */
+		max_fds = MAX(conn_fd, max_fds);	/* for select */
+		max_tcp_i = MAX(i, max_tcp_i);		/* max index in tcp_client[] array */
+		/* send embedded CAN ping */
+		memcpy(netframe, M_CAN_PING, CAN_ENCAP_SIZE);
+		net_to_net(conn_fd, NULL, netframe, CAN_ENCAP_SIZE);
+		if (cs2_config_data.verbose && !background)
+		    printf("send embedded CAN ping\n");
 	    }
-
-	    FD_SET(conn_fd, &all_fds);		/* add new descriptor to set */
-	    max_fds = MAX(conn_fd, max_fds);	/* for select */
-	    max_tcp_i = MAX(i, max_tcp_i);	/* max index in tcp_client[] array */
-	    /* send embedded CAN ping */
-	    memcpy(netframe, M_CAN_PING, CAN_ENCAP_SIZE);
-	    net_to_net(conn_fd, NULL, netframe, CAN_ENCAP_SIZE);
-	    if (cs2_config_data.verbose && !background)
-		printf("send embedded CAN ping\n");
 
 	    if (--nready <= 0)
 		continue;	/* no more readable descriptors */
@@ -922,27 +926,28 @@ int main(int argc, char **argv) {
 	if (FD_ISSET(st2, &read_fds)) {
 	    conn_fd = accept(st2, (struct sockaddr *)&tcp_addr2, &tcp_client_length);
 
-	    /* TODO : close missing */
 	    if (cs2_config_data.verbose && !background) {
-		printf("new client: %s, port %d conn fd: %d max fds: %d\n", inet_ntop(AF_INET, &(tcp_addr2.sin_addr),
-			buffer, sizeof(buffer)), ntohs(tcp_addr2.sin_port), conn_fd, max_fds);
+		printf("new client request: %s, port %d conn fd: %d max fds: %d active tcp_cons:%d\n", inet_ntop(AF_INET, &(tcp_addr2.sin_addr),
+			buffer, sizeof(buffer)), ntohs(tcp_addr2.sin_port), conn_fd, max_fds, tcp_connections);
 	    }
-	    syslog(LOG_NOTICE, "%s: new client: %s port %d conn fd: %d max fds: %d\n", __func__,
-			 inet_ntop(AF_INET, &(tcp_addr2.sin_addr), buffer, sizeof(buffer)), ntohs(tcp_addr2.sin_port), conn_fd, max_fds);
-	    for (i = 0; i < MAX_TCP_CONN; i++) {
-		if (tcp_client2[i] < 0) {
-		    tcp_client2[i] = conn_fd;	/* save new TCP client descriptor */
-		    break;
-		}
-	    }
-	    if (i == MAX_TCP_CONN) {
+	    syslog(LOG_NOTICE, "%s: new client request: %s port %d conn fd: %d max fds: %d active tcp_cons:%d\n", __func__,
+			 inet_ntop(AF_INET, &(tcp_addr2.sin_addr), buffer, sizeof(buffer)), ntohs(tcp_addr2.sin_port), conn_fd, max_fds, tcp_connections);
+	    if (tcp_connections == MAX_TCP_CONN) {
+		shutdown(conn_fd, SHUT_RDWR);
 		fprintf(stderr, "too many TCP clients\n");
 		syslog(LOG_ERR, "%s: too many TCP clients\n", __func__);
+	    } else {
+		tcp_connections++;
+		for (i = 0; i < MAX_TCP_CONN; i++) {
+		    if (tcp_client2[i] < 0) {
+			tcp_client2[i] = conn_fd;	/* save new TCP client descriptor */
+			break;
+		    }
+		}
+		FD_SET(conn_fd, &all_fds);		/* add new descriptor to set */
+		max_fds = MAX(conn_fd, max_fds);	/* for select */
+		max_tcp_i = MAX(i, max_tcp_i);	/* max index in tcp_client[] array */
 	    }
-
-	    FD_SET(conn_fd, &all_fds);		/* add new descriptor to set */
-	    max_fds = MAX(conn_fd, max_fds);	/* for select */
-	    max_tcp_i = MAX(i, max_tcp_i);	/* max index in tcp_client[] array */
 
 	    if (--nready <= 0)
 		continue;	/* no more readable descriptors */
@@ -970,6 +975,7 @@ int main(int argc, char **argv) {
 		    close(tcp_socket);
 		    FD_CLR(tcp_socket, &all_fds);
 		    tcp_client[i] = -1;
+		    tcp_connections--;
 		} else {
 		    /* check the whole TCP packet, if there are more than one CAN frame included */
 		    /* TCP packets with size modulo 13 !=0 are ignored though */
@@ -1020,6 +1026,7 @@ int main(int argc, char **argv) {
 		    close(tcp_socket);
 		    FD_CLR(tcp_socket, &all_fds);
 		    tcp_client2[i] = -1;
+		    tcp_connections--;
 		} else {
 		    decode_ascii_frame(tcp_socket, netframe, n);
 		}
