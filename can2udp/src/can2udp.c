@@ -42,7 +42,7 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -d <port>           destination UDP port for the server - default 15730\n");
     fprintf(stderr, "         -b <broadcast_addr> broadcast address - default 255.255.255.255\n");
     fprintf(stderr, "         -i <can int>        can interface - default can0\n");
-    fprintf(stderr, "         -f                  running in foreground\n\n");
+    fprintf(stderr, "         -f                  running in foreground\n");
     fprintf(stderr, "         -v                  verbose output (in foreground)\n\n");
 }
 
