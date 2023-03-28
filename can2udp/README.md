@@ -23,7 +23,6 @@ Usage: can2udp -l <port> -d <port> -i <can interface>
          -b <broadcast_addr> broadcast address - default 255.255.255.255
          -i <can int>        can interface - default can0
          -f                  running in foreground
-
          -v                  verbose output (in foreground)
 ```
 ```
