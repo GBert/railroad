@@ -38,6 +38,7 @@
 #define PREAMBLE_MM		0x0075
 #define PREAMBLE_OTHER		0x00C5
 #define PREAMBLE_MFX		0x00E5
+#define PREAMBLE_MM2_PRG	0x00E7
 #define PREAMBLE_MFX2		0x00F5
 #define PREAMBLE_MFX_F32	0x0117
 
@@ -181,6 +182,9 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     case PREAMBLE_MM:
 	printf("ID 0x%04x type: mm 8 functions\n", id);
 	break;
+	case PREAMBLE_MM2_PRG:
+	printf("ID 0x%04x type mm2\n", id);
+	break;	
     case PREAMBLE_MFX_F32:
 	printf("ID 0x%04x type: mfx 32 functions\n", id);
 	break;
