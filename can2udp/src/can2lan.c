@@ -721,12 +721,6 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "starting TCP listener error: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
-#if 0
-    /* prepare TCP clients array */
-    max_tcp_i = -1;		/* index into tcp_client[] array */
-    for (i = 0; i < MAX_TCP_CONN; i++)
-	tcp_client[i] = -1;	/* -1 indicates available entry */
-#endif
 
     /* prepare CAN socket */
     memset(&caddr, 0, sizeof(caddr));
