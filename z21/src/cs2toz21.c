@@ -59,10 +59,13 @@
 #include <sqlite3.h>
 
 #include "read-cs2-config.h"
+#include "fmapping.h"
 
 #define MAXDG		4096	/* maximum datagram size */
 #define MAXLINE         256
 #define Z21PORT		5728
+
+char z21_fstring_none[] = "none";
 
 #define SQL_EXEC() do { \
 ret = sqlite3_exec(db, sql, 0, 0, &err_msg); \
@@ -266,6 +269,7 @@ int sql_insert_locos(sqlite3 * db) {
     int i, j, n, ret;
     struct loco_data_t *l;
     char *sql;
+    char *z21_fstring;
 
     i = 1;
     j = 1;
@@ -285,8 +289,13 @@ int sql_insert_locos(sqlite3 * db) {
 	SQL_EXEC();
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, 'bugle', %d, %d, %d);",
-				j, i, 0,   l->function[n].duration, n,    n, 1, 0);
+		if (l->function[n].type <= sizeof(fmapping))
+		    z21_fstring = fmapping[l->function[n].type];
+		else
+		    z21_fstring = z21_fstring_none;
+
+		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, \"%s\", %d, %d, %d);",
+				j, i, 0,   l->function[n].duration, n, z21_fstring, n, 1, 0);
 		/* printf("%s\n", sql); */
 		SQL_EXEC();
 		j++;
