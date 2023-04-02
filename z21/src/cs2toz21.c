@@ -289,7 +289,7 @@ int sql_insert_locos(sqlite3 * db) {
 	SQL_EXEC();
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		if (l->function[n].type <= sizeof(fmapping))
+		if (l->function[n].type <= sizeof(fmapping)/sizeof(fmapping[0]))
 		    z21_fstring = fmapping[l->function[n].type];
 		else
 		    z21_fstring = z21_fstring_none;
