@@ -4,7 +4,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=forking
+Type=simple
 Restart=no
 TimeoutSec=5min
 IgnoreSIGPIPE=no
@@ -13,6 +13,7 @@ GuessMainPID=no
 RemainAfterExit=yes
 SuccessExitStatus=5 6
 ExecStart=/usr/sbin/s88udp -m1 -p 15730
+ExexStop=/usr/bin/killall s88udp
 
 [Install] 
 WantedBy = multi-user.target
