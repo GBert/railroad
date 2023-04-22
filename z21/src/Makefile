@@ -10,7 +10,7 @@ read-cs2-config_web: geturl.o read-cs2-config.o read-cs2-config_web.o
 	$(CC) $(CFLAGS) -o read-cs2-config_web geturl.o read-cs2-config.o read-cs2-config_web.o -lcurl
 
 cs2toz21: read-cs2-config.o cs2toz21.o
-	$(CC) $(CFLAGS) -o cs2toz21 read-cs2-config.o cs2toz21.o -lsqlite3
+	$(CC) $(CFLAGS) -o cs2toz21 read-cs2-config.o cs2toz21.o -lsqlite3 -lcurl -luuid
 
 z21emu: crc-ccitt.o cs2-data-functions.o geturl.o read-cs2-config.o subscribe.o utils.o xpn_tty.o z21emu.o
 	$(CC) $(CFLAGS) -o z21emu crc-ccitt.o cs2-data-functions.o read-cs2-config.o subscribe.o utils.o xpn_tty.o z21emu.o -lpthread -lz
