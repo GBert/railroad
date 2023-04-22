@@ -11,7 +11,6 @@
  * CS2 lokonotive.cs2 to Z21 SQLite converter
  */
 
-
 /*
  * Server sends initial packet
  *
@@ -105,7 +104,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     char *offer;
     void *p;
     struct stat file_stat;
-    char filename[] = {"/tmp/Data.z21"};
+    char filename[] = { "/tmp/Data.z21" };
 
     fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -134,7 +133,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     if (connect(st, (struct sockaddr *)&server_sa, sizeof(server_sa))) {
 	fprintf(stderr, "can't connect to TCP socket : %s\n", strerror(errno));
-	return(EXIT_FAILURE);
+	return (EXIT_FAILURE);
     }
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.6\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
 		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"MeineAnlage.z21\","
@@ -153,8 +152,8 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     p = mmap(NULL, file_stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
 
-    if (strncmp(offer, "install", 7) == 0 ) {
-        if (send(st, p, file_stat.st_size, 0) < 0) {
+    if (strncmp(offer, "install", 7) == 0) {
+	if (send(st, p, file_stat.st_size, 0) < 0) {
 	    fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
 	    return EXIT_FAILURE;
 	} else {
@@ -191,24 +190,24 @@ int send_udp_broadcast(void) {
     /* prepare udp destination struct with defaults */
     s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
     if (s <= 0) {
-        if (s == 0) {
-            fprintf(stderr, "UDP IP invalid\n");
-        } else {
-            fprintf(stderr, "invalid address family\n");
-        }
-        exit(EXIT_FAILURE);
+	if (s == 0) {
+	    fprintf(stderr, "UDP IP invalid\n");
+	} else {
+	    fprintf(stderr, "invalid address family\n");
+	}
+	exit(EXIT_FAILURE);
     }
 
     baddr.sin_port = htons(destination_port);
 
     /* prepare UDP sending socket */
     if ((sb = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        fprintf(stderr, "Send UDP socket error %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "Send UDP socket error %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
     }
     if (setsockopt(sb, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0) {
-        fprintf(stderr, "UDP set socket option error: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "UDP set socket option error: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
     }
 
     /* prepare receiving socket */
@@ -222,16 +221,16 @@ int send_udp_broadcast(void) {
     saddr.sin_port = htons(local_port);
 
     if (bind(sa, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
-        fprintf(stderr, "UDP bind error: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "UDP bind error: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
     }
 
     /* get timestamp */
     gettimeofday(&tv, NULL);
 
     unsigned long long millisecondsSinceEpoch =
-    (unsigned long long)(tv.tv_sec) * 1000 +
-    (unsigned long long)(tv.tv_usec) / 1000;
+	    (unsigned long long)(tv.tv_sec) * 1000 + 
+	    (unsigned long long)(tv.tv_usec) / 1000;
 
     asprintf(&timestamp, "%llu", millisecondsSinceEpoch);
 
@@ -241,15 +240,15 @@ int send_udp_broadcast(void) {
     FD_ZERO(&readfds);
     FD_SET(sa, &readfds);
     while (1) {
-        if (select(sa + 1, &readfds, NULL, NULL, NULL) < 0) {
-            fprintf(stderr, "select error: %s\n", strerror(errno));
-        };
+	if (select(sa + 1, &readfds, NULL, NULL, NULL) < 0) {
+	    fprintf(stderr, "select error: %s\n", strerror(errno));
+	};
 
 	if (FD_ISSET(sa, &readfds)) {
-	    n = recvfrom(sa, udpframe, sizeof (udpframe), 0, &client, &len);
+	    n = recvfrom(sa, udpframe, sizeof(udpframe), 0, &client, &len);
 	    printf("received UDP packet len %u from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
 	    if (n > 0) {
-		udpframe[n+1] = 0;
+		udpframe[n + 1] = 0;
 		printf("%s\n", udpframe);
 		/* only look for real IP adresse not 0.0.0.0 */
 		if (ntohl(client.sin_addr.s_addr) != 0) {
@@ -262,7 +261,7 @@ int send_udp_broadcast(void) {
     return EXIT_SUCCESS;
 }
 
-char *create_directory(char *basedir, uuid_t *uuid) {
+char *create_directory(char *basedir, uuid_t * uuid) {
     struct stat st;
     char uuidtext[UUIDTEXTSIZE];
     char *dir;
@@ -277,7 +276,7 @@ char *create_directory(char *basedir, uuid_t *uuid) {
     asprintf(&dir, "%s/export", basedir);
     if (stat(dir, &st) == -1) {
 	if (mkdir(dir, 0775)) {
-            fprintf(stderr, "%s: can't create %s\n", __func__, dir);
+	    fprintf(stderr, "%s: can't create %s\n", __func__, dir);
 	    return NULL;
 	}
     }
@@ -302,20 +301,20 @@ int copy_file(char *src, char *dst) {
     fd_in = fopen(src, "r");
     if (!fd_in) {
 	fprintf(stderr, "%s: can't fopen %s\n", __func__, src);
-        return EXIT_FAILURE;
+	return EXIT_FAILURE;
     }
 
     fd_out = fopen(dst, "w");
     if (!fd_out) {
 	fprintf(stderr, "%s: can't fopen %s\n", __func__, dst);
-        return EXIT_FAILURE;
+	return EXIT_FAILURE;
     }
 
     while (!feof(fd_in)) {
-        size_t bytes = fread(c, 1, sizeof(c), fd_in);
-        if (bytes) {
-            fwrite(c, 1, bytes, fd_out);
-        }
+	size_t bytes = fread(c, 1, sizeof(c), fd_in);
+	if (bytes) {
+	    fwrite(c, 1, bytes, fd_out);
+	}
     }
 
     fclose(fd_in);
@@ -328,7 +327,7 @@ int sql_update_history(sqlite3 * db) {
     int ret;
 
     /* delete existing data */
-    char *sql="DELETE FROM update_history;";
+    char *sql = "DELETE FROM update_history;";
     SQL_EXEC();
 
     sql = "INSERT INTO update_history VALUES(1, 'ios', '18.11.21, 06:41:18 Mitteleuropäische Normalzeit', '1.4.2', 1000, 100);";
@@ -336,7 +335,7 @@ int sql_update_history(sqlite3 * db) {
     return EXIT_SUCCESS;
 }
 
-int sql_insert_locos(sqlite3 *db, char *z21_dir, char *icon_dir, char *ip_s) {
+int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
     char *err_msg;
     int i, j, n, ret;
     struct loco_data_t *l;
@@ -351,9 +350,9 @@ int sql_insert_locos(sqlite3 *db, char *z21_dir, char *icon_dir, char *ip_s) {
     j = 1;
 
     /* delete existing data */
-    sql ="DELETE FROM vehicles;";
+    sql = "DELETE FROM vehicles;";
     SQL_EXEC();
-    sql ="DELETE FROM functions;";
+    sql = "DELETE FROM functions;";
     SQL_EXEC();
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
@@ -362,27 +361,27 @@ int sql_insert_locos(sqlite3 *db, char *z21_dir, char *icon_dir, char *ip_s) {
 	asprintf(&picture, "%s.png", uuidtext);
 
 	// printf("Loco picture: %s.png\n", l->icon);
-        asprintf(&loco_icon_s, "%s/%s.png", icon_dir, l->icon);
+	asprintf(&loco_icon_s, "%s/%s.png", icon_dir, l->icon);
 	asprintf(&loco_icon_d, "%s/%s", z21_dir, picture);
-	/* TODO: get picture false*/
+	/* TODO: get picture false */
 	if (copy_file(loco_icon_s, loco_icon_d) == EXIT_FAILURE) {
-            asprintf(&loco_icon_s, "%s/leeres Gleis.png", icon_dir);
+	    asprintf(&loco_icon_s, "%s/leeres Gleis.png", icon_dir);
 	    copy_file(loco_icon_s, loco_icon_d);
 	}
 
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
-		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, picture , l->tmax, l->uid, i - 1, ip_s);
+		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, picture, l->tmax, l->uid, i - 1, ip_s);
 	/* printf("%s\n", sql); */
 	SQL_EXEC();
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		if (l->function[n].type <= sizeof(fmapping)/sizeof(fmapping[0]))
+		if (l->function[n].type <= sizeof(fmapping) / sizeof(fmapping[0]))
 		    z21_fstring = fmapping[l->function[n].type];
 		else
 		    z21_fstring = z21_fstring_none;
 
 		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, \"%s\", %d, %d, %d);",
-				j, i, 0,   l->function[n].duration, n, z21_fstring, n, 1, 0);
+				j, i, 0, l->function[n].duration, n, z21_fstring, n, 1, 0);
 		/* printf("%s\n", sql); */
 		SQL_EXEC();
 		j++;
@@ -401,7 +400,6 @@ int main(int argc, char **argv) {
     sqlite3 *db;
     char *z21_dir, *sql_file;
     uuid_t z21_uuid;
-
 
     config_data.verbose = 1;
 
