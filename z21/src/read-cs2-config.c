@@ -158,6 +158,7 @@ void delete_all_loco_data(void) {
 
     HASH_ITER(hh, loco_data, cloco, tmp) {
 	HASH_DEL(loco_data, cloco);
+	check_free(cloco->icon);
 	check_free(cloco->name);
 	check_free(cloco->type);
 	check_free(cloco->mfxAdr);
@@ -889,7 +890,7 @@ int read_loco_data(char *config_file, int config_type) {
 		    loco->mfxAdr = mfx;
 		    check_free(name);
 		    check_free(type);
-		    /* check_free(icon); */
+		    check_free(icon);
 		} else {
 		    loco_complete = 1;
 		}
@@ -953,7 +954,7 @@ int read_loco_data(char *config_file, int config_type) {
 		loco->name = name;
 		/* we assume that the icon does have the same name
 		   it will be overwritten by the token .icon anyway */
-		loco->icon = name;
+		loco->icon = strdup(name);
 		debug_print("match name:      >%s<\n", loco->name);
 		break;
 	    case L1_TYPE:
@@ -963,6 +964,7 @@ int read_loco_data(char *config_file, int config_type) {
 		debug_print("match type:      >%s<\n", loco->type);
 		break;
 	    case L1_ICON:
+		free(loco->icon);
 		if (asprintf(&icon, "%s", &line[L1_ICON_LENGTH]) < 0)
 		    fprintf(stderr, "can't alloc memory for loco->icon: %s\n", __func__);
 		loco->icon = icon;

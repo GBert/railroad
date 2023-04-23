@@ -468,6 +468,7 @@ int main(int argc, char **argv) {
     sql_insert_locos(db, z21_dir, "/var/www/html/icons", "192.168.0.9");
     sqlite3_close(db);
     free(sql_file);
+    /* TODO: create zip file and delete directory */
     send_udp_broadcast();
     return EXIT_SUCCESS;
 }
