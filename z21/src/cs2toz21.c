@@ -184,8 +184,8 @@ int send_udp_broadcast(void) {
     int destination_port = Z21PORT;
     int local_port = Z21PORT;
     memset(&baddr, 0, sizeof(baddr));
-    memset(&baddr, 0, sizeof(saddr));
-    memset(&baddr, 0, sizeof(client));
+    memset(&saddr, 0, sizeof(saddr));
+    memset(&client, 0, sizeof(client));
 
     /* prepare udp destination struct with defaults */
     s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
@@ -236,6 +236,7 @@ int send_udp_broadcast(void) {
 
     if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof(baddr)) != strlen(timestamp))
 	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
+    free(timestamp);
 
     FD_ZERO(&readfds);
     FD_SET(sa, &readfds);
@@ -245,6 +246,7 @@ int send_udp_broadcast(void) {
 	};
 
 	if (FD_ISSET(sa, &readfds)) {
+	    len = 0;
 	    n = recvfrom(sa, udpframe, sizeof(udpframe), 0, &client, &len);
 	    printf("received UDP packet len %u from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
 	    if (n > 0) {
@@ -288,7 +290,6 @@ char *create_directory(char *basedir, uuid_t * uuid) {
 	fprintf(stderr, "%s: can't create %s\n", __func__, dir);
 	return NULL;
     }
-
     return dir;
 }
 
@@ -349,11 +350,12 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
     i = 1;
     j = 1;
 
-    /* delete existing data */
+    /* delete existing data
     sql = "DELETE FROM vehicles;";
     SQL_EXEC();
     sql = "DELETE FROM functions;";
     SQL_EXEC();
+    */
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	uuid_generate(uuid);
@@ -365,6 +367,7 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	asprintf(&loco_icon_d, "%s/%s", z21_dir, picture);
 	/* TODO: get picture false */
 	if (copy_file(loco_icon_s, loco_icon_d) == EXIT_FAILURE) {
+	    free(loco_icon_s);
 	    asprintf(&loco_icon_s, "%s/leeres Gleis.png", icon_dir);
 	    copy_file(loco_icon_s, loco_icon_d);
 	}
@@ -373,6 +376,10 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, picture, l->tmax, l->uid, i - 1, ip_s);
 	/* printf("%s\n", sql); */
 	SQL_EXEC();
+	free(sql);
+	free(loco_icon_s);
+	free(loco_icon_d);
+	free(picture);
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
 		if (l->function[n].type <= sizeof(fmapping) / sizeof(fmapping[0]))
@@ -384,12 +391,12 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 				j, i, 0, l->function[n].duration, n, z21_fstring, n, 1, 0);
 		/* printf("%s\n", sql); */
 		SQL_EXEC();
+		free(sql);
 		j++;
 	    }
 	}
 	i++;
     }
-    free(sql);
     return EXIT_SUCCESS;
 }
 
@@ -459,7 +466,8 @@ int main(int argc, char **argv) {
     }
     sql_update_history(db);
     sql_insert_locos(db, z21_dir, "/var/www/html/icons", "192.168.0.9");
-    send_udp_broadcast();
     sqlite3_close(db);
+    free(sql_file);
+    send_udp_broadcast();
     return EXIT_SUCCESS;
 }
