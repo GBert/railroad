@@ -654,7 +654,8 @@ int main(int argc, char **argv) {
 
     if (cs2_config_data.verbose && !background)
 	printf("using broadcast address %s\n", udp_dst_address);
-    free(udp_dst_address);
+    /* TODO: why is this broken */
+    /* free(udp_dst_address); */
 
     /* prepare UDP sending socket */
     sb = socket(AF_INET, SOCK_DGRAM, 0);
