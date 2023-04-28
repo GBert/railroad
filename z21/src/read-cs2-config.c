@@ -158,8 +158,8 @@ void delete_all_loco_data(void) {
 
     HASH_ITER(hh, loco_data, cloco, tmp) {
 	HASH_DEL(loco_data, cloco);
-	check_free(cloco->icon);
 	check_free(cloco->name);
+	check_free(cloco->icon);
 	check_free(cloco->type);
 	check_free(cloco->mfxAdr);
 	free(cloco);
@@ -174,6 +174,7 @@ void shrink_loco_list(char *name) {
 	} else {
 	    HASH_DEL(loco_data, cloco);
 	    check_free(cloco->name);
+	    check_free(cloco->icon);
 	    check_free(cloco->type);
 	    check_free(cloco->mfxAdr);
 	    free(cloco);
