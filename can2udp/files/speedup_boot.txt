@@ -1,0 +1,4 @@
+setenv bootdelay 0
+setenv preboot ''
+saveenv
+reset

@@ -84,6 +84,8 @@ ifneq (,$(findstring banana,$(CONFIG_TARGET_PROFILE)))
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/s88udp-bpi $(1)/usr/bin/s88udp
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/s88test-bpi $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/s88can $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/root
+	$(INSTALL_BIN) ./files/speedup_boot.txt $(1)/root/
 endif
 
 ifneq (,$(findstring bananapro,$(CONFIG_TARGET_PROFILE)))
