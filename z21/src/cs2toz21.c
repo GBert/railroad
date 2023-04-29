@@ -439,7 +439,7 @@ int main(int argc, char **argv) {
 	}
     }
 
-    if (asprintf(&loco_file, "%s/%s", config_dir, loco_name) < 0) {
+    if (asprintf(&loco_file, "%s/config/%s", config_dir, loco_name) < 0) {
 	fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
