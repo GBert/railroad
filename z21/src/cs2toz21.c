@@ -413,7 +413,7 @@ int main(int argc, char **argv) {
     char *loco_file;
     int opt, ret;
     sqlite3 *db;
-    char *z21_dir, *sql_file;
+    char *z21_dir, *sql_file, *icon_dir;
     uuid_t z21_uuid;
 
     config_data.verbose = 1;
@@ -476,7 +476,9 @@ int main(int argc, char **argv) {
 	return EXIT_FAILURE;
     }
     sql_update_history(db);
-    sql_insert_locos(db, z21_dir, config_dir, "192.168.0.9");
+    asprintf(&icon_dir, "%s/icons", config_dir);
+    sql_insert_locos(db, z21_dir, icon_dir, "192.168.0.9");
+    free(icon_dir);
     sqlite3_close(db);
     free(sql_file);
     /* TODO: create zip file and delete directory */
