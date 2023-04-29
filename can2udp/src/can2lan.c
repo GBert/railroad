@@ -626,10 +626,12 @@ int main(int argc, char **argv) {
 	    /* trying to get the broadcast address */
 	    tempsp = strdup(bcast_interface);
 	    while ((searchif = strsep(&tempsp, ","))) {
+		free(udp_dst_address);
 		udp_dst_address = search_interface(searchif);
 		if (udp_dst_address)
 		    break;
 	    }
+	    free(tempsp);
 	    /* try to prepare UDP sending socket struct */
 	    if (udp_dst_address) {
 		memset(&baddr, 0, sizeof(baddr));
@@ -655,7 +657,7 @@ int main(int argc, char **argv) {
     if (cs2_config_data.verbose && !background)
 	printf("using broadcast address %s\n", udp_dst_address);
     /* TODO: why is this broken */
-    /* free(udp_dst_address); */
+    free(udp_dst_address);
 
     /* prepare UDP sending socket */
     sb = socket(AF_INET, SOCK_DGRAM, 0);
