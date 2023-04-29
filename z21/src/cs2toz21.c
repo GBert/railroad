@@ -476,7 +476,7 @@ int main(int argc, char **argv) {
 	return EXIT_FAILURE;
     }
     sql_update_history(db);
-    sql_insert_locos(db, z21_dir, "/var/www/html/icons", "192.168.0.9");
+    sql_insert_locos(db, z21_dir, config_dir, "192.168.0.9");
     sqlite3_close(db);
     free(sql_file);
     /* TODO: create zip file and delete directory */
