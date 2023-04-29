@@ -114,6 +114,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     if (fstat(fd, &file_stat) < 0) {
 	fprintf(stderr, "can't get Z21 data %s size: %s\n", filename, strerror(errno));
+	close(fd);
 	return EXIT_FAILURE;
     }
 
@@ -122,6 +123,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 	fprintf(stderr, "can't create TCP socket: %s\n", strerror(errno));
+	close(fd);
 	exit(EXIT_FAILURE);
     }
 
@@ -133,6 +135,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     if (connect(st, (struct sockaddr *)&server_sa, sizeof(server_sa))) {
 	fprintf(stderr, "can't connect to TCP socket : %s\n", strerror(errno));
+	close(fd);
 	return (EXIT_FAILURE);
     }
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.6\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
@@ -147,6 +150,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     printf("Waiting for <install>\n");
     if (recv(st, offer, buf_len, 0) < 0) {
 	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
+	close(fd);
 	return EXIT_FAILURE;
     }
 
@@ -155,10 +159,12 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     if (strncmp(offer, "install", 7) == 0) {
 	if (send(st, p, file_stat.st_size, 0) < 0) {
 	    fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
+	    close(fd);
 	    return EXIT_FAILURE;
 	} else {
 	    if (close(st)) {
 		fprintf(stderr, "error closing TCP stream: %s\n", strerror(errno));
+		close(fd);
 		return EXIT_FAILURE;
 	    }
 	}
@@ -166,6 +172,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     printf("data send complete\n");
 
+    close(fd);
     return EXIT_SUCCESS;
 }
 
@@ -248,7 +255,7 @@ int send_udp_broadcast(void) {
 	if (FD_ISSET(sa, &readfds)) {
 	    len = 0;
 	    n = recvfrom(sa, udpframe, sizeof(udpframe), 0, &client, &len);
-	    printf("received UDP packet len %u from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
+	    printf("received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
 	    if (n > 0) {
 		udpframe[n + 1] = 0;
 		printf("%s\n", udpframe);
@@ -308,6 +315,7 @@ int copy_file(char *src, char *dst) {
     fd_out = fopen(dst, "w");
     if (!fd_out) {
 	fprintf(stderr, "%s: can't fopen %s\n", __func__, dst);
+	fclose(fd_in);
 	return EXIT_FAILURE;
     }
 
@@ -382,7 +390,7 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	free(picture);
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		if (l->function[n].type <= sizeof(fmapping) / sizeof(fmapping[0]))
+		if (l->function[n].type <= (sizeof(fmapping) / sizeof(fmapping[0])) - 1)
 		    z21_fstring = fmapping[l->function[n].type];
 		else
 		    z21_fstring = z21_fstring_none;
@@ -455,10 +463,13 @@ int main(int argc, char **argv) {
     asprintf(&sql_file, "%s/Loco.sqlite", z21_dir);
 
     ret = copy_file("Loco_empty.sqlite", sql_file);
+    if (ret == EXIT_FAILURE) {
+	fprintf(stderr, "Cannot copy file Loco_empty.sqlite to %s\n", sql_file);
+	return EXIT_FAILURE;
+    }
+
     ret = sqlite3_open(sql_file, &db);
-
     if (ret != SQLITE_OK) {
-
 	fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
 	sqlite3_close(db);
 
