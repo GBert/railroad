@@ -270,9 +270,8 @@ int send_udp_broadcast(void) {
     return EXIT_SUCCESS;
 }
 
-char *create_directory(char *basedir, uuid_t * uuid) {
+char *create_directory(char *basedir, char *uuidtext) {
     struct stat st;
-    char uuidtext[UUIDTEXTSIZE];
     char *dir;
 
     memset(&st, 0, sizeof st);
@@ -291,7 +290,6 @@ char *create_directory(char *basedir, uuid_t * uuid) {
     }
     free(dir);
 
-    uuid_unparse_upper(*uuid, uuidtext);
     asprintf(&dir, "%s/export/%s", basedir, uuidtext);
     if (mkdir(dir, 0775)) {
 	fprintf(stderr, "%s: can't create %s\n", __func__, dir);
@@ -413,8 +411,9 @@ int main(int argc, char **argv) {
     char *loco_file;
     int opt, ret;
     sqlite3 *db;
-    char *z21_dir, *sql_file, *icon_dir;
+    char *z21_dir, *sql_file, *icon_dir, *systemcmd;
     uuid_t z21_uuid;
+    char uuidtext[UUIDTEXTSIZE];
 
     config_data.verbose = 1;
 
@@ -443,6 +442,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
+    printf("loco_file: >%s<\n", loco_file);
 
     read_loco_data(loco_file, CONFIG_FILE);
     if (config_data.verbose == 1)
@@ -450,7 +450,8 @@ int main(int argc, char **argv) {
 
     /* preparing export directory */
     uuid_generate(z21_uuid);
-    z21_dir = create_directory("/tmp", &z21_uuid);
+    uuid_unparse_upper(z21_uuid, uuidtext);
+    z21_dir = create_directory("/tmp", uuidtext);
     if (!z21_dir) {
 	fprintf(stderr, "problems creating export directory\n");
 	return EXIT_FAILURE;
@@ -458,7 +459,7 @@ int main(int argc, char **argv) {
 
     /* open empty SQLite database */
 
-    printf("storing %s\n", z21_dir);
+    printf("storing in %s\n", z21_dir);
 
     asprintf(&sql_file, "%s/Loco.sqlite", z21_dir);
 
@@ -481,7 +482,14 @@ int main(int argc, char **argv) {
     free(icon_dir);
     sqlite3_close(db);
     free(sql_file);
-    /* TODO: create zip file and delete directory */
+    /* create zip file and delete directory */
+    asprintf(&systemcmd, "cd /tmp; rm -rf Data.z21; zip -mq Data.z21 export/%s/*", uuidtext);
+    printf("Zipping %s\n", systemcmd);
+    system(systemcmd);
+    free(systemcmd);
+    asprintf(&systemcmd, "rmdir /tmp/export/%s", uuidtext);
+    system(systemcmd);
+    free(systemcmd);
     send_udp_broadcast();
     return EXIT_SUCCESS;
 }
