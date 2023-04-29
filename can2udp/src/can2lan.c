@@ -625,13 +625,15 @@ int main(int argc, char **argv) {
 	for (i = 0; i < timeout; i++) {
 	    /* trying to get the broadcast address */
 	    tempsp = strdup(bcast_interface);
+	    /* storing pointer for freeing memory */
+	    char *sf = tempsp;
 	    while ((searchif = strsep(&tempsp, ","))) {
 		free(udp_dst_address);
 		udp_dst_address = search_interface(searchif);
 		if (udp_dst_address)
 		    break;
 	    }
-	    free(tempsp);
+	    free(sf);
 	    /* try to prepare UDP sending socket struct */
 	    if (udp_dst_address) {
 		memset(&baddr, 0, sizeof(baddr));
@@ -656,8 +658,6 @@ int main(int argc, char **argv) {
 
     if (cs2_config_data.verbose && !background)
 	printf("using broadcast address %s\n", udp_dst_address);
-    /* TODO: why is this broken */
-    free(udp_dst_address);
 
     /* prepare UDP sending socket */
     sb = socket(AF_INET, SOCK_DGRAM, 0);
@@ -669,6 +669,8 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "error setup UDP broadcast option: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
+    free(udp_dst_address);
+    free(bcast_interface);
 
     /* prepare reading UDP socket */
     memset(&saddr, 0, sizeof(saddr));
@@ -1037,7 +1039,6 @@ int main(int argc, char **argv) {
     free(page_name);
     /* free(udp_dst_address); */
     free(cs2_page_name);
-    free(bcast_interface);
     closelog();
     close(sc);
     close(sa);
