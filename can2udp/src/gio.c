@@ -321,16 +321,23 @@ int inflate_data(struct cs2_config_data_t *config_data) {
 char *search_interface(char *search) {
     struct sockaddr_in *bsa;
     struct ifaddrs *ifap, *ifa;
+    char *s;
 
     /* trying to get the broadcast address */
-    getifaddrs(&ifap);
+    if (getifaddrs(&ifap) == -1) {
+	perror("getifaddrs");
+	exit(EXIT_FAILURE);
+    }
     for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+	if (ifa->ifa_addr == NULL)
+	    continue;
 	if (ifa->ifa_addr) {
 	    if (ifa->ifa_addr->sa_family == AF_INET) {
 		bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
 		if (strncmp(ifa->ifa_name, search, strlen(search)) == 0) {
+		    s = strdup(inet_ntoa(bsa->sin_addr));
 		    freeifaddrs(ifap);
-		    return inet_ntoa(bsa->sin_addr);
+		    return s;
 		}
 	    }
 	}
