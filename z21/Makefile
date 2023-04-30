@@ -18,7 +18,7 @@ define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Roco Z21 Emulator
-  DEPENDS:=+zlib +libsqlite3
+  DEPENDS:=+zlib +libsqlite3 +libcurl +libuuid
 endef
 
 define Package/$(PKG_NAME)/description
