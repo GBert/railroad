@@ -357,11 +357,11 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
     j = 1;
 
     /* delete existing data
-    sql = "DELETE FROM vehicles;";
-    SQL_EXEC();
-    sql = "DELETE FROM functions;";
-    SQL_EXEC();
-    */
+       sql = "DELETE FROM vehicles;";
+       SQL_EXEC();
+       sql = "DELETE FROM functions;";
+       SQL_EXEC();
+     */
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	uuid_generate(uuid);
