@@ -483,11 +483,11 @@ int main(int argc, char **argv) {
     sqlite3_close(db);
     free(sql_file);
     /* create zip file and delete directory */
-    asprintf(&systemcmd, "cd /tmp; rm -rf Data.z21; zip -mq Data.z21 export/%s/*", uuidtext);
+    asprintf(&systemcmd, "cd /tmp; minizip -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
     printf("Zipping %s\n", systemcmd);
     system(systemcmd);
     free(systemcmd);
-    asprintf(&systemcmd, "rmdir /tmp/export/%s", uuidtext);
+    asprintf(&systemcmd, "rm -rf /tmp/export/%s", uuidtext);
     system(systemcmd);
     free(systemcmd);
     send_udp_broadcast();
