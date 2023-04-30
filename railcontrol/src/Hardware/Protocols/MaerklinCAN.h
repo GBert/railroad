@@ -193,6 +193,7 @@ namespace Hardware
 					CanDeviceMs2         = 0x0030,
 					CanDeviceMs2_2       = 0x0032, // undocumented
 					CanDeviceMs2_3       = 0x0033, // undocumented
+					CanDeviceMs2_4       = 0x0034, // undocumented
 					CanDeviceLinkS88     = 0x0040, // undocumented
 					CanDeviceCs2Slave_2  = 0xeeee, // undocumented
 					CanDeviceWireless    = 0xffe0,

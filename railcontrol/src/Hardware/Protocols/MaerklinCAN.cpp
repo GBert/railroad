@@ -636,6 +636,7 @@ namespace Hardware
 				case CanDeviceMs2:
 					case CanDeviceMs2_2:
 					case CanDeviceMs2_3:
+					case CanDeviceMs2_4:
 					deviceString = const_cast<char*>("MS2");
 					break;
 
