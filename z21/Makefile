@@ -40,6 +40,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/cs2toz21 $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/z21emu.init $(1)/etc/init.d/z21emu
+	$(INSTALL_DIR) $(1)/root
+	$(INSTALL_BIN) ./files/Loco_empty.sqlite $(1)/root
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
