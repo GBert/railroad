@@ -135,25 +135,56 @@ void print_net_frame(char *format, unsigned char *netframe, int verbose) {
     printf("%s ", timestamp);
     printf(format, canid & CAN_EFF_MASK, netframe[4]);
     for (i = 5; i < 5 + dlc; i++) {
-        printf(" %02x", netframe[i]);
+	printf(" %02x", netframe[i]);
     }
     if (dlc < 8) {
-        printf("(%02x", netframe[i]);
-        for (i = 6 + dlc; i < 13; i++) {
-            printf(" %02x", netframe[i]);
-        }
-        printf(")");
+	printf("(%02x", netframe[i]);
+	for (i = 6 + dlc; i < 13; i++) {
+	    printf(" %02x", netframe[i]);
+	}
+	printf(")");
     } else {
-        printf(" ");
+	printf(" ");
     }
     printf("  ");
     for (i = 5; i < 13; i++) {
-        if (isprint(netframe[i]))
-            printf("%c", netframe[i]);
-        else
-            putchar(46);
+	if (isprint(netframe[i]))
+	    printf("%c", netframe[i]);
+	else
+	    putchar(46);
     }
     printf(" ");
+}
+
+char *search_interface_ip(char *search, int type) {
+    struct sockaddr_in *bsa;
+    struct ifaddrs *ifap, *ifa;
+    char *s;
+
+    /* trying to get the broadcast address */
+    if (getifaddrs(&ifap) == -1) {
+	perror("getifaddrs");
+	exit(EXIT_FAILURE);
+    }
+    for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+	if (ifa->ifa_addr == NULL)
+	    continue;
+	if (ifa->ifa_addr) {
+	    if (ifa->ifa_addr->sa_family == AF_INET) {
+		if (type == BROADCAST_IP)
+		    bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
+		else
+		    bsa = (struct sockaddr_in *)ifa->ifa_addr;
+		if (strncmp(ifa->ifa_name, search, strlen(search)) == 0) {
+		    s = strdup(inet_ntoa(bsa->sin_addr));
+		    freeifaddrs(ifap);
+		    return s;
+		}
+	    }
+	}
+    }
+    freeifaddrs(ifap);
+    return NULL;
 }
 
 struct node *insert_right(struct node *list, int id) {
@@ -193,14 +224,14 @@ int inflate_data(struct config_data *config_data) {
     strm.next_in = Z_NULL;
     ret = inflateInit(&strm);
     if (ret != Z_OK)
-        return ret;
+	return ret;
     strm.avail_in = config_data->deflated_size;
     strm.avail_out = config_data->inflated_size;
     strm.next_in = config_data->deflated_data + 4;
     strm.next_out = config_data->inflated_data;
     ret = inflate(&strm, Z_NO_FLUSH);
 
-    assert(ret != Z_STREAM_ERROR);      /* state not clobbered */
+    assert(ret != Z_STREAM_ERROR);	/* state not clobbered */
     switch (ret) {
     case Z_NEED_DICT:
 	ret = Z_DATA_ERROR;
@@ -213,4 +244,3 @@ int inflate_data(struct config_data *config_data) {
     (void)inflateEnd(&strm);
     return 0;
 }
-

@@ -10,6 +10,8 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#define BROADCAST_IP	1
+
 struct node {
     int id;
     struct node *next;
