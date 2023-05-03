@@ -118,7 +118,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	return EXIT_FAILURE;
     }
 
-    printf("Filesize %ld", file_stat.st_size);
+    printf("Filesize %ld ", file_stat.st_size);
 
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -253,7 +253,7 @@ int send_udp_broadcast(void) {
 	};
 
 	if (FD_ISSET(sa, &readfds)) {
-	    len = 0;
+	    len = sizeof client;
 	    n = recvfrom(sa, udpframe, sizeof(udpframe), 0, &client, &len);
 	    printf("received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
 	    if (n > 0) {
