@@ -122,7 +122,7 @@ int main(void) {
     //while (1)
     {
 	//Send the packet
-	if (sendto(s, datagram, iph->tot_len, 0, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+	if (sendto(s, datagram, iph->tot_len, 0, (struct sockaddr *)&sin, sizeof sin) < 0) {
 	    perror("sendto failed");
 	}
 	//Data send successfully

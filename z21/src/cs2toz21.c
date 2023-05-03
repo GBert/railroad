@@ -127,13 +127,13 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	exit(EXIT_FAILURE);
     }
 
-    memset(&server_sa, 0, sizeof(server_sa));
+    memset(&server_sa, 0, sizeof server_sa);
     server_sa.sin_family = AF_INET;
     /* copy IP adresse from UDP request */
     memcpy(&server_sa.sin_addr.s_addr, &client_sa->sin_addr.s_addr, 4);
     server_sa.sin_port = htons(Z21PORT);
 
-    if (connect(st, (struct sockaddr *)&server_sa, sizeof(server_sa))) {
+    if (connect(st, (struct sockaddr *)&server_sa, sizeof server_sa)) {
 	fprintf(stderr, "can't connect to TCP socket : %s\n", strerror(errno));
 	close(fd);
 	return (EXIT_FAILURE);
@@ -190,9 +190,9 @@ int send_udp_broadcast(void) {
 
     int destination_port = Z21PORT;
     int local_port = Z21PORT;
-    memset(&baddr, 0, sizeof(baddr));
-    memset(&saddr, 0, sizeof(saddr));
-    memset(&client, 0, sizeof(client));
+    memset(&baddr, 0, sizeof baddr);
+    memset(&saddr, 0, sizeof saddr);
+    memset(&client, 0, sizeof client);
 
     /* prepare udp destination struct with defaults */
     s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
@@ -212,7 +212,7 @@ int send_udp_broadcast(void) {
 	fprintf(stderr, "Send UDP socket error %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
-    if (setsockopt(sb, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0) {
+    if (setsockopt(sb, SOL_SOCKET, SO_BROADCAST, &on, sizeof on) < 0) {
 	fprintf(stderr, "UDP set socket option error: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
@@ -227,7 +227,7 @@ int send_udp_broadcast(void) {
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);
     saddr.sin_port = htons(local_port);
 
-    if (bind(sa, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
+    if (bind(sa, (struct sockaddr *)&saddr, sizeof saddr) < 0) {
 	fprintf(stderr, "UDP bind error: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
@@ -241,7 +241,7 @@ int send_udp_broadcast(void) {
 
     asprintf(&timestamp, "%llu", millisecondsSinceEpoch);
 
-    if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof(baddr)) != strlen(timestamp))
+    if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof baddr) != strlen(timestamp))
 	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
     free(timestamp);
 
@@ -254,8 +254,8 @@ int send_udp_broadcast(void) {
 
 	if (FD_ISSET(sa, &readfds)) {
 	    len = sizeof client;
-	    n = recvfrom(sa, udpframe, sizeof(udpframe), 0, &client, &len);
-	    printf("received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof(buffer)));
+	    n = recvfrom(sa, udpframe, sizeof udpframe, 0, &client, &len);
+	    printf("received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof buffer));
 	    if (n > 0) {
 		udpframe[n + 1] = 0;
 		printf("%s\n", udpframe);
@@ -318,7 +318,7 @@ int copy_file(char *src, char *dst) {
     }
 
     while (!feof(fd_in)) {
-	size_t bytes = fread(c, 1, sizeof(c), fd_in);
+	size_t bytes = fread(c, 1, sizeof c, fd_in);
 	if (bytes) {
 	    fwrite(c, 1, bytes, fd_out);
 	}
@@ -388,7 +388,7 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	free(picture);
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		if (l->function[n].type <= (sizeof(fmapping) / sizeof(fmapping[0])) - 1)
+		if (l->function[n].type <= (sizeof fmapping / sizeof fmapping[0]) - 1)
 		    z21_fstring = fmapping[l->function[n].type];
 		else
 		    z21_fstring = z21_fstring_none;
@@ -421,7 +421,7 @@ int main(int argc, char **argv) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
-		strncpy(config_dir, optarg, sizeof(config_dir) - 1);
+		strncpy(config_dir, optarg, sizeof config_dir - 1);
 	    } else {
 		fprintf(stderr, "config file dir to long\n");
 		exit(EXIT_FAILURE);

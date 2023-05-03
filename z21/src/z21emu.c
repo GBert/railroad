@@ -116,17 +116,17 @@ unsigned int m_id(uint16_t loco_id) {
 	return (loco_id + 0xa000);
     else if (loco_id > 0xff)
 	return (loco_id + 0x3f00);
-    return((unsigned int)loco_id);
+    return ((unsigned int)loco_id);
 }
 
 uint16_t xpn_id(unsigned int m_id) {
 
     if (m_id < 0x3FFF) {
-	return(m_id);
+	return (m_id);
     } else if (m_id < 0xC000) {
-	return(m_id - 0x3F00);
+	return (m_id - 0x3F00);
     } else {
-	return(m_id - 0xA000);
+	return (m_id - 0xA000);
     }
 }
 
@@ -145,13 +145,14 @@ int send_z21_clients(unsigned char *udpframe, char *format, char *vchar) {
 	}
 	HASH_FIND_INT(subscriber, &z21_data.ip, z21client);
 	if (z21client) {
-	    s = sendto(z21_data.sp, udpframe, length, 0, (struct sockaddr *)&z21client->client_addr, sizeof(z21client->client_addr));
+	    s = sendto(z21_data.sp, udpframe, length, 0, (struct sockaddr *)&z21client->client_addr, sizeof z21client->client_addr);
+
 	    if (s < 0) {
 		fprintf(stderr, "UDP write error: %s\n", strerror(errno));
 		return (EXIT_FAILURE);
 	    }
 	}
-	return(EXIT_SUCCESS);
+	return (EXIT_SUCCESS);
     }
 
     HASH_ITER(hh, subscriber, z21client, tmp) {
@@ -160,7 +161,7 @@ int send_z21_clients(unsigned char *udpframe, char *format, char *vchar) {
 		print_udp_frame(format, length, udpframe);
 		printf("%s", vchar);
 	    }
-	    s = sendto(z21_data.sp, udpframe, length, 0, (struct sockaddr *)&z21client->client_addr, sizeof(z21client->client_addr));
+	    s = sendto(z21_data.sp, udpframe, length, 0, (struct sockaddr *)&z21client->client_addr, sizeof z21client->client_addr);
 	    if (s < 0) {
 		fprintf(stderr, "UDP write error: %s\n", strerror(errno));
 		return (EXIT_FAILURE);
@@ -204,14 +205,14 @@ int send_tcp_frame(unsigned char *frame, char *format, int verbose) {
     int on, s;
     uint16_t length = 13;
 
-    s = sendto(z21_data.st, frame, length, 0, (struct sockaddr *)&z21_data.staddr, sizeof(z21_data.staddr));
+    s = sendto(z21_data.st, frame, length, 0, (struct sockaddr *)&z21_data.staddr, sizeof z21_data.staddr);
     if (s < 0) {
 	fprintf(stderr, "TCP write error: %s\n", strerror(errno));
 	return (EXIT_FAILURE);
     }
 
     /* disable Nagle - force PUSH */
-    if (setsockopt(z21_data.st, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
+    if (setsockopt(z21_data.st, IPPROTO_TCP, TCP_NODELAY, &on, sizeof on) < 0) {
 	fprintf(stderr, "error disabling Nagle - TCP_NODELAY on: %s\n", strerror(errno));
 	return (EXIT_FAILURE);
     }
@@ -237,7 +238,7 @@ int send_xpn_loco_info(uint16_t uid, int verbose) {
     char *vchar;
 
     vchar = NULL;
-    memcpy(xpnframe, XPN_X_LOCO_INFO, sizeof(XPN_X_LOCO_INFO));
+    memcpy(xpnframe, XPN_X_LOCO_INFO, sizeof XPN_X_LOCO_INFO);
     loco_id = xpn_id(uid);
     comp_func = loco_get_func_summary(uid);
     speed = loco_get_speed(uid);
@@ -272,7 +273,7 @@ int send_xpn_loco_name(uint16_t loco_id, char *loco_name, uint8_t index, uint8_t
     char *vchar;
 
     vchar = NULL;
-    memset(xpnframe, 0, sizeof(xpnframe));
+    memset(xpnframe, 0, sizeof xpnframe);
     length = strnlen(loco_name, 10);
 
     xpnframe[0] = (length + 11) & 0xff;
@@ -315,7 +316,7 @@ int send_xpn_locos(struct z21_data_t *z21_data, struct loco_data_t *loco_data, i
 int send_xpn_turnout_info(uint16_t FAdr, uint8_t zz, char *vchar) {
     unsigned char xpnframe[32];
 
-    memcpy(xpnframe, XPN_X_TURNOUT_INFO, sizeof(XPN_X_TURNOUT_INFO));
+    memcpy(xpnframe, XPN_X_TURNOUT_INFO, sizeof XPN_X_TURNOUT_INFO);
     xpnframe[5] = FAdr >> 8;
     xpnframe[6] = FAdr & 0xff;
     xpnframe[7] = zz;
@@ -330,10 +331,10 @@ int send_xpn_turnout_info(uint16_t FAdr, uint8_t zz, char *vchar) {
 int send_xpn_lcn_detector(uint16_t id, uint8_t state, char *vchar) {
     unsigned char xpnframe[16];
 
-    memset(xpnframe, 0, sizeof(xpnframe));
+    memset(xpnframe, 0, sizeof xpnframe);
     xpnframe[0] = 0x08;
     xpnframe[2] = 0xA4;
-    xpnframe[4] = 0x01;	/* Type */
+    xpnframe[4] = 0x01;		/* Type */
     xpnframe[5] = id & 0xFF;
     xpnframe[6] = (id >> 8);
     xpnframe[7] = state;
@@ -347,7 +348,7 @@ int send_xpn_system_info(char *vchar) {
     /* TODO */
     unsigned char xpnframe[32];
 
-    memset(xpnframe, 0, sizeof(xpnframe));
+    memset(xpnframe, 0, sizeof xpnframe);
     xpnframe[0] = 0x14;
     xpnframe[2] = 0x84;
     /* mA */
@@ -458,13 +459,13 @@ int check_data_lan_x_header(struct z21_data_t *z21_data, unsigned char *udpframe
 	case LAN_X_GET_VERSION:
 	    v_printf(verbose, "LAN_X_GET_VERSION\n");
 	    z21_data->bcf = 0x00000000;
-	    memcpy(xpnframe, XPN_X_VERSION, sizeof(XPN_X_VERSION));
+	    memcpy(xpnframe, XPN_X_VERSION, sizeof XPN_X_VERSION);
 	    vas_printf(verbose, &vchar, "LAN_X_VERSION\n");
 	    send_xpn(xpnframe, vchar);
 	    break;
 	case LAN_X_GET_STATUS:
 	    v_printf(verbose, "LAN_X_GET_STATUS\n");
-	    memcpy(xpnframe, XPN_X_STATUS_CHANGED, sizeof(XPN_X_STATUS_CHANGED));
+	    memcpy(xpnframe, XPN_X_STATUS_CHANGED, sizeof XPN_X_STATUS_CHANGED);
 	    xpnframe[6] = z21_data->power ? 0x00 : 0x02;
 	    xpnframe[7] = xor(&xpnframe[4], 3);
 	    z21_data->bcf = 0x00000000;
@@ -563,7 +564,7 @@ int check_data_lan_x_header(struct z21_data_t *z21_data, unsigned char *udpframe
 	z21_data->power = 0;
 	send_can(MS_POWER_OFF, verbose);
 	v_printf(verbose, "\n");
-	memcpy(xpnframe, XPN_X_BC_STOPPED, sizeof(XPN_X_BC_STOPPED));
+	memcpy(xpnframe, XPN_X_BC_STOPPED, sizeof XPN_X_BC_STOPPED);
 	vas_printf(verbose, &vchar, "LAN_X_BC_STOPPED\n");
 	send_xpn(xpnframe, vchar);
 	break;
@@ -588,7 +589,7 @@ int check_data_xpn(struct z21_data_t *z21_data, int udplength, int verbose) {
     while (i + length <= udplength) {
 	length = le16(&z21_data->udpframe[i]);
 	if (length == 0)
-	   break;
+	    break;
 	header = le16(&z21_data->udpframe[i + 2]);
 	if (verbose) {
 	    if (z21_data->source == XPN_TTY_SOURCE)
@@ -661,7 +662,7 @@ int check_data_xpn(struct z21_data_t *z21_data, int udplength, int verbose) {
 	    if (length == 0x07) {
 		v_printf(verbose, "LAN_LOCONET_DETECTOR ");
 		type = z21_data->udpframe[i + 4];
-	        address = le16(&z21_data->udpframe[i + 5]);
+		address = le16(&z21_data->udpframe[i + 5]);
 		switch (type) {
 		case (0x80):
 		    v_printf(verbose, "get SIC %u\n", address);
@@ -838,15 +839,15 @@ int main(int argc, char **argv) {
     char *magnet_file;
 #ifndef NO_CAN
     struct sockaddr_can caddr;
-    socklen_t caddrlen = sizeof(caddr);
+    socklen_t caddrlen = sizeof caddr;
 #endif
-    socklen_t slen = sizeof(src_addr);
+    socklen_t slen = sizeof src_addr;
 
 #ifndef NO_XPN_TTY
     memset(&xpn_tty, 0, sizeof(struct xpn_tty_t));
 #endif
-    memset(&z21_data, 0, sizeof(z21_data));
-    memset(&ifr, 0, sizeof(ifr));
+    memset(&z21_data, 0, sizeof z21_data);
+    memset(&ifr, 0, sizeof ifr);
 
 #ifndef NO_XPN_TTY
     while ((opt = getopt(argc, argv, "c:p:s:b:g:i:t:xhf?")) != -1) {
@@ -856,7 +857,7 @@ int main(int argc, char **argv) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
-		strncpy(config_dir, optarg, sizeof(config_dir) - 1);
+		strncpy(config_dir, optarg, sizeof config_dir - 1);
 	    } else {
 		fprintf(stderr, "config file dir to long\n");
 		exit(EXIT_FAILURE);
@@ -869,15 +870,15 @@ int main(int argc, char **argv) {
 	    secondary_port = strtoul(optarg, (char **)NULL, 10);
 	    break;
 	case 'g':
-	    strncpy(cs2addr, optarg, sizeof(cs2addr) - 1);
+	    strncpy(cs2addr, optarg, sizeof cs2addr - 1);
 	    break;
 #ifndef NO_XPN_TTY
 	case 't':
-	    strncpy(xpn_tty.interface, optarg, sizeof(xpn_tty.interface) - 1);
+	    strncpy(xpn_tty.interface, optarg, sizeof xpn_tty.interface - 1);
 	    break;
 #endif
 	case 'i':
-	    strncpy(ifr.ifr_name, optarg, sizeof(ifr.ifr_name) - 1);
+	    strncpy(ifr.ifr_name, optarg, sizeof ifr.ifr_name - 1);
 	    break;
 	case 'f':
 	    z21_data.foreground = 1;
@@ -919,7 +920,7 @@ int main(int argc, char **argv) {
     z21_data.spaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     z21_data.spaddr.sin_port = htons(primary_port);
 
-    if (bind(z21_data.sp, (struct sockaddr *)&z21_data.spaddr, sizeof(z21_data.spaddr)) < 0) {
+    if (bind(z21_data.sp, (struct sockaddr *)&z21_data.spaddr, sizeof z21_data.spaddr) < 0) {
 	fprintf(stderr, "primary UDP bind error: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
@@ -935,7 +936,7 @@ int main(int argc, char **argv) {
     z21_data.ssaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     z21_data.ssaddr.sin_port = htons(secondary_port);
 
-    if (bind(z21_data.ss, (struct sockaddr *)&z21_data.ssaddr, sizeof(z21_data.ssaddr)) < 0) {
+    if (bind(z21_data.ss, (struct sockaddr *)&z21_data.ssaddr, sizeof z21_data.ssaddr) < 0) {
 	fprintf(stderr, "scondary UDP bind error: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
@@ -967,7 +968,7 @@ int main(int argc, char **argv) {
 	    exit(EXIT_FAILURE);
 	}
 
-	memset(&z21_data.staddr, 0, sizeof(z21_data.staddr));
+	memset(&z21_data.staddr, 0, sizeof z21_data.staddr);
 	z21_data.staddr.sin_family = AF_INET;
 
 	if (inet_aton(cs2addr, (struct in_addr *)&z21_data.staddr.sin_addr.s_addr) == 0) {
@@ -977,7 +978,7 @@ int main(int argc, char **argv) {
 
 	z21_data.staddr.sin_port = htons(MAERKLIN_PORT);
 
-	if (connect(z21_data.st, (struct sockaddr *)&z21_data.staddr, sizeof(z21_data.staddr))) {
+	if (connect(z21_data.st, (struct sockaddr *)&z21_data.staddr, sizeof z21_data.staddr)) {
 	    fprintf(stderr, "can't connect to TCP socket : %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
@@ -1045,7 +1046,7 @@ int main(int argc, char **argv) {
 	if (xpn_tty.fd) {
 	    FD_SET(xpn_tty.fd, &readfds);
 	    max_fds = MAX(max_fds, xpn_tty.fd);
-        }
+	}
 #endif
 	if (select(max_fds + 1, &readfds, NULL, NULL, NULL) < 0) {
 	    fprintf(stderr, "select error: %s\n", strerror(errno));
@@ -1058,7 +1059,7 @@ int main(int argc, char **argv) {
 
 	/* received a UDP packet on primary */
 	if (FD_ISSET(z21_data.sp, &readfds)) {
-	    memset(&src_addr, 0, sizeof(src_addr));
+	    memset(&src_addr, 0, sizeof src_addr);
 	    ret = recvfrom(z21_data.sp, z21_data.udpframe, MAXDG, 0, (struct sockaddr *)&src_addr, &slen);
 	    /* v_printf(verbose, "FD_ISSET sp, ret %d\n", ret); */
 	    if (ret < 0) {
@@ -1073,7 +1074,7 @@ int main(int argc, char **argv) {
 	}
 	/* received a UDP packet on secondary */
 	if (FD_ISSET(z21_data.ss, &readfds)) {
-	    memset(&src_addr, 0, sizeof(src_addr));
+	    memset(&src_addr, 0, sizeof src_addr);
 	    ret = recvfrom(z21_data.ss, z21_data.udpframe, MAXDG, 0, (struct sockaddr *)&src_addr, &slen);
 	    /* v_printf(verbose, "FD_ISSET ss, ret %d\n", ret); */
 	    if (ret < 0) {
