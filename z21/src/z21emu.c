@@ -96,7 +96,7 @@ static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
-    fprintf(stderr, "   Version 1.3\n\n");
+    fprintf(stderr, "   Version 2.0\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -p <port>           primary UDP port for the server - default %d\n", PRIMARY_UDP_PORT);
     fprintf(stderr, "         -s <port>           secondary UDP port for the server - default %d\n", SECONDARY_UDP_PORT);
@@ -111,23 +111,31 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -f                  running in foreground\n\n");
 }
 
-unsigned int m_id(uint16_t loco_id) {
-    if (loco_id > 0x1fff)
-	return (loco_id + 0xa000);
-    else if (loco_id > 0xff)
-	return (loco_id + 0x3f00);
-    return ((unsigned int)loco_id);
+/*
+	0x0000 - 0x007F mm2_prg   Adresse + 0x0000
+	0x0080 - 0x00FF mm2_dil   Adresse + 0x0080
+	  1000 -   4999 mfx       Adresse +   1000
+	  5000 -   9999 dcc       Adresse +   5000
+*/
+
+uint16_t loco_address_mapping(uint16_t uid) {
+    /* dcc */
+    if (uid >= 0xc000)
+        return (uid - 0xc000 + 5000);
+    /* mfx */
+    if (uid >= 0x4000)
+        return (uid - 0x4000 + 1000);
+    return (uid);
 }
 
-uint16_t xpn_id(unsigned int m_id) {
-
-    if (m_id < 0x3FFF) {
-	return (m_id);
-    } else if (m_id < 0xC000) {
-	return (m_id - 0x3F00);
-    } else {
-	return (m_id - 0xA000);
-    }
+uint16_t loco_address_demapping(uint16_t z21app_address) {
+    /* dcc */
+    if (z21app_address >= 5000)
+        return (z21app_address - 5000 + 0xc000);
+    /* mfx */
+    if (z21app_address >= 1000)
+        return (z21app_address - 1000 + 0x4000);
+    return (z21app_address);
 }
 
 int send_z21_clients(unsigned char *udpframe, char *format, char *vchar) {
@@ -239,7 +247,7 @@ int send_xpn_loco_info(uint16_t uid, int verbose) {
 
     vchar = NULL;
     memcpy(xpnframe, XPN_X_LOCO_INFO, sizeof XPN_X_LOCO_INFO);
-    loco_id = xpn_id(uid);
+    loco_id = loco_address_mapping(uid);
     comp_func = loco_get_func_summary(uid);
     speed = loco_get_speed(uid);
 
@@ -271,6 +279,7 @@ int send_xpn_loco_name(uint16_t loco_id, char *loco_name, uint8_t index, uint8_t
     unsigned char xpnframe[32];
     size_t length;
     char *vchar;
+    uint16_t xpn_loco_id;
 
     vchar = NULL;
     memset(xpnframe, 0, sizeof xpnframe);
@@ -280,12 +289,9 @@ int send_xpn_loco_name(uint16_t loco_id, char *loco_name, uint8_t index, uint8_t
     xpnframe[2] = 0x40;
     xpnframe[4] = (length + 0xe5) & 0xff;
     xpnframe[5] = 0xf1;
-    if (loco_id > 0xc000)
-	loco_id -= 0xa000;
-    else if (loco_id > 0x4000)
-	loco_id -= 0x3f00;
-    xpnframe[6] = loco_id >> 8;
-    xpnframe[7] = loco_id & 0xff;
+    xpn_loco_id = loco_address_mapping(loco_id);
+    xpnframe[6] = xpn_loco_id >> 8;
+    xpnframe[7] = xpn_loco_id & 0xff;
     xpnframe[8] = index;
     xpnframe[9] = n;
     memcpy(&xpnframe[10], loco_name, length);
@@ -370,22 +376,11 @@ int send_xpn_system_info(char *vchar) {
 }
 
 void set_loco_id(unsigned char *data, uint16_t loco_id) {
-    /*
-       0x0000 - 0x007F mm2_prg   Adresse + 0x0000
-       0x0080 - 0x00FF mm2_dil   Adresse + 0x0080
-       0x0100 - 0x1FFF mfx       Adresse + 0x0100
-       0x2000 - 0x3FFF dcc       Adresse + 0x2000
-     */
-    if (loco_id < 0x0100) {
-	data[2] = 0x00;
-	data[3] = loco_id;
-    } else if (loco_id < 0x2000) {
-	data[2] |= 0x40 + ((loco_id - 0x0100) >> 8);
-	data[3] = loco_id & 0xff;
-    } else if (loco_id < 0x3FFF) {
-	data[2] |= 0xC0 + ((loco_id - 0x2000) >> 8);
-	data[3] = loco_id & 0xff;
-    }
+    uint16_t m_loco_id;
+
+    m_loco_id = loco_address_demapping(loco_id);
+    data[2] = m_loco_id >> 8;
+    data[3] = m_loco_id & 0xff;
 }
 
 int send_can_loco_function(uint16_t loco_id, uint8_t function, uint8_t value, int verbose) {
@@ -411,7 +406,7 @@ int send_can_loco_drive(uint16_t loco_id, uint8_t direction, uint8_t step, uint8
 	netframe[9] = 2;
     else if (direction == 1)
 	netframe[9] = 1;
-    if (netframe[9] != loco_get_direction(m_id(loco_id))) {
+    if (netframe[9] != loco_get_direction(loco_address_demapping(loco_id))) {
 	send_can(netframe, verbose);
     }
 
@@ -496,7 +491,7 @@ int check_data_lan_x_header(struct z21_data_t *z21_data, unsigned char *udpframe
 	    /* TODO */
 	    vas_printf(verbose, &vchar, " LOC ID 0x%04X\n", loco_id);
 	    /* TODO */
-	    send_xpn_loco_info(m_id(loco_id), verbose);
+	    send_xpn_loco_info(loco_address_demapping(loco_id), verbose);
 	}
 	break;
     case LAN_X_SET_LOCO:
@@ -507,7 +502,7 @@ int check_data_lan_x_header(struct z21_data_t *z21_data, unsigned char *udpframe
 		uint8_t function = (udpframe[8]) & 0x1F;
 		uint8_t switchtype = (udpframe[8] >> 6) & 0x03;
 		if (switchtype == 2)
-		    value = loco_get_function(m_id(loco_id), function) ^ 1;
+		    value = loco_get_function(loco_address_demapping(loco_id), function) ^ 1;
 		else
 		    value = switchtype;
 		send_can_loco_function(loco_id, function, value, z21_data->foreground);
