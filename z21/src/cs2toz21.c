@@ -40,7 +40,7 @@
  * Server sends file
  *
  * {"owningDevice":{"os":"ios","appVersion":"1.4.6","deviceName":"iPad von Gerhard","deviceType":"iPad7,3",
- *  "request":"device_information_request","buildNumber":6076,"apiVersion":1},"fileName":"MeineAnlage.z21",
+ *  "request":"device_information_request","buildNumber":6076,"apiVersion":1},"fileName":"Data.z21",
  *  "request":"file_transfer_info","fileSize":744444}
  */
 
@@ -337,7 +337,9 @@ int sql_update_history(sqlite3 * db) {
     char *sql = "DELETE FROM update_history;";
     SQL_EXEC();
 
-    sql = "INSERT INTO update_history VALUES(1, 'ios', '18.11.21, 06:41:18 Mitteleuropäische Normalzeit', '1.4.2', 1000, 100);";
+    sql = "INSERT INTO update_history VALUES(1, 'ios', '04.05.23, 08:41:18 Mitteleuropäische Normalzeit', '1.4.7', 1000, 100);";
+    SQL_EXEC();
+    sql = "PRAGMA user_version = 15";
     SQL_EXEC();
     return EXIT_SUCCESS;
 }
