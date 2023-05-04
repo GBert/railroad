@@ -8,7 +8,7 @@
  */
 
 /*
- * CS2 lokonotive.cs2 to Z21 SQLite converter
+ * CS2 lokomotive.cs2 to Z21 SQLite converter
  */
 
 /*
