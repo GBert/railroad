@@ -77,8 +77,8 @@
 
 char z21_fstring_none[] = "none";
 
-#define SQL_EXEC() do { \
-ret = sqlite3_exec(db, sql, 0, 0, &err_msg); \
+#define SQL_EXEC(SQL) do { \
+ret = sqlite3_exec(db, (SQL), 0, 0, &err_msg); \
 if (ret != SQLITE_OK) { \
     fprintf(stderr, "SQL error: %s\n", err_msg); \
     sqlite3_free(err_msg); \
@@ -138,8 +138,8 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	close(fd);
 	return (EXIT_FAILURE);
     }
-    asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.6\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
-		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"MeineAnlage.z21\","
+    asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.7\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
+		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"Data.z21\","
 		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", file_stat.st_size);
     printf("send TCP\n%s", offer);
     send(st, offer, strlen(offer), 0);
@@ -330,17 +330,20 @@ int copy_file(char *src, char *dst) {
 }
 
 int sql_update_history(sqlite3 * db) {
-    char *err_msg;
     int ret;
+    char *err_msg;
+    char *time_st;
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
 
-    /* delete existing data */
     char *sql = "DELETE FROM update_history;";
-    SQL_EXEC();
-
-    sql = "INSERT INTO update_history VALUES(1, 'ios', '04.05.23, 08:41:18 Mitteleuropäische Normalzeit', '1.4.7', 1000, 100);";
-    SQL_EXEC();
+    SQL_EXEC(sql);
+    asprintf(&time_st, "INSERT INTO update_history VALUES(1, \'ios\', \'%02d.%02d.%02d, %02d:%02d:%02d Mitteleuropäische Normalzeit\', \'1.4.7\', 1000, 100);",
+		    tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    SQL_EXEC(time_st);
+    free(time_st);
     sql = "PRAGMA user_version = 15";
-    SQL_EXEC();
+    SQL_EXEC(sql);
     return EXIT_SUCCESS;
 }
 
@@ -360,9 +363,9 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 
     /* delete existing data
        sql = "DELETE FROM vehicles;";
-       SQL_EXEC();
+       SQL_EXEC(sql);
        sql = "DELETE FROM functions;";
-       SQL_EXEC();
+       SQL_EXEC(sql);
      */
 
     for (l = loco_data; l != NULL; l = l->hh.next) {
@@ -383,7 +386,7 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
 		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, picture, l->tmax, l->uid, i - 1, ip_s);
 	/* printf("%s\n", sql); */
-	SQL_EXEC();
+	SQL_EXEC(sql);
 	free(sql);
 	free(loco_icon_s);
 	free(loco_icon_d);
@@ -398,7 +401,7 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, \"%s\", %d, %d, %d);",
 				j, i, 0, l->function[n].duration, n, z21_fstring, n, 1, 0);
 		/* printf("%s\n", sql); */
-		SQL_EXEC();
+		SQL_EXEC(sql);
 		free(sql);
 		j++;
 	    }
