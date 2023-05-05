@@ -111,10 +111,10 @@ uint16_t loco_address_mapping(uint16_t uid) {
 uint16_t loco_address_demapping(uint16_t z21app_address) {
     /* dcc */
     if (z21app_address > 5000)
-        return (z21app_address - 5000 + 0xc000);
+	return (z21app_address - 5000 + 0xc000);
     /* mfx */
     if (z21app_address > 1000)
-        return (z21app_address - 1000 + 0x4000);
+	return (z21app_address - 1000 + 0x4000);
     return (z21app_address);
 }
 
@@ -256,7 +256,7 @@ int send_udp_broadcast(void) {
     gettimeofday(&tv, NULL);
 
     unsigned long long millisecondsSinceEpoch =
-	    (unsigned long long)(tv.tv_sec) * 1000 + 
+	    (unsigned long long)(tv.tv_sec) * 1000 +
 	    (unsigned long long)(tv.tv_usec) / 1000;
 
     asprintf(&timestamp, "%llu", millisecondsSinceEpoch);
@@ -322,7 +322,7 @@ int copy_file(char *src, char *dst) {
     char c[4096];
     FILE *fd_in, *fd_out;
 
-    printf("copy file %s -> %s\n", src, dst);
+    // printf("copy file %s -> %s\n", src, dst);
 
     fd_in = fopen(src, "r");
     if (!fd_in) {
@@ -369,7 +369,7 @@ int sql_update_history(sqlite3 * db) {
 
 int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
     char *err_msg;
-    int i, j, n, ret;
+    int button, i, j, n, ret;
     struct loco_data_t *l;
     char *sql;
     char *z21_fstring;
@@ -405,7 +405,6 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	}
 
 	loco_address = loco_address_mapping(l->uid);
-	printf("CS2 uid : 0x%4x -> %d\n", l->uid, loco_address);
 	asprintf(&sql, "INSERT INTO vehicles VALUES(%d, '%s', '%s', 0, %d, %d, 1, %d, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', "
 		       "0, '', 0, '%s', 0, 0, 0, 786, 0, 0, 1024, '', 0, 0);", i, l->name, picture, l->tmax, loco_address, i - 1, ip_s);
 	/* printf("%s\n", sql); */
@@ -416,13 +415,10 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	free(picture);
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		if (l->function[n].type <= (sizeof fmapping / sizeof fmapping[0]) - 1)
-		    z21_fstring = fmapping[l->function[n].type];
-		else
-		    z21_fstring = z21_fstring_none;
-
+		l->function[n].type <= (sizeof fmapping / sizeof fmapping[0]) - 1 ? (z21_fstring = fmapping[l->function[n].type]) : (z21_fstring = z21_fstring_none);
+		l->function[n].duration > 0 ? (button = 2) : (button = 0);
 		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, \"%s\", %d, %d, %d);",
-				j, i, 0, l->function[n].duration, n, z21_fstring, n, 1, 0);
+				j, i, button, l->function[n].duration, n, z21_fstring, n, 1, 0);
 		/* printf("%s\n", sql); */
 		SQL_EXEC(sql);
 		free(sql);
