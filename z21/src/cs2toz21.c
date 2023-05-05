@@ -76,6 +76,7 @@
 #define UUIDTEXTSIZE (sizeof(uuid_t) * 2) + 5
 
 char z21_fstring_none[] = "none";
+char *timestamp;
 
 #define SQL_EXEC(SQL) do { \
 ret = sqlite3_exec(db, (SQL), 0, 0, &err_msg); \
@@ -201,7 +202,6 @@ int send_udp_broadcast(void) {
     struct sockaddr_in baddr, saddr;
     struct sockaddr_in client;
     struct timeval tv;
-    char *timestamp;
     char buffer[64];
     socklen_t len;
     fd_set readfds;
@@ -280,7 +280,6 @@ int send_udp_broadcast(void) {
 		printf("%s\n", udpframe);
 		/* only look for real IP adresse not 0.0.0.0 */
 		if (memcmp(timestamp, udpframe, strlen(timestamp) != 0)) {
-		    free(timestamp);
 		    send_tcp_data(&client);
 		}
 	    }
