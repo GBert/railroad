@@ -263,7 +263,6 @@ int send_udp_broadcast(void) {
 
     if (sendto(sb, timestamp, strlen(timestamp), 0, (struct sockaddr *)&baddr, sizeof baddr) != strlen(timestamp))
 	fprintf(stderr, "UDP write error: %s\n", strerror(errno));
-    free(timestamp);
 
     FD_ZERO(&readfds);
     FD_SET(sa, &readfds);
@@ -280,13 +279,13 @@ int send_udp_broadcast(void) {
 		udpframe[n + 1] = 0;
 		printf("%s\n", udpframe);
 		/* only look for real IP adresse not 0.0.0.0 */
-		if (ntohl(client.sin_addr.s_addr) != 0) {
+		if (memcmp(timestamp, udpframe, strlen(timestamp) != 0)) {
+		    free(timestamp);
 		    send_tcp_data(&client);
 		}
 	    }
 	}
     }
-
     return EXIT_SUCCESS;
 }
 
