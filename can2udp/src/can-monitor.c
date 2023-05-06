@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 4.11\n\n");
+    fprintf(stderr, "   Version 4.12\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -802,7 +802,7 @@ void print_loc_proto(uint8_t proto) {
 }
 
 void decode_frame(struct can_frame *frame) {
-    uint32_t id, kennung, function, uid, cv_number, cv_index;
+    uint32_t id, kennung, typ, function, uid, cv_number, cv_index;
     uint16_t paket, crc, kenner, kontakt, value;
     uint8_t n_kanaele, n_messwerte;
     char s[32];
@@ -1019,9 +1019,9 @@ void decode_frame(struct can_frame *frame) {
 	break;
     case 0x31:
 	uid = be32(frame->data);
-	kennung = be16(&frame->data[6]);
+	typ = be16(&frame->data[6]);
 	printf("Ping Antwort von ");
-	switch (kennung) {
+	switch (typ) {
 	case 0x0000:
 	    if ((uid & 0xff000000) == 0x42000000)
 		printf("Booster (6017x)");
@@ -1045,8 +1045,10 @@ void decode_frame(struct can_frame *frame) {
 	case 0x0040:
 	    if ((uid & 0xFFF00000) == 0x53300000)
 		printf("LinkS88");
-	    else
+	    else if ((uid & 0xFFFF0000) == 0x43420000)
 		printf("S88 Gateway");
+	    else
+		printf("S88 Unknown");
 	    break;
 	case 0x0051:
 	    if ((uid & 0xffff0000) == 0x4d430000)
