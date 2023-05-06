@@ -1048,7 +1048,7 @@ void decode_frame(struct can_frame *frame) {
 	    else if ((uid & 0xFFFF0000) == 0x43420000)
 		printf("S88 Gateway");
 	    else
-		printf("S88 Unknown");
+		printf("S88 Unbekannt");
 	    break;
 	case 0x0051:
 	    if ((uid & 0xffff0000) == 0x4d430000)
