@@ -94,7 +94,7 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
-    fprintf(stderr, "   Version 0.1\n\n");
+    fprintf(stderr, "   Version 0.9\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -v                  verbose\n\n");
 }
