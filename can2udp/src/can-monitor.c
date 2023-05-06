@@ -1039,6 +1039,7 @@ void decode_frame(struct can_frame *frame) {
 	case 0x0031:
 	case 0x0032:
 	case 0x0033:
+	case 0x0034:
 	    printf("MS2");
 	    break;
 	case 0x0040:
