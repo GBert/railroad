@@ -802,8 +802,8 @@ void print_loc_proto(uint8_t proto) {
 }
 
 void decode_frame(struct can_frame *frame) {
-    uint32_t id, kennung, typ, function, uid, cv_number, cv_index;
-    uint16_t paket, crc, kenner, kontakt, value;
+    uint32_t id, kennung, function, uid, cv_number, cv_index;
+    uint16_t paket, crc, kenner, kontakt, typ, value;
     uint8_t n_kanaele, n_messwerte;
     char s[32];
     float v;
