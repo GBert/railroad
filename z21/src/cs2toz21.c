@@ -413,8 +413,8 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	free(picture);
 	for (n = 0; n < 32; n++) {
 	    if (l->function[n].type) {
-		l->function[n].type <= (sizeof fmapping / sizeof fmapping[0]) - 1 ? (z21_fstring = fmapping[l->function[n].type]) : (z21_fstring = z21_fstring_none);
-		l->function[n].duration > 0 ? (button = 2) : (button = 0);
+		z21_fstring = (l->function[n].type <= sizeof fmapping / sizeof fmapping[0] - 1) ? fmapping[l->function[n].type] : z21_fstring_none;
+		button = l->function[n].duration ? 2 : 0;
 		asprintf(&sql, "INSERT INTO functions VALUES( %d, %d, %d, '', %d.0, %d, \"%s\", %d, %d, %d);",
 				j, i, button, l->function[n].duration, n, z21_fstring, n, 1, 0);
 		/* printf("%s\n", sql); */
