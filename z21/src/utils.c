@@ -30,7 +30,6 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <linux/can.h>
-#include <zlib.h>
 
 #include "utils.h"
 #include "z21.h"
@@ -96,6 +95,26 @@ uint8_t xor(unsigned char *data, int length) {
     for (i = 0; i < length; i++)
 	res ^= data[i];
     return (res);
+}
+
+uint16_t loco_address_mapping(uint16_t uid) {
+    /* dcc */
+    if (uid >= 0xc000)
+        return (uid - 0xc000 + 5000);
+    /* mfx */
+    if (uid >= 0x4000)
+        return (uid - 0x4000 + 1000);
+    return (uid);
+}
+
+uint16_t loco_address_demapping(uint16_t z21app_address) {
+    /* dcc */
+    if (z21app_address >= 5000)
+        return (z21app_address - 5000 + 0xc000);
+    /* mfx */
+    if (z21app_address >= 1000)
+        return (z21app_address - 1000 + 0x4000);
+    return (z21app_address);
 }
 
 void print_udp_frame(char *format, int udplength, unsigned char *udpframe) {
@@ -185,62 +204,4 @@ char *search_interface_ip(char *search, int type) {
     }
     freeifaddrs(ifap);
     return NULL;
-}
-
-struct node *insert_right(struct node *list, int id) {
-    struct node *new_node = (struct node *)calloc(sizeof(struct node), 1);
-    new_node->id = id;
-    new_node->next = list->next;
-    list->next = new_node;
-    return new_node;
-}
-
-void free_list(struct node *list) {
-    struct node *p, *next_node;
-    for (p = list->next; p != NULL; p = next_node) {
-	next_node = p->next;
-	free(p);
-    }
-    list->next = NULL;
-}
-
-struct node *search_node(struct node *list, int id) {
-    while (list != NULL) {
-	if (list->id == id)
-	    return list;
-	list = list->next;
-    }
-    return NULL;
-}
-
-int inflate_data(struct config_data *config_data) {
-    int ret;
-    z_stream strm;
-
-    strm.zalloc = Z_NULL;
-    strm.zfree = Z_NULL;
-    strm.opaque = Z_NULL;
-    strm.avail_in = 0;
-    strm.next_in = Z_NULL;
-    ret = inflateInit(&strm);
-    if (ret != Z_OK)
-	return ret;
-    strm.avail_in = config_data->deflated_size;
-    strm.avail_out = config_data->inflated_size;
-    strm.next_in = config_data->deflated_data + 4;
-    strm.next_out = config_data->inflated_data;
-    ret = inflate(&strm, Z_NO_FLUSH);
-
-    assert(ret != Z_STREAM_ERROR);	/* state not clobbered */
-    switch (ret) {
-    case Z_NEED_DICT:
-	ret = Z_DATA_ERROR;
-	/* falls through */
-    case Z_DATA_ERROR:
-    case Z_MEM_ERROR:
-	(void)inflateEnd(&strm);
-	return ret;
-    }
-    (void)inflateEnd(&strm);
-    return 0;
 }

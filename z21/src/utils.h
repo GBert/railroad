@@ -32,6 +32,9 @@ struct config_data {
 
 void usec_sleep(int usec);
 uint8_t xor(unsigned char *data, int length);
+uint16_t loco_address_mapping(uint16_t uid);
+uint16_t loco_address_demapping(uint16_t uid);
+char *search_interface_ip(char *search, int type);
 void print_udp_frame(char *format, int length, unsigned char *udpframe);
 void print_net_frame(char *format, unsigned char *udpframe, int verbose);
 int time_stamp(char *timestamp);
@@ -42,5 +45,6 @@ uint32_t be32(uint8_t * u);
 uint32_t le32(uint8_t * u);
 
 void to_le16(uint8_t * u, uint16_t n);
+void to_be16(uint8_t * u, uint16_t n);
 
 #endif /* _UTILS_H_ */

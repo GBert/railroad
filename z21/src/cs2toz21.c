@@ -68,8 +68,9 @@
 #include "read-cs2-config.h"
 #include "fmapping.h"
 #include "geturl.h"
+#include "utils.h"
+#include "z21.h"
 
-#define MAXDG		4096	/* maximum datagram size */
 #define MAXLINE         256
 #define Z21PORT		5728
 
@@ -77,6 +78,7 @@
 
 char z21_fstring_none[] = "none";
 char *timestamp;
+struct z21_data_t z21_data;
 
 #define SQL_EXEC(SQL) do { \
 ret = sqlite3_exec(db, (SQL), 0, 0, &err_msg); \
@@ -97,26 +99,6 @@ void print_usage(char *prg) {
     fprintf(stderr, "   Version 0.9\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -v                  verbose\n\n");
-}
-
-uint16_t loco_address_mapping(uint16_t uid) {
-    /* dcc */
-    if (uid > 0xc000)
-	return (uid - 0xc000 + 5000);
-    /* mfx */
-    if (uid > 0x4000)
-	return (uid - 0x4000 + 1000);
-    return (uid);
-}
-
-uint16_t loco_address_demapping(uint16_t z21app_address) {
-    /* dcc */
-    if (z21app_address > 5000)
-	return (z21app_address - 5000 + 0xc000);
-    /* mfx */
-    if (z21app_address > 1000)
-	return (z21app_address - 1000 + 0x4000);
-    return (z21app_address);
 }
 
 int send_tcp_data(struct sockaddr_in *client_sa) {
