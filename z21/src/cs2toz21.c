@@ -98,6 +98,8 @@ void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
     fprintf(stderr, "   Version 0.9\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
+    fprintf(stderr, "         -s <IP or name>     name or address for config server\n");
+    fprintf(stderr, "         -i <IP or name>     name or address for icons server\n");
     fprintf(stderr, "         -v                  verbose\n\n");
 }
 
@@ -347,7 +349,7 @@ int sql_update_history(sqlite3 * db) {
     return EXIT_SUCCESS;
 }
 
-int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
+int sql_insert_locos(sqlite3 * db, struct config_data_t *config_data, char *z21_dir, char *icon_dir, char *ip_s) {
     char *err_msg;
     int button, i, j, n, ret;
     struct loco_data_t *l;
@@ -375,13 +377,19 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 	asprintf(&picture, "%s.png", uuidtext);
 
 	// printf("Loco picture: %s.png\n", l->icon);
-	asprintf(&loco_icon_s, "%s/%s.png", icon_dir, l->icon);
 	asprintf(&loco_icon_d, "%s/%s", z21_dir, picture);
-	/* TODO: get picture false */
-	if (copy_file(loco_icon_s, loco_icon_d) == EXIT_FAILURE) {
-	    free(loco_icon_s);
-	    asprintf(&loco_icon_s, "%s/leeres Gleis.png", icon_dir);
-	    copy_file(loco_icon_s, loco_icon_d);
+
+	/* do we get the icons from a webserver ? */
+	if (config_data->icon_server) {
+	    asprintf(&loco_icon_s, "%s/%s.png", config_data->icon_server, l->icon);
+	    get_url(loco_icon_s, NULL, loco_icon_d);
+	} else {
+	    asprintf(&loco_icon_s, "%s/%s.png", icon_dir, l->icon);
+	    /* TODO: get picture false */
+	    if (copy_file(loco_icon_s, loco_icon_d) == EXIT_FAILURE) {
+		asprintf(&loco_icon_s, "%s/leeres Gleis.png", icon_dir);
+		copy_file(loco_icon_s, loco_icon_d);
+	    }
 	}
 
 	loco_address = loco_address_mapping(l->uid);
@@ -412,22 +420,40 @@ int sql_insert_locos(sqlite3 * db, char *z21_dir, char *icon_dir, char *ip_s) {
 
 int main(int argc, char **argv) {
     struct config_data_t config_data;
-    char *loco_file;
+    char *config_file, *loco_file;
     int opt, ret;
     sqlite3 *db;
     char *z21_dir, *sql_file, *icon_dir, *systemcmd;
     uuid_t z21_uuid;
     char uuidtext[UUIDTEXTSIZE];
 
+    memset(&config_data, 0, sizeof config_data);
+
     config_data.verbose = 1;
 
-    while ((opt = getopt(argc, argv, "c:vh?")) != -1) {
+    while ((opt = getopt(argc, argv, "c:i:s:vh?")) != -1) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
 		strncpy(config_dir, optarg, sizeof config_dir - 1);
 	    } else {
 		fprintf(stderr, "config file dir to long\n");
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 'i':
+	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
+		config_data.icon_server = strndup(optarg, MAXLINE -1);
+	    } else {
+		fprintf(stderr, "server address to long\n");
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 's':
+	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
+		config_data.config_server= strndup(optarg, MAXLINE -1);
+	    } else {
+		fprintf(stderr, "server address to long\n");
 		exit(EXIT_FAILURE);
 	    }
 	    break;
@@ -442,13 +468,30 @@ int main(int argc, char **argv) {
 	}
     }
 
-    if (asprintf(&loco_file, "%s/config/%s", config_dir, loco_name) < 0) {
-	fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
+    /* try to read the lokomotive.cs via http ... */
+    if (config_data.config_server[0]) {
+	printf("using http for config file\n");
+	if (asprintf(&loco_file, "http://%s/config/lokomotive.cs2", config_data.config_server) < 0) {
+	    fprintf(stderr, "can't alloc buffer for config file: %s\n", strerror(errno));
+	    exit(EXIT_FAILURE);
+	}
+	config_file = get_url(loco_file, NULL, NULL);
+	if (config_file) {
+	    read_loco_data(config_file, 0);
+	} else {
+	    fprintf(stderr, "can't read loco file: %s\n", strerror(errno));
+	    exit(EXIT_FAILURE);
+	}
+	free(config_file);
+    /* ... otherwise use file */
+    } else {
+	if (asprintf(&loco_file, "%s/config/%s", config_dir, loco_name) < 0) {
+	    fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
+	    exit(EXIT_FAILURE);
+	}
+	printf("loco_file: >%s<\n", loco_file);
+	read_loco_data(loco_file, CONFIG_FILE);
     }
-    printf("loco_file: >%s<\n", loco_file);
-
-    read_loco_data(loco_file, CONFIG_FILE);
     if (config_data.verbose == 1)
 	printf("locos in CS2 File: %u\n", HASH_COUNT(loco_data));
 
@@ -482,7 +525,7 @@ int main(int argc, char **argv) {
     }
     sql_update_history(db);
     asprintf(&icon_dir, "%s/icons", config_dir);
-    sql_insert_locos(db, z21_dir, icon_dir, "192.168.0.9");
+    sql_insert_locos(db, &config_data, z21_dir, icon_dir, "192.168.0.9");
     free(icon_dir);
     sqlite3_close(db);
     free(sql_file);

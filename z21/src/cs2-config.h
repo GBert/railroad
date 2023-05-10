@@ -31,6 +31,8 @@ struct config_data_t {
     char *name;
     char *directory;
     char *filename;
+    char *config_server;
+    char *icon_server;
     uint8_t *deflated_data;
     uint8_t *inflated_data;
 };
