@@ -12,6 +12,8 @@
 
 #define BROADCAST_IP	1
 
+#include <stdint.h>
+
 struct node {
     int id;
     struct node *next;
@@ -32,6 +34,8 @@ struct config_data {
 
 void usec_sleep(int usec);
 uint8_t xor(unsigned char *data, int length);
+void url_encoder_rfc_tables_init(void);
+char *url_encode(unsigned char *s, char *enc);
 uint16_t loco_address_mapping(uint16_t uid);
 uint16_t loco_address_demapping(uint16_t uid);
 char *search_interface_ip(char *search, int type);

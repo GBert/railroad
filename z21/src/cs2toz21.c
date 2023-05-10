@@ -79,6 +79,7 @@
 char z21_fstring_none[] = "none";
 char *timestamp;
 struct z21_data_t z21_data;
+extern char rfc3986[256];
 
 #define SQL_EXEC(SQL) do { \
 ret = sqlite3_exec(db, (SQL), 0, 0, &err_msg); \
@@ -364,6 +365,8 @@ int sql_insert_locos(sqlite3 * db, struct config_data_t *config_data, char *z21_
     i = 1;
     j = 1;
 
+    url_encoder_rfc_tables_init();
+
     /* delete existing data
        sql = "DELETE FROM vehicles;";
        SQL_EXEC(sql);
@@ -381,8 +384,11 @@ int sql_insert_locos(sqlite3 * db, struct config_data_t *config_data, char *z21_
 
 	/* do we get the icons from a webserver ? */
 	if (config_data->icon_server) {
-	    asprintf(&loco_icon_s, "%s/%s.png", config_data->icon_server, l->icon);
+	    char *icon_s = calloc(strlen(l->icon) * 3, 1);
+	    url_encode((unsigned char *)l->icon, icon_s);
+	    asprintf(&loco_icon_s, "%s/%s.png", config_data->icon_server, icon_s);
 	    get_url(loco_icon_s, NULL, loco_icon_d);
+	    free(icon_s);
 	} else {
 	    asprintf(&loco_icon_s, "%s/%s.png", icon_dir, l->icon);
 	    /* TODO: get picture false */

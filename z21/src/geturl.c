@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+#include "utils.h"
+
+
+extern char *rfc3986;
+extern char *html5;
 
 struct memory_struct {
     char *memory;

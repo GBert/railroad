@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <libgen.h>
 #include <unistd.h>
 #include <string.h>
@@ -44,6 +45,7 @@
 uint16_t CRCCCITT(unsigned char *data, size_t length, unsigned short seed);
 
 extern struct z21_data_t z21_data;
+char rfc3986[256] = {0};
 
 uint16_t le16(uint8_t * u) {
     return (u[1] << 8) | u[0];
@@ -64,6 +66,27 @@ uint32_t le32(uint8_t * u) {
 void to_le16(uint8_t * u, uint16_t n) {
     u[0] = n & 0xff;
     u[1] = n >> 8;
+}
+
+void url_encoder_rfc_tables_init(void) {
+    int i;
+
+    for (i = 0; i < 256; i++) {
+	rfc3986[i] = isalnum( i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
+    }
+}
+
+char *url_encode(unsigned char *s, char *enc) {
+
+    char *table = rfc3986;
+
+    for (; *s; s++){
+	if (table[*s])
+	    *enc = table[*s];
+	else sprintf( enc, "%%%02X", *s);
+	while (*++enc);
+    }
+    return(enc);
 }
 
 void usec_sleep(int usec) {
