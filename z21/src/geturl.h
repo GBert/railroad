@@ -10,6 +10,8 @@
 #ifndef _GET_URL_H_
 #define _GET_URL_H_
 
+#include <curl/curl.h>
+
 char *get_url(char *url, char *a_url, char *filename);
 
 #endif /* _GET_URL_H_ */

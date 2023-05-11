@@ -52,7 +52,6 @@ char *get_url(char *url, char *a_url, char *filename) {
 
     printf("getting url %s\n", url);
 
-    curl_global_init(CURL_GLOBAL_ALL);
     curl_handle = curl_easy_init();
     curl_easy_setopt(curl_handle, CURLOPT_URL, url);
     // curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
@@ -81,7 +80,6 @@ char *get_url(char *url, char *a_url, char *filename) {
 	}
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl_handle);
-	curl_global_cleanup();
 	return NULL;
     }
 

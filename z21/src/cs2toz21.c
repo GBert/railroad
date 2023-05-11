@@ -474,6 +474,9 @@ int main(int argc, char **argv) {
 	}
     }
 
+    if (config_data.config_server[0] || config_data.icon_server[0])
+	curl_global_init(0);
+
     /* try to read the lokomotive.cs via http ... */
     if (config_data.config_server[0]) {
 	printf("using http for config file\n");
@@ -532,9 +535,13 @@ int main(int argc, char **argv) {
     sql_update_history(db);
     asprintf(&icon_dir, "%s/icons", config_dir);
     sql_insert_locos(db, &config_data, z21_dir, icon_dir, "192.168.0.9");
-    free(icon_dir);
+
     sqlite3_close(db);
     free(sql_file);
+    if (config_data.config_server[0] || config_data.icon_server[0])
+	curl_global_cleanup();
+    free(icon_dir);
+
     /* create zip file and delete directory */
     asprintf(&systemcmd, "cd /tmp; minizip -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
     printf("Zipping %s\n", systemcmd);
