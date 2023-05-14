@@ -393,6 +393,7 @@ int sql_insert_locos(sqlite3 * db, struct z21_config_data_t *config_data, char *
 	    asprintf(&loco_icon_s, "%s/%s.png", icon_dir, l->icon);
 	    /* TODO: get picture false */
 	    if (copy_file(loco_icon_s, loco_icon_d) == EXIT_FAILURE) {
+		free(loco_icon_s);
 		asprintf(&loco_icon_s, "%s/leeres Gleis.png", icon_dir);
 		copy_file(loco_icon_s, loco_icon_d);
 	    }
