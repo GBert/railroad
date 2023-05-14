@@ -79,6 +79,7 @@
 char z21_fstring_none[] = "none";
 char *timestamp;
 struct z21_data_t z21_data;
+struct z21_config_data_t config_data;
 extern char rfc3986[256];
 
 #define SQL_EXEC(SQL) do { \
@@ -92,13 +93,12 @@ if (ret != SQLITE_OK) { \
 } while (0)
 
 unsigned char udpframe[MAXDG];
-char config_dir[MAXLINE] = "/www/config/";
 extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
     fprintf(stderr, "   Version 0.9\n\n");
-    fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
+    fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -s <IP or name>     name or address for config server\n");
     fprintf(stderr, "         -i <IP or name>     name or address for icons server\n");
     fprintf(stderr, "         -v                  verbose\n\n");
@@ -350,7 +350,7 @@ int sql_update_history(sqlite3 * db) {
     return EXIT_SUCCESS;
 }
 
-int sql_insert_locos(sqlite3 * db, struct config_data_t *config_data, char *z21_dir, char *icon_dir, char *ip_s) {
+int sql_insert_locos(sqlite3 * db, struct z21_config_data_t *config_data, char *z21_dir, char *icon_dir, char *ip_s) {
     char *err_msg;
     int button, i, j, n, ret;
     struct loco_data_t *l;
@@ -425,7 +425,6 @@ int sql_insert_locos(sqlite3 * db, struct config_data_t *config_data, char *z21_
 }
 
 int main(int argc, char **argv) {
-    struct config_data_t config_data;
     char *config_file, *loco_file;
     int opt, ret;
     sqlite3 *db;
@@ -434,6 +433,7 @@ int main(int argc, char **argv) {
     char uuidtext[UUIDTEXTSIZE];
 
     memset(&config_data, 0, sizeof config_data);
+    config_data.config_dir=strdup("/www/config");
 
     config_data.verbose = 1;
 
@@ -441,7 +441,8 @@ int main(int argc, char **argv) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
-		strncpy(config_dir, optarg, sizeof config_dir - 1);
+		free(config_data.config_dir);
+		config_data.config_dir = strndup(optarg, MAXLINE -1);
 	    } else {
 		fprintf(stderr, "config file dir to long\n");
 		exit(EXIT_FAILURE);
@@ -494,7 +495,7 @@ int main(int argc, char **argv) {
 	free(config_file);
     /* ... otherwise use file */
     } else {
-	if (asprintf(&loco_file, "%s/config/%s", config_dir, loco_name) < 0) {
+	if (asprintf(&loco_file, "%s/config/%s", config_data.config_dir, loco_name) < 0) {
 	    fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
@@ -533,7 +534,7 @@ int main(int argc, char **argv) {
 	return EXIT_FAILURE;
     }
     sql_update_history(db);
-    asprintf(&icon_dir, "%s/icons", config_dir);
+    asprintf(&icon_dir, "%s/icons", config_data.config_dir);
     sql_insert_locos(db, &config_data, z21_dir, icon_dir, "192.168.0.9");
 
     sqlite3_close(db);
@@ -541,6 +542,7 @@ int main(int argc, char **argv) {
     if (config_data.config_server[0] || config_data.icon_server[0])
 	curl_global_cleanup();
     free(icon_dir);
+    free(config_data.config_dir);
 
     /* create zip file and delete directory */
     asprintf(&systemcmd, "cd /tmp; minizip -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);

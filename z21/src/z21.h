@@ -65,6 +65,17 @@ struct z21_data_t {
     unsigned char udpframe[MAXDG];
 };
 
+struct z21_config_data_t {
+    int verbose;
+    char *name;
+    char *directory;
+    char *filename;
+    char *config_dir;
+    char *config_server;
+    char *icon_server;
+    char *interface_list;
+};
+
 #define LAN_GET_SERIAL_NUMBER		0x10
 #define LAN_GET_CODE			0x18
 #define LAN_GET_HWINFO			0x1A
