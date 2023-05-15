@@ -98,11 +98,11 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
-    fprintf(stderr, "   Version 0.91\n\n");
+    fprintf(stderr, "   Version 0.92\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
-    fprintf(stderr, "         -s <IP or name>     name or address for config server\n");
-    fprintf(stderr, "         -i <IP or name>     name or address for icons server\n");
+    fprintf(stderr, "         -s <IP or name>     link to the config server\n");
+    fprintf(stderr, "         -i <IP or name>     link to the icons server directory\n");
     fprintf(stderr, "         -v                  verbose\n\n");
 }
 
@@ -497,12 +497,8 @@ int main(int argc, char **argv) {
 
     /* try to read the lokomotive.cs via http ... */
     if (config_data.config_server[0]) {
-	printf("using http for config file\n");
-	if (asprintf(&loco_file, "http://%s/config/lokomotive.cs2", config_data.config_server) < 0) {
-	    fprintf(stderr, "can't alloc buffer for config file: %s\n", strerror(errno));
-	    exit(EXIT_FAILURE);
-	}
-	config_file = get_url(loco_file, NULL, NULL);
+	printf("using network for config file\n");
+	config_file = get_url(config_data.config_server, NULL, NULL);
 	if (config_file) {
 	    read_loco_data(config_file, 0);
 	} else {
