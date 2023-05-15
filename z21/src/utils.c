@@ -45,7 +45,7 @@
 uint16_t CRCCCITT(unsigned char *data, size_t length, unsigned short seed);
 
 extern struct z21_data_t z21_data;
-char rfc3986[256] = {0};
+char rfc3986[256] = { 0 };
 
 uint16_t le16(uint8_t * u) {
     return (u[1] << 8) | u[0];
@@ -72,7 +72,7 @@ void url_encoder_rfc_tables_init(void) {
     int i;
 
     for (i = 0; i < 256; i++) {
-	rfc3986[i] = isalnum( i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
+	rfc3986[i] = isalnum(i) || i == '~' || i == '-' || i == '.' || i == '_' ? i : 0;
     }
 }
 
@@ -80,13 +80,14 @@ char *url_encode(unsigned char *s, char *enc) {
 
     char *table = rfc3986;
 
-    for (; *s; s++){
+    for (; *s; s++) {
 	if (table[*s])
 	    *enc = table[*s];
-	else sprintf( enc, "%%%02X", *s);
-	while (*++enc);
+	else
+	    sprintf(enc, "%%%02X", *s);
+	while (*++enc) ;
     }
-    return(enc);
+    return (enc);
 }
 
 void usec_sleep(int usec) {
@@ -123,20 +124,20 @@ uint8_t xor(unsigned char *data, int length) {
 uint16_t loco_address_mapping(uint16_t uid) {
     /* dcc */
     if (uid >= 0xc000)
-        return (uid - 0xc000 + 5000);
+	return (uid - 0xc000 + 5000);
     /* mfx */
     if (uid >= 0x4000)
-        return (uid - 0x4000 + 1000);
+	return (uid - 0x4000 + 1000);
     return (uid);
 }
 
 uint16_t loco_address_demapping(uint16_t z21app_address) {
     /* dcc */
     if (z21app_address >= 5000)
-        return (z21app_address - 5000 + 0xc000);
+	return (z21app_address - 5000 + 0xc000);
     /* mfx */
     if (z21app_address >= 1000)
-        return (z21app_address - 1000 + 0x4000);
+	return (z21app_address - 1000 + 0x4000);
     return (z21app_address);
 }
 

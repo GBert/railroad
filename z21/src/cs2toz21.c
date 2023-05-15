@@ -489,7 +489,7 @@ int main(int argc, char **argv) {
     }
 
     /* find the IP address for the database */
-    if (!(config_data.ip_address = find_first_ip(interface_list, 0))) 
+    if (!(config_data.ip_address = find_first_ip(interface_list, 0)))
        config_data.ip_address = strdup("127.0.0.1");
 
     if (config_data.config_server[0] || config_data.icon_server[0])
