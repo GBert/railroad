@@ -75,7 +75,7 @@
 #define Z21PORT		5728
 
 #define UUIDTEXTSIZE (sizeof(uuid_t) * 2) + 5
-#define INTERFACE_LIST "br0,wlan0"
+#define INTERFACE_LIST "wlan0,br-lan,br0"
 
 char z21_fstring_none[] = "none";
 char *timestamp;
