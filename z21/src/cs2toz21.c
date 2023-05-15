@@ -98,7 +98,7 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
-    fprintf(stderr, "   Version 0.92\n\n");
+    fprintf(stderr, "   Version 0.93\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
     fprintf(stderr, "         -s <IP or name>     link to the config server\n");
@@ -492,11 +492,11 @@ int main(int argc, char **argv) {
     if (!(config_data.ip_address = find_first_ip(interface_list, 0)))
        config_data.ip_address = strdup("127.0.0.1");
 
-    if (config_data.config_server[0] || config_data.icon_server[0])
+    if (config_data.config_server || config_data.icon_server)
 	curl_global_init(0);
 
     /* try to read the lokomotive.cs via http ... */
-    if (config_data.config_server[0]) {
+    if (config_data.config_server) {
 	printf("using network for config file\n");
 	config_file = get_url(config_data.config_server, NULL, NULL);
 	if (config_file) {
@@ -552,7 +552,7 @@ int main(int argc, char **argv) {
 
     sqlite3_close(db);
     free(sql_file);
-    if (config_data.config_server[0] || config_data.icon_server[0])
+    if (config_data.config_server || config_data.icon_server)
 	curl_global_cleanup();
     free(icon_dir);
     free(config_data.config_dir);
