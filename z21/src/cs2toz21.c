@@ -98,11 +98,11 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
-    fprintf(stderr, "   Version 0.93\n\n");
+    fprintf(stderr, "   Version 0.94\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
-    fprintf(stderr, "         -s <IP or name>     link to the config server\n");
-    fprintf(stderr, "         -i <IP or name>     link to the icons server directory\n");
+    fprintf(stderr, "         -s <link to config> link to the lokomotive.cs2\n");
+    fprintf(stderr, "         -p <link to icons>  link to the icons server directory\n");
     fprintf(stderr, "         -v                  verbose\n\n");
 }
 
