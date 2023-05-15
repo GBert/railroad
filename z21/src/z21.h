@@ -73,7 +73,7 @@ struct z21_config_data_t {
     char *config_dir;
     char *config_server;
     char *icon_server;
-    char *interface_list;
+    char *ip_address;
 };
 
 #define LAN_GET_SERIAL_NUMBER		0x10

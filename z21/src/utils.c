@@ -211,20 +211,36 @@ char *search_interface_ip(char *search, int type) {
     for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
 	if (ifa->ifa_addr == NULL)
 	    continue;
-	if (ifa->ifa_addr) {
-	    if (ifa->ifa_addr->sa_family == AF_INET) {
-		if (type == BROADCAST_IP)
-		    bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
-		else
-		    bsa = (struct sockaddr_in *)ifa->ifa_addr;
-		if (strncmp(ifa->ifa_name, search, strlen(search)) == 0) {
-		    s = strdup(inet_ntoa(bsa->sin_addr));
-		    freeifaddrs(ifap);
-		    return s;
-		}
+	if (ifa->ifa_addr->sa_family == AF_INET) {
+	    if (type == BROADCAST_IP)
+		bsa = (struct sockaddr_in *)ifa->ifa_broadaddr;
+	    else
+		bsa = (struct sockaddr_in *)ifa->ifa_addr;
+	    if (strncmp(ifa->ifa_name, search, strlen(search)) == 0) {
+		s = strdup(inet_ntoa(bsa->sin_addr));
+		freeifaddrs(ifap);
+		return s;
 	    }
 	}
     }
     freeifaddrs(ifap);
+    return NULL;
+}
+
+char *find_first_ip(char *list, int type) {
+    char *ip_address = NULL;
+    char *searchif;
+    char *tempsp, *temp;
+
+    tempsp = strdup(list);
+    temp = tempsp;
+    while ((searchif = strsep(&tempsp, ","))) {
+	ip_address = search_interface_ip(searchif, type);
+	if (ip_address) {
+	    free(temp);
+	    return ip_address;
+	}
+    }
+    free(temp);
     return NULL;
 }

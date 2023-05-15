@@ -75,6 +75,7 @@
 #define Z21PORT		5728
 
 #define UUIDTEXTSIZE (sizeof(uuid_t) * 2) + 5
+#define INTERFACE_LIST "br0,wlan0"
 
 char z21_fstring_none[] = "none";
 char *timestamp;
@@ -99,6 +100,7 @@ void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir\n", prg);
     fprintf(stderr, "   Version 0.9\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
+    fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
     fprintf(stderr, "         -s <IP or name>     name or address for config server\n");
     fprintf(stderr, "         -i <IP or name>     name or address for icons server\n");
     fprintf(stderr, "         -v                  verbose\n\n");
@@ -426,7 +428,7 @@ int sql_insert_locos(sqlite3 * db, struct z21_config_data_t *config_data, char *
 }
 
 int main(int argc, char **argv) {
-    char *config_file, *loco_file;
+    char *config_file, *loco_file, *interface_list;
     int opt, ret;
     sqlite3 *db;
     char *z21_dir, *sql_file, *icon_dir, *systemcmd;
@@ -435,10 +437,11 @@ int main(int argc, char **argv) {
 
     memset(&config_data, 0, sizeof config_data);
     config_data.config_dir=strdup("/www/config");
+    interface_list = strdup(INTERFACE_LIST);
 
     config_data.verbose = 1;
 
-    while ((opt = getopt(argc, argv, "c:i:s:vh?")) != -1) {
+    while ((opt = getopt(argc, argv, "c:i:p:s:vh?")) != -1) {
 	switch (opt) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
@@ -450,6 +453,15 @@ int main(int argc, char **argv) {
 	    }
 	    break;
 	case 'i':
+	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
+		free(interface_list);
+		interface_list = strndup(optarg, MAXLINE -1);
+	    } else {
+		fprintf(stderr, "interface list to long\n");
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 'p':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
 		config_data.icon_server = strndup(optarg, MAXLINE -1);
 	    } else {
@@ -475,6 +487,10 @@ int main(int argc, char **argv) {
 	    break;
 	}
     }
+
+    /* find the IP address for the database */
+    if (!(config_data.ip_address = find_first_ip(interface_list, 0))) 
+       config_data.ip_address = strdup("127.0.0.1");
 
     if (config_data.config_server[0] || config_data.icon_server[0])
 	curl_global_init(0);
@@ -536,7 +552,7 @@ int main(int argc, char **argv) {
     }
     sql_update_history(db);
     asprintf(&icon_dir, "%s/icons", config_data.config_dir);
-    sql_insert_locos(db, &config_data, z21_dir, icon_dir, "192.168.0.9");
+    sql_insert_locos(db, &config_data, z21_dir, icon_dir, config_data.ip_address);
 
     sqlite3_close(db);
     free(sql_file);

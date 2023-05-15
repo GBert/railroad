@@ -39,6 +39,7 @@ char *url_encode(unsigned char *s, char *enc);
 uint16_t loco_address_mapping(uint16_t uid);
 uint16_t loco_address_demapping(uint16_t uid);
 char *search_interface_ip(char *search, int type);
+char *find_first_ip(char *list, int type);
 void print_udp_frame(char *format, int length, unsigned char *udpframe);
 void print_net_frame(char *format, unsigned char *udpframe, int verbose);
 int time_stamp(char *timestamp);
