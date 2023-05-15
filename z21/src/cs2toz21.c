@@ -558,7 +558,7 @@ int main(int argc, char **argv) {
     free(config_data.config_dir);
 
     /* create zip file and delete directory */
-    asprintf(&systemcmd, "cd /tmp; minizip -io Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
+    asprintf(&systemcmd, "cd /tmp; minizip -i -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
     printf("Zipping %s\n", systemcmd);
     system(systemcmd);
     free(systemcmd);
