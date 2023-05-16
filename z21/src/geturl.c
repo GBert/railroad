@@ -11,10 +11,11 @@
 #include <string.h>
 #include <curl/curl.h>
 #include "utils.h"
-
+#include "z21.h"
 
 extern char *rfc3986;
 extern char *html5;
+extern struct z21_config_data_t config_data;
 
 struct memory_struct {
     char *memory;
@@ -50,7 +51,7 @@ char *get_url(char *url, char *a_url, char *filename) {
     CURL *curl_handle;
     CURLcode ret = 0;
 
-    printf("getting url %s\n", url);
+    v_printf(config_data.verbose, "getting url %s", url);
 
     curl_handle = curl_easy_init();
     curl_easy_setopt(curl_handle, CURLOPT_URL, url);
@@ -65,14 +66,14 @@ char *get_url(char *url, char *a_url, char *filename) {
 	    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cb_write_url_data);
 	    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
 	    ret = curl_easy_perform(curl_handle);
-	    if (ret == CURLE_HTTP_RETURNED_ERROR) {
-		printf("curl problem %d\n", ret);
+	    if (ret == CURLE_OK) {
+		v_printf(config_data.verbose, "\t -> OK %d\n", ret);
+	    } else {
+		v_printf(config_data.verbose, "\t -> NOK %d\n", ret);
 		curl_easy_setopt(curl_handle, CURLOPT_URL, a_url);
 		ret = curl_easy_perform(curl_handle);
 		if (ret == CURLE_HTTP_RETURNED_ERROR)
 		    fprintf(stderr, "%s: error getting alternate %s\n", __func__, a_url);
-	    } else {
-		printf("curl fine %d\n", ret);
 	    }
 	    fclose(pagefile);
 	} else {

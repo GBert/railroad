@@ -126,7 +126,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	return EXIT_FAILURE;
     }
 
-    printf("Filesize %ld ", file_stat.st_size);
+    v_printf(config_data.verbose, "Filesize %ld \n", file_stat.st_size);
 
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -149,13 +149,13 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.7\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
 		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"Data.z21\","
 		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", file_stat.st_size);
-    printf("send TCP\n%s", offer);
+    v_printf(config_data.verbose, "send TCP\n%s", offer);
     send(st, offer, strlen(offer), 0);
 
     buf_len = strlen(offer);
     memset(offer, 0, buf_len);
 
-    printf("Waiting for <install>\n");
+    printf("Waiting for <install> from client\n");
     if (recv(st, offer, buf_len, 0) < 0) {
 	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
 	close(fd);
@@ -439,8 +439,6 @@ int main(int argc, char **argv) {
     config_data.config_dir=strdup("/www/config");
     interface_list = strdup(INTERFACE_LIST);
 
-    config_data.verbose = 1;
-
     while ((opt = getopt(argc, argv, "c:i:p:s:vh?")) != -1) {
 	switch (opt) {
 	case 'c':
@@ -512,11 +510,10 @@ int main(int argc, char **argv) {
 	    fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
-	printf("loco_file: >%s<\n", loco_file);
+	v_printf(config_data.verbose, "loco_file: >%s<\n", loco_file);
 	read_loco_data(loco_file, CONFIG_FILE);
     }
-    if (config_data.verbose == 1)
-	printf("locos in CS2 File: %u\n", HASH_COUNT(loco_data));
+    v_printf(config_data.verbose, "locos in CS2 File: %u\n", HASH_COUNT(loco_data));
 
     /* preparing export directory */
     uuid_generate(z21_uuid);
@@ -529,7 +526,7 @@ int main(int argc, char **argv) {
 
     /* open empty SQLite database */
 
-    printf("storing in %s\n", z21_dir);
+    v_printf(config_data.verbose, "storing in %s\n", z21_dir);
 
     asprintf(&sql_file, "%s/Loco.sqlite", z21_dir);
 
@@ -559,7 +556,7 @@ int main(int argc, char **argv) {
 
     /* create zip file and delete directory */
     asprintf(&systemcmd, "cd /tmp; minizip -i -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
-    printf("Zipping %s\n", systemcmd);
+    v_printf(config_data.verbose, "Zipping %s\n", systemcmd);
     system(systemcmd);
     free(systemcmd);
     asprintf(&systemcmd, "rm -rf /tmp/export/%s", uuidtext);

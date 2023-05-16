@@ -11,6 +11,9 @@
 #ifndef _Z21_H_
 #define _Z21_H_
 
+#include <stdint.h>
+#include <netinet/in.h>
+
 #define MAX(a,b)		((a) > (b) ? (a) : (b))
 #define MAXDG			4096	/* maximum datagram size */
 #define MAXIPLEN		40	/* maximum IP string length */
