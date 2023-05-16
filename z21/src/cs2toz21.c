@@ -261,12 +261,12 @@ int send_udp_broadcast(void) {
 	if (FD_ISSET(sa, &readfds)) {
 	    len = sizeof client;
 	    n = recvfrom(sa, udpframe, sizeof udpframe, 0, &client, &len);
-	    printf("received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof buffer));
+	    v_printf(config_data.verbose, "received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof buffer));
 	    if (n > 0) {
 		udpframe[n + 1] = 0;
-		printf("%s\n", udpframe);
 		/* only look for real IP adresse not 0.0.0.0 */
 		if (memcmp(timestamp, udpframe, strlen(timestamp) != 0)) {
+		    v_printf(config_data.verbose, "%s\n", udpframe);
 		    send_tcp_data(&client);
 		}
 	    }
@@ -495,7 +495,7 @@ int main(int argc, char **argv) {
 
     /* try to read the lokomotive.cs via http ... */
     if (config_data.config_server) {
-	printf("using network for config file\n");
+	v_printf(config_data.verbose, "using network for config file\n");
 	config_file = get_url(config_data.config_server, NULL, NULL);
 	if (config_file) {
 	    read_loco_data(config_file, 0);
@@ -513,7 +513,12 @@ int main(int argc, char **argv) {
 	v_printf(config_data.verbose, "loco_file: >%s<\n", loco_file);
 	read_loco_data(loco_file, CONFIG_FILE);
     }
-    v_printf(config_data.verbose, "locos in CS2 File: %u\n", HASH_COUNT(loco_data));
+
+    if (!HASH_COUNT(loco_data)) {
+	fprintf(stderr, "no locos found !\n");
+	exit(EXIT_FAILURE);
+    }
+    v_printf(config_data.verbose, "\nlocos in CS2 File: %u\n", HASH_COUNT(loco_data));
 
     /* preparing export directory */
     uuid_generate(z21_uuid);
