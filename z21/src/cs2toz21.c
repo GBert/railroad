@@ -98,7 +98,7 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -c config_dir -i <interface list> -s <config link> -p <icons link>\n", prg);
-    fprintf(stderr, "   Version 0.94\n\n");
+    fprintf(stderr, "   Version 0.95\n\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
     fprintf(stderr, "         -s <link to config> link to the lokomotive.cs2\n");
