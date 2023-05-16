@@ -8,10 +8,12 @@
 #include "geturl.h"
 #include "read-cs2-config.h"
 #include "uthash.h"
+#include "z21.h"
 
 extern struct loco_data_t *loco_data, *loco_data_by_uid;
 extern struct magnet_data_t *magnet_data;
 extern struct subscriber_t *subscriber;
+struct z21_config_data_t config_data;
 
 int main() {
     char *ptr = NULL;
