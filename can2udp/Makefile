@@ -121,6 +121,11 @@ ifneq (,$(findstring onion_omega2p,$(CONFIG_TARGET_PROFILE)))
 	$(INSTALL_BIN) ./files/can2lan.init_srse2_openwrt $(1)/etc/init.d/can2lan
 endif
 
+ifneq (,$(findstring tplink_tl-wr902ac-v3,$(CONFIG_TARGET_PROFILE)))
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/can2lan.init_srse2_openwrt $(1)/etc/init.d/can2lan
+endif
+
 ifneq (,$(findstring wr841,$(CONFIG_TARGET_PROFILE)))
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/can2lan.init_slcan $(1)/etc/init.d/can2lan
