@@ -1,0 +1,29 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2015 OpenWrt.org
+
+START=99
+
+start() {
+	ip link add dev vcan0 type vcan
+	ip link set up vcan0
+
+	[ -e /www/config/ ] && {
+		rm -f /var/run/can2lan.pid
+		# can2lan -T30 -mc /www/config -b br-lan
+		# -g respond to CAN pings - WDP special
+		# can2lan -mg -c /www/config -b eth0
+		# Wifi 
+		# can2lan -T30 -mc /www/config -b apcli0
+		# or Wifi 
+		# can2lan -T30 -mc /www/config -b br-wlan
+	}
+
+        # start MaeCAN can2udp if MaeCAN is installed
+	[ -e /www/MaeCAN-Server/ ] && {
+		can2udp -l 15734 -d 15733
+	}
+}
+
+stop() {
+	killall can2lan
+}
