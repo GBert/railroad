@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -66,6 +66,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextAllowedPropulsions */ { "Allowed propulsions", "Erlaubte Antriebe", "Tipos de propulsiones permitios" },
 /* TextAllowedPushPull */ { "Allowed push-pull trains", "Erlaubte Pendelzüge", "Trenes push-pull permitidos" },
 /* TextAllowedTrainTypes */ { "Allowed train types", "Erlaubte Zugtypen", "Tipos de trenes permitidos" },
+/* TextAlways */ { "always", "immer", "siempre" },
 /* TextAreYouSureToDelete */ { "Are you sure you really want to delete {0}?", "Bist du sicher, dass du {0} löschen möchtest?", "Estás seguro, que quieres eliminar {0}?" },
 /* TextAtLock */ { "At lock", "Beim Sperren", "Durante bloquear" },
 /* TextAtUnlock */ { "At unlock", "Beim Freigeben", "Durante liberar" },
@@ -145,6 +146,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextDeleteFeedback */ { "Delete feedback", "Rückmelder löschen", "Eliminar retroseñal" },
 /* TextDeleteLayer */ { "Delete layer", "Schicht löschen", "Eliminar capa" },
 /* TextDeleteLoco */ { "Delete locomotive", "Lokomotive löschen", "Eliminar locomotora" },
+/* TextDeleteMultipleUnit */ { "Delete multiple unit", "Mehrfachtraktion löschen", "Eliminar unidad múltiple" },
 /* TextDeleteRoute */ { "Delete route", "Fahrstrasse löschen", "Eliminar itinerario" },
 /* TextDeleteSignal */ { "Delete signal", "Signal löschen", "Eliminar señal" },
 /* TextDeleteSwitch */ { "Delete switch", "Weiche löschen", "Eliminar desvío" },
@@ -169,6 +171,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextEditFeedbacks */ { "Edit feedbacks", "Rückmelder bearbeiten", "Editar retroseñales" },
 /* TextEditLayers */ { "Edit layers", "Schichten bearbeiten", "Editar capas" },
 /* TextEditLocos */ { "Edit locomotives", "Lokomotiven bearbeiten", "Editar locomotoras" },
+/* TextEditLocos */ { "Edit multiple units", "Mehrfachtraktion bearbeiten", "Editar unidades múltiples" },
 /* TextEditRoute */ { "Edit route", "Fahrstrasse bearbeiten", "Editar itinerario" },
 /* TextEditRoutes */ { "Edit routes", "Fahrstrassen bearbeiten", "Editar itinerarios" },
 /* TextEditSettings */ { "Edit settings", "Einstellungen bearbeiten", "Editar opciones" },
@@ -182,6 +185,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextEditTracks */ { "Edit tracks", "Gleise bearbeiten", "Editar vías" },
 /* TextEnglish */ { "English", "Englisch", "Ingles" },
 /* TextError */ { "error", "Fehler", "error" },
+/* TextExecuteAccessory */ { "Execute accessories", "Schalte Zubehörartikel", "Cambia los accesorios" },
 /* TextExecutingRoute */ { "Executing route {0}", "Führe Fahrstrasse {0} aus", "Ejecutando itinerario {0}" },
 /* TextExitRailControl */ { "Exit RailControl", "RailControl beenden", "Apagar RailControl" },
 /* TextFeedback */ { "feedback", "Rückmelder", "retroseñal" },
@@ -244,6 +248,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextHttpConnectionRequest */ { "HTTP connection {0}: Request: {1} {2}", "HTTP Verbindung {0}: Anfrage {1} {2}", "HTTP connectión {0}: solicitud: {1} {2}" },
 /* TextIPAddress */ { "IP address", "IP Adresse", "Dirección IP" },
 /* TextImport */ { "Import", "Importieren", "Importar" },
+/* TextIndependentOfControl */ { "Independent of control", "Unabhängig der Zentrale", "Independiente del control" },
 /* TextIndex */ { "Index", "Index", "Index" },
 /* TextInfo */ { "info", "Informationen", "informaciones" },
 /* TextInvalidControlID */ { "Invalid controlID {0}", "Ungültige Control ID {0}", "Control ID {0} no valido" },
@@ -286,6 +291,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextLoadedFeedback */ { "Loaded feedback {0}: {1}", "Rückmelder {0} geladen: {1}", "Cargado retroseñal {0}: {1}" },
 /* TextLoadedLayer */ { "Loaded layer {0}: {1}", "Schicht {0} geladen: {1}", "Cargado capa {0}: {1}" },
 /* TextLoadedLoco */ { "Loaded locomotive {0}: {1}", "Lokomotive {0} geladen: {1}", "Cargado locomotora {0}: {1}" },
+/* TextLoadedMultipleUnit */ { "Loaded multiple unit {0}: {1}", "Mehrfachtraktion {0} geladen: {1}", "Cargado unidad múltiple {0}: {1}" },
 /* TextLoadedRoute */ { "Loaded route {0}: {1}", "Fahrstrasse {0} geladen: {1}", "Cargado itinerario {0}: {1}" },
 /* TextLoadedSignal */ { "Loaded signal {0}: {1}", "Signal {0} geladen: {1}", "Cargado señal {0}: {1}" },
 /* TextLoadedSwitch */ { "Loaded switch {0}: {1}", "Weiche {0} geladen: {1}", "Cargado desvío {0}: {1}" },
@@ -427,6 +433,11 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextMinTrackLength */ { "Minimal track length", "Kürzestes Gleis", "Vía más corta" },
 /* TextMinTrainLength */ { "Minimal train length", "Minimale Zuglänge", "Longitud de tren minima" },
 /* TextMultipleUnit */ { "Multiple unit", "Mehrfachtraktion", "Unidad múltiple" },
+/* TextMultipleUnitDeleted */ { "Multiple unit {0} deleted", "Mehrfachtraktion {0} gelöscht", "Unidad múltiple {0} eliminado" },
+/* TextMultipleUnitDoesNotExist */ { "Multiple unit does not exist", "Mehrfachtraktion existiert nicht", "Unidad múltiple no existe" },
+/* TextMultipleUnitIsInUse */ { "Multiple unit {0} is in use", "Mehrfrachtraktion {0} ist in Gebrauch", "Unidad múltiple {0} está en uso" },
+/* TextMultipleUnitSaved */ { "Multiple unit {0} saved", "Mehrfachtraktion {0} gespeichert", "Unidad múltiple {0} guardado" },
+/* TextMultipleUnits */ { "Multiple units", "Mehrfachtraktionen", "Unidades múltiples" },
 /* TextMyUidHash */ { "My UID: {0}; My CAN hash: {1}", "Meine UID: {0}; Mein CAN hash: {1}", "Mi UID: {0}; Mi CAN hash: {1}" },
 /* TextName */ { "Name", "Name", "Nombre" },
 /* TextNameInControl */ { "Name in control's database", "Name in der Datenbank der Zentrale", "Nombre en el control" },
@@ -727,6 +738,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextUnableToAddLayer1 */ { "Unable to add initial layer 1", "Nicht möglich die Schicht 1 hinzuzufügen", "Imposible añadir capa 1" },
 /* TextUnableToAddLoco */ { "Unable to add locomotive", "Nicht möglich die Lokomotive hinzuzufügen", "Impsible ańadir la locomotora" },
 /* TextUnableToAddLocoToTrack */ { "Unable to add locomotive {0} to track {1}", "Nicht möglich die Lokomotive {0} auf Gleis {1} zu setzen", "Impsible poner la locomotora sobre vía {1}" },
+/* TextUnableToAddMultipleUnit */ { "Unable to add multiple unit", "Nicht möglich die Mehrfachtraktion hinzuzufügen", "Impsible ańadir la unidad múltiple" },
 /* TextUnableToAddRoute */ { "Unable to add route", "Nicht möglich die Fahrstrasse hinzuzufügen ", "Imposible añadir el itinerario" },
 /* TextUnableToAddSignal */ { "Unable to add signal", "Nicht möglich das Signal hinzuzufügen ", "Imposible añadir la señal" },
 /* TextUnableToAddSwitch */ { "Unable to add switch", "Nicht möglich die Weiche hinzuzufügen ", "Imposible añadir el desvío" },
@@ -763,6 +775,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextWarning */ { "warning", "Warnungen", "advertencias" },
 /* TextWebServerStarted */ { "Webserver started", "Webserver wurde gestartet", "Servidor web encendido" },
 /* TextWebServerStopped */ { "Webserver stopped", "Webserver wurde beendet", "Servidor web apagado" },
+/* TextWhenWrongPosition */ { "when in wrong position", "wenn in falscher Lage", "si en la posición falsa" },
 /* TextWidth */ { "Width", "Breite", "Anchura" },
 /* TextWidthIs0 */ { "Width is zero", "Breite ist null", "Anchura está zero" },
 /* TextWrite */ { "write", "schreiben", "escribir" },

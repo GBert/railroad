@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -92,15 +92,27 @@ namespace Hardware
 			buffer[12] = 0;
 		}
 
-		void MaerklinCAN::ParseAddressProtocol(const Address input, Address& address, Protocol& protocol)
+		void MaerklinCAN::ParseAddressProtocol(const Address input,
+			Address& address,
+			Protocol& protocol,
+			LocoType& type)
 		{
 			address = input;
 			Address maskedAddress = address & 0xFC00;
+			type = LocoTypeLoco;
 
 			if (maskedAddress == 0x0000 || maskedAddress == 0x3000)
 			{
 				protocol = ProtocolMM;
 				address &= 0x03FF;
+				return;
+			}
+
+			if (maskedAddress == 0x2000)
+			{
+				protocol = ProtocolNone;
+				address &= 0x03FF;
+				type = LocoTypeMultipleUnit;
 				return;
 			}
 
@@ -443,7 +455,8 @@ namespace Hardware
 			}
 			Address address;
 			Protocol protocol;
-			ParseAddressProtocol(buffer, address, protocol);
+			LocoType type;
+			ParseAddressProtocol(buffer, address, protocol, type);
 			Speed speed = Utils::Utils::DataBigEndianToShort(buffer + 9);
 			logger->Info(Languages::TextReceivedSpeedCommand, protocol, address, speed);
 			manager->LocoSpeed(ControlTypeHardware, controlID, protocol, address, speed);
@@ -457,7 +470,8 @@ namespace Hardware
 			}
 			Address address;
 			Protocol protocol;
-			ParseAddressProtocol(buffer, address, protocol);
+			LocoType type;
+			ParseAddressProtocol(buffer, address, protocol, type);
 			Orientation orientation = (buffer[9] == 1 ? OrientationRight : OrientationLeft);
 			logger->Info(Languages::TextReceivedDirectionCommand, protocol, address, orientation);
 			// changing direction implies speed = 0
@@ -473,7 +487,8 @@ namespace Hardware
 			}
 			Address address;
 			Protocol protocol;
-			ParseAddressProtocol(buffer, address, protocol);
+			LocoType type;
+			ParseAddressProtocol(buffer, address, protocol, type);
 			DataModel::LocoFunctionNr function = buffer[9];
 			DataModel::LocoFunctionState on = (
 				buffer[10] != 0 ? DataModel::LocoFunctionStateOn : DataModel::LocoFunctionStateOff);
@@ -489,7 +504,8 @@ namespace Hardware
 			}
 			Address address;
 			Protocol protocol;
-			ParseAddressProtocol(buffer, address, protocol);
+			LocoType type;
+			ParseAddressProtocol(buffer, address, protocol, type);
 			DataModel::AccessoryState state = (buffer[9] ? DataModel::AccessoryStateOn : DataModel::AccessoryStateOff);
 			// GUI-address is 1-based, protocol-address is 0-based
 			++address;
@@ -782,9 +798,11 @@ namespace Hardware
 					Address input = Utils::Utils::HexToInteger(value);
 					Address address = AddressNone;
 					Protocol protocol = ProtocolNone;
-					ParseAddressProtocol(input, address, protocol);
+					LocoType type;
+					ParseAddressProtocol(input, address, protocol, type);
 					cacheEntry.SetAddress(address);
 					cacheEntry.SetProtocol(protocol);
+					cacheEntry.SetType(type);
 					logger->Info(Languages::TextCs2MasterLocoAddressProtocol, address, protocol);
 				}
 				else if (key.compare("funktionen") == 0

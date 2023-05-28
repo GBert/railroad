@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -26,7 +26,9 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/Feedback.h"
 #include "DataModel/Layer.h"
 #include "DataModel/Loco.h"
+#include "DataModel/LocoBase.h"
 #include "DataModel/LocoFunctions.h"
+#include "DataModel/MultipleUnit.h"
 #include "DataModel/ObjectIdentifier.h"
 #include "DataModel/Relation.h"
 #include "DataModel/Route.h"
@@ -34,4 +36,3 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/Switch.h"
 #include "DataModel/Text.h"
 #include "DataModel/Track.h"
-

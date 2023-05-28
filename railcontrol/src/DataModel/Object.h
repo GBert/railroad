@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -24,6 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 
 #include "DataTypes.h"
+#include "DataModel/ObjectIdentifier.h"
 #include "DataModel/Serializable.h"
 
 namespace DataModel
@@ -59,6 +60,11 @@ namespace DataModel
 			inline ObjectID GetID() const
 			{
 				return objectID;
+			}
+
+			inline ObjectIdentifier GetObjectIdentifier() const
+			{
+				return ObjectIdentifier(GetObjectType(), GetID());
 			}
 
 			virtual inline void SetName(const std::string& name)

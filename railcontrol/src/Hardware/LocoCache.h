@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -41,6 +41,7 @@ namespace Hardware
 				locoId(LocoNone),
 				protocol(ProtocolNone),
 				address(AddressNone),
+				type(LocoTypeLoco),
 				matchKey("")
 			{
 			}
@@ -90,6 +91,16 @@ namespace Hardware
 				this->address = address;
 			}
 
+			inline LocoType GetType() const
+			{
+				return type;
+			}
+
+			inline void SetType(LocoType type)
+			{
+				this->type = type;
+			}
+
 			inline void SetFunction(const DataModel::LocoFunctionNr nr,
 				const DataModel::LocoFunctionType type,
 				const DataModel::LocoFunctionIcon icon,
@@ -129,6 +140,7 @@ namespace Hardware
 			std::string name;
 			Protocol protocol;
 			Address address;
+			LocoType type;
 			std::string matchKey;
 			DataModel::LocoFunctions functions;
 	};

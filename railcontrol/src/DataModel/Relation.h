@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -40,13 +40,14 @@ namespace DataModel
 			enum Type : unsigned char
 			{
 				TypeCalculate = 0,
-				TypeLocoSlave = ObjectTypeLoco << 3,
-				TypeTrackSignal = ObjectTypeTrack << 3,
+				TypeLocoSlave = (ObjectTypeLoco << 3), // not used anymore, TypeMultipeUnitSlave instead
+				TypeTrackSignal = (ObjectTypeTrack << 3),
 				TypeFeedbackAtSet = ObjectTypeFeedback << 3,
 				TypeFeedbackAtUnset = (ObjectTypeFeedback << 3) + 1,
-				TypeRouteAtLock = ObjectTypeRoute << 3,
+				TypeRouteAtLock = (ObjectTypeRoute << 3),
 				TypeRouteAtUnlock = (ObjectTypeRoute << 3) + 1,
 				TypeClusterTrack = (ObjectTypeCluster << 3),
+				TypeMultipleUnitSlave = (ObjectTypeMultipleUnit << 3),
 			};
 
 			typedef unsigned short Data;

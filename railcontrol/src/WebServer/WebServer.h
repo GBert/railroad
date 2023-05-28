@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -69,19 +69,32 @@ namespace WebServer
 			void LayerDelete(const LayerID layerID, const std::string& name) override;
 			void LayerSettings(const LayerID layerID, const std::string& name) override;
 			void LocoDelete(const LocoID locoID, const std::string& name, const std::string& matchKey) override;
-			void LocoDestinationReached(const DataModel::Loco* loco, const DataModel::Route* route, const DataModel::Track* track) override;
-			void LocoOrientation(const ControlType controlType, const DataModel::Loco* loco, const Orientation direction) override;
 
-			void LocoFunction(const ControlType controlType,
-				const DataModel::Loco* loco,
+			void LocoBaseDestinationReached(const DataModel::LocoBase* loco,
+				const DataModel::Route* route,
+				const DataModel::Track* track) override;
+
+			void LocoBaseOrientation(const ControlType controlType,
+				const DataModel::LocoBase* loco,
+				const Orientation direction) override;
+
+			void LocoBaseFunction(const ControlType controlType,
+				const DataModel::LocoBase* loco,
 				const DataModel::LocoFunctionNr function,
 				const DataModel::LocoFunctionState on) override;
 
-			void LocoRelease(const LocoID locoID) override;
-			void LocoSettings(const LocoID locoID, const std::string& name, const std::string& matchKey) override;
-			void LocoSpeed(const ControlType controlType, const DataModel::Loco* loco, const Speed speed) override;
-			void LocoStart(const LocoID locoID, const std::string& name) override;
-			void LocoStop(const LocoID locoID, const std::string& name) override;
+			void LocoBaseRelease(const DataModel::LocoBase* loco) override;
+
+			void LocoSettings(const LocoID locoID,
+				const std::string& name,
+				const std::string& matchKey) override;
+
+			void LocoBaseSpeed(const ControlType controlType,
+				const DataModel::LocoBase* loco,
+				const Speed speed) override;
+
+			void LocoBaseStart(const DataModel::LocoBase* loco) override;
+			void LocoBaseStop(const DataModel::LocoBase* loco) override;
 			void RouteDelete(const RouteID routeID, const std::string& name) override;
 			void RouteRelease(const RouteID routeID) override;
 			void RouteSettings(const RouteID routeID, const std::string& name) override;

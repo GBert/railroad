@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -24,6 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 
 #include "DataModel/Feedback.h"
+#include "DataModel/Loco.h"
 #include "DataModel/Track.h"
 #include "Manager.h"
 #include "Utils/Utils.h"
@@ -405,7 +406,7 @@ namespace DataModel
 	}
 
 	bool Track::GetValidRoutes(Logger::Logger* logger,
-		const Loco* loco,
+		const LocoBase* loco,
 		const bool allowLocoTurn,
 		std::vector<Route*>& validRoutes) const
 	{

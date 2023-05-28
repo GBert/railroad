@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -321,12 +321,17 @@ namespace Hardware
 
 				inline void ParseAddressProtocol(const unsigned char* const buffer,
 					Address& address,
-					Protocol& protocol)
+					Protocol& protocol,
+					LocoType& type)
 				{
 					Address input = ParseAddress(buffer);
-					ParseAddressProtocol(input, address, protocol);
+					ParseAddressProtocol(input, address, protocol, type);
 				}
-				static void ParseAddressProtocol(const Address input, Address& address, Protocol& protocol);
+
+				static void ParseAddressProtocol(const Address input,
+					Address& address,
+					Protocol& protocol,
+					LocoType& type);
 
 				static inline CanPrio ParsePrio(const unsigned char* const buffer)
 				{

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -103,7 +103,7 @@ namespace DataModel
 				return manager->RouteExecute(logger, locoID, ObjectID2());
 
 			case ObjectTypeLoco:
-				manager->LocoFunctionState(ControlTypeInternal, locoID, static_cast<DataModel::LocoFunctionNr>(ObjectID2()), static_cast<DataModel::LocoFunctionState>(data));
+				manager->LocoBaseFunctionState(ControlTypeInternal, locoID, static_cast<DataModel::LocoFunctionNr>(ObjectID2()), static_cast<DataModel::LocoFunctionState>(data));
 				return true;
 
 			case ObjectTypePause:

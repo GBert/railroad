@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -66,6 +66,7 @@ class Languages
 			TextAllowedPropulsions,
 			TextAllowedPushPull,
 			TextAllowedTrainTypes,
+			TextAlways,
 			TextAreYouSureToDelete,
 			TextAtLock,
 			TextAtUnlock,
@@ -145,6 +146,7 @@ class Languages
 			TextDeleteFeedback,
 			TextDeleteLayer,
 			TextDeleteLoco,
+			TextDeleteMultipleUnit,
 			TextDeleteRoute,
 			TextDeleteSignal,
 			TextDeleteSwitch,
@@ -169,6 +171,7 @@ class Languages
 			TextEditFeedbacks,
 			TextEditLayers,
 			TextEditLocos,
+			TextEditMultipleUnits,
 			TextEditRoute,
 			TextEditRoutes,
 			TextEditSettings,
@@ -182,6 +185,7 @@ class Languages
 			TextEditTracks,
 			TextEnglish,
 			TextError,
+			TextExecuteAccessory,
 			TextExecutingRoute,
 			TextExitRailControl,
 			TextFeedback,
@@ -244,6 +248,7 @@ class Languages
 			TextHttpConnectionRequest,
 			TextIPAddress,
 			TextImport,
+			TextIndependentOfControl,
 			TextIndex,
 			TextInfo,
 			TextInvalidControlID,
@@ -286,6 +291,7 @@ class Languages
 			TextLoadedFeedback,
 			TextLoadedLayer,
 			TextLoadedLoco,
+			TextLoadedMultipleUnit,
 			TextLoadedRoute,
 			TextLoadedSignal,
 			TextLoadedSwitch,
@@ -427,6 +433,11 @@ class Languages
 			TextMinTrackLength,
 			TextMinTrainLength,
 			TextMultipleUnit,
+			TextMultipleUnitDeleted,
+			TextMultipleUnitDoesNotExist,
+			TextMultipleUnitIsInUse,
+			TextMultipleUnitSaved,
+			TextMultipleUnits,
 			TextMyUidHash,
 			TextName,
 			TextNameInControl,
@@ -727,6 +738,7 @@ class Languages
 			TextUnableToAddLayer1,
 			TextUnableToAddLoco,
 			TextUnableToAddLocoToTrack,
+			TextUnableToAddMultipleUnit,
 			TextUnableToAddRoute,
 			TextUnableToAddSignal,
 			TextUnableToAddSwitch,
@@ -763,6 +775,7 @@ class Languages
 			TextWarning,
 			TextWebServerStarted,
 			TextWebServerStopped,
+			TextWhenWrongPosition,
 			TextWidth,
 			TextWidthIs0,
 			TextWrite,

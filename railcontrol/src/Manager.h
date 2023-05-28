@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -73,11 +73,10 @@ class Manager
 
 		// control (console, web, ...)
 		const std::string GetControlName(const ControlID controlID);
+
 		const std::map<std::string,Hardware::HardwareParams*> ControlListByName() const;
-		const std::map<ControlID,std::string> LocoControlListNames() const;
-		const std::map<ControlID,std::string> AccessoryControlListNames() const;
-		const std::map<ControlID,std::string> FeedbackControlListNames() const;
-		const std::map<ControlID,std::string> ProgramControlListNames() const;
+
+		const std::map<ControlID,std::string> ControlListNames(const Hardware::Capabilities capability) const;
 
 		inline const std::map<std::string,Protocol> LocoProtocolsOfControl(const ControlID controlID) const
 		{
@@ -91,7 +90,6 @@ class Manager
 
 		// loco
 		std::string GetLocoList() const;
-		std::string GetRouteList() const;
 
 		DataModel::Loco* GetLoco(const LocoID locoID) const;
 
@@ -131,7 +129,6 @@ class Manager
 			const Propulsion propulsion,
 			const TrainType type,
 			const std::vector<DataModel::LocoFunctionEntry>& locoFunctions,
-			const std::vector<DataModel::Relation*>& slaves,
 			std::string& result
 		);
 
@@ -145,25 +142,120 @@ class Manager
 		}
 
 		bool LocoProtocolAddress(const LocoID locoID, ControlID& controlID, Protocol& protocol, Address& address) const;
-		void LocoSpeed(const ControlType controlType, const ControlID controlID, const Protocol protocol, const Address address, const Speed speed);
-		bool LocoSpeed(const ControlType controlType, const LocoID locoID, const Speed speed, const bool withSlaves = true);
-		bool LocoSpeed(const ControlType controlType, DataModel::Loco* loco, const Speed speed, const bool withSlaves = true);
+
+		inline void LocoSpeed(const ControlType controlType,
+			const ControlID controlID,
+			const Protocol protocol,
+			const Address address,
+			const Speed speed)
+		{
+			// nullptr check of loco is done within submethod
+			LocoBaseSpeed(controlType, GetLoco(controlID, protocol, address), speed);
+		}
+
+		inline bool LocoBaseSpeed(const ControlType controlType,
+			const LocoID locoID,
+			const Speed speed)
+		{
+			// nullptr check of loco is done within submethod
+			return LocoBaseSpeed(controlType, GetLocoBase(locoID), speed);
+		}
+
+		bool LocoBaseSpeed(const ControlType controlType,
+			DataModel::LocoBase* loco,
+			const Speed speed);
+
 		Speed LocoSpeed(const LocoID locoID) const;
-		void LocoOrientation(const ControlType controlType, const ControlID controlID, const Protocol protocol, const Address address, const Orientation orientation);
-		void LocoOrientation(const ControlType controlType, const LocoID locoID, const Orientation orientation);
-		void LocoOrientation(const ControlType controlType, DataModel::Loco* loco, const Orientation orientation);
+
+		inline void LocoOrientation(const ControlType controlType,
+			const ControlID controlID,
+			const Protocol protocol,
+			const Address address,
+			const Orientation orientation)
+		{
+			// nullptr check of loco is done within submethod
+			LocoBaseOrientation(controlType, GetLoco(controlID, protocol, address), orientation);
+		}
+
+		inline void LocoBaseOrientation(const ControlType controlType,
+			const LocoID locoID,
+			const Orientation orientation)
+		{
+			// nullptr check of loco is done within submethod
+			LocoBaseOrientation(controlType, GetLocoBase(locoID), orientation);
+		}
+
+		void LocoBaseOrientation(const ControlType controlType,
+			DataModel::LocoBase* loco,
+			const Orientation orientation);
 
 		void LocoFunctionState(const ControlType controlType,
 			const ControlID controlID,
 			const Protocol protocol,
 			const Address address,
 			const DataModel::LocoFunctionNr function,
-			const DataModel::LocoFunctionState on);
+			const DataModel::LocoFunctionState on)
+		{
+			// nullptr check of loco is done within submethod
+			LocoBaseFunctionState(controlType, GetLoco(controlID, protocol, address), function, on);
+		}
 
-		void LocoFunctionState(const ControlType controlType,
+		void LocoBaseFunctionState(const ControlType controlType,
 			const LocoID locoID,
 			const DataModel::LocoFunctionNr function,
 			const DataModel::LocoFunctionState on);
+
+		void LocoBaseFunctionState(const ControlType controlType,
+			DataModel::LocoBase* loco,
+			const DataModel::LocoFunctionNr function,
+			const DataModel::LocoFunctionState on);
+
+		// multiple unit
+		DataModel::MultipleUnit* GetMultipleUnit(const MultipleUnitID multipleUnitId) const;
+
+		DataModel::LocoConfig GetMultipleUnitOfConfigByMatchKey(const ControlID controlId,
+			const std::string& matchKey) const;
+
+		const std::map<std::string,DataModel::LocoConfig> MultipleUnitConfigByName() const;
+
+		bool MultipleUnitSave
+		(
+			MultipleUnitID multipleUnitID,
+			const std::string& name,
+			const ControlID controlID,
+			const std::string& matchKey,
+			const Address address,
+			const Length length,
+			const bool pushpull,
+			const Speed maxSpeed,
+			const Speed travelSpeed,
+			const Speed reducedSpeed,
+			const Speed creepingSpeed,
+			const TrainType type,
+			const std::vector<DataModel::LocoFunctionEntry>& locoFunctions,
+			const std::vector<DataModel::Relation*>& slaves,
+			std::string& result
+		);
+
+		bool MultipleUnitDelete(const MultipleUnitID multipleUnitID,
+			std::string& result);
+
+		inline bool MultipleUnitDelete(const MultipleUnitID multipleUnitId)
+		{
+			std::string result;
+			return MultipleUnitDelete(multipleUnitId, result);
+		}
+
+		// locobase
+		inline DataModel::LocoBase* GetLocoBase(const LocoID locoId) const
+		{
+			MultipleUnitID multipleUnitId = locoId & (~MultipleUnitIdPrefix);
+			return locoId == multipleUnitId ? static_cast<DataModel::LocoBase*>(GetLoco(locoId)) : static_cast<DataModel::LocoBase*>(GetMultipleUnit(multipleUnitId));
+		}
+
+		const std::map<std::string,LocoID> LocoBaseIdsByName() const;
+
+		const std::string& GetLocoBaseName(const LocoID locoID) const;
 
 		// accessory
 		void AccessoryState(const ControlType controlType, const ControlID controlID, const Protocol protocol, const Address address, const DataModel::AccessoryState state);
@@ -325,8 +417,13 @@ class Manager
 
 		// route
 		bool RouteExecute(Logger::Logger* logger, const LocoID locoID, const RouteID routeID);
+
 		void RouteExecuteAsync(Logger::Logger* logger, const RouteID routeID);
+
+		std::string GetRouteList() const;
+
 		DataModel::Route* GetRoute(const RouteID routeID) const;
+
 		const std::string& GetRouteName(const RouteID routeID) const;
 
 		inline const std::map<RouteID,DataModel::Route*>& RouteList() const
@@ -335,6 +432,7 @@ class Manager
 		}
 
 		const std::map<std::string,DataModel::Route*> RouteListByName() const;
+
 		bool RouteSave(RouteID routeID,
 			const std::string& name,
 			const Delay delay,
@@ -470,7 +568,7 @@ class Manager
 		void TrackPublishState(const DataModel::Track* track);
 		bool RouteRelease(const RouteID routeID);
 
-		bool LocoDestinationReached(const DataModel::Loco* loco,
+		bool LocoDestinationReached(const DataModel::LocoBase* loco,
 			const DataModel::Route* route,
 			const DataModel::Track* track);
 
@@ -506,6 +604,11 @@ class Manager
 			return stopOnFeedbackInFreeTrack;
 		}
 
+		inline bool GetExecuteAccessory() const
+		{
+			return executeAccessory;
+		}
+
 		inline DataModel::SelectRouteApproach GetSelectRouteApproach() const
 		{
 			return selectRouteApproach;
@@ -516,14 +619,15 @@ class Manager
 			return nrOfTracksToReserve;
 		}
 
-		bool SaveSettings(const Languages::Language language,
+		bool SettingsSave(const Languages::Language language,
 			const DataModel::AccessoryPulseDuration duration,
 			const bool autoAddFeedback,
 			const bool stopOnFeedbackInFreeTrack,
+			const bool executeAccessoryAlways,
 			const DataModel::SelectRouteApproach selectRouteApproach,
 			const DataModel::Loco::NrOfTracksToReserve nrOfTracksToReserve,
 			const Logger::Logger::Level logLevel
-			);
+		);
 
 		ControlID GetPossibleControlForLoco() const;
 		ControlID GetPossibleControlForAccessory() const;
@@ -559,11 +663,6 @@ class Manager
 		DataModel::Switch* GetSwitch(const ControlID controlID, const Protocol protocol, const Address address) const;
 		DataModel::Feedback* GetFeedback(const ControlID controlID, const FeedbackPin pin) const;
 		DataModel::Signal* GetSignal(const ControlID controlID, const Protocol protocol, const Address address) const;
-
-		void LocoFunctionState(const ControlType controlType,
-			DataModel::Loco* loco,
-			const DataModel::LocoFunctionNr function,
-			const DataModel::LocoFunctionState on);
 
 		void AccessoryState(const ControlType controlType, DataModel::Accessory* accessory, const DataModel::AccessoryState state, const bool force);
 		void SwitchState(const ControlType controlType, DataModel::Switch* mySwitch, const DataModel::AccessoryState state, const bool force);
@@ -666,12 +765,25 @@ class Manager
 		bool CheckAddressLoco(const Protocol protocol, const Address address, std::string& result);
 		bool CheckAddressAccessory(const Protocol protocol, const Address address, std::string& result);
 
-		bool CheckControlLocoProtocolAddress(const ControlID controlID, const Protocol protocol, const Address address, std::string& result)
+		inline bool CheckControlLocoProtocolAddress(const ControlID controlID,
+			const Protocol protocol,
+			const Address address,
+			std::string& result)
 		{
 			return CheckControlProtocolAddress(AddressTypeLoco, controlID, protocol, address, result);
 		}
 
-		bool CheckControlAccessoryProtocolAddress(const ControlID controlID, const Protocol protocol, const Address address, std::string& result)
+		inline bool CheckControlMultipleUnitProtocolAddress(const ControlID controlID,
+			const Address address,
+			std::string& result)
+		{
+			return CheckControlProtocolAddress(AddressTypeMultipleUnit, controlID, ProtocolNone, address, result);
+		}
+
+		inline bool CheckControlAccessoryProtocolAddress(const ControlID controlID,
+			const Protocol protocol,
+			const Address address,
+			std::string& result)
 		{
 			return CheckControlProtocolAddress(AddressTypeAccessory, controlID, protocol, address, result);
 		}
@@ -808,6 +920,10 @@ class Manager
 		std::map<LocoID,DataModel::Loco*> locos;
 		mutable std::mutex locoMutex;
 
+		// multiple unit
+		std::map<LocoID,DataModel::MultipleUnit*> multipleUnits;
+		mutable std::mutex multipleUnitMutex;
+
 		// accessory
 		std::map<AccessoryID,DataModel::Accessory*> accessories;
 		mutable std::mutex accessoryMutex;
@@ -850,6 +966,7 @@ class Manager
 		DataModel::AccessoryPulseDuration defaultAccessoryDuration;
 		bool autoAddFeedback;
 		bool stopOnFeedbackInFreeTrack;
+		bool executeAccessory;
 		DataModel::SelectRouteApproach selectRouteApproach;
 		DataModel::Loco::NrOfTracksToReserve nrOfTracksToReserve;
 
@@ -861,6 +978,7 @@ class Manager
 
 		const std::string unknownControl;
 		const std::string unknownLoco;
+		const std::string unknownMultipleUnit;
 		const std::string unknownAccessory;
 		const std::string unknownFeedback;
 		const std::string unknownTrack;

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -155,29 +155,41 @@ class ControlInterface
 		{
 		}
 
-		virtual void LocoDelete(__attribute__((unused)) const LocoID locoID,
-			__attribute__((unused)) const std::string& name,
-			__attribute__((unused)) const std::string& matchKey)
-		{
-		}
-
-		virtual void LocoDestinationReached(__attribute__((unused)) const DataModel::Loco* loco,
+		virtual void LocoBaseDestinationReached(__attribute__((unused)) const DataModel::LocoBase* loco,
 			__attribute__((unused)) const DataModel::Route* route,
 			__attribute__((unused)) const DataModel::Track* track)
 		{
 		}
 
-		virtual void LocoOrientation(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::Loco* loco,
+		virtual void LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
+			__attribute__((unused)) const DataModel::LocoBase* loco,
 			__attribute__((unused)) const Orientation orientation)
 		{
 		}
 
 
-		virtual void LocoFunction(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::Loco* loco,
+		virtual void LocoBaseFunction(__attribute__((unused)) const ControlType controlType,
+			__attribute__((unused)) const DataModel::LocoBase* loco,
 			__attribute__((unused)) const DataModel::LocoFunctionNr function,
 			__attribute__((unused)) const DataModel::LocoFunctionState on)
+		{
+		}
+
+		virtual void LocoBaseRelease(__attribute__((unused)) const DataModel::LocoBase* loco)
+		{
+		}
+
+		virtual void LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
+			__attribute__((unused)) const DataModel::LocoBase* loco,
+			__attribute__((unused)) const Speed speed)
+		{
+		}
+
+		virtual void LocoBaseStart(__attribute__((unused)) const DataModel::LocoBase* loco)
+		{
+		}
+
+		virtual void LocoBaseStop(__attribute__((unused)) const DataModel::LocoBase* loco)
 		{
 		}
 
@@ -190,7 +202,9 @@ class ControlInterface
 			return false;
 		}
 
-		virtual void LocoRelease(__attribute__((unused)) const LocoID locoID)
+		virtual void LocoDelete(__attribute__((unused)) const LocoID locoID,
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const std::string& matchKey)
 		{
 		}
 
@@ -200,18 +214,15 @@ class ControlInterface
 		{
 		}
 
-		virtual void LocoSpeed(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::Loco* loco, __attribute__((unused)) const Speed speed)
+		virtual void MultipleUnitDelete(__attribute__((unused)) const MultipleUnitID multipleUnitID,
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const std::string& matchKey)
 		{
 		}
 
-		virtual void LocoStart(__attribute__((unused)) const LocoID locoID,
-			__attribute__((unused)) const std::string& name)
-		{
-		}
-
-		virtual void LocoStop(__attribute__((unused)) const LocoID locoID,
-			__attribute__((unused)) const std::string& name)
+		virtual void MultipleUnitSettings(__attribute__((unused)) const MultipleUnitID multipleUnitID,
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const std::string& matchKey)
 		{
 		}
 
@@ -297,16 +308,16 @@ class ControlInterface
 		{
 		}
 
-		virtual void LocoSpeedOrientationFunctions(const DataModel::Loco* loco,
+		virtual void LocoSpeedOrientationFunctions(const DataModel::LocoBase* loco,
 			const Speed speed,
 			const Orientation orientation,
 			std::vector<DataModel::LocoFunctionEntry>& functions)
 		{
-			LocoSpeed(ControlTypeInternal, loco, speed);
-			LocoOrientation(ControlTypeInternal, loco, orientation);
+			LocoBaseSpeed(ControlTypeInternal, loco, speed);
+			LocoBaseOrientation(ControlTypeInternal, loco, orientation);
 			for (const DataModel::LocoFunctionEntry& functionEntry : functions)
 			{
-				LocoFunction(ControlTypeInternal, loco, functionEntry.nr, functionEntry.state);
+				LocoBaseFunction(ControlTypeInternal, loco, functionEntry.nr, functionEntry.state);
 			}
 		}
 
@@ -338,7 +349,22 @@ class ControlInterface
 
 		virtual DataModel::LocoConfig GetLocoByMatchKey(__attribute__((unused)) const std::string& matchKey) const
 		{
-			return DataModel::LocoConfig();
+			return DataModel::LocoConfig(LocoTypeLoco);
+		}
+
+		virtual void AddUnmatchedMultipleUnits(__attribute__((unused)) std::map<std::string,DataModel::LocoConfig>& list) const
+		{
+		}
+
+		virtual std::map<std::string,DataModel::LocoConfig> GetUnmatchedMultipleUnits(__attribute__((unused)) const std::string& matchKey) const
+		{
+			std::map<std::string,DataModel::LocoConfig> out;
+			return out;
+		}
+
+		virtual DataModel::LocoConfig GetMultipleUnitByMatchKey(__attribute__((unused)) const std::string& matchKey) const
+		{
+			return DataModel::LocoConfig(LocoTypeMultipleUnit);
 		}
 
 		virtual void AddUnmatchedAccessories(__attribute__((unused)) std::map<std::string,DataModel::AccessoryConfig>& list) const

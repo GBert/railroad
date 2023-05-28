@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -181,7 +181,7 @@ namespace Hardware
 
 			virtual DataModel::LocoConfig GetLocoByMatchKey(__attribute__((unused)) const std::string& matchKey) const
 			{
-				return DataModel::LocoConfig();
+				return DataModel::LocoConfig(LocoTypeLoco);
 			}
 
 			virtual void SetLocoIdOfMatchKey(__attribute__((unused)) const LocoID locoId,

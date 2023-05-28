@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -55,6 +55,8 @@ namespace Storage
 			void DeleteHardwareParams(const ControlID controlID);
 			void AllLocos(std::map<LocoID,DataModel::Loco*>& locos);
 			void DeleteLoco(LocoID locoID);
+			void AllMultipleUnits(std::map<LocoID,DataModel::MultipleUnit*>& multipleUnits);
+			void DeleteMultipleUnit(MultipleUnitID multipleUnitID);
 			void AllAccessories(std::map<AccessoryID,DataModel::Accessory*>& accessories);
 			void DeleteAccessory(AccessoryID accessoryID);
 			void AllFeedbacks(std::map<FeedbackID,DataModel::Feedback*>& feedbacks);
@@ -76,6 +78,7 @@ namespace Storage
 			void Save(const Hardware::HardwareParams& hardwareParams);
 			void Save(const DataModel::Route& route);
 			void Save(const DataModel::Loco& loco);
+			void Save(const DataModel::MultipleUnit& multipleUnit);
 			void Save(const DataModel::Cluster& cluster);
 			void Save(const DataModel::Track& track);
 

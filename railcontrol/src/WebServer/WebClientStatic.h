@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -37,6 +37,8 @@ namespace WebServer
 			WebClientStatic() = delete;
 			WebClientStatic(const WebClientStatic&) = delete;
 			WebClientStatic& operator=(const WebClientStatic&) = delete;
+
+			static HtmlTag HtmlTagSelectExecuteAccessory(const bool executeAccessory = true);
 
 			static HtmlTag HtmlTagSelectSelectRouteApproach(const DataModel::SelectRouteApproach selectRouteApproach,
 				const bool addDefault = true);
@@ -98,6 +100,15 @@ namespace WebServer
 				const Languages::TextSelector buttonValue,
 				const bool selected = false,
 				const bool hidden = false);
+
+			static HtmlTag HtmlTagSelectPropulsion(const Propulsion propulsion);
+			static HtmlTag HtmlTagSelectTrainType(const TrainType trainType);
+			static HtmlTag HtmlTagTabFunctions(const DataModel::LocoFunctionEntry* locoFunctions);
+			static HtmlTag HtmlTagTabAutomode(const bool pushpull,
+				const Speed maxSpeed,
+				const Speed travelSpeed,
+				const Speed reducedSpeed,
+				const Speed creepingSpeed);
 	};
 
 } // namespace WebServer

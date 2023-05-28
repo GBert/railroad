@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -23,6 +23,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 
 #include "DataModel/Loco.h"
+#include "DataModel/MultipleUnit.h"
 #include "Hardware/LocoCache.h"
 
 namespace DataModel
@@ -30,11 +31,12 @@ namespace DataModel
 	class LocoConfig
 	{
 		public:
-			inline LocoConfig()
+			inline LocoConfig(const LocoType type = LocoTypeLoco)
 			:	controlId(ControlNone),
 				locoId(LocoNone),
 				address(AddressDefault),
 				protocol(ProtocolNone),
+				type(type),
 				isInUse(false)
 			{
 			}
@@ -44,6 +46,7 @@ namespace DataModel
 				locoId(loco.GetID()),
 				address(loco.GetAddress()),
 				protocol(loco.GetProtocol()),
+				type(LocoTypeLoco),
 				name(loco.GetName()),
 				matchKey(loco.GetMatchKey()),
 				isInUse(loco.IsInUse())
@@ -56,6 +59,7 @@ namespace DataModel
 				locoId(loco.GetLocoID()),
 				address(loco.GetAddress()),
 				protocol(loco.GetProtocol()),
+				type(loco.GetType()),
 				name(loco.GetName()),
 				matchKey(loco.GetMatchKey()),
 				isInUse(false)
@@ -69,6 +73,7 @@ namespace DataModel
 				locoId = loco.GetID();
 				address = loco.GetAddress();
 				protocol = loco.GetProtocol();
+				type = LocoTypeLoco;
 				name = loco.GetName();
 				matchKey = loco.GetMatchKey();
 				isInUse = loco.IsInUse();
@@ -82,9 +87,24 @@ namespace DataModel
 				locoId = loco.GetLocoID();
 				address = loco.GetAddress();
 				protocol = loco.GetProtocol();
+				type = loco.GetType();
 				name = loco.GetName();
 				matchKey = loco.GetMatchKey();
 				ConfigureFunctions(loco.GetFunctionStates());
+				return *this;
+			}
+
+			inline LocoConfig& operator=(const DataModel::MultipleUnit& multipleUnit)
+			{
+				controlId = multipleUnit.GetControlID();
+				locoId = multipleUnit.GetID();
+				address = multipleUnit.GetAddress();
+				protocol = ProtocolNone;
+				type = LocoTypeMultipleUnit;
+				name = multipleUnit.GetName();
+				matchKey = multipleUnit.GetMatchKey();
+				isInUse = multipleUnit.IsInUse();
+				ConfigureFunctions(multipleUnit.GetFunctionStates());
 				return *this;
 			}
 
@@ -106,6 +126,16 @@ namespace DataModel
 			inline Protocol GetProtocol() const
 			{
 				return protocol;
+			}
+
+			inline LocoType GetType() const
+			{
+				return type;
+			}
+
+			inline void SetType(const LocoType type)
+			{
+				this->type = type;
 			}
 
 			inline std::string GetName() const
@@ -143,6 +173,7 @@ namespace DataModel
 			LocoID locoId;
 			Address address;
 			Protocol protocol;
+			LocoType type;
 			std::string name;
 			std::string matchKey;
 			bool isInUse;

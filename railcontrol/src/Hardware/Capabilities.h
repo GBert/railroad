@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -29,26 +29,28 @@ namespace Hardware
 	{
 		CapabilityNone                         = 0x00000000,
 		CapabilityLoco                         = 0x00000001,
-		CapabilityAccessory                    = 0x00000002,
-		CapabilityFeedback                     = 0x00000004,
-		CapabilityProgram                      = 0x00000008,
-		CapabilityProgramMmWrite               = 0x00000010,
-		CapabilityProgramMmPomWrite            = 0x00000020,
-		CapabilityProgramMfxRead               = 0x00000040,
-		CapabilityProgramMfxWrite              = 0x00000080,
-		CapabilityProgramDccRegisterRead       = 0x00000100,
-		CapabilityProgramDccRegisterWrite      = 0x00000200,
-		CapabilityProgramDccPageRead           = 0x00000400,
-		CapabilityProgramDccPageWrite          = 0x00000800,
-		CapabilityProgramDccDirectRead         = 0x00001000,
-		CapabilityProgramDccDirectWrite        = 0x00002000,
-		CapabilityProgramDccPomLocoRead        = 0x00004000,
-		CapabilityProgramDccPomLocoWrite       = 0x00008000,
-		CapabilityProgramDccPomAccessoryRead   = 0x00010000,
-		CapabilityProgramDccPomAccessoryWrite  = 0x00020000,
-		CapabilityLocoDatabase                 = 0x00040000,
-		CapabilityAccessoryDatabase            = 0x00080000,
-		CapabilityFeedbackDatabase             = 0x00100000,
+		CapabilityMultipleUnit                 = 0x00000002,
+		CapabilityAccessory                    = 0x00000004,
+		CapabilityFeedback                     = 0x00000008,
+		CapabilityProgram                      = 0x00000010,
+		CapabilityProgramMmWrite               = 0x00000020,
+		CapabilityProgramMmPomWrite            = 0x00000040,
+		CapabilityProgramMfxRead               = 0x00000080,
+		CapabilityProgramMfxWrite              = 0x00000100,
+		CapabilityProgramDccRegisterRead       = 0x00000200,
+		CapabilityProgramDccRegisterWrite      = 0x00000400,
+		CapabilityProgramDccPageRead           = 0x00000800,
+		CapabilityProgramDccPageWrite          = 0x00001000,
+		CapabilityProgramDccDirectRead         = 0x00002000,
+		CapabilityProgramDccDirectWrite        = 0x00004000,
+		CapabilityProgramDccPomLocoRead        = 0x00008000,
+		CapabilityProgramDccPomLocoWrite       = 0x00010000,
+		CapabilityProgramDccPomAccessoryRead   = 0x00020000,
+		CapabilityProgramDccPomAccessoryWrite  = 0x00040000,
+		CapabilityLocoDatabase                 = 0x00080000,
+		CapabilityMultipleUnitDatabase         = 0x00100000,
+		CapabilityAccessoryDatabase            = 0x00200000,
+		CapabilityFeedbackDatabase             = 0x00400000,
 	};
 
 	inline Capabilities operator& (const Capabilities c1, const Capabilities c2)

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -71,6 +71,20 @@ namespace DataModel
 		if (objectID != ObjectNone)
 		{
 			objectType = ObjectTypeText;
+			return true;
+		}
+
+		objectID = static_cast<ObjectID>(Utils::Utils::GetIntegerMapEntry(arguments, "pause", ObjectNone));
+		if (objectID != ObjectNone)
+		{
+			objectType = ObjectTypePause;
+			return true;
+		}
+
+		objectID = static_cast<ObjectID>(Utils::Utils::GetIntegerMapEntry(arguments, "multipleunit", ObjectNone));
+		if (objectID != ObjectNone)
+		{
+			objectType = ObjectTypeMultipleUnit;
 			return true;
 		}
 
@@ -146,12 +160,24 @@ namespace DataModel
 			objectID = Utils::Utils::StringToInteger(text.substr(4), ObjectNone);
 			return *this;
 		}
+		if (text.substr(0, 5).compare("pause") == 0)
+		{
+			objectType = ObjectTypePause;
+			objectID = Utils::Utils::StringToInteger(text.substr(5), ObjectNone);
+			return *this;
+		}
+		if (text.substr(0, 12).compare("multipleunit") == 0)
+		{
+			objectType = ObjectTypeMultipleUnit;
+			objectID = Utils::Utils::StringToInteger(text.substr(7), ObjectNone);
+			return *this;
+		}
 		objectType = ObjectTypeTrack;
 		objectID = Utils::Utils::StringToInteger(text, ObjectNone);
 		return *this;
 	}
 
-	std::string ObjectIdentifier::GetObjectTypeAsString() const
+	std::string ObjectIdentifier::ObjectTypeToString(const ObjectType objectType)
 	{
 		switch (objectType)
 		{
@@ -193,6 +219,9 @@ namespace DataModel
 
 			case ObjectTypePause:
 				return "pause";
+
+			case ObjectTypeMultipleUnit:
+				return "multipleunit";
 		}
 		return "object";
 	}

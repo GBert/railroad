@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -243,7 +243,9 @@ namespace Hardware
 		instance->Booster(status);
 	}
 
-	void HardwareHandler::LocoSpeed(const ControlType controlType, const DataModel::Loco* loco, const Speed speed)
+	void HardwareHandler::LocoBaseSpeed(const ControlType controlType,
+		const DataModel::LocoBase* loco,
+		const Speed speed)
 	{
 		if (controlType == ControlTypeHardware || instance == nullptr || loco->GetControlID() != GetControlID())
 		{
@@ -252,7 +254,9 @@ namespace Hardware
 		instance->LocoSpeed(loco->GetProtocol(), loco->GetAddress(), speed);
 	}
 
-	void HardwareHandler::LocoOrientation(const ControlType controlType, const DataModel::Loco* loco, const Orientation orientation)
+	void HardwareHandler::LocoBaseOrientation(const ControlType controlType,
+		const DataModel::LocoBase* loco,
+		const Orientation orientation)
 	{
 		if (controlType == ControlTypeHardware || instance == nullptr || loco->GetControlID() != GetControlID())
 		{
@@ -261,8 +265,8 @@ namespace Hardware
 		instance->LocoOrientation(loco->GetProtocol(), loco->GetAddress(), orientation);
 	}
 
-	void HardwareHandler::LocoFunction(const ControlType controlType,
-		const DataModel::Loco* loco,
+	void HardwareHandler::LocoBaseFunction(const ControlType controlType,
+		const DataModel::LocoBase* loco,
 		const DataModel::LocoFunctionNr function,
 		const DataModel::LocoFunctionState on)
 	{
@@ -273,7 +277,7 @@ namespace Hardware
 		instance->LocoFunction(loco->GetProtocol(), loco->GetAddress(), function, on);
 	}
 
-	void HardwareHandler::LocoSpeedOrientationFunctions(const DataModel::Loco* loco,
+	void HardwareHandler::LocoSpeedOrientationFunctions(const DataModel::LocoBase* loco,
 		const Speed speed,
 		const Orientation orientation,
 		std::vector<DataModel::LocoFunctionEntry>& functions)
@@ -543,6 +547,10 @@ namespace Hardware
 			{
 				continue;
 			}
+			if (loco.GetType() != LocoTypeLoco)
+			{
+				continue;
+			}
 			list[loco.GetName() + " (" + instance->GetShortName() + ")"] = loco;
 		}
 	}
@@ -572,7 +580,7 @@ namespace Hardware
 	{
 		if (instance == nullptr)
 		{
-			return DataModel::LocoConfig();
+			return DataModel::LocoConfig(LocoTypeLoco);
 		}
 		return instance->GetLocoByMatchKey(match);
 	}

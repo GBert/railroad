@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -34,7 +34,7 @@ class Manager;
 
 namespace DataModel
 {
-	class Loco;
+	class LocoBase;
 	class Relation;
 
 	class Route : public LayoutItem, public LockableItem
@@ -139,7 +139,7 @@ namespace DataModel
 			bool FromTrackOrientation(Logger::Logger* logger,
 				const TrackID trackID,
 				const Orientation trackOrientation,
-				const DataModel::Loco* loco,
+				const DataModel::LocoBase* loco,
 				const bool allowLocoTurn);
 
 			bool Execute(Logger::Logger* logger, const LocoID locoID);

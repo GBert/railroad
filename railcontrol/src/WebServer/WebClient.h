@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -159,9 +159,10 @@ namespace WebServer
 				const DataModel::LayoutItem::LayoutRotation rotation = DataModel::LayoutItem::RotationNotRelevant,
 				const DataModel::LayoutItem::Visible visible = DataModel::LayoutItem::VisibleNotRelevant) const ;
 
-			HtmlTag HtmlTagControlLoco(ControlID& controlId, const std::string& objectType, const ObjectID objectID);
-			HtmlTag HtmlTagControlAccessory(ControlID& controlID, const std::string& objectType, const ObjectID objectID);
-			HtmlTag HtmlTagControlFeedback(ControlID& controlId, const std::string& objectType, const ObjectID objectID);
+			HtmlTag HtmlTagControlLoco(ControlID& controlId, const std::string& objectType, const ObjectID objectID) const;
+			HtmlTag HtmlTagControlMultipleUnit(ControlID& controlId, const std::string& objectType, const ObjectID objectID) const;
+			HtmlTag HtmlTagControlAccessory(ControlID& controlID, const std::string& objectType, const ObjectID objectID) const;
+			HtmlTag HtmlTagControlFeedback(ControlID& controlId, const std::string& objectType, const ObjectID objectID) const;
 
 			HtmlTag HtmlTagProtocolAccessory(const ControlID controlID, const Protocol selectedProtocol);
 
@@ -214,7 +215,7 @@ namespace WebServer
 
 			HtmlTag HtmlTagInputBitValue(std::string name) const;
 
-			std::map<std::string,ObjectID> GetLocoSlaveOptions(const LocoID locoID = LocoNone) const;
+			std::map<std::string,ObjectID> GetMultipleUnitSlaveOptions(const LocoID locoID = LocoNone) const;
 
 			void HandleSelectLoco(const std::map<std::string, std::string>& arguments);
 			void HandleLayerEdit(const std::map<std::string, std::string>& arguments);
@@ -227,8 +228,8 @@ namespace WebServer
 			void HandleControlList();
 			void HandleControlAskDelete(const std::map<std::string, std::string>& arguments);
 			void HandleControlDelete(const std::map<std::string, std::string>& arguments);
-			void HandleLocoSpeed(const std::map<std::string,std::string>& arguments);
-			void HandleLocoOrientation(const std::map<std::string,std::string>& arguments);
+			void HandleLocoBaseSpeed(const std::map<std::string,std::string>& arguments);
+			void HandleLocoBaseOrientation(const std::map<std::string,std::string>& arguments);
 			void HandleLocoFunction(const std::map<std::string, std::string>& arguments);
 			void HandleLocoEdit(const std::map<std::string, std::string>& arguments);
 			void HandleLocoSave(const std::map<std::string, std::string>& arguments);
@@ -237,6 +238,11 @@ namespace WebServer
 			void HandleLocoDelete(const std::map<std::string, std::string>& arguments);
 			void HandleLocoRelease(const std::map<std::string, std::string>& arguments);
 			void HandleLocoAddTimeTable(const std::map<std::string, std::string>& arguments);
+			void HandleMultipleUnitEdit(const std::map<std::string, std::string>& arguments);
+			void HandleMultipleUnitSave(const std::map<std::string, std::string>& arguments);
+			void HandleMultipleUnitList();
+			void HandleMultipleUnitAskDelete(const std::map<std::string, std::string>& arguments);
+			void HandleMultipleUnitDelete(const std::map<std::string, std::string>& arguments);
 			void HandleProtocol(const std::map<std::string, std::string>& arguments);
 			void HandleLayout(const std::map<std::string,std::string>& arguments);
 			void HandleAccessoryEdit(const std::map<std::string,std::string>& arguments);

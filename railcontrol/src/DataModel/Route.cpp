@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -22,7 +22,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <map>
 #include <string>
 
-#include "DataModel/Loco.h"
+#include "DataModel/LocoBase.h"
 #include "DataModel/Relation.h"
 #include "DataModel/Route.h"
 #include "Manager.h"
@@ -176,7 +176,7 @@ namespace DataModel
 	bool Route::FromTrackOrientation(Logger::Logger* logger,
 		const TrackID trackID,
 		const Orientation trackOrientation,
-		const Loco* loco,
+		const LocoBase* loco,
 		const bool allowLocoTurn)
 	{
 		if (automode == false)

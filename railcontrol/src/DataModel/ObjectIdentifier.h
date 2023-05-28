@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2022 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -111,12 +111,18 @@ namespace DataModel
 				return objectID;
 			}
 
-			std::string GetObjectTypeAsString() const;
+			inline std::string GetObjectTypeAsString() const
+			{
+				return ObjectTypeToString(objectType);
+			}
+
 
 			inline std::string GetObjectIdAsString() const
 			{
 				return std::to_string(objectID);
 			}
+
+			static std::string ObjectTypeToString(const ObjectType objectType);
 
 		private:
 			ObjectType objectType;

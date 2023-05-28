@@ -82,7 +82,7 @@ body {
 	}
 }
 
-@media (min-width: 650px) and (max-width: 951px) {
+@media (min-width: 650px) and (max-width: 999px) {
 	.menu_config {
 		display: none;
 	}
@@ -103,7 +103,7 @@ body {
 	}
 }
 
-@media (min-width: 952px) {
+@media (min-width: 1000px) {
 	.menu_add,
 	.menu_config,
 	.menu_config_visible {
