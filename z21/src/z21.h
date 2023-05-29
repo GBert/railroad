@@ -70,6 +70,8 @@ struct z21_data_t {
 
 struct z21_config_data_t {
     int verbose;
+    struct in_addr cs2_ip;
+    int auto_timeout;
     char *name;
     char *directory;
     char *filename;

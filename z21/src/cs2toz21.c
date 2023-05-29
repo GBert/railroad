@@ -65,6 +65,7 @@
 #include <sqlite3.h>
 #include <uuid/uuid.h>
 
+#include "cs2_net.h"
 #include "read-cs2-config.h"
 #include "fmapping.h"
 #include "geturl.h"
@@ -98,7 +99,8 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -c <config_dir> -i <interface list> -s <config link> -p <icons link>\n", prg);
-    fprintf(stderr, "   Version 0.95\n\n");
+    fprintf(stderr, "   Version 0.96\n\n");
+    fprintf(stderr, "         -a <time_out>       try to find CS2/CS2 for %s seconds using -i <interface list>\n", config_data.config_dir);
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
     fprintf(stderr, "         -s <link to config> link to the lokomotive.cs2\n");
@@ -428,7 +430,7 @@ int sql_insert_locos(sqlite3 * db, struct z21_config_data_t *config_data, char *
 }
 
 int main(int argc, char **argv) {
-    char *config_file, *loco_file, *interface_list;
+    char *broadcast_ip, *config_file, *loco_file, *interface_list;
     int opt, ret;
     sqlite3 *db;
     char *z21_dir, *sql_file, *icon_dir, *systemcmd;
@@ -439,8 +441,11 @@ int main(int argc, char **argv) {
     config_data.config_dir=strdup("/www/config");
     interface_list = strdup(INTERFACE_LIST);
 
-    while ((opt = getopt(argc, argv, "c:i:p:s:vh?")) != -1) {
+    while ((opt = getopt(argc, argv, "a:c:i:p:s:vh?")) != -1) {
 	switch (opt) {
+	case 'a':
+	    config_data.auto_timeout = atoi(optarg);
+	    break;
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
 		free(config_data.config_dir);
@@ -483,6 +488,26 @@ int main(int argc, char **argv) {
 	    print_usage(basename(argv[0]));
 	    exit(EXIT_SUCCESS);
 	    break;
+	}
+    }
+
+    /* we try to find the CS2 IP */
+    if (config_data.auto_timeout) {
+	/* find the broadcast address */
+	if (!(broadcast_ip = find_first_ip(interface_list, BROADCAST_IP))) {
+	    fprintf(stderr, "can't find a valid broadcast IP on list: %s\n", interface_list);
+	    exit(EXIT_FAILURE);
+	}
+	/* we have found the CS2 IP so let's use network config */
+	config_data.cs2_ip = find_cs2(broadcast_ip, config_data.auto_timeout);
+	if (config_data.cs2_ip.s_addr) {
+	    config_data.ip_address = inet_ntoa(config_data.cs2_ip);
+	    asprintf(&config_data.config_server, "http://%s/config/lokomotive.cs2", config_data.ip_address);
+	    asprintf(&config_data.icon_server, "http://%s/icons", config_data.ip_address);
+	    v_printf(config_data.verbose, "guessed CS2 IP address %s\n", config_data.ip_address);
+	} else {
+	    fprintf(stderr, "can't find CS2 on interfaces: %s\n", interface_list);
+	    exit(EXIT_FAILURE);
 	}
     }
 
