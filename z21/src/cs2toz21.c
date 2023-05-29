@@ -110,9 +110,10 @@ void print_usage(char *prg) {
 }
 
 int send_tcp_data(struct sockaddr_in *client_sa) {
-    int buf_len, fd, st;
+    int fd, st;
     struct sockaddr_in server_sa;
     char *offer;
+    char *buffer;
     void *p;
     struct stat file_stat;
     char filename[] = { "/tmp/Data.z21" };
@@ -154,12 +155,12 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", file_stat.st_size);
     v_printf(config_data.verbose, "send TCP\n%s", offer);
     send(st, offer, strlen(offer), 0);
+    free(offer);
 
-    buf_len = strlen(offer);
-    memset(offer, 0, buf_len);
+    buffer = calloc(2048, sizeof(char));
 
     printf("Waiting for <install> from client\n");
-    if (recv(st, offer, buf_len, 0) < 0) {
+    if (recv(st, buffer, sizeof(buffer), 0) < 0) {
 	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
 	close(fd);
 	return EXIT_FAILURE;
@@ -167,7 +168,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     p = mmap(NULL, file_stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
 
-    if (strncmp(offer, "install", 7) == 0) {
+    if (strncmp(buffer, "install", 7) == 0) {
 	if (send(st, p, file_stat.st_size, 0) < 0) {
 	    fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
 	    close(fd);
@@ -182,7 +183,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     }
 
     printf("data send complete\n");
-
+    free(buffer);
     close(fd);
     return EXIT_SUCCESS;
 }
