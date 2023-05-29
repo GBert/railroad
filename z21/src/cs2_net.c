@@ -111,5 +111,7 @@ struct in_addr find_cs2(char *broadcast_ip, int retries) {
 	    }
 	}
     }
+    close(sr);
+    close(sb);
     return cs2_ip;
 }
