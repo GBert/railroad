@@ -103,8 +103,20 @@ namespace DataModel
 				return manager->RouteExecute(logger, locoID, ObjectID2());
 
 			case ObjectTypeLoco:
-				manager->LocoBaseFunctionState(ControlTypeInternal, locoID, static_cast<DataModel::LocoFunctionNr>(ObjectID2()), static_cast<DataModel::LocoFunctionState>(data));
+			{
+				const DataModel::LocoFunctionNr nr = static_cast<DataModel::LocoFunctionNr>(ObjectID2());
+				if (data > DataModel::LocoFunctionStateOn)
+				{
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoID, nr, DataModel::LocoFunctionStateOn);
+					Utils::Utils::SleepForMilliseconds(static_cast<unsigned int>(data) * 100);
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoID, nr, DataModel::LocoFunctionStateOff);
+				}
+				else
+				{
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoID, nr, static_cast<DataModel::LocoFunctionState>(data));
+				}
 				return true;
+			}
 
 			case ObjectTypePause:
 				Utils::Utils::SleepForMilliseconds(static_cast<unsigned int>(data) * 100);

@@ -798,9 +798,13 @@ namespace WebServer
 				content.AddChildTag(HtmlTagSelect(name + "_id", functionOptions, Utils::Utils::ToStringWithLeadingZeros(objectId, 3)).AddClass("select_relation_id"));
 
 				// FIXME: load available functions of loco
-				map<DataModel::LocoFunctionState,Languages::TextSelector> stateOptions;
-				stateOptions[DataModel::LocoFunctionStateOff] = Languages::TextOff;
-				stateOptions[DataModel::LocoFunctionStateOn] = Languages::TextOn;
+				map<DataModel::LocoFunctionState,string> stateOptions;
+				stateOptions[DataModel::LocoFunctionStateOff] = Languages::GetText(Languages::TextOff);
+				stateOptions[DataModel::LocoFunctionStateOn] = Languages::GetText(Languages::TextOn);
+				stateOptions[DataModel::LocoFunctionState0s5] = "0.5s";
+				stateOptions[DataModel::LocoFunctionState1s0] = "1s";
+				stateOptions[DataModel::LocoFunctionState1s5] = "1.5s";
+				stateOptions[DataModel::LocoFunctionState2s0] = "2s";
 				content.AddChildTag(HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::LocoFunctionState>(data)).AddClass("select_relation_state"));
 				return content;
 			}

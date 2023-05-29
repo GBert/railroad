@@ -34,7 +34,11 @@ namespace DataModel
 	enum LocoFunctionState : uint8_t
 	{
 		LocoFunctionStateOff = 0,
-		LocoFunctionStateOn = 1
+		LocoFunctionStateOn = 1,
+		LocoFunctionState0s5 = 5,
+		LocoFunctionState1s0 = 10,
+		LocoFunctionState1s5 = 15,
+		LocoFunctionState2s0 = 20,
 	};
 
 	enum LocoFunctionType : uint8_t
@@ -168,13 +172,13 @@ namespace DataModel
 	class LocoFunctionEntry
 	{
 		public:
-			LocoFunctionEntry()
+			inline LocoFunctionEntry()
+			:	nr(0),
+				state(LocoFunctionStateOff),
+				type(LocoFunctionTypeNone),
+				icon(LocoFunctionIconNone),
+				timer(0)
 			{
-				nr = 0;
-				state = LocoFunctionStateOff;
-				type = LocoFunctionTypeNone;
-				icon = LocoFunctionIconNone;
-				timer = 0;
 			}
 
 			LocoFunctionNr nr;
