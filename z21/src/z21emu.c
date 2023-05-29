@@ -50,6 +50,7 @@
 struct sockaddr_in *bsa;
 extern pthread_mutex_t lock;
 
+unsigned char udpframe[MAXDG];
 struct z21_data_t z21_data;
 extern struct loco_data_t *loco_data, *loco_data_by_uid;
 extern struct magnet_data_t *magnet_data;
@@ -98,7 +99,7 @@ static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
-    fprintf(stderr, "   Version 2.0\n\n");
+    fprintf(stderr, "   Version 2.1\n\n");
     fprintf(stderr, "         -a <time_out>       try to find gateway for <time_out> seconds\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -p <port>           primary UDP port for the server - default %d\n", PRIMARY_UDP_PORT);
@@ -891,34 +892,16 @@ int main(int argc, char **argv) {
 #endif
 
     /* prepare primary UDP socket */
-    z21_data.sp = socket(PF_INET, SOCK_DGRAM, 0);
-    if (z21_data.sp < 0) {
-	fprintf(stderr, "primary UDP socket error: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
-    }
-
-    z21_data.spaddr.sin_family = AF_INET;
-    z21_data.spaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    z21_data.spaddr.sin_port = htons(primary_port);
-
-    if (bind(z21_data.sp, (struct sockaddr *)&z21_data.spaddr, sizeof z21_data.spaddr) < 0) {
-	fprintf(stderr, "primary UDP bind error: %s\n", strerror(errno));
+    z21_data.sp = setup_udp_socket(&z21_data.spaddr, NULL, primary_port, UDP_READING);
+    if (z21_data.sp <= 0) {
+	fprintf(stderr, "problem to setup primary UDP socket\n");
 	exit(EXIT_FAILURE);
     }
 
     /* prepare secondary UDP socket */
-    z21_data.ss = socket(PF_INET, SOCK_DGRAM, 0);
-    if (z21_data.ss < 0) {
-	fprintf(stderr, "secondary UDP socket error: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
-    }
-
-    z21_data.ssaddr.sin_family = AF_INET;
-    z21_data.ssaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    z21_data.ssaddr.sin_port = htons(secondary_port);
-
-    if (bind(z21_data.ss, (struct sockaddr *)&z21_data.ssaddr, sizeof z21_data.ssaddr) < 0) {
-	fprintf(stderr, "scondary UDP bind error: %s\n", strerror(errno));
+    z21_data.ss = setup_udp_socket(&z21_data.ssaddr, NULL, secondary_port, UDP_READING);
+    if (z21_data.ss <= 0) {
+	fprintf(stderr, "problem to setup primary UDP socket\n");
 	exit(EXIT_FAILURE);
     }
 
