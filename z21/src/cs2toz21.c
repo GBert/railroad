@@ -65,6 +65,7 @@
 #include <sqlite3.h>
 #include <uuid/uuid.h>
 
+#include "net.h"
 #include "cs2_net.h"
 #include "read-cs2-config.h"
 #include "fmapping.h"
@@ -187,7 +188,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 }
 
 int send_udp_broadcast(void) {
-    int n, s, sa, sb;
+    int n, sa, sb;
     struct sockaddr_in baddr, saddr;
     struct sockaddr_in client;
     struct timeval tv;
@@ -195,55 +196,28 @@ int send_udp_broadcast(void) {
     socklen_t len;
     fd_set readfds;
 
-    const int on = 1;
-
     int destination_port = Z21PORT;
     int local_port = Z21PORT;
     memset(&baddr, 0, sizeof baddr);
     memset(&saddr, 0, sizeof saddr);
     memset(&client, 0, sizeof client);
 
-    /* prepare udp destination struct with defaults */
-    s = inet_pton(AF_INET, "255.255.255.255", &baddr.sin_addr);
-    if (s <= 0) {
-	if (s == 0) {
-	    fprintf(stderr, "UDP IP invalid\n");
-	} else {
-	    fprintf(stderr, "invalid address family\n");
-	}
-	exit(EXIT_FAILURE);
-    }
-
-    baddr.sin_port = htons(destination_port);
-
     /* prepare UDP sending socket */
-    if ((sb = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	fprintf(stderr, "Send UDP socket error %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
-    }
-    if (setsockopt(sb, SOL_SOCKET, SO_BROADCAST, &on, sizeof on) < 0) {
-	fprintf(stderr, "UDP set socket option error: %s\n", strerror(errno));
+    sb = setup_udp_socket(&baddr, "255.255.255.255", destination_port, UDP_SENDING);
+    if (sb <= 0) {
+        fprintf(stderr, "problem to setup UDP (Z21 App) sending socket\n");
 	exit(EXIT_FAILURE);
     }
 
     /* prepare receiving socket */
-    if ((sa = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-	fprintf(stderr, "UDP socket error: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
-    }
-
-    saddr.sin_family = AF_INET;
-    saddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    saddr.sin_port = htons(local_port);
-
-    if (bind(sa, (struct sockaddr *)&saddr, sizeof saddr) < 0) {
-	fprintf(stderr, "UDP bind error: %s\n", strerror(errno));
+    sa = setup_udp_socket(&saddr, NULL, local_port, UDP_READING);
+    if (sa <= 0) {
+        fprintf(stderr, "problem to setup UDP (Z21 App) receiving socket\n");
 	exit(EXIT_FAILURE);
     }
 
     /* get timestamp */
     gettimeofday(&tv, NULL);
-
     unsigned long long millisecondsSinceEpoch =
 	    (unsigned long long)(tv.tv_sec) * 1000 +
 	    (unsigned long long)(tv.tv_usec) / 1000;
