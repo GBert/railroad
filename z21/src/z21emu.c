@@ -901,7 +901,7 @@ int main(int argc, char **argv) {
     /* prepare secondary UDP socket */
     z21_data.ss = setup_udp_socket(&z21_data.ssaddr, NULL, secondary_port, UDP_READING);
     if (z21_data.ss <= 0) {
-	fprintf(stderr, "problem to setup primary UDP socket\n");
+	fprintf(stderr, "problem to setup secondary UDP socket\n");
 	exit(EXIT_FAILURE);
     }
 
