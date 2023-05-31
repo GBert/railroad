@@ -73,6 +73,8 @@
 #include "utils.h"
 #include "z21.h"
 
+#include "Empty_Z21_sqlite.h"
+
 #define MAXLINE         256
 #define Z21PORT		5728
 
@@ -100,7 +102,7 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -c <config_dir> -i <interface list> -s <config link> -p <icons link>\n", prg);
-    fprintf(stderr, "   Version 0.96\n\n");
+    fprintf(stderr, "   Version 0.97\n\n");
     fprintf(stderr, "         -a <time_out>       try to find CS2/CS2 for <time_out> seconds using -i <interface list>\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
@@ -411,6 +413,7 @@ int main(int argc, char **argv) {
     char *z21_dir, *sql_file, *icon_dir, *systemcmd;
     uuid_t z21_uuid;
     char uuidtext[UUIDTEXTSIZE];
+    FILE *fp;
 
     memset(&config_data, 0, sizeof config_data);
     config_data.config_dir=strdup("/www/config");
@@ -532,15 +535,21 @@ int main(int argc, char **argv) {
     /* open empty SQLite database */
 
     v_printf(config_data.verbose, "storing in %s\n", z21_dir);
-
     asprintf(&sql_file, "%s/Loco.sqlite", z21_dir);
 
-    ret = copy_file("Loco_empty.sqlite", sql_file);
-    if (ret == EXIT_FAILURE) {
-	fprintf(stderr, "Cannot copy file Loco_empty.sqlite to %s\n", sql_file);
+    /* copy empty Z21 SQLite3 Database */
+    fp = fopen(sql_file, "w");
+    if (!fp) {
+	fprintf(stderr, "Cannot open empty Z21 database file for writing: %s\n", sql_file);
 	return EXIT_FAILURE;
     }
+    if (fwrite(Empty_Z21_sqlite, 1, sizeof Empty_Z21_sqlite, fp) != sizeof Empty_Z21_sqlite) {
+	fprintf(stderr, "Cannot write Z21 empty database file: %s\n", sql_file);
+	return EXIT_FAILURE;
+    }
+    fclose(fp);
 
+    /* open the database now */
     ret = sqlite3_open(sql_file, &db);
     if (ret != SQLITE_OK) {
 	fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
