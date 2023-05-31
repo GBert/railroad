@@ -1612,23 +1612,32 @@ function loadProtocol(type, ID)
 	requestUpdateItem(elementName, url);
 }
 
-function loadRelationObject(type, priority)
+function loadRelationObject(atlock, priority, objectType = 0, id = 0, state = 0)
 {
-	var elementName = 'relation_' + type + '_' + priority;
+	var elementName = 'relation_' + atlock + '_' + priority;
 	var object = document.getElementById(elementName);
 	if (!object)
 	{
 		return;
 	}
-	var typeSelector = document.getElementById('s_' + elementName + '_type');
-	if (!typeSelector)
+	if (objectType == 0)
 	{
-		return;
+		var typeSelector = document.getElementById('s_' + elementName + '_type');
+		if (!typeSelector)
+		{
+			return;
+		}
+		objectType = typeSelector.value;
 	}
 	var url = '/?cmd=relationobject';
-	url += '&objecttype=' + typeSelector.value;
+	url += '&objecttype=' + objectType;
 	url += '&priority=' + priority;
-	url += '&type=' + type;
+	url += '&atlock=' + atlock;
+	if (objectType != 0)
+	{
+		url += '&id=' + id;
+		url += '&state=' + state;
+	}
 	requestUpdateItem(elementName + "_object", url);
 }
 
@@ -2044,6 +2053,73 @@ function extendLocos()
 	}
 	++numberOfLocoControls;
 	updateLocoControls();
+}
+
+function swapRelations(atlock, ownPriority, up)
+{
+	var ownElementName = 's_relation_' + atlock + '_' + ownPriority + '_';
+	var ownElementType = document.getElementById(ownElementName + 'type');
+	var ownElementId = document.getElementById(ownElementName + 'id');
+	var ownElementState = document.getElementById(ownElementName + 'state');
+	if (!ownElementType)
+	{
+		alert("Own element does not exist: " + ownElementName);
+		return;
+	}
+	var ownType = ownElementType.value;
+	var ownId = 0;
+	if (ownElementId)
+	{
+		ownId = ownElementId.value;
+	}
+	var ownState = 0;
+	if (ownElementState)
+	{
+		ownState = ownElementState.value;
+	}
+
+	var otherPriority = ownPriority;
+	var otherElementName;
+	var otherElementType = false;
+	while (!otherElementType)
+	{
+		if (up == 'up')
+		{
+			--otherPriority;
+			if (otherPriority == 0)
+			{
+				return;
+			}
+		}
+		else
+		{
+			++otherPriority;
+			if (otherPriority == 255)
+			{
+				return;
+			}
+		}
+		otherElementName = 's_relation_' + atlock + '_' + otherPriority + '_';
+		otherElementType = document.getElementById(otherElementName + 'type');
+	}
+	var otherElementId = document.getElementById(otherElementName + 'id');
+	var otherElementState = document.getElementById(otherElementName + 'state');
+
+	var otherType = otherElementType.value;
+
+	var otherId = 0;
+	if (otherElementId)
+	{
+		otherId = otherElementId.value;
+	}
+	var otherState = 0;
+	if (otherElementState)
+	{
+		otherState = otherElementState.value;
+	}
+
+	loadRelationObject(atlock, ownPriority, otherType, otherId, otherState);
+	loadRelationObject(atlock, otherPriority, ownType, ownId, ownState);
 }
 
 function enableNoSleep()

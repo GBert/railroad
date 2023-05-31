@@ -484,7 +484,7 @@ input {
 
 .select_relation_id,
 .select_relation_id .dropdown {
-	width: 300px;
+	width: 250px;
 }
 
 .select_relation_state,
@@ -571,6 +571,11 @@ button {
 	text-align: center;
 	font-size: 15px;
 	padding: 0px;
+}
+
+.button_replacement {
+	margin: 1px;
+	display: inline-block;
 }
 
 button:active {

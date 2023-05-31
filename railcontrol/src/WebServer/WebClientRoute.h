@@ -56,16 +56,17 @@ namespace WebServer
 			void HandleFeedbacksOfTrack(const std::map<std::string,std::string>& arguments);
 
 		private:
-			HtmlTag HtmlTagRelation(const std::string& type,
-				const std::string& priority,
+			HtmlTag HtmlTagRelation(const std::string& atlock,
+				const Priority priority,
 				const ObjectType objectType = ObjectTypeSwitch,
 				const ObjectID objectId = ObjectNone,
 				const DataModel::Relation::Data = DataModel::Relation::DefaultData);
 
-			HtmlTag HtmlTagRelationObject(const std::string& name,
+			HtmlTag HtmlTagRelationObject(const std::string& atlock,
+				const std::string& priorityString,
 				const ObjectType objectType,
 				const ObjectID objectId = ObjectNone,
-				const DataModel::Relation::Data = DataModel::Relation::DefaultData);
+				const DataModel::Relation::Data state = DataModel::Relation::DefaultData);
 
 			HtmlTag HtmlTagRelationSwitchState(const std::string& name,
 				const SwitchID switchId,

@@ -18,32 +18,22 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
-#include "Version.h"
+#pragma once
 
-const std::string& GetVersionInfoGitHash()
-{
-	static const std::string gitHash = "0ec5f9ed7699e79c8301297c98a8fc8fe693c131";
-	return gitHash;
-}
+#include <string>
 
-time_t GetVersionInfoGitTimestamp()
-{
-	return 1685424464;
-}
+#include "WebServer/HtmlTag.h"
 
-unsigned int GetVersionInfoGitDirty()
+namespace WebServer
 {
-	return 1;
-}
-
-time_t GetVersionInfoCompileTimestamp()
-{
-	return 1685546629;
-}
-
-const std::string& GetVersionInfoRailControlVersion()
-{
-	static const std::string railControlVersion = "22";
-	return railControlVersion;
-}
+	class HtmlTagSpace : public HtmlTag
+	{
+		public:
+			inline HtmlTagSpace()
+			:	HtmlTag("div")
+			{
+				AddContent("&nbsp;");
+			}
+	};
+} // namespace WebServer
 

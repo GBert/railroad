@@ -30,6 +30,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "WebServer/HtmlTagButtonCommandWide.h"
 #include "WebServer/HtmlTagButtonOK.h"
 #include "WebServer/HtmlTagButtonPopupWide.h"
+#include "WebServer/HtmlTagButtonSwapRelation.h"
 #include "WebServer/HtmlTagInputCheckboxWithLabel.h"
 #include "WebServer/HtmlTagInputHidden.h"
 #include "WebServer/HtmlTagInputIntegerWithLabel.h"
@@ -39,6 +40,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "WebServer/HtmlTagSelectMultipleWithLabel.h"
 #include "WebServer/HtmlTagSelectOrientation.h"
 #include "WebServer/HtmlTagSelectWithLabel.h"
+#include "WebServer/HtmlTagSpace.h"
 #include "WebServer/WebClient.h"
 #include "WebServer/WebClientStatic.h"
 
@@ -153,7 +155,7 @@ namespace WebServer
 		Priority priorityAtLock = 1;
 		for (auto relation : relationsAtLock)
 		{
-			relationDivAtLock.AddChildTag(HtmlTagRelation("atlock", to_string(relation->GetPriority()), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
+			relationDivAtLock.AddChildTag(HtmlTagRelation("atlock", relation->GetPriority(), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
 			priorityAtLock = relation->GetPriority() + 1;
 		}
 		relationDivAtLock.AddChildTag(HtmlTagInputHidden("relationcounteratlock", to_string(priorityAtLock)));
@@ -176,7 +178,7 @@ namespace WebServer
 		Priority priorityAtUnlock = 1;
 		for (auto relation : relationsAtUnlock)
 		{
-			relationDivAtUnlock.AddChildTag(HtmlTagRelation("atunlock", to_string(relation->GetPriority()), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
+			relationDivAtUnlock.AddChildTag(HtmlTagRelation("atunlock", relation->GetPriority(), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
 			priorityAtUnlock = relation->GetPriority() + 1;
 		}
 		relationDivAtUnlock.AddChildTag(HtmlTagInputHidden("relationcounteratunlock", to_string(priorityAtUnlock)));
@@ -516,7 +518,7 @@ namespace WebServer
 		}
 		Priority priority = Utils::Utils::StringToInteger(priorityString, 1);
 		HtmlTag container;
-		container.AddChildTag(HtmlTagRelation(type, priorityString));
+		container.AddChildTag(HtmlTagRelation(type, priority));
 		container.AddChildTag(HtmlTag("div").AddId("new_" + type + "_priority_" + to_string(priority + 1)));
 		client.ReplyHtmlWithHeader(container);
 	}
@@ -524,10 +526,11 @@ namespace WebServer
 	void WebClientRoute::HandleRelationObject(const map<string, string>& arguments)
 	{
 		const string priority = Utils::Utils::GetStringMapEntry(arguments, "priority");
-		const string type = Utils::Utils::GetStringMapEntry(arguments, "type");
-		const string name = "relation_" + type + "_" + priority;
+		const string atlock = Utils::Utils::GetStringMapEntry(arguments, "atlock");
 		const ObjectType objectType = static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "objecttype"));
-		client.ReplyHtmlWithHeader(HtmlTagRelationObject(name, objectType));
+		const ObjectID id = static_cast<ObjectID>(Utils::Utils::GetIntegerMapEntry(arguments, "id"));
+		const DataModel::Relation::Data state = static_cast<DataModel::Relation::Data>(Utils::Utils::GetIntegerMapEntry(arguments, "state"));
+		client.ReplyHtmlWithHeader(HtmlTagRelationObject(atlock, priority, objectType, id, state));
 	}
 
 	void WebClientRoute::HandleRelationSwitchStates(const map<string, string>& arguments)
@@ -537,36 +540,35 @@ namespace WebServer
 		client.ReplyHtmlWithHeader(HtmlTagRelationSwitchState(name, switchId));
 	}
 
-	HtmlTag WebClientRoute::HtmlTagRelation(const string& type,
-		const string& priority,
+	HtmlTag WebClientRoute::HtmlTagRelation(const string& atlock,
+		const Priority priority,
 		const ObjectType objectType,
 	    const ObjectID objectId,
 	    const DataModel::Relation::Data state)
 	{
 		HtmlTag content("div");
-		string name = "relation_" + type + "_" + priority;
+		string priorityString = to_string(priority);
+		string name = "relation_" + atlock + "_" + priorityString;
 		content.AddId(name);
 		HtmlTagButton deleteButton(Languages::TextDelete, "delete_" + name);
 		deleteButton.AddAttribute("onclick", "deleteElement('" + name + "');return false;");
 		deleteButton.AddClass("wide_button");
 		content.AddChildTag(deleteButton);
 
-		map<ObjectType, Languages::TextSelector> objectTypeOptions;
-		objectTypeOptions[ObjectTypeAccessory] = Languages::TextAccessory;
-		objectTypeOptions[ObjectTypeSignal] = Languages::TextSignal;
-		objectTypeOptions[ObjectTypeSwitch] = Languages::TextSwitch;
-		objectTypeOptions[ObjectTypeTrack] = Languages::TextTrack;
-		objectTypeOptions[ObjectTypeRoute] = Languages::TextRoute;
-		objectTypeOptions[ObjectTypeLoco] = Languages::TextLoco;
-		objectTypeOptions[ObjectTypePause] = Languages::TextPause;
-		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
-		select.AddClass("select_relation_objecttype");
-		select.AddAttribute("onchange", "loadRelationObject('" + type + "', " + priority + ");return false;");
-		content.AddChildTag(select);
+		if (priority > 1)
+		{
+			content.AddChildTag(HtmlTagButtonSwapRelation(atlock, priorityString, true));
+		}
+		else
+		{
+			content.AddChildTag(HtmlTagSpace().AddClass("small_button").AddClass("button_replacement"));
+		}
+		content.AddChildTag(HtmlTagButtonSwapRelation(atlock, priorityString, false));
+
 		HtmlTag contentObject("div");
 		contentObject.AddId(name + "_object");
 		contentObject.AddClass("inline-block");
-		contentObject.AddChildTag(HtmlTagRelationObject(name, objectType, objectId, state));
+		contentObject.AddChildTag(HtmlTagRelationObject(atlock, priorityString, objectType, objectId, state));
 		content.AddChildTag(contentObject);
 		return content;
 	}
@@ -585,12 +587,27 @@ namespace WebServer
 		return HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::AccessoryState>(data)).AddClass("select_relation_state");
 	}
 
-	HtmlTag WebClientRoute::HtmlTagRelationObject(const string& name,
+	HtmlTag WebClientRoute::HtmlTagRelationObject(const string& atlock,
+		const string& priorityString,
 		const ObjectType objectType,
 		const ObjectID objectId,
-		const DataModel::Relation::Data data)
+		const DataModel::Relation::Data state)
 	{
+		const string name = "relation_" + atlock + "_" + priorityString;
 		HtmlTag content;
+		map<ObjectType, Languages::TextSelector> objectTypeOptions;
+		objectTypeOptions[ObjectTypeAccessory] = Languages::TextAccessory;
+		objectTypeOptions[ObjectTypeSignal] = Languages::TextSignal;
+		objectTypeOptions[ObjectTypeSwitch] = Languages::TextSwitch;
+		objectTypeOptions[ObjectTypeTrack] = Languages::TextTrack;
+		objectTypeOptions[ObjectTypeRoute] = Languages::TextRoute;
+		objectTypeOptions[ObjectTypeLoco] = Languages::TextLoco;
+		objectTypeOptions[ObjectTypePause] = Languages::TextPause;
+		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
+		select.AddClass("select_relation_objecttype");
+		select.AddAttribute("onchange", "loadRelationObject('" + atlock + "', '" + priorityString + "');return false;");
+		content.AddChildTag(select);
+
 		switch (objectType)
 		{
 			case ObjectTypeSwitch:
@@ -614,7 +631,7 @@ namespace WebServer
 				HtmlTag contentState("div");
 				contentState.AddId(name + "_state");
 				contentState.AddClass("inline-block");
-				contentState.AddChildTag(HtmlTagRelationSwitchState(name, switchId, data));
+				contentState.AddChildTag(HtmlTagRelationSwitchState(name, switchId, state));
 				content.AddChildTag(contentState);
 				return content;
 			}
@@ -640,7 +657,7 @@ namespace WebServer
 				HtmlTag contentState("div");
 				contentState.AddId(name + "_state");
 				contentState.AddClass("inline-block");
-				contentState.AddChildTag(client.HtmlTagRelationSignalState(name, signalId, data));
+				contentState.AddChildTag(client.HtmlTagRelationSignalState(name, signalId, state));
 				content.AddChildTag(contentState);
 				return content;
 			}
@@ -658,7 +675,7 @@ namespace WebServer
 				map<DataModel::AccessoryState,Languages::TextSelector> stateOptions;
 				stateOptions[DataModel::AccessoryStateOn] = Languages::TextOn;
 				stateOptions[DataModel::AccessoryStateOff] = Languages::TextOff;
-				content.AddChildTag(HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::AccessoryState>(data)).AddClass("select_relation_state"));
+				content.AddChildTag(HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::AccessoryState>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 
@@ -672,7 +689,7 @@ namespace WebServer
 				}
 				content.AddChildTag(HtmlTagSelect(name + "_id", trackOptions, objectId).AddClass("select_relation_id"));
 
-				content.AddChildTag(HtmlTagSelectOrientation(name + "_state", static_cast<Orientation>(data)).AddClass("select_relation_state"));
+				content.AddChildTag(HtmlTagSelectOrientation(name + "_state", static_cast<Orientation>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 
@@ -805,7 +822,7 @@ namespace WebServer
 				stateOptions[DataModel::LocoFunctionState1s0] = "1s";
 				stateOptions[DataModel::LocoFunctionState1s5] = "1.5s";
 				stateOptions[DataModel::LocoFunctionState2s0] = "2s";
-				content.AddChildTag(HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::LocoFunctionState>(data)).AddClass("select_relation_state"));
+				content.AddChildTag(HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::LocoFunctionState>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 
@@ -833,7 +850,7 @@ namespace WebServer
 				time[80u] = "8s";
 				time[90u] = "9s";
 				time[100u] = "10s";
-				content.AddChildTag(HtmlTagSelect(name + "_state", time, static_cast<unsigned int>(data)).AddClass("select_relation_state"));
+				content.AddChildTag(HtmlTagSelect(name + "_state", time, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 
