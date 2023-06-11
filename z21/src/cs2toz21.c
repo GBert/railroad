@@ -102,7 +102,7 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -c <config_dir> -i <interface list> -s <config link> -p <icons link>\n", prg);
-    fprintf(stderr, "   Version 0.97\n\n");
+    fprintf(stderr, "   Version 0.98\n\n");
     fprintf(stderr, "         -a <time_out>       try to find CS2/CS2 for <time_out> seconds using -i <interface list>\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
@@ -119,6 +119,8 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     void *p;
     struct stat file_stat;
     char filename[] = { "/tmp/Data.z21" };
+
+    memset(&file_stat, 0, sizeof file_stat);
 
     fd = open(filename, O_RDONLY);
     if (fd < 0) {
