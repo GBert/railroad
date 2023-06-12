@@ -118,11 +118,12 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     char *buffer;
     void *p;
     struct stat file_stat;
+    off_t filesize;
     char filename[] = { "/tmp/Data.z21" };
 
     memset(&file_stat, 0, sizeof file_stat);
 
-    fd = open(filename, O_RDONLY);
+    fd = open(filename, O_RDONLY|O_SYNC);
     if (fd < 0) {
 	fprintf(stderr, "can't open Z21 data %s: %s\n", filename, strerror(errno));
 	return EXIT_FAILURE;
@@ -134,7 +135,8 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	return EXIT_FAILURE;
     }
 
-    v_printf(config_data.verbose, "Filesize %ld \n", file_stat.st_size);
+    filesize = file_stat.st_size;
+    v_printf(config_data.verbose, "Filesize %ld \n", filesize);
 
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -156,7 +158,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     }
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.7\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
 		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"Data.z21\","
-		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", file_stat.st_size);
+		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", filesize);
     v_printf(config_data.verbose, "send TCP\n%s", offer);
     send(st, offer, strlen(offer), 0);
     free(offer);
@@ -170,10 +172,10 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 	return EXIT_FAILURE;
     }
 
-    p = mmap(NULL, file_stat.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    p = mmap(NULL, filesize, PROT_READ, MAP_SHARED, fd, 0);
 
     if (strncmp(buffer, "install", 7) == 0) {
-	if (send(st, p, file_stat.st_size, 0) < 0) {
+	if (send(st, p, filesize, 0) < 0) {
 	    fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
 	    close(fd);
 	    return EXIT_FAILURE;
