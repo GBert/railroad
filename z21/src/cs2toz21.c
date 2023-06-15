@@ -166,7 +166,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     buffer = calloc(2048, sizeof(char));
 
     printf("Waiting for <install> from client\n");
-    if (recv(st, buffer, sizeof(buffer), 0) < 0) {
+    if (recv(st, buffer, sizeof(buffer), MSG_WAITALL) < 0) {
 	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
 	close(fd);
 	return EXIT_FAILURE;
@@ -573,7 +573,7 @@ int main(int argc, char **argv) {
     free(config_data.config_dir);
 
     /* create zip file and delete directory */
-    asprintf(&systemcmd, "cd /tmp; minizip -i -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
+    asprintf(&systemcmd, "cd /tmp; minizip -i -o Data.z21 export/%s/* 2>&1 > /dev/null;sync", uuidtext);
     v_printf(config_data.verbose, "Zipping %s\n", systemcmd);
     system(systemcmd);
     free(systemcmd);
