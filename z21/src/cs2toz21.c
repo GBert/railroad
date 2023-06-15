@@ -243,7 +243,7 @@ int send_udp_broadcast(void) {
 
 	if (FD_ISSET(sa, &readfds)) {
 	    len = sizeof client;
-	    n = recvfrom(sa, udpframe, sizeof udpframe, 0, &client, &len);
+	    n = recvfrom(sa, udpframe, sizeof udpframe, 0, (struct sockaddr *)&client, &len);
 	    v_printf(config_data.verbose, "received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof buffer));
 	    if (n > 0) {
 		udpframe[n + 1] = 0;
