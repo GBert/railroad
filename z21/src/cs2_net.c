@@ -98,7 +98,7 @@ struct in_addr find_cs2(char *broadcast_ip, int retries) {
 
 	if (FD_ISSET(sr, &readfds)) {
 	    len = sizeof responder;
-	    n = recvfrom(sr, udpframe, sizeof udpframe, 0, &responder, &len);
+	    n = recvfrom(sr, udpframe, sizeof udpframe, 0, (struct sockaddr *)&responder, &len);
 	    // printf("received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &responder.sin_addr, buffer, sizeof buffer));
 	    if (n == 13) {
 		/* CAN Ping and response are reversed */
