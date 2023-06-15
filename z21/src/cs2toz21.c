@@ -112,36 +112,30 @@ void print_usage(char *prg) {
 }
 
 int send_tcp_data(struct sockaddr_in *client_sa) {
-    int fd, st;
+    int n, st;
+    size_t b;
+    FILE *fp;
     struct sockaddr_in server_sa;
     char *offer;
     char *buffer;
-    void *p;
-    struct stat file_stat;
     off_t filesize;
     char filename[] = { "/tmp/Data.z21" };
 
-    memset(&file_stat, 0, sizeof file_stat);
-
-    fd = open(filename, O_RDONLY|O_SYNC);
-    if (fd < 0) {
+    fp = fopen(filename, "rb");
+    if (!fp) {
 	fprintf(stderr, "can't open Z21 data %s: %s\n", filename, strerror(errno));
 	return EXIT_FAILURE;
     }
 
-    if (fstat(fd, &file_stat) < 0) {
-	fprintf(stderr, "can't get Z21 data %s size: %s\n", filename, strerror(errno));
-	close(fd);
-	return EXIT_FAILURE;
-    }
-
-    filesize = file_stat.st_size;
+    fseek(fp, 0, SEEK_END);
+    filesize = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
     v_printf(config_data.verbose, "Filesize %ld \n", filesize);
 
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 	fprintf(stderr, "can't create TCP socket: %s\n", strerror(errno));
-	close(fd);
+	fclose(fp);
 	exit(EXIT_FAILURE);
     }
 
@@ -153,7 +147,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
 
     if (connect(st, (struct sockaddr *)&server_sa, sizeof server_sa)) {
 	fprintf(stderr, "can't connect to TCP socket : %s\n", strerror(errno));
-	close(fd);
+	fclose(fp);
 	return (EXIT_FAILURE);
     }
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.7\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
@@ -163,34 +157,41 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     send(st, offer, strlen(offer), 0);
     free(offer);
 
-    buffer = calloc(2048, sizeof(char));
+    buffer = calloc(1024, 1);
+    v_printf(config_data.verbose, "Waiting for <install> from client\n");
+    n = recv(st, buffer, sizeof(buffer), 0);
 
-    printf("Waiting for <install> from client\n");
-    if (recv(st, buffer, sizeof(buffer), MSG_WAITALL) < 0) {
+    if (n < 0) {
 	fprintf(stderr, "error receiveing answer install: %s\n", strerror(errno));
-	close(fd);
+	free(buffer);
+	fclose(fp);
 	return EXIT_FAILURE;
     }
 
-    p = mmap(NULL, filesize, PROT_READ, MAP_SHARED, fd, 0);
+    v_printf(config_data.verbose, "received from Z21 App %d chars: >%s<\n", n, buffer);
 
-    if (strncmp(buffer, "install", 7) == 0) {
-	if (send(st, p, filesize, 0) < 0) {
-	    fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
-	    close(fd);
-	    return EXIT_FAILURE;
-	} else {
-	    if (close(st)) {
-		fprintf(stderr, "error closing TCP stream: %s\n", strerror(errno));
-		close(fd);
-		return EXIT_FAILURE;
+    if (strncmp(buffer, "install", n) == 0) {
+	while(!feof(fp)) {
+	    b = fread(buffer, 1, sizeof buffer, fp);
+	    // printf("b : %u\n", b);
+	    if (send(st, buffer, b, 0) < 0) {
+	        fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
+	        fclose(fp);
+		free(buffer);
+	        return EXIT_FAILURE;
 	    }
+	}
+	if (shutdown(st, SHUT_RDWR)) {
+	    fprintf(stderr, "error closing TCP stream: %s\n", strerror(errno));
+	    fclose(fp);
+	    free(buffer);
+	    return EXIT_FAILURE;
 	}
     }
 
     printf("data send complete\n");
     free(buffer);
-    close(fd);
+    fclose(fp);
     return EXIT_SUCCESS;
 }
 
@@ -411,13 +412,13 @@ int sql_insert_locos(sqlite3 * db, struct z21_config_data_t *config_data, char *
 }
 
 int main(int argc, char **argv) {
+    FILE *fp;
     char *broadcast_ip, *config_file, *loco_file, *interface_list;
     int opt, ret;
     sqlite3 *db;
     char *z21_dir, *sql_file, *icon_dir, *systemcmd;
     uuid_t z21_uuid;
     char uuidtext[UUIDTEXTSIZE];
-    FILE *fp;
 
     memset(&config_data, 0, sizeof config_data);
     config_data.config_dir=strdup("/www/config");
@@ -573,7 +574,7 @@ int main(int argc, char **argv) {
     free(config_data.config_dir);
 
     /* create zip file and delete directory */
-    asprintf(&systemcmd, "cd /tmp; minizip -i -o Data.z21 export/%s/* 2>&1 > /dev/null;sync", uuidtext);
+    asprintf(&systemcmd, "cd /tmp; minizip -i -o Data.z21 export/%s/* 2>&1 > /dev/null", uuidtext);
     v_printf(config_data.verbose, "Zipping %s\n", systemcmd);
     system(systemcmd);
     free(systemcmd);
