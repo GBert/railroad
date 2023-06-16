@@ -8,11 +8,11 @@
  */
 
 /*
- * CS2 lokomotive.cs2 to Z21 SQLite converter
+ * CS2 lokomotive.cs2 to Z21 App (SQLite) converter
  */
 
 /*
- * Server sends initial packet
+ * Server sends initial packet / UDP
  *
  * Epoch Time: 1664630770.036
  * Src: 192.168.0.171, Dst: 255.255.255.255
@@ -30,18 +30,24 @@
  */
 
 /*
- * Client answer
+ * Z21 App answer / UDP
  *
  * {"os":"android","appVersion":"1.4.6","deviceName":"Z21 Emulator","deviceType":"OpenWRT",
  * "request":"device_information_request","buildNumber":6076,"apiVersion":1}
  */
 
 /*
- * Server sends file
+ * Switch to TCP Connection on Port 5728 / Server is Z21 App
+ * Data Source sends file
  *
  * {"owningDevice":{"os":"ios","appVersion":"1.4.6","deviceName":"iPad von Gerhard","deviceType":"iPad7,3",
  *  "request":"device_information_request","buildNumber":6076,"apiVersion":1},"fileName":"Data.z21",
  *  "request":"file_transfer_info","fileSize":744444}
+ *
+ * Z21 App sends:
+ * install
+ *
+ * Data Source sends the file Data.z21 and closes TCP connection
  */
 
 #define _GNU_SOURCE
@@ -118,7 +124,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     struct sockaddr_in server_sa;
     char *offer;
     char *buffer;
-    off_t filesize;
+    int32_t filesize;
     char filename[] = { "/tmp/Data.z21" };
 
     fp = fopen(filename, "rb");
@@ -130,7 +136,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     fseek(fp, 0, SEEK_END);
     filesize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    v_printf(config_data.verbose, "Filesize %ld \n", filesize);
+    v_printf(config_data.verbose, "Filesize %d \n", filesize);
 
     /* prepare TCP client socket */
     if ((st = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -152,7 +158,7 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     }
     asprintf(&offer, "{\"owningDevice\":{\"os\":\"android\",\"appVersion\":\"1.4.7\",\"deviceName\":\"Z21 Emulator\",\"deviceType\":\"OpenWRT\","
 		     "\"request\":\"device_information_request\",\"buildNumber\":6076,\"apiVersion\":1},\"fileName\":\"Data.z21\","
-		     "\"request\":\"file_transfer_info\",\"fileSize\":%ld}\n", filesize);
+		     "\"request\":\"file_transfer_info\",\"fileSize\":%d}\n", filesize);
     v_printf(config_data.verbose, "send TCP\n%s", offer);
     send(st, offer, strlen(offer), 0);
     free(offer);
@@ -171,14 +177,13 @@ int send_tcp_data(struct sockaddr_in *client_sa) {
     v_printf(config_data.verbose, "received from Z21 App %d chars: >%s<\n", n, buffer);
 
     if (strncmp(buffer, "install", n) == 0) {
-	while(!feof(fp)) {
+	while (!feof(fp)) {
 	    b = fread(buffer, 1, sizeof buffer, fp);
-	    // printf("b : %u\n", b);
 	    if (send(st, buffer, b, 0) < 0) {
-	        fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
-	        fclose(fp);
+		fprintf(stderr, "error sending Z21 data file: %s\n", strerror(errno));
+		fclose(fp);
 		free(buffer);
-	        return EXIT_FAILURE;
+		return EXIT_FAILURE;
 	    }
 	}
 	if (shutdown(st, SHUT_RDWR)) {
@@ -213,14 +218,14 @@ int send_udp_broadcast(void) {
     /* prepare UDP sending socket */
     sb = setup_udp_socket(&baddr, "255.255.255.255", destination_port, UDP_SENDING);
     if (sb <= 0) {
-        fprintf(stderr, "problem to setup UDP (Z21 App) sending socket\n");
+	fprintf(stderr, "problem to setup UDP (Z21 App) sending socket\n");
 	exit(EXIT_FAILURE);
     }
 
     /* prepare receiving socket */
     sa = setup_udp_socket(&saddr, NULL, local_port, UDP_READING);
     if (sa <= 0) {
-        fprintf(stderr, "problem to setup UDP (Z21 App) receiving socket\n");
+	fprintf(stderr, "problem to setup UDP (Z21 App) receiving socket\n");
 	exit(EXIT_FAILURE);
     }
 
@@ -421,7 +426,7 @@ int main(int argc, char **argv) {
     char uuidtext[UUIDTEXTSIZE];
 
     memset(&config_data, 0, sizeof config_data);
-    config_data.config_dir=strdup("/www/config");
+    config_data.config_dir = strdup("/www/config");
     interface_list = strdup(INTERFACE_LIST);
 
     while ((opt = getopt(argc, argv, "a:c:i:p:s:vh?")) != -1) {
@@ -432,7 +437,7 @@ int main(int argc, char **argv) {
 	case 'c':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
 		free(config_data.config_dir);
-		config_data.config_dir = strndup(optarg, MAXLINE -1);
+		config_data.config_dir = strndup(optarg, MAXLINE - 1);
 	    } else {
 		fprintf(stderr, "config file dir to long\n");
 		exit(EXIT_FAILURE);
@@ -441,7 +446,7 @@ int main(int argc, char **argv) {
 	case 'i':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
 		free(interface_list);
-		interface_list = strndup(optarg, MAXLINE -1);
+		interface_list = strndup(optarg, MAXLINE - 1);
 	    } else {
 		fprintf(stderr, "interface list to long\n");
 		exit(EXIT_FAILURE);
@@ -449,7 +454,7 @@ int main(int argc, char **argv) {
 	    break;
 	case 'p':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
-		config_data.icon_server = strndup(optarg, MAXLINE -1);
+		config_data.icon_server = strndup(optarg, MAXLINE - 1);
 	    } else {
 		fprintf(stderr, "server address to long\n");
 		exit(EXIT_FAILURE);
@@ -457,7 +462,7 @@ int main(int argc, char **argv) {
 	    break;
 	case 's':
 	    if (strnlen(optarg, MAXLINE) < MAXLINE) {
-		config_data.config_server= strndup(optarg, MAXLINE -1);
+		config_data.config_server = strndup(optarg, MAXLINE - 1);
 	    } else {
 		fprintf(stderr, "server address to long\n");
 		exit(EXIT_FAILURE);
@@ -496,7 +501,7 @@ int main(int argc, char **argv) {
 
     /* find the IP address for the database */
     if (!(config_data.ip_address = find_first_ip(interface_list, 0)))
-       config_data.ip_address = strdup("127.0.0.1");
+	config_data.ip_address = strdup("127.0.0.1");
 
     if (config_data.config_server || config_data.icon_server)
 	curl_global_init(0);
