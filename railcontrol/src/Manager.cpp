@@ -1064,7 +1064,7 @@ bool Manager::MultipleUnitDelete(const MultipleUnitID multipleUnitID, string& re
 	MultipleUnit* multipleUnit = nullptr;
 	{
 		std::lock_guard<std::mutex> guard(multipleUnitMutex);
-		if (multipleUnitID == MultipleUnitNone || locos.count(multipleUnitID) != 1)
+		if (multipleUnitID == MultipleUnitNone || multipleUnits.count(multipleUnitID) != 1)
 		{
 			result = Languages::GetText(Languages::TextMultipleUnitDoesNotExist);
 			return false;

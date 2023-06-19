@@ -170,7 +170,7 @@ namespace DataModel
 				return matchKey;
 			}
 
-			Feedback& operator=(const Hardware::FeedbackCacheEntry& loco);
+			Feedback& operator=(const Hardware::FeedbackCacheEntry& feedback);
 
 		private:
 			void UpdateTrack();

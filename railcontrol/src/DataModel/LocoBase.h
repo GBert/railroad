@@ -31,6 +31,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/LocoFunctions.h"
 #include "DataModel/Object.h"
 #include "DataModel/Relation.h"
+#include "DataModel/Route.h"
 #include "Utils/ThreadSafeQueue.h"
 
 class Manager;
@@ -86,6 +87,8 @@ namespace DataModel
 				trackSecond(nullptr),
 				routeFirst(nullptr),
 				routeSecond(nullptr),
+				feedbackIdFirstReduced(FeedbackNone),
+				feedbackIdFirstCreep(FeedbackNone),
 				feedbackIdFirst(FeedbackNone),
 				feedbackIdReduced(FeedbackNone),
 				feedbackIdCreep(FeedbackNone),
@@ -350,6 +353,8 @@ namespace DataModel
 
 			bool GoToAutoModeInternal(const LocoState newState);
 
+			Speed GetRouteSpeed(const Route::Speed routeSpeed);
+
 			mutable std::mutex stateMutex;
 			std::thread locoThread;
 
@@ -373,6 +378,8 @@ namespace DataModel
 			Track* trackSecond;
 			Route* routeFirst;
 			Route* routeSecond;
+			volatile FeedbackID feedbackIdFirstReduced;
+			volatile FeedbackID feedbackIdFirstCreep;
 			volatile FeedbackID feedbackIdFirst;
 			volatile FeedbackID feedbackIdReduced;
 			volatile FeedbackID feedbackIdCreep;

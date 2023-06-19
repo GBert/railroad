@@ -247,7 +247,7 @@ namespace WebServer
 			}
 			else if (arguments["cmd"].compare("locoedit") == 0)
 			{
-				HandleMultipleUnitEdit(arguments);
+				HandleLocoEdit(arguments);
 			}
 			else if (arguments["cmd"].compare("locosave") == 0)
 			{

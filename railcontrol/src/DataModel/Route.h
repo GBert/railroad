@@ -66,6 +66,7 @@ namespace DataModel
 				executeAtUnlock(false),
 				delay(0),
 				pushpull(PushpullTypeBoth),
+				propulsion(PropulsionUnknown),
 				trainType(TrainTypeAll),
 				minTrainLength(0),
 				maxTrainLength(0),

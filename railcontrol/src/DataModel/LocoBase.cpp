@@ -561,27 +561,12 @@ namespace DataModel
 		trackSecond = newTrack;
 		routeSecond = route;
 		feedbackIdFirst = feedbackIdStop;
+		feedbackIdFirstCreep = feedbackIdCreep;
+		feedbackIdFirstReduced = feedbackIdReduced;
 		feedbackIdOver = routeSecond->GetFeedbackIdOver();
 		feedbackIdStop = routeSecond->GetFeedbackIdStop();
-		Route::Speed speedFirst = routeFirst->GetSpeed();
-		Route::Speed speedSecond = routeSecond->GetSpeed();
-		if (speedSecond == Route::SpeedTravel)
-		{
-			feedbackIdCreep = routeSecond->GetFeedbackIdCreep();
-			feedbackIdReduced = routeSecond->GetFeedbackIdReduced();
-			if (speedFirst == Route::SpeedTravel)
-			{
-				manager->LocoBaseSpeed(ControlTypeInternal, this, travelSpeed);
-			}
-		}
-		else if (speedSecond == Route::SpeedReduced)
-		{
-			feedbackIdCreep = routeSecond->GetFeedbackIdCreep();
-			if (speedFirst == Route::SpeedReduced)
-			{
-				manager->LocoBaseSpeed(ControlTypeInternal, this, reducedSpeed);
-			}
-		}
+		feedbackIdCreep = routeSecond->GetFeedbackIdCreep();
+		feedbackIdReduced = routeSecond->GetFeedbackIdReduced();
 
 		wait = routeSecond->GetWaitAfterRelease();
 
@@ -680,6 +665,24 @@ namespace DataModel
 		return true;
 	}
 
+	Speed LocoBase::GetRouteSpeed(const Route::Speed routeSpeed)
+	{
+		switch (routeSpeed)
+		{
+			case Route::SpeedTravel:
+				return travelSpeed;
+
+			case Route::SpeedReduced:
+				return reducedSpeed;
+
+			case Route::SpeedCreeping:
+				return creepingSpeed;
+
+			default:
+				return MinSpeed;
+		}
+	}
+
 	void LocoBase::LocationReached(const FeedbackID feedbackID)
 	{
 		if (feedbackID == feedbackIdOver)
@@ -729,7 +732,49 @@ namespace DataModel
 
 		if (feedbackID == feedbackIdFirst)
 		{
+			Speed newSpeed = GetRouteSpeed(routeSecond->GetSpeed());
+			if (speed > newSpeed)
+			{
+				manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
+			}
 			feedbackIdsReached.Enqueue(feedbackIdFirst);
+			return;
+		}
+
+		if (feedbackID == feedbackIdFirstCreep)
+		{
+			Route::Speed routeSpeed = routeSecond->GetSpeed();
+			switch (routeSpeed)
+			{
+				case Route::SpeedCreeping:
+					if (speed > creepingSpeed)
+					{
+						manager->LocoBaseSpeed(ControlTypeInternal, this, creepingSpeed);
+					}
+					break;
+
+				default:
+					break;
+			}
+			return;
+		}
+
+		if (feedbackID == feedbackIdFirstReduced)
+		{
+			Route::Speed routeSpeed = routeSecond->GetSpeed();
+			switch (routeSpeed)
+			{
+				case Route::SpeedReduced:
+				case Route::SpeedCreeping:
+					if (speed > reducedSpeed)
+					{
+						manager->LocoBaseSpeed(ControlTypeInternal, this, reducedSpeed);
+					}
+					break;
+
+				default:
+					break;
+			}
 			return;
 		}
 	}
@@ -760,24 +805,8 @@ namespace DataModel
 			return;
 		}
 
-		Speed newSpeed;
-		switch (routeFirst->GetSpeed())
-		{
-			case Route::SpeedTravel:
-				newSpeed = travelSpeed;
-				break;
-
-			case Route::SpeedReduced:
-				newSpeed = reducedSpeed;
-				break;
-
-			case Route::SpeedCreeping:
-			default:
-				newSpeed = creepingSpeed;
-				break;
-		}
-
-		if (speed > newSpeed)
+		Speed newSpeed = GetRouteSpeed(routeSecond->GetSpeed());
+		if (speed != newSpeed)
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
 		}
@@ -813,6 +842,8 @@ namespace DataModel
 				break;
 		}
 
+		feedbackIdFirstCreep = FeedbackNone;
+		feedbackIdFirstReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
 	}
 
@@ -825,6 +856,9 @@ namespace DataModel
 			logger->Error(Languages::TextIsInAutomodeWithoutRouteTrack, GetName());
 			return;
 		}
+
+		// FIXME: This is needed if FeedbackIdFirst is not hit
+		manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 
 		manager->LocoDestinationReached(this, routeFirst, trackFrom);
 		routeFirst->Release(logger, GetID());
