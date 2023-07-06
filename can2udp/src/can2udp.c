@@ -36,7 +36,7 @@ unsigned char udpframe_reply[MAXDG];
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -l <port> -d <port> -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 0.93\n");
+    fprintf(stderr, "   Version 0.94\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "         -l <port>           listening UDP port for the server - default 15731\n");
     fprintf(stderr, "         -d <port>           destination UDP port for the server - default 15730\n");
@@ -75,7 +75,7 @@ uint16_t generateHash(uint32_t uid) {
 
 void send_magic_start_60113_frame(int can_socket, int verbose) {
     struct can_frame frame;
-    memset(&frame, 0, sizeof(frame));
+    memset(&frame, 0, sizeof frame);
 
     frame.can_id = 0x360301UL;
     /* use EFF */
@@ -110,12 +110,11 @@ int main(int argc, char **argv) {
     const char rocrail_server[] = "255.255.255.255";
     strcpy(ifr.ifr_name, "can0");
 
-    memset(&saddr, 0, sizeof(saddr));
-    memset(&baddr, 0, sizeof(baddr));
-    memset(&caddr, 0, sizeof(caddr));
-    memset(&frame, 0, sizeof(frame));
-    memset(udpframe, 0, sizeof(udpframe));
-    memset(udpframe_reply, 0, sizeof(udpframe_reply));
+    memset(&saddr, 0, sizeof saddr);
+    memset(&baddr, 0, sizeof baddr);
+    memset(&caddr, 0, sizeof caddr);
+    memset(&frame, 0, sizeof frame);
+    memset(udpframe_reply, 0, sizeof udpframe_reply);
 
     /* prepare udp destination struct with defaults */
     baddr.sin_family = AF_INET;
@@ -143,7 +142,7 @@ int main(int argc, char **argv) {
 	    s = inet_pton(AF_INET, optarg, &baddr.sin_addr);
 	    if (s <= 0) {
 		if (s == 0) {
-		    fprintf(stderr, "invalid IP address: %s\n", strerror(errno));
+		    fprintf(stderr, "invalid IP address: %s\n", optarg);
 		} else {
 		    fprintf(stderr, "inet_pton error: %s\n", strerror(errno));
 		}
@@ -239,6 +238,7 @@ int main(int argc, char **argv) {
 		/* prepare UDP frame */
 		frame.can_id &= CAN_EFF_MASK;
 		canid = htonl(frame.can_id);
+		memset(udpframe, 0, sizeof udpframe);
 		memcpy(udpframe, &canid, 4);
 		udpframe[4] = frame.can_dlc;
 		memcpy(&udpframe[5], &frame.data, frame.can_dlc);
