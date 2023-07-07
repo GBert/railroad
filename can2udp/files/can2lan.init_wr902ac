@@ -20,7 +20,7 @@ start() {
 
         # start MaeCAN can2udp if MaeCAN is installed
 	[ -e /www/MaeCAN-Server/ ] && {
-		can2udp -l 15734 -d 15733
+		can2udp -l 15734 -d 15733 -b 127.0.0.1
 	}
 }
 
