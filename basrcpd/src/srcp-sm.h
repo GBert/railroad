@@ -1,4 +1,4 @@
-// srcp-sm.h - adapted for basrcpd project 2018 by Rainer Müller 
+// srcp-sm.h - adapted for basrcpd project 2018 - 2023 by Rainer Müller
 
 /***************************************************************************
                           srcp-sm.h  -  description
@@ -6,7 +6,7 @@
     begin                : Mon Aug 12 2002
     copyright            : (C) 2002 by Dipl.-Ing. Frank Schmischke
     email                : frank.schmischke@t-online.de
-   
+
 	MFX Code:            : daniel@siggsoftware.ch
  ***************************************************************************/
 
@@ -26,7 +26,8 @@
 #include "config-srcpd.h"
 
 typedef enum SMPROTOCOL {
-    PROTO_NMRA = 0,
+    PROTO_NONE = 0,
+    PROTO_NMRA,
     PROTO_MM,
     PROTO_MFX
 } sm_protocol_t;
@@ -45,26 +46,27 @@ typedef enum TYPE {
     CV,
     CV_BIT,
     MM_REG,
+    MM_REG_UB,
     BIND_MFX,
     CV_MFX
 } sm_type_t;
 
 /* Loco decoder */
 typedef struct _SM {
-    sm_protocol_t protocol;  
+    sm_protocol_t protocol;
     sm_type_t type;
     sm_command_t command;
     int protocolversion;
     int addr;
-    //				MMREG    REG      PAGE	  CV	  CVBIT	  CVMFX	  BIND	
-    int cvaddr;	//	regaddr  regaddr  cvaddr  cvaddr  cvaddr  cvline  ----
-    int index;	//	----	 ----	  ----	  ----	  bitnr	  cvindex ----
-    int value; 	//	regval	 regval	  cvval	  cvval   bitval  cvval	  uid / regcnt
+    //				MMSEARCH MMREG    REG      PAGE	   CV	   CVBIT	CVMFX	  BIND
+    int cvaddr;	//	----	 regaddr  regaddr  cvaddr  cvaddr  cvaddr  	cvline    ----
+    int index;	//	proto	 ----	  ----	   ----	   ----	   bitnr	cvindex   ----
+    int value; 	//	-----	 regval	  regval   cvval   cvval   bitval   cvval	  uid / regcnt
     struct timeval tv;          /* time of change */
 } sm_t;
 
 /**
- * SM Kommando in Queue zur Ausführung. Wenn ein Paramter für ein Kommando nciht benötigt wird, muss -1 übergeben werden.
+ * SM Kommando in Queue zur Ausführung. Wenn ein Paramter für ein Kommando nicht benötigt wird, muss -1 übergeben werden.
  * @param busnumber
  * @param protocol Zu verwendendes Protokoll
  * @param command Auszuführendes SM Kommando (SET, GET etc.)
@@ -76,15 +78,15 @@ typedef struct _SM {
  *                  Bei type==CV_MFX und CA_MFX: Der Index innerhalb CV Zeile
  * @param value Bei type==CV_BIT 0 oder 1, sondet 0..255 Byte Value zum schreiben oder verify
  */
-int enqueueSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_type_t type, 
+int enqueueSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_type_t type,
 						int addr, int typeaddr, int bit_index, int value);
-              
+
 int queue_SM_isempty(bus_t busnumber);
 int getNextSM(bus_t busnumber, sm_t * l);
 int dequeueNextSM(bus_t, sm_t*);
 
 /**
- * SM Kommando ausführen. Wenn ein Paramter für ein Kommando nciht benötigt wird, muss -1 übergeben werden.
+ * SM Kommando ausführen. Wenn ein Paramter für ein Kommando nicht benötigt wird, muss -1 übergeben werden.
  * @param busnumber
  * @param protocol Zu verwendendes Protokoll
  * @param command Auszuführendes SM Kommando (SET, GET etc.)
@@ -97,12 +99,13 @@ int dequeueNextSM(bus_t, sm_t*);
  * @param value Bei type==CV_BIT 0 oder 1, sondet 0..255 Byte Value zum schreiben oder verify
  * @param info Buffer für Meldungsrückgabe
  */
-int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_type_t type, 
+int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_type_t type,
 				int addr, int typeaddr, int bit_index, int value, char *info);
 
 void handle_mfx_bind_verify(bus_t bus, sm_command_t cmnd, uint32_t val, int addr);
-void handle_mcs_config(bus_t bus, sm_command_t command, 
+void handle_mcs_config(bus_t bus, sm_command_t command,
 						int uid, int cvaddr, int cvindex, int value, int ctrl);
 void handle_mcs_discovery(bus_t bus, int proto, int uid);
 
 #endif
+

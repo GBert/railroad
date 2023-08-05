@@ -1,4 +1,4 @@
-// ddl.h - adapted for basrcpd project 2018 - 2022 by Rainer Müller
+// ddl.h - adapted for basrcpd project 2018 - 2023 by Rainer Müller
 
 /* $Id: ddl.h 1419 2009-12-10 20:06:19Z gscholz $ */
 
@@ -39,9 +39,9 @@
 
 /* data types for maerklin packet pool */
 typedef struct _tMaerklinPacket {
-    time_t timeLastUpdate;
-    char packet[18];
-    char f_packets[4][18];
+    gl_data_t *glptr;
+    char packet[4];
+    char f_packets[4][4];
 } tMaerklinPacket;
 
 typedef struct _tMaerklinPacketPool {
@@ -54,7 +54,6 @@ typedef struct _tMaerklinPacketPool {
 typedef struct _tMFXPacket {
     gl_data_t *glptr;
     char packet[PKTSIZE];
-    int packet_size;
 } tMFXPacket;
 
 typedef struct _tMFXPacketPool {
@@ -65,11 +64,9 @@ typedef struct _tMFXPacketPool {
 
 /* data types for NMRA packet pool */
 typedef struct _tNMRAPacket {
-    time_t timeLastUpdate;
+    gl_data_t *glptr;
     char packet[PKTSIZE];
-    int packet_size;
     char fx_packet[PKTSIZE];
-    int fx_packet_size;
 } tNMRAPacket;
 
 typedef struct _tNMRAPacketPool {
@@ -134,7 +131,7 @@ typedef struct _DDL_DATA {
 
 	volatile bool allowSM;		/* service mode commands allowed */
 	volatile int resumeSM;		/* service mode commands outstanding */
-    bool pgtrkonly;             /* only programming track will be feed */
+	int pgtrkonly;				/* only programming track will be feed */
 
     pthread_mutex_t nmra_pktpool_mutex;
     tNMRAPacketPool NMRAPacketPool;
@@ -163,9 +160,11 @@ int init_bus_DDL(bus_t busnumber);
 #define QM2FXPKT    3
 #define QM1FUNCPKT  4
 #define QM1SOLEPKT  5
+#define QMSEARCH20  6
+#define QMSEARCH40  7
 #define QNBLOCOPKT  10
 #define QNBACCPKT   11
-#define QNPROCPKT   12
+#define QNPROGPKT   12
 #define QMFX0PKT    18		/* mfx without feedback */
 #define QMFX1PKTD   19		/* mfx with simple feedback for discovery */
 #define QMFX1PKTV   20		/* mfx with simple feedback for verify */
@@ -174,19 +173,17 @@ int init_bus_DDL(bus_t busnumber);
 #define QMFX16PKT   22
 #define QMFX32PKT   23
 
-char *get_maerklin_packet(bus_t busnumber, int adr, int fx);
-void update_MaerklinPacketPool(bus_t busnumber, int adr,
+void update_MaerklinPacketPool(bus_t busnumber, gl_data_t *glp,
                                char const *const sd_packet,
                                char const *const f1, char const *const f2,
                                char const *const f3, char const *const f4);
-void update_NMRAPacketPool(bus_t busnumber, int adr,
+void update_NMRAPacketPool(bus_t busnumber, gl_data_t *glp,
                            char const *const packet, int packet_size,
                            char const *const fx_packet, int fx_packet_size);
 void update_MFXPacketPool(bus_t busnumber, gl_data_t *glp,
                           char const *const packet, int packet_size);
 
-void send_packet(bus_t busnumber, char *packet,
-                 int packet_size, int packet_type, int xmits);
+unsigned int send_packet(bus_t busnumber, char *packet, int packet_type, int xmits);
 
 /* serial line modes: */
 #define ON  1

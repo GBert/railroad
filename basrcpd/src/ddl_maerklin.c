@@ -1,4 +1,4 @@
-// ddl_maerklin.c - adapted for basrcpd project 2018 by Rainer Müller
+// ddl_maerklin.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller
 //
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -42,11 +42,10 @@
 
  implemented protocols:
 
- M1: maerklin protocol type 1 (old)
- M2: maerklin protocol type 2 (new)
- M3: maerklin protocol type 2 (new) with 28 speed steps (Wikinger decoder)
- M4: maerklin protocol type 2 (new) with 256 addresses (Uhlenbrock)
- M5: maerklin protocol type 2 (new) with 27 speed steps (newer Maerklin decoders)
+ M1: maerklin protocol type 1 (old) with 14 speed steps
+ M2: maerklin protocol type 2 (new) with 14 speed steps
+     maerklin protocol type 2 (new) with 28 speed steps (Wikinger decoder)
+     maerklin protocol type 2 (new) with 27 speed steps (newer Maerklin decoders)
  MS: maerklin protocol for solenoids (type 1 and type 2)
  MF: maerklin_protocol for function decoders (old)
 
@@ -56,7 +55,6 @@
 #include "ddl_maerklin.h"
 #include "srcp-gl.h"
 #include "syslogmessage.h"
-
 
 // Codiertabelle zur Adresswandlung binär -> ternär
 static uint8_t mmadr_cod [256] = {
@@ -78,403 +76,23 @@ static uint8_t mmadr_cod [256] = {
     177,188,191,189,180,183,181,144,147,145,156,159,157,148,151,149 };
 
 
-//Für SPI Ausgabe wird hier nur 0 und 1 als 0 und 1 Bytes kodiert.
-static char LO = 0;
-static char HI = 1;
+typedef struct _tMaerklinData {
+	uint8_t	addr;	uint8_t	func;	uint8_t	data;	uint8_t	xdat;
+} tMaerklinData;
 
-char getMaerklinLO() {
-  return LO;
-}
-char getMaerklinHI() {
-  return HI;
-}
+/* speed coding for 27 and 28 step handling */
+    /* xFS    rFS   sFS1 -> (50ms) -> sFS2			FS28
 
-int comp_maerklin_1(bus_t busnumber, int address, int direction,
-                    		int speed, int funcs)         //, char cacheddirection)
-{
-    char packet[18];
-    int i;
-
-    if (address < 0 || address > 80 || speed < 0 || speed > 15) return 1;
-
-    /* compute address part */
-    for (i = 0; i < 8; i++)
-        packet[i] = (mmadr_cod[address] >> i) & 1;
-
-    /* compute func part */
-    packet[8] = packet[9] = funcs & 1;
-
-    /* compute speed part */
-    for (i = 5; i < 9; i++) {
-        packet[2 * i] = packet[2 * i + 1] = speed & 1;
-        speed >>= 1;
-    }
-
-    update_MaerklinPacketPool(busnumber, address, packet, packet, packet,
-                              packet, packet);
-    send_packet(busnumber, packet, 18, QM1LOCOPKT, 2);
-    return 0;
-}
-
-int comp_maerklin_2(bus_t busnumber, int address, int direction,
-                    int speed, int func, int f1, int f2, int f3, int f4)
-{
-
-    char trits[9];
-    char packet[18];
-    char f_packets[4][18];
-    int fx = 0, fx_changed = 0;
-    char *fx_packet;
-
-    char mask[5];
-    int i, j;
-    int mspeed;
-
-    if (direction == 0)
-        direction = -1;
-    else
-        direction = 1;
-    speed = direction * speed;
-
-    /* no special error handling, it's job of the clients */
-    if (address < 0 || address > 255 || func < 0 || func > 1 || speed < -15
-        || speed > 15 || f1 < 0 || f1 > 1 || f2 < 0 || f2 > 1 || f3 < 0
-        || f3 > 1 || f4 < 0 || f4 > 1)
-        return 1;
-
-    /* compute address part */
-    for (i = 0; i < 8; i++)
-        packet[i] = (mmadr_cod[address] >> i) & 1;
-
-    /* compute func part */
-    packet[8] = packet[9] = func & 1;
-
-    /* so far the same procedure as by Maerklin type 1, but now ... */
-    /* compute speed trits   */
-    if (speed < -7)
-        strcpy(mask, "HLHL");
-    if (speed <= 0 && speed >= -7 && direction == -1)
-        strcpy(mask, "HLHH");
-    if (speed >= 0 && speed <= 7 && direction == 1)
-        strcpy(mask, "LHLH");
-    if (speed > 7)
-        strcpy(mask, "LHLL");
-    speed = abs(speed);
-    mspeed = speed;
-
-    for (i = 5; i < 9; i++) {
-        j = speed % 2;
-        speed = speed / 2;
-        switch (j) {
-            case 0:
-                trits[i] = 'L';
-                break;
-            case 1:
-                trits[i] = 'H';
-                break;
-        }
-        if (trits[i] == 'H' && mask[i - 5] == 'L')
-            trits[i] = 'O';
-        if (trits[i] == 'L' && mask[i - 5] == 'H')
-            trits[i] = 'U';     /* Oops, whats */
-    }                           /* this? :-)    */
-
-    for (i = 5; i < 9; i++) {
-        switch (trits[i]) {
-            case 'L':
-                packet[2 * i] = LO;
-                packet[2 * i + 1] = LO;
-                break;
-            case 'H':
-                packet[2 * i] = HI;
-                packet[2 * i + 1] = HI;
-                break;
-            case 'O':
-                packet[2 * i] = HI;
-                packet[2 * i + 1] = LO;
-                break;
-            case 'U':
-                packet[2 * i] = LO;
-                packet[2 * i + 1] = HI;
-                break;
-        }
-    }
-    for (j = 0; j < 4; j++) {
-        for (i = 0; i < 18; i++) {
-            f_packets[j][i] = packet[i];
-        }
-    }
-    f_packets[0][11] = HI;
-    f_packets[0][13] = HI;
-    f_packets[0][15] = LO;
-    if (f1)
-        f_packets[0][17] = HI;
-    else
-        f_packets[0][17] = LO;
-    f_packets[1][11] = LO;
-    f_packets[1][13] = LO;
-    f_packets[1][15] = HI;
-    if (f2)
-        f_packets[1][17] = HI;
-    else
-        f_packets[1][17] = LO;
-    f_packets[2][11] = LO;
-    f_packets[2][13] = HI;
-    f_packets[2][15] = HI;
-    if (f3)
-        f_packets[2][17] = HI;
-    else
-        f_packets[2][17] = LO;
-    f_packets[3][11] = HI;
-    f_packets[3][13] = HI;
-    f_packets[3][15] = HI;
-    if (f4)
-        f_packets[3][17] = HI;
-    else
-        f_packets[3][17] = LO;
-
-    /* thanks to Dieter Schaefer for the following code */
-    for (j = 0; j < 4; j++) {
-        if (((j == 0) && (mspeed == 3) && (!f1))
-            || ((j == 1) && (mspeed == 4) && (!f2))
-            || ((j == 2) && (mspeed == 6) && (!f3))
-            || ((j == 3) && (mspeed == 7) && (!f4))) {
-            f_packets[j][11] = HI;
-            f_packets[j][13] = LO;
-            f_packets[j][15] = HI;
-        }
-        if (((j == 0) && (mspeed == 11) && (f1))
-            || ((j == 1) && (mspeed == 12) && (f2))
-            || ((j == 2) && (mspeed == 14) && (f3))
-            || ((j == 3) && (mspeed == 15) && (f4))) {
-            f_packets[j][11] = LO;
-            f_packets[j][13] = HI;
-            f_packets[j][15] = LO;
-        }
-    }
-
-    /* lets have a look, what has changed ... */
-    for (i = 0; i < 4; i++) {
-        fx_packet = get_maerklin_packet(busnumber, address, i);
-        if (fx_packet[17] != f_packets[i][17]) {
-            fx_changed = 1;
-            fx = i;
-            break;
-        }
-    }
-
-    update_MaerklinPacketPool(busnumber, address, packet, f_packets[0],
-                              f_packets[1], f_packets[2], f_packets[3]);
-
-    //Ausgabe Geschwindigkeitsbefehl erfolgt immer
-    send_packet(busnumber, packet, 18, QM2LOCOPKT, 2);
-    if (fx_changed) {
-    	send_packet(busnumber, f_packets[fx], 18, QM2FXPKT, 1);
-    }
-    return 0;
-}
-
-int comp_maerklin_28(bus_t busnumber, int address, int direction,
-                    int speed, int func, int f1, int f2, int f3, int f4)
-{
-
-    char trits[9];
-    char packet[18];
-    char f_packets[4][18];
-    int fx = 0, fx_changed = 0;
-    char *fx_packet;
-
-    char mask[5];
-    int i, j;
-    int adr = 0;
-    int speed_halfstep = 0;
-    int mspeed;
-
-    adr = address;
-    if (direction == 0)
-        direction = -1;
-    else
-        direction = 1;
-    speed = direction * speed;
-
-    /* no special error handling, it's job of the clients */
-    if (address < 0 || address > 255 || func < 0 || func > 1 || speed < -28
-        || speed > 28 || f1 < 0 || f1 > 1 || f2 < 0 || f2 > 1 || f3 < 0
-        || f3 > 1 || f4 < 0 || f4 > 1)
-        return 1;
-
-    /* compute address part */
-    for (i = 0; i < 8; i++)
-        packet[i] = (mmadr_cod[address] >> i) & 1;
-
-    /* so far the same procedure as by Maerklin type 1, but now ... */
-
-    speed_halfstep = !(abs(speed) % 2);
-    if (speed > 0)
-        speed = ((speed + 1) / 2) + 1;
-    else
-        speed = ((speed - 1) / 2) - 1;
-
-    /* compute func trit and speed half step */
-    if (!speed_halfstep)
-        if (func)
-            trits[4] = 'H';
-        else
-            trits[4] = 'L';
-    else if (func)
-        trits[4] = 'O';
-    else
-        trits[4] = 'U';
-
-    /* compute speed trits   */
-    if (speed < -7)
-        strcpy(mask, "HLHL");
-    if (speed <= 0 && speed >= -7 && direction == -1)
-        strcpy(mask, "HLHH");
-    if (speed >= 0 && speed <= 7 && direction == 1)
-        strcpy(mask, "LHLH");
-    if (speed > 7)
-        strcpy(mask, "LHLL");
-    speed = abs(speed);
-    mspeed = speed;
-
-    for (i = 5; i < 9; i++) {
-        j = speed % 2;
-        speed = speed / 2;
-        switch (j) {
-            case 0:
-                trits[i] = 'L';
-                break;
-            case 1:
-                trits[i] = 'H';
-                break;
-        }
-        if (trits[i] == 'H' && mask[i - 5] == 'L')
-            trits[i] = 'O';
-        if (trits[i] == 'L' && mask[i - 5] == 'H')
-            trits[i] = 'U';     /* Oops, whats */
-    }                           /* this? :-)    */
-
-    for (i = 4; i < 9; i++) {
-        switch (trits[i]) {
-            case 'L':
-                packet[2 * i] = LO;
-                packet[2 * i + 1] = LO;
-                break;
-            case 'H':
-                packet[2 * i] = HI;
-                packet[2 * i + 1] = HI;
-                break;
-            case 'O':
-                packet[2 * i] = HI;
-                packet[2 * i + 1] = LO;
-                break;
-            case 'U':
-                packet[2 * i] = LO;
-                packet[2 * i + 1] = HI;
-                break;
-        }
-    }
-    for (j = 0; j < 4; j++) {
-        for (i = 0; i < 18; i++) {
-            f_packets[j][i] = packet[i];
-        }
-    }
-    f_packets[0][11] = HI;
-    f_packets[0][13] = HI;
-    f_packets[0][15] = LO;
-    if (f1)
-        f_packets[0][17] = HI;
-    else
-        f_packets[0][17] = LO;
-    f_packets[1][11] = LO;
-    f_packets[1][13] = LO;
-    f_packets[1][15] = HI;
-    if (f2)
-        f_packets[1][17] = HI;
-    else
-        f_packets[1][17] = LO;
-    f_packets[2][11] = LO;
-    f_packets[2][13] = HI;
-    f_packets[2][15] = HI;
-    if (f3)
-        f_packets[2][17] = HI;
-    else
-        f_packets[2][17] = LO;
-    f_packets[3][11] = HI;
-    f_packets[3][13] = HI;
-    f_packets[3][15] = HI;
-    if (f4)
-        f_packets[3][17] = HI;
-    else
-        f_packets[3][17] = LO;
-
-    /* thanks to Dieter Schaefer for the following code */
-    for (j = 0; j < 4; j++) {
-        if (((j == 0) && (mspeed == 3) && (!f1))
-            || ((j == 1) && (mspeed == 4) && (!f2))
-            || ((j == 2) && (mspeed == 6) && (!f3))
-            || ((j == 3) && (mspeed == 7) && (!f4))) {
-            f_packets[j][11] = HI;
-            f_packets[j][13] = LO;
-            f_packets[j][15] = HI;
-        }
-        if (((j == 0) && (mspeed == 11) && (f1))
-            || ((j == 1) && (mspeed == 12) && (f2))
-            || ((j == 2) && (mspeed == 14) && (f3))
-            || ((j == 3) && (mspeed == 15) && (f4))) {
-            f_packets[j][11] = LO;
-            f_packets[j][13] = HI;
-            f_packets[j][15] = LO;
-        }
-    }
-
-    /* lets have a look, what has changed ... */
-    for (i = 0; i < 4; i++) {
-        fx_packet = get_maerklin_packet(busnumber, adr, i);
-        if (fx_packet[17] != f_packets[i][17]) {
-            fx_changed = 1;
-            fx = i;
-            break;
-        }
-    }
-
-    update_MaerklinPacketPool(busnumber, adr, packet, f_packets[0],
-                              f_packets[1], f_packets[2], f_packets[3]);
-
-    //Ausgabe Geschwindigkeitsbefehl erfolgt immer
-    send_packet(busnumber, packet, 18, QM2LOCOPKT, 2);
-    if (fx_changed) {
-    	send_packet(busnumber, f_packets[fx], 18, QM2FXPKT, 1);
-    }
-    return 0;
-}
-
-int comp_maerklin_27(bus_t busnumber, int address, int direction,
-                    int speed, int func, int f1, int f2, int f3, int f4, int speed_old)
-{
-
-    int sFS1, sFS2;
-    int rtc;
-    int two_commands = false;
-    int acceleration = false;
-
-    /* no special error handling, it's job of the clients */
-    if (speed < 0 || speed > 28)
-        return 1;
-
-    /* xFS    rFS   sFS1 -> (500ms) -> sFS2
-
-       0      0      0                  %
-
-       2      2      0                  2
-       3    2.5      3                  2
-       4      3      2                  3
-       5    3.5      4                  3
-       6      4      3                  4
-       7    4.5      5                  4
-       8      5      4                  5
-       9    5.5      6                  5
+       0       0      0                  %			 0
+	CHG_DIR    1      1                  1			 1
+       2       2      0                  2			 2
+       3     2.5      3                  2			 2
+       4       3      2                  3
+       5     3.5      4                  3
+       6       4      3                  4
+       7     4.5      5                  4
+       8       5      4                  5
+       9     5.5      6                  5
        10      6      5                  6
        11    6.5      7                  6
        12      7      6                  7
@@ -493,157 +111,116 @@ int comp_maerklin_27(bus_t busnumber, int address, int direction,
        25   13.5     14                 13
        26     14     13                 14
        27   14.5     15                 14
-       28     15     14                 15
+       28     15     14                 15			15
+       29   ----     --                 --			15
      */
 
-    acceleration = (speed_old < speed);
+void comp_MM(bus_t bus, gl_data_t *glp, int direction, int speed)
+{
+	tMaerklinData mdata;
 
-    if ((acceleration && (speed % 2)) || (!acceleration && !(speed % 2)))
-        two_commands = true;
+	int sFS1, sFS2 = 0;
+	int addr = glp->id;
+	if (addr < 0 || addr > 255 || speed < 0 || speed > (glp->n_fs + 1)) return;
 
-    if (speed > 0) {
-        if (two_commands) {     /* two commands necessary */
-            if (speed % 2) {
-                sFS2 = speed / 2 + 1;
-                sFS1 = sFS2 + 1;
-            }
-            else {
-                sFS2 = speed / 2 + 1;
-                sFS1 = sFS2 - 1;
-                if (sFS1 == 1)
-                    sFS1 = 0;
-            }
-        }
-        else {                  /* one command necessary */
-            sFS1 = speed / 2 + 1;
-            sFS2 = 0;
-        }
-    }
-    else {                      /* one command necessary */
-        sFS1 = 0;
-        sFS2 = 0;
-    }
+	mdata.addr = mmadr_cod[addr];
+	mdata.func = (glp->funcs & 1) ? 3 : 0;
+	mdata.data = speed;
 
-    rtc = comp_maerklin_2(busnumber, address, direction, sFS1, func, f1, f2, f3, f4);
-    if ((sFS2 > 0) && (rtc == 0)) {
-        if (usleep(50000) == -1) {
-            syslog_bus(busnumber, DBG_ERROR,
-                       "usleep() failed in Märklin line %d: %s (errno = %d)",
-                       __LINE__, strerror(errno), errno);
-        }
-        rtc = comp_maerklin_2(busnumber, address, direction, sFS2, func,
-                              f1, f2, f3, f4);
-    }
-    return rtc;
+	if (glp->protocolversion == 1) {	// MM1 coding
+		if (addr > 80) return;
+		mdata.xdat = speed;
+		char *packet = (char *)&mdata;
+		update_MaerklinPacketPool(bus, glp, packet, packet, packet, packet, packet);
+		send_packet(bus, packet, QM1LOCOPKT, 2);
+
+		if (glp->n_func > 1) {			// MF-Decoder
+    		syslog_bus(bus, DBG_DEBUG,
+               "Command for func decoder (Maerklin) (MF) addr %d received", addr);
+			mdata.func = 3;
+			mdata.xdat = mdata.data = (glp->funcs >> 1) & 0xF;
+			send_packet(bus, (char *)&mdata, QM1FUNCPKT, 2);
+		}
+	}
+	else {
+		switch (glp->n_fs) {
+		case 14:	break;							// no special handling
+		case 27:	if (speed > 1) {
+						sFS2 = (speed / 2) + 1;
+						if (speed & 1) {
+							sFS1 = sFS2 + 1;
+						}
+						else {
+							sFS1 = sFS2 - 1;
+							if (sFS1 == 1) sFS1 = 0;
+						}
+						mdata.data = sFS1;			// first speed value
+					}
+					if (sFS2) {
+						if (mdata.data & 8) mdata.xdat = (direction) ? 2 : 5;
+			  			else mdata.xdat = (direction) ? 10 : 13;
+						send_packet(bus, (char *)&mdata, QM2LOCOPKT, 3);
+						mdata.data = sFS2;			// use second speed value
+					}
+					break;
+		case 28:	if (speed > 1) {
+						if (speed & 1) mdata.func ^= 2;	// halfstep bit
+						mdata.data = (speed / 2) + 1;
+					}
+					break;
+		default:	return;							// invalid value
+		}
+
+		char packets[5][4];
+		for (int f = 0; f < 5; f++) {
+			switch (f) {				// MM2 coding of direction and functions
+			  case 0:	if (mdata.data & 8) mdata.xdat = (direction) ? 2 : 5;
+			  			else mdata.xdat = (direction) ? 10 : 13;
+						break;
+			  case 1:	mdata.xdat = (glp->funcs & 2) ? 11 : 3;		break;
+			  case 2:	mdata.xdat = (glp->funcs & 4) ? 12 : 4;		break;
+			  case 3:	mdata.xdat = (glp->funcs & 8) ? 14 : 6;		break;
+			  case 4:	mdata.xdat = (glp->funcs & 16) ? 15 : 7;	break;
+			}
+			if (mdata.xdat == mdata.data) {
+        		mdata.xdat = (mdata.data & 8) ? 10 : 5;
+			}
+			memcpy(packets[f], &mdata, 4);
+		}
+		update_MaerklinPacketPool(bus, glp, packets[0],
+								packets[1], packets[2], packets[3], packets[4]);
+		send_packet(bus, packets[0], QM2LOCOPKT, 2);
+
+		for (int i=1; i < 5; i++) {
+			if ((glp->funcschange >> i) & 1) {
+				send_packet(bus, packets[i], QM2FXPKT, 1);
+				return;
+			}
+		}
+	}
 }
 
-int comp_maerklin_ms(bus_t busnumber, int address, int port, int action)
+int comp_maerklin_ms(bus_t bus, int address, int port, int action)
 {
-    char packet[18];
-    int i, j;
     int id, subid;
+	tMaerklinData mdata;
 
-    syslog_bus(busnumber, DBG_DEBUG,
+    syslog_bus(bus, DBG_DEBUG,
                "command for MM solenoid received addr:%d port:%d action:%d",
 			   address, port, action);
 
-    /* no special error handling, it's job of the clients */
     if (address < 1 || address > 324 || action < 0 || action > 1 || port < 0 || port > 1) {
         return 1;
     }
     id = ((address - 1) >> 2);
-    subid = (((address - 1) & 3) << 1) + port;
-    if (action)
-    	packet[16] = packet[17] = 1;
-    else
-    	packet[16] = packet[17] = 0;
-
-    /* compute address part */
     if (id == 0) id = 80;		// special translation
-    for (i = 0; i < 8; i++)
-        packet[i] = (mmadr_cod[id] >> i) & 1;
+    subid = (((address - 1) & 3) << 1) + port;
 
-    /* compute dummy func part */
-    packet[8] = packet[9] = 0;
-
-    /* compute port trits   */
-    for (i = 5; i < 8; i++) {
-        j = subid % 2;
-        subid = subid / 2;
-        switch (j) {
-            case 0:
-                packet[i*2] = LO;
-                packet[i*2+1] = LO;
-                break;
-            case 1:
-                packet[i*2] = HI;
-                packet[i*2+1] = HI;
-                break;
-        }
-    }
-
-    send_packet(busnumber, packet, 18, QM1SOLEPKT, 2);
-    return 0;
-}
-
-int comp_maerklin_mf(bus_t busnumber, int address, int f1, int f2,
-                     int f3, int f4)
-{
-    char trits[9];
-    char packet[18];
-    int i;
-
-    syslog_bus(busnumber, DBG_DEBUG,
-               "Command for func decoder (Maerklin) (MF) addr %d received", address);
-
-    /* no special error handling, it's job of the clients */
-    if (address < 0 || address > 80 || f1 < 0 || f1 > 1 ||
-        f2 < 0 || f2 > 1 || f3 < 0 || f3 > 1 || f4 < 0 || f4 > 1)
-        return 1;
-
-    /* compute address part */
-    for (i = 0; i < 8; i++)
-        packet[i] = (mmadr_cod[address] >> i) & 1;
-
-    /* compute func trit (dummy) */
-    trits[4] = 'H';
-    /* compute function trits   */
-    if (f1)
-        trits[5] = 'H';
-    else
-        trits[5] = 'L';
-    if (f2)
-        trits[6] = 'H';
-    else
-        trits[6] = 'L';
-    if (f3)
-        trits[7] = 'H';
-    else
-        trits[7] = 'L';
-    if (f4)
-        trits[8] = 'H';
-    else
-        trits[8] = 'L';
-
-    for (i = 4; i < 9; i++) {
-        switch (trits[i]) {
-            case 'L':
-                packet[i*2] = LO;
-                packet[i*2+1] = LO;
-                break;
-            case 'H':
-                packet[i*2] = HI;
-                packet[i*2+1] = HI;
-                break;
-            case 'O':
-                packet[i*2] = HI;
-                packet[i*2+1] = LO;
-                break;
-        }
-    }
-
-    send_packet(busnumber, packet, 18, QM1FUNCPKT, 2);
-    return 0;
+	mdata.addr = mmadr_cod[id];
+	mdata.func = 0;
+	mdata.xdat = mdata.data = subid + ((action) ? 8 : 0);
+	send_packet(bus, (char *)&mdata, QM1SOLEPKT, 2);
+	return 0;
 }
 
 void comp_maerklin_loco(bus_t bus, gl_data_t *glp)
@@ -668,28 +245,49 @@ void comp_maerklin_loco(bus_t bus, gl_data_t *glp)
     	"command for M%d protocol received addr:%d dir:%d (%d) speed:%d of %d chg %d funcs:%x",
         pv, addr, direction, glp->cacheddirection, speed, glp->n_fs, glp->speedchange, glp->funcs);
 
-	if (pv == 1) {	comp_maerklin_1(bus, addr, direction, speed, glp->funcs);
-                	if (glp->n_func > 1)
-                		comp_maerklin_mf(bus, addr, ((glp->funcs >> 1) & 0x01),
-                                ((glp->funcs >> 2) & 0x01), ((glp->funcs >> 3) & 0x01),
-                                ((glp->funcs >> 4) & 0x01));
-    }
-    else switch (glp->n_fs) {
-        case 14:	comp_maerklin_2(bus, addr, direction, speed,
-                                glp->funcs & 0x01, ((glp->funcs >> 1) & 0x01),
-                                ((glp->funcs >> 2) & 0x01), ((glp->funcs >> 3) & 0x01),
-                                ((glp->funcs >> 4) & 0x01));
-                    break;
-        case 27:	comp_maerklin_27(bus, addr, direction, speed,
-                                glp->funcs & 0x01, ((glp->funcs >> 1) & 0x01),
-                                ((glp->funcs >> 2) & 0x01), ((glp->funcs >> 3) & 0x01),
-                                ((glp->funcs >> 4) & 0x01), glp->cachedspeed);
-                    break;
-    	case 28:	comp_maerklin_28(bus, addr, direction, speed,
-                                glp->funcs & 0x01, ((glp->funcs >> 1) & 0x01),
-                                ((glp->funcs >> 2) & 0x01), ((glp->funcs >> 3) & 0x01),
-                                ((glp->funcs >> 4) & 0x01));
-                    break;
-    }
-    glp->speedchange &= ~SCSPEED;       // handled now
+	comp_MM(bus, glp, direction, speed);
+
+	glp->speedchange &= ~SCSPEED;       // handled now
+	glp->funcschange = 0;
 }
+
+static void progstep(bus_t bus, int addr, int npre, int nact, int npast)
+{
+	tMaerklinData mdata;
+
+	mdata.addr = mmadr_cod[addr];
+	mdata.func = 0;
+	if (npre) {
+		mdata.xdat = mdata.data = 0;
+		send_packet(bus, (char *)&mdata, QM1LOCOPKT, npre);
+	}
+	mdata.xdat = mdata.data = 1;
+	send_packet(bus, (char *)&mdata, QM1LOCOPKT, nact);
+
+	mdata.xdat = mdata.data = 0;
+	send_packet(bus, (char *)&mdata, QM1LOCOPKT, npast);
+}
+
+int mm_reg_prog(bus_t bus, bool ubmode, int addr, int regnr, int regval)
+{
+	syslog_bus(bus, DBG_DEBUG,
+			"command for MM programming received addr:%d register:%d value:%d",
+			addr, regnr, regval);
+
+	if (addr <= 0) addr = 80;
+	if (addr > 255 || regnr < 0 || regnr > 255 || regval < 0 || regval > 255) {
+		return 1;
+	}
+	progstep(bus, addr, 0, ubmode ? 400 : 100, 20);
+	progstep(bus, regnr, 10, 60, 50);
+	progstep(bus, regval, 10, 60, 50);
+	return 0;
+}
+
+int mm_search_loco(bus_t bus, int proto)
+{
+	int t = sleep(19);			// HACK: simulate action duration (<20s)
+	syslog_bus(bus, DBG_DEBUG, "*** MM-SEARCH not yet implemented, t=%d", t);
+	return proto;
+}
+

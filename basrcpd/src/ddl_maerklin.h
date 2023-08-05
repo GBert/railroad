@@ -1,4 +1,4 @@
-// ddl_maerklin.h - adapted for basrcpd project 2018 by Rainer Müller 
+// ddl_maerklin.h - adapted for basrcpd project 2018 - 2023 by Rainer MÃ¼ller 
 //
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -38,11 +38,11 @@
 /* signal generating functions for maerklin */
 
 void comp_maerklin_loco(bus_t bus, gl_data_t *glp);
-int comp_maerklin_ms(bus_t bus, int address, int port, int action);
-int comp_maerklin_mf(bus_t bus, int address,
-                     int f1, int f2, int f3, int f4);
 
-char getMaerklinHI(void);
-char getMaerklinLO(void);
+int comp_maerklin_ms(bus_t bus, int address, int port, int action);
+
+int mm_reg_prog(bus_t bus, bool ubmode, int addr, int regnr, int regval);
+
+int mm_search_loco(bus_t bus, int proto);
 
 #endif

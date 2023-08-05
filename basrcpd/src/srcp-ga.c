@@ -279,6 +279,7 @@ int initGA(bus_t busnumber, int addr, const char protocol)
 int lockGA(bus_t busnumber, int addr, long int duration,
            sessionid_t sessionid)
 {
+    if ((addr <= 0) || (addr > get_number_ga(busnumber))) return SRCP_WRONGVALUE;
     if (ga[busnumber].gastate[addr].locked_by == sessionid ||
         ga[busnumber].gastate[addr].locked_by == 0) {
         ga[busnumber].gastate[addr].locked_by = sessionid;
@@ -299,6 +300,10 @@ int lockGA(bus_t busnumber, int addr, long int duration,
 
 int getlockGA(bus_t busnumber, int addr, sessionid_t *sessionid)
 {
+    if ((addr <= 0) || (addr > get_number_ga(busnumber))) {
+        *sessionid = 0;
+        return SRCP_WRONGVALUE;
+    }
     *sessionid = ga[busnumber].gastate[addr].locked_by;
     return SRCP_OK;
 
@@ -306,6 +311,7 @@ int getlockGA(bus_t busnumber, int addr, sessionid_t *sessionid)
 
 int describeLOCKGA(bus_t bus, int addr, char *reply)
 {
+    if ((addr <= 0) || (addr > get_number_ga(bus))) return SRCP_WRONGVALUE;
     sprintf(reply, "%lld.%.3ld 100 INFO %lu LOCK GA %d %ld %lu\n",
             (long long) ga[bus].gastate[addr].locktime.tv_sec,
             (long) (ga[bus].gastate[addr].locktime.tv_usec / 1000),
@@ -317,6 +323,7 @@ int describeLOCKGA(bus_t bus, int addr, char *reply)
 int unlockGA(bus_t busnumber, int addr, sessionid_t sessionid)
 {
     /*pointer to ga state data*/
+    if ((addr <= 0) || (addr > get_number_ga(busnumber))) return SRCP_WRONGVALUE;
     ga_data_t* ga_tmp = &ga[busnumber].gastate[addr];
 
     if (ga_tmp->locked_by == 0 || ga_tmp->locked_by == sessionid) {
@@ -425,6 +432,7 @@ void handle_mcs_gacc(bus_t bus, char protocol, int addr, int port,
 			int action, int activetime)
 {
 	if (bus) { 		// bus == 0 indicates that basrcpd should ignore
+	if ((addr <= 0) || (addr > get_number_ga(bus))) return;
 		if (ga[bus].gastate[addr].protocol != protocol) {
 			if (initGA(bus, addr, protocol) != SRCP_OK) return;
 		}

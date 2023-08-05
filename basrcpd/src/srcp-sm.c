@@ -1,4 +1,4 @@
-// srcp-sm.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller 
+// srcp-sm.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller 
 
 /***************************************************************************
                          srcp-sm.c  -  description
@@ -265,10 +265,24 @@ int infoSM(bus_t busnumber, sm_protocol_t protocol, sm_command_t command, sm_typ
                             (long long) now.tv_sec, (long) (now.tv_usec / 1000),
                             busnumber, addr, typeaddr, bit_index, result);
                     break;
-                case MM_REG:
-                    minfo[0] = 1;	
-                    minfo[1] = 33;
-                    info_mcs(busnumber, 3, result, minfo);
+                case MM_REG:	case MM_REG_UB:
+					if (command == SET) {
+//						snprintf(info, MAXSRCPLINELEN,
+//                            "%lld.%.3ld 100 INFO %lu SM %d CVMFX %d %d %d\n",
+//                            (long long) now.tv_sec, (long) (now.tv_usec / 1000),
+//							busnumber, addr, typeaddr, bit_index, value);
+						minfo[0] = 4;
+						minfo[1] = 0;
+						minfo[2] = typeaddr & 0xFF;
+						minfo[3] = value;
+						minfo[4] = 0x80;	//result;
+						info_mcs(busnumber, 0x11, addr, minfo);
+					}
+                    else {
+						minfo[0] = 1;	
+                    	minfo[1] = 33;					// MM search result
+                    	info_mcs(busnumber, 3, result, minfo);
+					}
                     break;
                 case BIND_MFX:
                     if (addr == 0) {					// SET ^ GET x GM 0 BIND
@@ -334,7 +348,7 @@ void handle_mcs_config(bus_t bus, sm_command_t command,
     switch(uid >> 14) {
 		case 0:	protocol = PROTO_MM;
 				if (command == GET) goto defmsg;
-				type = MM_REG; 
+				type = (ctrl & 0x10) ? MM_REG_UB : MM_REG; 
 				break;
 		case 1:	protocol = PROTO_MFX;
 				type = CV_MFX;
@@ -366,7 +380,8 @@ void handle_mcs_discovery(bus_t bus, int proto, int uid)
 	char reply[MAXSRCPLINELEN];
 
     switch(proto) {
-        case 33:    infoSM(bus, PROTO_MM, GET, MM_REG, 0, -1, -1, -1, reply);
+        case 33:
+		case 34:    infoSM(bus, PROTO_MM, GET, MM_REG, 0, -1, proto, -1, reply);
                     break;
         default:    syslog_bus(bus, DBG_WARN, 
                             "*** MCS discovery for prot %d not supported.", proto);

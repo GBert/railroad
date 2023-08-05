@@ -1,4 +1,4 @@
-// ddl_mfx.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller
+// ddl_mfx.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -183,7 +183,7 @@ static void addCRCBits(char *stream, unsigned int *pos) {
 static unsigned int sendMFXPaket(int address, char *stream, int packetTyp, int xmits)
 {
 	unsigned int sizeStream = ((stream[0] + 7) / 8) + 1; //+7 damit immer bei int Division aufgerundet wird
-	send_packet(busnumber, stream, sizeStream, packetTyp, xmits);
+	send_packet(busnumber, stream, packetTyp, xmits);
 	return sizeStream;
 }
 
@@ -322,18 +322,20 @@ static uint16_t loadRegistrationCounter() {
  * Den veränderten Neuanmeldezähler speichern.
  * @regCounter Aktueller Neuanmeldezähler, der gespeichert werden soll.
  */
-static void saveRegistrationCounter(uint16_t regCounter) {
+static void saveRegistrationCounter(uint16_t regCounter)
+{
+	int wrres = 0;
 	int regCountFile = open(REG_COUNTER_FILE, O_WRONLY | O_CREAT | O_TRUNC,
 												S_IRUSR | S_IWUSR);
-	if (regCountFile < 0) {
-		syslog_bus(busnumber, DBG_ERROR,
-                "Error %d when trying to store ReRegistration counter", errno);
-    	return;
-  	}
-  	char buffer[10];
-  	sprintf(buffer, "%d", regCounter);
-  	write(regCountFile, buffer, strlen(buffer));
-  	close (regCountFile);
+	if (regCountFile < 0) wrres = errno;
+	else {
+		char buffer[10];
+		sprintf(buffer, "%d", regCounter);
+		if (write(regCountFile, buffer, strlen(buffer)) < 0) wrres = errno;
+		close (regCountFile);
+	}
+	if (wrres) syslog_bus(busnumber, DBG_ERROR,
+				"Error %d when trying to store ReRegistration counter", wrres);
 }
 
 /**
@@ -707,6 +709,7 @@ void serialMFXresult(uint8_t *buf, int len)
 	char dbgmsg[200];
 	DDL_DATA *ddl = (DDL_DATA*)buses[busnumber].driverdata;
 	uint8_t	event = 0x43;
+	int wrres = 0;
 
 	for (int n=0; n<len; n++) sprintf(dbgmsg + 3 * n, " %02X", buf[n]);
 	syslog_bus(busnumber, DBG_DEBUG, "read data len %d:%s", len, dbgmsg);
@@ -724,13 +727,14 @@ void serialMFXresult(uint8_t *buf, int len)
 			if (checkMfxCRC(ddl->fbData.serfbdata, ddl->fbData.fbbytnum)) {
 				syslog_bus(busnumber, DBG_DEBUG, "CRC OK");
 				event = 0x42;
-				write(ddl->feedbackPipe[1], &event, 1);
+				wrres = write(ddl->feedbackPipe[1], &event, 1);
 			}
 		}
 		else syslog_bus(busnumber, DBG_DEBUG, 
 			"mfx rec data framing error: len %d, min %d, start code 0x%X", len, minreq, buf[1]);
 	}
-	else write(ddl->feedbackPipe[1], &event, 1);
+	else wrres = write(ddl->feedbackPipe[1], &event, 1);
+	if (wrres < 0) syslog_bus(busnumber, DBG_ERROR, "write feedback pipe failed");
 }
 
 /**

@@ -1,4 +1,4 @@
-// ddl-nmra.h - adapted for basrcpd project 2018 by Rainer Müller 
+// ddl-nmra.h - adapted for basrcpd project 2018 - 2023 by Rainer Müller 
 
 /* +----------------------------------------------------------------------+ *
  * | DDL - Digital Direct for Linux                                       | *
@@ -34,10 +34,10 @@
 #ifndef DDL_NMRA_H
 #define DDL_NMRA_H
 
-int translateBitstream2Packetstream(bus_t busnumber, char *Bitstream,
-                                    char *Packetstream);
+//int translateBitstream2Packetstream(bus_t busnumber, char *Bitstream, char *Packetstream);
 
 /* signal generating functions for nmra dcc */
+void nmra_idle(bus_t busnumber, int nmbr);
 
 /* NMRA multi function decoder */
 void comp_nmra_multi_func(bus_t busnumber, gl_data_t *glp);

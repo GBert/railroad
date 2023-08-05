@@ -1,4 +1,4 @@
-// srcpd-server.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller 
+// srcpd-server.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller 
 
 /* $Id: srcp-server.c 1725 2016-03-20 17:06:01Z gscholz $ */
 
@@ -14,6 +14,7 @@
 
 #include "config-srcpd.h"
 #include "srcp-server.h"
+#include "srcp-power.h"
 #include "srcp-error.h"
 #include "srcp-info.h"
 #include "syslogmessage.h"
@@ -194,6 +195,7 @@ void server_reset()
      * devices to get them in operation again.
      */
     for (bus_t bus = 1; bus <= num_buses; bus++) {
+        setPower(bus, 0, "SERVER RESET");
         cacheCleanGL(bus);
         clean_GA(bus);
     }

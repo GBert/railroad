@@ -630,7 +630,7 @@ gl_data_t * get_gldata_ptr(bus_t bus, uint32_t locid)
             				p->n_func = 16;
 							break;
 					case 7:	p->protocol = 'N';	// DCC
-        					p->protocolversion = 1;
+        					p->protocolversion = (p->id > 127) ? 2 : 1;
 							p->n_fs = 28;
             				p->n_func = 16;
 							break;
@@ -724,7 +724,8 @@ int handle_mcs_func(bus_t bus, uint32_t locid, int funr, int val)
 {
 //  syslog_bus(bus, DBG_DEBUG, "mcs_func for %d, f%d set to %d", locid, funr, val);
     gl_data_t *p = get_gldata_ptr(bus, locid | MCSADDRINDICATOR);
-    if (p == NULL) return -1;
+    if ((p == NULL) || (funr > 31)) return -1;
+	if ((funr + 1) > p->n_func) p->n_func = funr + 1;
     if (val >= 0) {
         uint32_t mask = 1 << funr;
         uint32_t oldval = (p->funcs & mask) ? 1 : 0;
