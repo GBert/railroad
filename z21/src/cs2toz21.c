@@ -108,7 +108,7 @@ extern struct loco_data_t *loco_data;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -v -c <config_dir> -i <interface list> -s <config link> -p <icons link>\n", prg);
-    fprintf(stderr, "   Version 0.99\n\n");
+    fprintf(stderr, "   Version 0.991\n\n");
     fprintf(stderr, "         -a <time_out>       try to find CS2/CS2 for <time_out> seconds using -i <interface list>\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_data.config_dir);
     fprintf(stderr, "         -i <interface list> interface list - default %s\n", INTERFACE_LIST);
@@ -426,7 +426,7 @@ int main(int argc, char **argv) {
     char uuidtext[UUIDTEXTSIZE];
 
     memset(&config_data, 0, sizeof config_data);
-    config_data.config_dir = strdup("/www/config");
+    config_data.config_dir = strdup("/www");
     interface_list = strdup(INTERFACE_LIST);
 
     while ((opt = getopt(argc, argv, "a:c:i:p:s:vh?")) != -1) {
