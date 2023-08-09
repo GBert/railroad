@@ -28,8 +28,8 @@ bpi-rs485: bpi-rs485.o
 can-bounce-test: can-bounce-test.o
 	$(CC) $(CFLAGS) -o can-bounce-test can-bounce-test.o
 
-can-monitor: crc-ccitt.o lib.o can-monitor.o
-	$(CC) $(CFLAGS) -o can-monitor crc-ccitt.o lib.o can-monitor.o -lpcap
+can-monitor:
+	+$(MAKE) -C can_monitor
 
 can-replay: can-replay.o
 	$(CC) $(CFLAGS) -o can-replay can-replay.o
@@ -141,3 +141,4 @@ spitest: spitest.o
 
 clean:
 	$(RM) *.o $(BINS) s88udp
+	+$(MAKE) -C can_monitor clean
