@@ -2148,7 +2148,8 @@ int main(int argc, char **argv) {
 		myudp = (struct udphdr *)(pkt_ptr + sizeof(struct ip));
 		dport = ntohs(myudp->uh_dport);
 		sport = ntohs(myudp->uh_sport);
-		if ((dport != 15730) && (sport != 15730) && (dport != 15731) && (sport != 15731))
+		if ((dport != 15730) && (sport != 15730) && (dport != 15731) && (sport != 15731) 
+			&& (dport != 5728) && (dport != 21105) && (dport != 21106))
 		    continue;
 		int size_payload = packet_length - (IPHDR_LEN + sizeof(struct udphdr));
 		if (verbose) {
