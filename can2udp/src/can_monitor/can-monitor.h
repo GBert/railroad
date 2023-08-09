@@ -13,7 +13,20 @@
 
 #define MAX_MESSWERTE	256
 
-#if 0					/* FIXME: actually not used in canmon */
+#define RED     "\x1B[31m"
+#define GRN     "\x1B[32m"
+#define YEL     "\x1B[33m"
+#define BLU     "\x1B[34m"
+#define MAG     "\x1B[35m"
+#define CYN     "\x1B[36m"
+#define WHT     "\x1B[37m"
+#define RESET   "\x1B[0m"
+
+/* diff between CS1/CS2 */
+#define M_CS2_HASH_MASK   0x00000380U
+#define M_CS2_HASH_FLAG   0x00000300U
+
+#if 0					/* FIXME: actually not used by can-monitor */
 struct statusdaten_t {
     uint32_t geraete_id;
     uint8_t messwerte;
