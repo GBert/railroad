@@ -151,7 +151,7 @@ void writeYellow(const char *s) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.00\n\n");
+    fprintf(stderr, "   Version 5.01\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -332,7 +332,7 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 	int header = data[2] + data[3] * 256;
 	int par1st = 4;
 
-	printf("%s %.3d>  UDP*Z21 Länge %03X, Header %04X ", timestamp, source, datlen, header);
+	printf("%s %.3d>  UDP  Z21 L %03X, H %04X ", timestamp, source, datlen, header);
 	if (header == 0x0040) {	// LAN_X_...
 	    uint8_t xorval = 0;
 	    for (int i = 4; i < datlen; i++)
@@ -343,8 +343,9 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		uint8_t xheader = data[4];
 		if ((xheader & 0x20) && (xheader != 0xEF)) {	// use DB0
 		    uint8_t db0 = data[5];
-		    printf("%02X %02X => ", xheader, db0);
+		    printf("%02X %02X                 ", xheader, db0);
 		    par1st = 6;
+		    printf(BLU);
 		    switch (xheader * 256 + db0) {
 		    case 0x2121:
 			printf("LAN_X_GET_VERSION");
@@ -401,7 +402,8 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 			printf("unbekannt");
 		    }
 		} else {
-		    printf("%02X    => ", xheader);
+		    printf("%02X                    ", xheader);
+		    printf(BLU);
 		    par1st = 5;
 		    switch (xheader) {
 		    case 0x43:
@@ -417,7 +419,7 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 			printf("LAN_X_BC_STOPPED");
 			break;
 		    case 0xEF:
-			printf("LAN_X_LOCO_INFO");
+			printf("LAN_X_LOCO_INFO    ");
 			break;
 		    default:
 			printf("unbekannt");
@@ -430,7 +432,8 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		    printf(" %02X", data[i]);
 	    }
 	} else {
-	    printf("      => ");
+	    printf(BLU);
+	    printf("                      ");
 	    switch (header) {
 	    case 0x10:
 		printf("LAN_GET_SERIAL_NUMBER");
@@ -2151,6 +2154,7 @@ int main(int argc, char **argv) {
 		if ((dport != 15730) && (sport != 15730) && (dport != 15731) && (sport != 15731)
 			&& (dport != 5728) && (dport != 21105) && (dport != 21106))
 		    continue;
+		printf(RESET);
 		int size_payload = packet_length - (IPHDR_LEN + sizeof(struct udphdr));
 		if (verbose) {
 		    printf("%s ", timestamp);
