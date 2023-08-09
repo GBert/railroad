@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <linux/can.h>
-#include <linux/can/raw.h>
 
 #include "tools.h"
 #include "can-monitor.h"
