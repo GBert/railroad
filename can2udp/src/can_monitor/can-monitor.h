@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef _CAN_MONITOR_H
-#define _CAN_MONITOR_H
+#ifndef _CAN_MONITOR_H_
+#define _CAN_MONITOR_H_
 
 #define MAX_MESSWERTE	256
 
@@ -103,5 +103,5 @@ struct cs2_config_data_t {
 int config_write(struct cs2_config_data_t *config_data);
 uint16_t CRCCCITT(unsigned char *data, size_t length, unsigned short seed);
 
-#endif /* _CAN_MONITOR_H */
+#endif /* _CAN_MONITOR_H_ */
 

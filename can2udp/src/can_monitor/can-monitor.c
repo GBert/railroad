@@ -39,6 +39,7 @@
 #include "../lib.h"
 #include "decoder-can-cdb.h"
 #include "decoder-can-cs1.h"
+#include "decoder-can-maecan.h"
 #include "decoder-z21.h"
 #include "tools.h"
 #include "can-monitor.h"
@@ -508,7 +509,7 @@ void print_loc_proto(uint8_t proto) {
 
 void decode_frame(struct can_frame *frame) {
     uint32_t id, kennung, function, uid, cv_number, cv_index;
-    uint16_t paket, crc, kenner, kontakt, typ, value;
+    uint16_t paket, crc, kenner, kontakt, typ;
     uint8_t n_kanaele, n_messwerte;
     char s[32];
     float v;
@@ -1074,139 +1075,10 @@ void decode_frame(struct can_frame *frame) {
 	break;
 
     /* MäCAN Bootloader/Updater */
-    case 0x80:{
-	    uid = be32(frame->data);
-	    printf("MäCAN Bootloader ");
-	    switch (frame->can_dlc) {
-	    case 4:
-		printf("UID 0x%08X Update-Angebot an ", uid);
-		break;
-	    case 6:{
-		    switch (frame->data[4]) {
-		    case 0x04:
-			printf("UID 0x%08X Page %d Beginn", uid, frame->data[5]);
-			break;
-		    case 0x05:
-			printf("UID 0x%08X Page %d Ende", uid, frame->data[5]);
-			break;
-		    case 0x07:{
-			    printf("UID 0x%08X Update abgeschlossen für ", uid);
-			    switch (frame->data[5]) {
-			    case 0x51:
-				printf("MäCAN Busankoppler");
-				break;
-			    case 0x52:
-				printf("MäCAN MP5x16");
-				break;
-			    case 0x53:
-				printf("MäCAN Dx32");
-				break;
-			    default:
-				printf("unbekannt");
-				break;
-			    }
-			    break;
-			}
-		    default:
-			printf("unbekannt");
-			break;
-		    }
-		    break;
-		}
-	    case 8:
-		printf("Data");
-		break;
-	    default:
-		break;
-	    }
-	    printf("\n");
-	    break;
-	}
-    case 0x81:{
-	    printf("MäCAN Bootloader ");
-	    switch (frame->can_dlc) {
-	    case 6:{
-		    uid = be32(frame->data);
-		    printf("UID 0x%08X ", uid);
-		    switch (frame->data[4]) {
-		    case 0x01:{
-			    printf("Bestätigung durch ");
-			    switch (frame->data[5]) {
-			    case 0x51:
-				printf("MäCAN Busankoppler");
-				break;
-			    case 0x52:
-				printf("MäCAN MP5x16");
-				break;
-			    case 0x53:
-				printf("MäCAN Dx32");
-				break;
-			    default:
-				printf("unbekannt");
-				break;
-			    }
-			    break;
-			}
-		    }
-		    break;
-		}
-	    case 7:{
-		    value = be16(&frame->data[5]);
-		    uid = be32(frame->data);
-		    printf("UID 0x%08X ", uid);
-		    switch (frame->data[4]) {
-		    case 1:{
-
-			    if (frame->data[6] == 1)
-				printf("Bestätigung");
-			    else
-				printf("Ablehnung");
-			    printf(" durch Updater für ");
-			    switch (frame->data[5]) {
-			    case 0x51:
-				printf("MäCAN Busankppler");
-				break;
-			    case 0x52:
-				printf("MäCAN MP5x16");
-				break;
-			    case 0x53:
-				printf("MäCAN Dx32");
-				break;
-			    default:
-				printf("unbekannt");
-				break;
-			    }
-			    break;
-			}
-		    case 2:
-			printf("Page-Größe %d", value);
-			break;
-		    case 3:
-			printf("Page-Anzahl %d", value);
-			break;
-		    case 5:{
-			    printf("Page %d ", frame->data[5]);
-			    if (frame->data[6] == 1)
-				printf("empfangen");
-			    else
-				printf("fehler");
-			    break;
-			}
-
-		    default:
-			printf("unbekannt");
-			break;
-		    }
-		    break;
-		}
-	    default:
-		break;
-	    }
-
-	    printf("\n");
-	    break;
-	}
-
+    case 0x80:
+    case 0x81:
+	decode_can_maecan(frame);
+	break;
     default:
 	printf("unknown\n");
 	break;
