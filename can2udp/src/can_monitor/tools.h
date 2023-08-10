@@ -13,5 +13,7 @@
 uint16_t be16(uint8_t *u);
 uint32_t be32(uint8_t *u);
 uint32_t le32(uint8_t *u);
+void writeRed(const char *s);
+void writeGreen(const char *s);
 
 #endif /* _TOOLS_H_ */

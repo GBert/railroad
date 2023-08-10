@@ -41,7 +41,7 @@ char *getLoco(uint8_t * data, char *s) {
     return s;
 }
 
-void command_system(struct can_frame *frame) {
+void decode_cs2_system(struct can_frame *frame) {
     uint32_t uid, response;
     uint16_t sid, wert;
     static uint16_t crcreg;

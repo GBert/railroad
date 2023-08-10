@@ -14,7 +14,7 @@
 #include "can-monitor.h"
 
 char *getLoco(uint8_t * data, char *s);
-void command_system(struct can_frame *frame);
+void decode_cs2_system(struct can_frame *frame);
 void print_loc_proto(uint8_t proto);
 
 #endif /* _DECODE_CAN_CS2_H_ */
