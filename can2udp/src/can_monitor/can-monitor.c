@@ -661,7 +661,7 @@ void decode_frame(struct can_frame *frame) {
 		    printf(GRN "Config Data %s mit CRC 0x%04X, Länge %d, ",
 			   config_data.name, config_data.crc, config_data.deflated_size);
 		    if (config_data.deflated_data[0] == 0) {
-			config_data.inflated_size = ntohl(*(uint32_t *) config_data.deflated_data);
+			config_data.inflated_size = be32(config_data.deflated_data);
 			printf("inflated %d Bytes\n", config_data.inflated_size);
 			/* now we can inflate collected data */
 			if (expconf) {
