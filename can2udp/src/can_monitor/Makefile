@@ -11,7 +11,7 @@ all:	$(BINS)
 CFLAGS+=-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wall -Wextra -Wmaybe-uninitialized -std=gnu99 -pedantic-errors 
 
 can-monitor: ${OBJS}
-	$(CC) $(CFLAGS) -o can-monitor ${OBJS} -lpcap
+	$(CC) $(CFLAGS) -o can-monitor ${OBJS} -lpcap -lz
 
 clean:
 	$(RM) ${OBJS} $(BINS)

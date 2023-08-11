@@ -7,9 +7,11 @@
  * ----------------------------------------------------------------------------
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include "zlib.h"
 #include "can-monitor.h"
 
 uint16_t be16(uint8_t *u) {
@@ -34,4 +36,34 @@ void writeGreen(const char *s) {
     printf(RESET);
 }
 
+int inflate_data(struct cs2_config_data_t *config_data) {
+    int ret;
+    z_stream strm;
 
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = 0;
+    strm.next_in = Z_NULL;
+    ret = inflateInit(&strm);
+    if (ret != Z_OK)
+	return ret;
+    strm.avail_in = config_data->deflated_size;
+    strm.avail_out = config_data->inflated_size;
+    strm.next_in = config_data->deflated_data + 4;
+    strm.next_out = config_data->inflated_data;
+    ret = inflate(&strm, Z_NO_FLUSH);
+
+    assert(ret != Z_STREAM_ERROR);	/* state not clobbered */
+    switch (ret) {
+    case Z_NEED_DICT:
+	ret = Z_DATA_ERROR;
+	/* falls through */
+    case Z_DATA_ERROR:
+    case Z_MEM_ERROR:
+	(void)inflateEnd(&strm);
+	return ret;
+    }
+
+    return 0;
+}

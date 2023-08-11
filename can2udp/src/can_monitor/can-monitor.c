@@ -112,7 +112,7 @@ void INThandler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.01\n\n");
+    fprintf(stderr, "   Version 5.02\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -773,7 +773,15 @@ void decode_frame(struct can_frame *frame) {
 		    if (config_data.deflated_data[0] == 0) {
 			config_data.inflated_size = ntohl(*(uint32_t *) config_data.deflated_data);
 			printf("inflated %d Bytes\n", config_data.inflated_size);
-			/* TODO: now you can inflate collected data */
+			/* now we can inflate collected data */
+			if (expconf) {
+			    config_data.inflated_data = malloc(config_data.inflated_size);
+			    if (inflate_data(&config_data))
+				printf("\nFehler: Daten konnten nicht dekomprimiert werden");
+			    else
+				printf(RESET "%s", config_data.inflated_data);
+			    free(config_data.inflated_data);
+			}
 		    } else {
 			printf("unkomprimiert\n");
 			if (expconf)
