@@ -104,6 +104,7 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
     case 0xEEEE:
 	printf("CS2 Software");
 	break;
+    case 0xFFF0: /* beobachtet */
     case 0xFFFF:
 	printf("CS2-GUI (Master)");
 	break;
