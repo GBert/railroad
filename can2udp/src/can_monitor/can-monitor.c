@@ -665,7 +665,6 @@ void decode_frame(struct can_frame *frame) {
 			printf("inflated %d Bytes\n", config_data.inflated_size);
 			/* now we can inflate collected data */
 			if (expconf) {
-			    config_data.inflated_data = malloc(config_data.inflated_size);
 			    if (inflate_data(&config_data))
 				printf("\nFehler: Daten konnten nicht dekomprimiert werden");
 			    else
