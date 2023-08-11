@@ -1036,7 +1036,7 @@ int main(int argc, char **argv) {
 		}
 		unsigned char *dump = (unsigned char *)pkt_ptr + IPHDR_LEN + sizeof(struct udphdr);
 		if (dport == 5728) {
-		    printf("%s %.3d>  UDP*Z21-CONF", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
+		    printf("%s %.3d>  UDP  Z21-CONF", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
 		    z21_conf_info(dump, size_payload);
 		    continue;
 		} else if ((dport == 21105) || (dport == 21106)) {
@@ -1091,7 +1091,7 @@ int main(int argc, char **argv) {
 				   ntohs(mytcp->th_dport));
 			    printf("  packet_length %4d\n", size_payload);
 			}
-			printf("%s %.3d>  TCP*Z21-CONF", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
+			printf("%s %.3d>  TCP  Z21-CONF", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
 			z21_conf_info(dump, size_payload);
 		    }
 		    continue;
