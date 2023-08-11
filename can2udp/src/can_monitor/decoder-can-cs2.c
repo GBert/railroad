@@ -10,11 +10,14 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <linux/can.h>
 
 #include "tools.h"
 #include "can-monitor.h"
+
+extern struct cs2_config_data_t config_data;
 
 char *getLoco(uint8_t * data, char *s) {
     uint16_t locID = be16(&data[2]);
@@ -104,7 +107,7 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
     case 0xEEEE:
 	printf("CS2 Software");
 	break;
-    case 0xFFF0: /* beobachtet */
+    case 0xFFF0:		/* beobachtet */
     case 0xFFFF:
 	printf("CS2-GUI (Master)");
 	break;
@@ -113,6 +116,77 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
 	break;
     }
     printf(" UID 0x%08X, Software Version %d.%d\n", uid, frame->data[4], frame->data[5]);
+}
+
+void decode_cs2_config_data(struct can_frame *frame, int expconf) {
+    char s[32];
+    uint16_t crc;
+
+    switch (frame->can_dlc) {
+    case 6:
+	config_data.deflated_size = be32(frame->data);
+	config_data.crc = be16(&frame->data[4]);
+	if (config_data.deflated_data)
+	    free(config_data.deflated_data);
+	config_data.deflated_data = malloc((size_t)config_data.deflated_size + 8);
+	config_data.deflated_size_counter = 0;
+	printf("Config Data Stream: Länge 0x%08X CRC 0x%04X\n", config_data.deflated_size, config_data.crc);
+	break;
+    case 7:
+	config_data.deflated_size = be32(frame->data);
+	config_data.crc = be16(&frame->data[4]);
+	if (config_data.deflated_data)
+	    free(config_data.deflated_data);
+	config_data.deflated_data = malloc((size_t)config_data.deflated_size + 8);
+	config_data.deflated_size_counter = 0;
+	memset(config_data.name, 0, sizeof(config_data.name));
+	printf("Config Data Stream: Länge 0x%08X CRC 0x%04X (unbekannt 0x%02X)\n",
+	       config_data.deflated_size, config_data.crc, frame->data[6]);
+	break;
+    case 8:
+	if ((frame->can_id & 0x01FFFF00UL) == 0x00434700) {
+	    memset(s, 0, sizeof(s));
+	    memcpy(s, frame->data, frame->can_dlc);
+	    printf("Config Data Broadcast Trigger ID 0x%02X für Datei %s\n", (frame->can_id & 0xFF), s);
+	    break;
+	}
+	if (config_data.deflated_size_counter < config_data.deflated_size) {
+	    memcpy(config_data.deflated_data + config_data.deflated_size_counter, frame->data, 8);
+	    config_data.deflated_size_counter += 8;
+	}
+	printf("Config Data Stream: Daten (%d/%d)\n", config_data.deflated_size_counter, config_data.deflated_size);
+	if ((config_data.deflated_size_counter >= config_data.deflated_size) && config_data.deflated_data) {
+	    crc = CRCCCITT(config_data.deflated_data, config_data.deflated_size_counter, 0xFFFF);
+	    if (crc == config_data.crc) {
+		printf(GRN "Config Data %s mit CRC 0x%04X, Länge %d, ",
+		       config_data.name, config_data.crc, config_data.deflated_size);
+		if (config_data.deflated_data[0] == 0) {
+		    config_data.inflated_size = be32(config_data.deflated_data);
+		    printf("inflated %d Bytes\n", config_data.inflated_size);
+		    /* now we can inflate collected data */
+		    if (expconf) {
+			if (inflate_data(&config_data))
+			    printf("\nFehler: Daten konnten nicht dekomprimiert werden");
+			else
+			    printf(RESET "%s", config_data.inflated_data);
+			free(config_data.inflated_data);
+		    }
+		} else {
+		    printf("unkomprimiert\n");
+		    if (expconf)
+			printf(RESET "%s", config_data.deflated_data);
+		}
+	    } else {
+		printf(RED "Config Data %s mit ungültigem CRC 0x%04X, erwartet 0x%04X\n",
+		       config_data.name, crc, config_data.crc);
+	    }
+	    free(config_data.deflated_data);
+	    config_data.deflated_data = NULL;
+	}
+	break;
+    default:
+	printf("Data Stream mit unerwartetem DLC %d\n", frame->can_dlc);
+    }
 }
 
 void decode_cs2_system(struct can_frame *frame) {
