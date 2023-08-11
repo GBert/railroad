@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "zlib.h"
 #include "can-monitor.h"
 
@@ -39,6 +40,10 @@ void writeGreen(const char *s) {
 int inflate_data(struct cs2_config_data_t *config_data) {
     int ret;
     z_stream strm;
+
+    /* NULL terminating for printf */
+    config_data->inflated_data = malloc(config_data->inflated_size + 1);
+    config_data->inflated_data[config_data->inflated_size] = 0;
 
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
