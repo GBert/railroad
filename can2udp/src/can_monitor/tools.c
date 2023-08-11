@@ -67,8 +67,9 @@ int inflate_data(struct cs2_config_data_t *config_data) {
     case Z_DATA_ERROR:
     case Z_MEM_ERROR:
 	(void)inflateEnd(&strm);
+	inflateEnd(&strm);
 	return ret;
     }
-
+    inflateEnd(&strm);
     return 0;
 }
