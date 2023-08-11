@@ -70,40 +70,6 @@ static char *F_N_UDP_FORMAT_STRG = "  UDP  0x%08X  [%d]";
 static char *F_N_TCP_FORMAT_STRG = "  TCP  0x%08X  [%d]";
 static char *F_N_SFF_FORMAT_STRG = "  CAN  <S>  0x%03X  [%d]";
 
-#if 0
-int insert_right(struct knoten *liste, void *element) {
-    struct knoten *tmp = liste;
-    struct knoten *node = calloc(1, sizeof(struct knoten));
-    if (node == NULL) {
-	fprintf(stderr, "calloc failed in %s: %s\n", __func__, strerror(errno));
-	return -1;
-    }
-    while (tmp->next != NULL)
-	tmp = tmp->next;
-    tmp->next = node;
-    tmp->daten = element;
-    return 0;
-}
-
-struct messwert_t *suche_messwert(struct knoten *liste, uint64_t messwert) {
-    struct knoten *tmp = liste;
-    int i = 0;
-
-    while (tmp) {
-	struct messwert_t *messwert_tmp = (void *)tmp->daten;
-	if (messwert_tmp->geraete_id_messwert == messwert) {
-	    return messwert_tmp;
-	} else {
-	    i++;
-	    if (i >= MAX_MESSWERTE)
-		return NULL;
-	    tmp = tmp->next;
-	}
-    }
-    return NULL;
-}
-#endif
-
 void INThandler(int sig) {
     signal(sig, SIG_IGN);
     fputs(RESET, stdout);

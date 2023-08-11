@@ -19,6 +19,40 @@
 
 extern struct cs2_config_data_t config_data;
 
+#if 0
+int insert_right(struct knoten *liste, void *element) {
+    struct knoten *tmp = liste;
+    struct knoten *node = calloc(1, sizeof(struct knoten));
+    if (node == NULL) {
+        fprintf(stderr, "calloc failed in %s: %s\n", __func__, strerror(errno));
+        return -1;
+    }
+    while (tmp->next != NULL)
+        tmp = tmp->next;
+    tmp->next = node;
+    tmp->daten = element;
+    return 0;
+}
+
+struct messwert_t *suche_messwert(struct knoten *liste, uint64_t messwert) {
+    struct knoten *tmp = liste;
+    int i = 0;
+
+    while (tmp) {
+        struct messwert_t *messwert_tmp = (void *)tmp->daten;
+        if (messwert_tmp->geraete_id_messwert == messwert) {
+            return messwert_tmp;
+        } else {
+            i++;
+            if (i >= MAX_MESSWERTE)
+                return NULL;
+            tmp = tmp->next;
+        }
+    }
+    return NULL;
+}
+#endif
+
 char *getLoco(uint8_t * data, char *s) {
     uint16_t locID = be16(&data[2]);
     char prot[32];
