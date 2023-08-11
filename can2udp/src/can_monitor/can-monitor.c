@@ -268,7 +268,7 @@ int CS1(int hash) {
 
 void decode_frame(struct can_frame *frame) {
     uint32_t id, kennung, function, uid, cv_number, cv_index;
-    uint16_t paket, crc, kenner, kontakt, typ;
+    uint16_t paket, crc, kenner, kontakt;
     uint8_t n_kanaele, n_messwerte;
     char s[32];
     float v;
@@ -490,73 +490,7 @@ void decode_frame(struct can_frame *frame) {
 	printf("Ping Anfrage\n");
 	break;
     case 0x31:
-	uid = be32(frame->data);
-	typ = be16(&frame->data[6]);
-	printf("Ping Antwort von ");
-	switch (typ) {
-	case 0x0000:
-	    if ((uid & 0xff000000) == 0x42000000)
-		printf("Booster (6017x)");
-	    else
-		printf("GFP");
-	    break;
-	case 0x0010:
-	case 0x0011:
-	    printf("Gleisbox");
-	    break;
-	case 0x0020:
-	    printf("Connect6021");
-	    break;
-	case 0x0030:
-	case 0x0031:
-	case 0x0032:
-	case 0x0033:
-	case 0x0034:
-	    printf("MS2");
-	    break;
-	case 0x0040:
-	    if ((uid & 0xFFF00000) == 0x53300000)
-		printf("LinkS88");
-	    else if ((uid & 0xFFFF0000) == 0x43420000)
-		printf("S88 Gateway");
-	    else
-		printf("S88 Unbekannt");
-	    break;
-	case 0x0051:
-	    if ((uid & 0xffff0000) == 0x4d430000)
-		printf("MäCAN Busankoppler");
-	    break;
-	case 0x0052:
-	    if ((uid & 0xffff0000) == 0x4d430000)
-		printf("MäCAN MP5x16");
-	    break;
-	case 0x0053:
-	    if ((uid & 0xffff0000) == 0x4d430000)
-		printf("MäCAN Dx32");
-	    else
-		printf("Cg Servo");
-	    break;
-	case 0x0054:
-	    printf("Cg Rückmelder");
-	    break;
-	case 0x4681:
-	case 0x46FF:
-	    printf("Rocrail");
-	    break;
-	case 0x1234:
-	    printf("MäCAN-Weichendecoder");
-	    break;
-	case 0xEEEE:
-	    printf("CS2 Software");
-	    break;
-	case 0xFFFF:
-	    printf("CS2-GUI (Master)");
-	    break;
-	default:
-	    printf("unbekannt");
-	    break;
-	}
-	printf(" UID 0x%08X, Software Version %d.%d\n", uid, frame->data[4], frame->data[5]);
+	decode_cs2_can_member(frame);
 	break;
     /* CAN Bootloader */
     case 0x36:
