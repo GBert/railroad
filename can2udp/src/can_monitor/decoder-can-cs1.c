@@ -7,11 +7,6 @@
  * ----------------------------------------------------------------------------
  */
 
-/*  ID field for MS1, coding for normal operation and for detection:
-    28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
-    <-PRIO-> <------          OBJECTHANDLE           ------> <-CMND-> <---    NODE    --->
-    <-PRIO-> <---      UID      ---> <-STEP-> <--  MID   --> <-CMND-> <---    NODE    --->
-*/
 
 #include <ctype.h>
 #include <stdint.h>
@@ -21,6 +16,15 @@
 #include "tools.h"
 #include "can-monitor.h"
 
+#if 0
+int CS1(int hash) {
+    if ((hash & (1 << 7)) == 0 && (hash & (1 << 8)) != 0 && (hash & (1 << 9)) != 0)
+        return 0;
+    else
+        return 1;
+}
+#endif
+
 int check_cs1_frame(uint32_t id) {
     if ((id & M_CS2_HASH_MASK) == M_CS2_HASH_FLAG)
 	return 0;
@@ -29,6 +33,12 @@ int check_cs1_frame(uint32_t id) {
 	return 1;
     return 0;
 }
+
+/*  ID field for MS1, coding for normal operation and for detection:
+    28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+    <-PRIO-> <------          OBJECTHANDLE           ------> <-CMND-> <---    NODE    --->
+    <-PRIO-> <---      UID      ---> <-STEP-> <--  MID   --> <-CMND-> <---    NODE    --->
+*/
 
 void decode_frame_cs1(struct can_frame *frame) {
     uint8_t mid;

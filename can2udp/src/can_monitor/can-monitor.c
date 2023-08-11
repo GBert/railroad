@@ -257,15 +257,6 @@ void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame
     fprintf(fp, "\n");
 }
 
-#if 0
-int CS1(int hash) {
-    if ((hash & (1 << 7)) == 0 && (hash & (1 << 8)) != 0 && (hash & (1 << 9)) != 0)
-	return 0;
-    else
-	return 1;
-}
-#endif
-
 void decode_frame(struct can_frame *frame) {
     uint32_t id, function, uid, cv_number, cv_index;
     uint16_t paket, kenner, kontakt;
