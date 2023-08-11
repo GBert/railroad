@@ -41,15 +41,14 @@ char *getLoco(uint8_t * data, char *s) {
     return s;
 }
 
-void decode_cs2_can_member(struct can_frame *frame) {
+void decode_cs2_can_identifier(struct can_frame *frame) {
     uint32_t uid;
-    uint16_t typ;
+    uint16_t ident;
 
     uid = be32(frame->data);
-    typ = be16(&frame->data[6]);
-    printf("Ping Antwort von ");
+    ident = be16(&frame->data[6]);
 
-    switch (typ) {
+    switch (ident) {
     case 0x0000:
 	if ((uid & 0xff000000) == 0x42000000)
 	    printf("Booster (6017x)");
@@ -63,7 +62,7 @@ void decode_cs2_can_member(struct can_frame *frame) {
     case 0x0020:
 	printf("Connect6021");
 	break;
-
+    case 0x0030:
     case 0x0031:
     case 0x0032:
     case 0x0033:
