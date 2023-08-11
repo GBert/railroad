@@ -1138,6 +1138,7 @@ int main(int argc, char **argv) {
 	    }
 	    printf(RESET);
 	}
+	pcap_close(handle);
 	return (EXIT_SUCCESS);
     /* reading from CAN socket */
     } else {
