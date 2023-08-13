@@ -45,8 +45,6 @@
 #include "tools.h"
 #include "can-monitor.h"
 
-#define	MAX_PAKETE	256
-#define	MAXSIZE		256
 #define MAXDG   	4096	/* maximum datagram size */
 #define MAXUDP  	16	/* maximum datagram size */
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
@@ -63,7 +61,7 @@ struct knoten *messwert = NULL;
 struct cs2_config_data_t config_data;
 
 unsigned char buffer[MAX_PAKETE * 8];
-int verbose = 0, kanal = 0, expconf = 0;
+int verbose = 0, expconf = 0;
 
 static char *F_N_CAN_FORMAT_STRG = "  CAN  0x%08X  [%d]";
 static char *F_N_UDP_FORMAT_STRG = "  UDP  0x%08X  [%d]";
@@ -224,9 +222,8 @@ void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame
 }
 
 void decode_frame(struct can_frame *frame) {
-    uint32_t id, function, uid, cv_number, cv_index;
-    uint16_t paket, kenner, kontakt;
-    uint8_t n_kanaele, n_messwerte;
+    uint32_t function, uid, cv_number, cv_index;
+    uint16_t kenner, kontakt;
     char s[32];
     float v;
 
@@ -503,38 +500,7 @@ void decode_frame(struct can_frame *frame) {
     /* Statusdaten Konfiguration */
     case 0x3A:
     case 0x3B:
-	/* TODO Daten analysiert ausgeben */
-	uid = be32(frame->data);
-	if (frame->can_dlc == 5) {
-	    kanal = frame->data[4];
-	    printf("Statusdaten: UID 0x%08X Index 0x%02X\n", uid, kanal);
-	    /* Datensatz ist komplett übertragen */
-	    if (frame->can_id & 0x00010000UL) {
-	    }
-	}
-	if (frame->can_dlc == 6)
-	    printf("Statusdaten: UID 0x%08X Index 0x%02X Paketanzahl %d\n", uid, frame->data[4], frame->data[5]);
-	if (frame->can_dlc == 8) {
-	    paket = (frame->can_id & 0xFCFF) - 1;
-	    printf("Statusdaten: Paket %d ", paket);
-	    if (paket == 0)
-		memset(buffer, 0, sizeof(buffer));
-	    if (paket < MAX_PAKETE)
-		memcpy(&buffer[paket * 8], frame->data, 8);
-	    if ((kanal == 0) && (paket == 0)) {
-		n_messwerte = frame->data[0];
-		n_kanaele = frame->data[1];
-		id = be32(&frame->data[4]);
-		printf(" Anzahl Messwerte: %d Anzahl Kanäle: %d Gerätenummer: 0x%08x", n_messwerte, n_kanaele, id);
-	    } else
-		for (int i = 0; i < 8; i++) {
-		    if (isprint(frame->data[i]))
-			putchar(frame->data[i]);
-		    else
-			putchar(' ');
-		}
-	    printf("\n");
-	}
+	decode_cs2_can_channels(frame);
 	break;
     /* Mag Update paket */
     case 0x3C:

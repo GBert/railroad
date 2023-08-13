@@ -11,6 +11,8 @@
 #ifndef _CAN_MONITOR_H_
 #define _CAN_MONITOR_H_
 
+#define MAX_PAKETE      256
+#define MAXSIZE         256
 #define MAX_MESSWERTE	256
 
 #define RED     "\x1B[31m"

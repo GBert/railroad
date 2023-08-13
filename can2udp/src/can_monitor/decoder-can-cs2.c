@@ -18,6 +18,7 @@
 #include "can-monitor.h"
 
 extern struct cs2_config_data_t config_data;
+int kanal = 0;
 
 #if 0
 int insert_right(struct knoten *liste, void *element) {
@@ -150,6 +151,47 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
 	break;
     }
     printf(" UID 0x%08X, Software Version %d.%d\n", uid, frame->data[4], frame->data[5]);
+}
+
+void decode_cs2_can_channels(struct can_frame *frame) {
+    uint32_t id, uid;
+    unsigned char buffer[1024];
+    uint16_t paket;
+    uint8_t n_kanaele, n_messwerte;
+
+    paket = 0;
+    /* TODO Daten analysiert ausgeben */
+    uid = be32(frame->data);
+    if (frame->can_dlc == 5) {
+	kanal = frame->data[4];
+	printf("Statusdaten: UID 0x%08X Index 0x%02X\n", uid, kanal);
+	/* Datensatz ist komplett übertragen */
+	if (frame->can_id & 0x00010000UL) {
+	}
+    }
+    if (frame->can_dlc == 6)
+	printf("Statusdaten: UID 0x%08X Index 0x%02X Paketanzahl %d\n", uid, frame->data[4], frame->data[5]);
+    if (frame->can_dlc == 8) {
+	paket = (frame->can_id & 0xFCFF) - 1;
+	printf("Statusdaten: Paket %d ", paket);
+	if (paket == 0)
+	    memset(buffer, 0, sizeof(buffer));
+	if (paket < MAX_PAKETE)
+	    memcpy(&buffer[paket * 8], frame->data, 8);
+	if ((kanal == 0) && (paket == 0)) {
+	    n_messwerte = frame->data[0];
+	    n_kanaele = frame->data[1];
+	    id = be32(&frame->data[4]);
+	    printf(" Anzahl Messwerte: %d Anzahl Kanäle: %d Gerätenummer: 0x%08x", n_messwerte, n_kanaele, id);
+	} else
+	    for (int i = 0; i < 8; i++) {
+		if (isprint(frame->data[i]))
+		    putchar(frame->data[i]);
+		else
+		    putchar(' ');
+	    }
+	printf("\n");
+    }
 }
 
 void decode_cs2_config_data(struct can_frame *frame, int expconf) {
