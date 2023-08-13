@@ -253,7 +253,7 @@ int send_udp_broadcast(void) {
 	    v_printf(config_data.verbose, "received UDP packet len %d from %s\n", n, inet_ntop(AF_INET, &client.sin_addr, buffer, sizeof buffer));
 	    if (n > 0) {
 		udpframe[n + 1] = 0;
-		/* only look for real IP adresse not 0.0.0.0 */
+		/* look for different packet than the sent packet */
 		if (memcmp(timestamp, udpframe, strlen(timestamp)) != 0) {
 		    v_printf(config_data.verbose, "%s\n", udpframe);
 		    send_tcp_data(&client);
