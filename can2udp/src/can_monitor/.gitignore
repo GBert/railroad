@@ -1,3 +1,4 @@
 *.o
 *~
 can-monitor
+test.*
