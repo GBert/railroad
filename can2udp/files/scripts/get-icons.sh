@@ -5,7 +5,7 @@ set -e
 
 FILE=cs2update.img
 FS_TYPE=reiserfs
-LINK=https://cloud.maerklin.de/owncloud/index.php/s/s9VYomomybeHTnD/download
+LINK=https://streaming.maerklin.de/public-media/cs2/cs2update.img
 MNT_POINT=/tmp/mnt
 WEB_DIR=/www
 
