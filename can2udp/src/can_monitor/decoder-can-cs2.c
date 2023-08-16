@@ -64,15 +64,12 @@ struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t in
 
     while (tmp) {
 	messwert_tmp = tmp->daten;
-	if (tmp->daten == NULL)
+	if (messwert_tmp == NULL)
 	    return NULL;
 
 	if ((messwert_tmp->uid == uid) && (messwert_tmp->index == index)) {
 	     // printf("Gefunden ");
-	     return (struct messwert_t *)tmp->daten;
-	} else {
-	     // printf("nicht Gefunden ");
-	    tmp = tmp->next;
+	     return tmp->daten;
 	}
 	tmp = tmp->next;
     }
@@ -231,18 +228,15 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
 	strcpy(a_messwert->name, p);
 	p = next_string(p);
 	a_messwert->min_bereich = atof(p);
-	printf(">>>>%02.02f<<<<\n", a_messwert->min_bereich);
 	p = next_string(p);
 	a_messwert->max_bereich = atof(p);
-	printf(">>>>%02.02f<<<<\n", a_messwert->max_bereich);
 	p = next_string(p);
 	a_messwert->einheit = calloc(1, strlen(p) + 1);
 	strcpy(a_messwert->einheit, p);
-	printf(">>>>%s<<<<\n", a_messwert->einheit);
-	printf("* Channel complete: 0x%08X, kanal %d index %d min %d max %d\n", uid, kanal,
-			a_messwert->index, a_messwert->nullpunkt, a_messwert->max_limit);
+	//printf("* Channel complete: 0x%08X, kanal %d index %d min %d max %d\n", uid, kanal,
+	//		a_messwert->index, a_messwert->nullpunkt, a_messwert->max_limit);
 	insert_right(messwert_knoten, a_messwert);
-	print_llist(messwert_knoten);
+	//print_llist(messwert_knoten);
     } else if (messwerte) {
 	/* Kanal Beschreibung */
     }
