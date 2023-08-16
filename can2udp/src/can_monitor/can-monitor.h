@@ -40,19 +40,22 @@ struct statusdaten_t {
 #endif
 
 struct messwert_t {
-    uint64_t geraete_id_messwert;
-    uint8_t anfragenummer;
+    uint32_t uid;
+    uint8_t index;
     int8_t potenz;
     uint8_t farbe_bereich1;
     uint8_t farbe_bereich2;
     uint8_t farbe_bereich3;
     uint8_t farbe_bereich4;
     uint16_t nullpunkt;
+    uint16_t max_limit;
     uint16_t ende_bereich1;
     uint16_t ende_bereich2;
     uint16_t ende_bereich3;
     uint16_t ende_bereich4;
-    char *bezeichnung_start;
+    char *name;
+    float min_bereich;
+    float max_bereich;
     char *bezeichnung_ende;
     char *einheit;
 };

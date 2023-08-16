@@ -7,7 +7,9 @@
  * ----------------------------------------------------------------------------
  */
 
+#define _GNU_SOURCE
 #include <ctype.h>
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,8 +21,18 @@
 
 extern struct cs2_config_data_t config_data;
 int kanal = 0;
+uint32_t channel_uid;
+uint8_t channel;
+uint8_t messwerte;
+struct messwert_t *a_messwert = NULL;
+struct knoten *messwert_knoten = NULL;
+unsigned char channel_buffer[MAX_PAKETE * 8];
 
-#if 0
+char *next_string(char *p) {
+    while(*p++);
+    return p++;
+}
+
 int insert_right(struct knoten *liste, void *element) {
     struct knoten *tmp = liste;
     struct knoten *node = calloc(1, sizeof(struct knoten));
@@ -35,24 +47,66 @@ int insert_right(struct knoten *liste, void *element) {
     return 0;
 }
 
-struct messwert_t *suche_messwert(struct knoten *liste, uint64_t messwert) {
+void print_llist(struct knoten *liste) {
     struct knoten *tmp = liste;
-    int i = 0;
+    struct messwert_t *messwert;
+
+    while (tmp->daten) {
+	messwert = tmp->daten;
+	printf("Messwerte: %s 0x%08X Index %d\n", messwert->name, messwert->uid, messwert->index);
+	tmp = tmp->next;
+    }
+}
+
+struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t index) {
+    struct knoten *tmp = liste;
+    struct messwert_t *messwert_tmp;
 
     while (tmp) {
-	struct messwert_t *messwert_tmp = (void *)tmp->daten;
-	if (messwert_tmp->geraete_id_messwert == messwert) {
-	    return messwert_tmp;
+	messwert_tmp = tmp->daten;
+	if (tmp->daten == NULL)
+	    return NULL;
+
+	if ((messwert_tmp->uid == uid) && (messwert_tmp->index == index)) {
+	     // printf("Gefunden ");
+	     return (struct messwert_t *)tmp->daten;
 	} else {
-	    i++;
-	    if (i >= MAX_MESSWERTE)
-		return NULL;
+	     // printf("nicht Gefunden ");
 	    tmp = tmp->next;
 	}
+	tmp = tmp->next;
     }
     return NULL;
 }
-#endif
+
+char *berechne_messwert(struct messwert_t *c_messwert, uint16_t wert) {
+    int i;
+    float value;
+    char *s = NULL;
+
+    value = (c_messwert->max_bereich - c_messwert->min_bereich);
+    // printf("value %0.2f ", value);
+
+    value = value / (c_messwert->max_limit - c_messwert->nullpunkt);
+    // printf("value %0.2f %d ", value, wert);
+
+    value = value * wert + c_messwert->min_bereich;
+    // printf("value %0.2f ", value);
+
+    /* i = c_messwert->potenz;
+    while (i != 0) {
+	if (i < 0) {
+	    i++;
+	    value *= 10.0;
+	}
+	if (i > 0) {
+	    i--;
+	    value *= 10.0;
+	}
+    } */
+    asprintf(&s, "%0.2f %s", value, c_messwert->einheit);
+    return s;
+}
 
 char *getLoco(uint8_t * data, char *s) {
     uint16_t locID = be16(&data[2]);
@@ -153,11 +207,51 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
     printf(" UID 0x%08X, Software Version %d.%d\n", uid, frame->data[4], frame->data[5]);
 }
 
+void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int messwerte) {
+   char *p;
+
+   if (kanal && messwerte) {
+	/* Messwert */
+	a_messwert = calloc(1, sizeof (struct messwert_t));
+	a_messwert->uid = uid;
+	a_messwert->index =  buffer[0];
+	a_messwert->potenz = buffer[1];
+	a_messwert->farbe_bereich1 = buffer[2];
+	a_messwert->farbe_bereich2 = buffer[3];
+	a_messwert->farbe_bereich3 = buffer[4];
+	a_messwert->farbe_bereich4 = buffer[5];
+	a_messwert->nullpunkt     = be16(&buffer[6]);
+	a_messwert->ende_bereich1 = be16(&buffer[8]);
+	a_messwert->ende_bereich2 = be16(&buffer[10]);
+	a_messwert->ende_bereich3 = be16(&buffer[12]);
+	a_messwert->ende_bereich4 = be16(&buffer[14]);
+	a_messwert->max_limit = a_messwert->ende_bereich4;
+	p = (char *)&buffer[16];
+	a_messwert->name = calloc(1, strlen(p) + 1);
+	strcpy(a_messwert->name, p);
+	p = next_string(p);
+	a_messwert->min_bereich = atof(p);
+	printf(">>>>%02.02f<<<<\n", a_messwert->min_bereich);
+	p = next_string(p);
+	a_messwert->max_bereich = atof(p);
+	printf(">>>>%02.02f<<<<\n", a_messwert->max_bereich);
+	p = next_string(p);
+	a_messwert->einheit = calloc(1, strlen(p) + 1);
+	strcpy(a_messwert->einheit, p);
+	printf(">>>>%s<<<<\n", a_messwert->einheit);
+	printf("* Channel complete: 0x%08X, kanal %d index %d min %d max %d\n", uid, kanal,
+			a_messwert->index, a_messwert->nullpunkt, a_messwert->max_limit);
+	insert_right(messwert_knoten, a_messwert);
+	print_llist(messwert_knoten);
+    } else if (messwerte) {
+	/* Kanal Beschreibung */
+    }
+}
+
 void decode_cs2_can_channels(struct can_frame *frame) {
     uint32_t id, uid;
-    unsigned char buffer[1024];
     uint16_t paket;
-    uint8_t n_kanaele, n_messwerte;
+    uint8_t n_kanaele;
 
     paket = 0;
     /* TODO Daten analysiert ausgeben */
@@ -167,22 +261,30 @@ void decode_cs2_can_channels(struct can_frame *frame) {
 	printf("Statusdaten: UID 0x%08X Index 0x%02X\n", uid, kanal);
 	/* Datensatz ist komplett übertragen */
 	if (frame->can_id & 0x00010000UL) {
+	    channel_uid = be32(frame->data);
+	    decode_cs2_channel_data(channel_buffer, channel_uid, kanal, messwerte);
 	}
     }
-    if (frame->can_dlc == 6)
+    if (frame->can_dlc == 6) {
 	printf("Statusdaten: UID 0x%08X Index 0x%02X Paketanzahl %d\n", uid, frame->data[4], frame->data[5]);
+        if (frame->can_id & 0x00010000UL) {
+            channel_uid = be32(frame->data);
+            decode_cs2_channel_data(channel_buffer, channel_uid, kanal, messwerte);
+        }
+
+    }
     if (frame->can_dlc == 8) {
 	paket = (frame->can_id & 0xFCFF) - 1;
 	printf("Statusdaten: Paket %d ", paket);
 	if (paket == 0)
-	    memset(buffer, 0, sizeof(buffer));
+	    memset(channel_buffer, 0, sizeof(channel_buffer));
 	if (paket < MAX_PAKETE)
-	    memcpy(&buffer[paket * 8], frame->data, 8);
+	    memcpy(&channel_buffer[paket * 8], frame->data, 8);
 	if ((kanal == 0) && (paket == 0)) {
-	    n_messwerte = frame->data[0];
+	    messwerte = frame->data[0];
 	    n_kanaele = frame->data[1];
 	    id = be32(&frame->data[4]);
-	    printf(" Anzahl Messwerte: %d Anzahl Kanäle: %d Gerätenummer: 0x%08x", n_messwerte, n_kanaele, id);
+	    printf(" Anzahl Messwerte: %d Anzahl Kanäle: %d Gerätenummer: 0x%08x", messwerte, n_kanaele, id);
 	} else
 	    for (int i = 0; i < 8; i++) {
 		if (isprint(frame->data[i]))
@@ -271,6 +373,7 @@ void decode_cs2_system(struct can_frame *frame) {
     static uint16_t crcreg;
     uint8_t modul;
     char s[32];
+    struct messwert_t *c_messwert = calloc(1, sizeof(struct messwert_t));
 
     memset(s, 0, sizeof(s));
     response = frame->can_id & 0x00010000;
@@ -369,11 +472,17 @@ void decode_cs2_system(struct can_frame *frame) {
 	}
 	if (frame->can_dlc == 8) {
 	    wert = be16(&frame->data[6]);
-	    if (response)
+	    if (response) {
 		printf("System: Statusabfrage UID 0x%08X Kanal 0x%02X Messwert 0x%04X", uid, frame->data[5], wert);
-	    else
-		printf("System: Konfiguration UID 0x%08X Kanal 0x%02X Konfigurationswert 0x%04X", uid, frame->data[5],
-		       wert);
+		c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
+		if (c_messwert) {
+		    char *s = berechne_messwert(c_messwert, wert);
+		    printf(" %s", s);
+		    free(s);
+		}
+	    } else {
+		printf("System: Konfiguration UID 0x%08X Kanal 0x%02X Konfigurationswert 0x%04X", uid, frame->data[5], wert);
+	    }
 	}
 	break;
     case 0x0c:

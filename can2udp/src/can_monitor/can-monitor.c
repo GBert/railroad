@@ -56,9 +56,8 @@
 
 unsigned char netframe[MAXDG];
 
-struct knoten *statusdaten = NULL;
-struct knoten *messwert = NULL;
 struct cs2_config_data_t config_data;
+extern struct knoten *messwert_knoten;
 
 unsigned char buffer[MAX_PAKETE * 8];
 int verbose = 0, expconf = 0;
@@ -684,6 +683,9 @@ int main(int argc, char **argv) {
 	    exit(EXIT_FAILURE);
 	}
     }
+
+    messwert_knoten = calloc(1, sizeof (struct knoten));
+
     /* do we have a candump file ? */
     if (candump_file[0] != 0) {
 	FILE *fp;
