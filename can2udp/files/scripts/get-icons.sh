@@ -21,7 +21,7 @@ cp -rp $MNT_POINT/home/cs2/fcticons $WEB_DIR
 cp -rp $MNT_POINT/home/cs2/icons $WEB_DIR
 cp -rp $MNT_POINT/home/cs2/magicons_ $WEB_DIR
 cp -rp $MNT_POINT/home/cs2/doc $WEB_DIR
-mkdir -rp $WEB_DIR/update
+mkdir -p $WEB_DIR/update
 cp -p $MNT_POINT/home/cs2/update/*.bin $WEB_DIR/update
 cp -p $MNT_POINT/home/cs2/update/*.ms2 $WEB_DIR/update
 # cp -rp $MNT_POINT/home/cs2/spiel $WEB_DIR
