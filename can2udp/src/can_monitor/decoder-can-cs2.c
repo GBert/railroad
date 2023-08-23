@@ -29,7 +29,8 @@ struct knoten *messwert_knoten = NULL;
 unsigned char channel_buffer[MAX_PAKETE * 8];
 
 char *next_string(char *p) {
-    while(*p++);
+    /* TODO: range check //
+    while (*p++) ;
     return p++;
 }
 
@@ -68,8 +69,8 @@ struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t in
 	    return NULL;
 
 	if ((messwert_tmp->uid == uid) && (messwert_tmp->index == index)) {
-	     // printf("Gefunden ");
-	     return tmp->daten;
+	    // printf("Gefunden ");
+	    return tmp->daten;
 	}
 	tmp = tmp->next;
     }
@@ -80,7 +81,7 @@ char *berechne_messwert(struct messwert_t *c_messwert, uint16_t wert) {
     float value;
     char *s = NULL;
 
-    value = (c_messwert->max_bereich - c_messwert->min_bereich)/(c_messwert->max_limit - c_messwert->nullpunkt);
+    value = (c_messwert->max_bereich - c_messwert->min_bereich) / (c_messwert->max_limit - c_messwert->nullpunkt);
     value = value * wert + c_messwert->min_bereich;
     if (asprintf(&s, "%0.2f %s", value, c_messwert->einheit))
 	fprintf(stderr, "%s: can't alloc memory for measure", __func__);
@@ -187,14 +188,14 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
 }
 
 void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int messwerte) {
-   char *p;
+    char *p;
 
-   /* TODO: still not all values are kept */ 
-   if (kanal && messwerte) {
+    /* TODO: still not all values are kept */
+    if (kanal && messwerte) {
 	/* Messwert */
-	a_messwert = calloc(1, sizeof (struct messwert_t));
+	a_messwert = calloc(1, sizeof(struct messwert_t));
 	a_messwert->uid = uid;
-	a_messwert->index =  buffer[0];
+	a_messwert->index  = buffer[0];
 	a_messwert->potenz = buffer[1];
 	a_messwert->farbe_bereich1 = buffer[2];
 	a_messwert->farbe_bereich2 = buffer[3];
@@ -241,10 +242,10 @@ void decode_cs2_can_channels(struct can_frame *frame) {
     if (frame->can_dlc == 6) {
 	printf("Statusdaten: UID 0x%08X Index 0x%02X Paketanzahl %d\n", uid, frame->data[4], frame->data[5]);
 	/* Datensatz ist komplett übertragen */
-        if (frame->can_id & 0x00010000UL) {
-            channel_uid = be32(frame->data);
-            decode_cs2_channel_data(channel_buffer, channel_uid, kanal, messwerte);
-        }
+	if (frame->can_id & 0x00010000UL) {
+	    channel_uid = be32(frame->data);
+	    decode_cs2_channel_data(channel_buffer, channel_uid, kanal, messwerte);
+	}
 
     }
     if (frame->can_dlc == 8) {
