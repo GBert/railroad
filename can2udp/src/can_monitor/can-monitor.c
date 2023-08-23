@@ -75,7 +75,7 @@ void INThandler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.10\n\n");
+    fprintf(stderr, "   Version 5.11\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -883,7 +883,7 @@ int main(int argc, char **argv) {
 		myudp = (struct udphdr *)(pkt_ptr + sizeof(struct ip));
 		dport = ntohs(myudp->uh_dport);
 		sport = ntohs(myudp->uh_sport);
-		if ((dport != 15730) && (sport != 15730) && (dport != 15731) && (sport != 15731)
+		if ((dport != 15730) && (dport != 15731) && (dport != 15732)
 			&& (dport != 5728) && (dport != 21105) && (dport != 21106))
 		    continue;
 		printf(RESET);
