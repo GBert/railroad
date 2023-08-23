@@ -29,7 +29,7 @@ struct knoten *messwert_knoten = NULL;
 unsigned char channel_buffer[MAX_PAKETE * 8];
 
 char *next_string(char *p) {
-    /* TODO: range check //
+    /* TODO: range check */
     while (*p++) ;
     return p++;
 }
