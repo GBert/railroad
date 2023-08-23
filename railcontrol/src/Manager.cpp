@@ -31,7 +31,8 @@ along with RailControl; see the file LICENCE. If not see
 #include "RailControl.h"
 #include "Storage/TransactionGuard.h"
 #include "Utils/Utils.h"
-#include "WebServer/WebServer.h"
+#include "Server/Web/WebServer.h"
+#include "Server/Z21/Z21Server.h"
 
 using namespace DataModel;
 using LayoutPosition = DataModel::LayoutItem::LayoutPosition;
@@ -91,7 +92,8 @@ Manager::Manager(Config& config)
 	selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::StringToInteger(storage->GetSetting("SelectRouteApproach")));
 	nrOfTracksToReserve = static_cast<DataModel::Loco::NrOfTracksToReserve>(Utils::Utils::StringToInteger(storage->GetSetting("NrOfTracksToReserve"), 2));
 
-	controls[ControlIdWebserver] = new WebServer::WebServer(*this, config.getValue("webserveraddress", "any"), config.getValue("webserverport", 8082));
+	controls[ControlIdWebServer] = new Server::Web::WebServer(*this, config.getValue("webserveraddress", "any"), config.getValue("webserverport", 8082));
+	controls[ControlIdZ21Server] = new Server::Z21::Z21Server(*this, Server::Z21::Z21Server::Z21Port);
 
 	storage->AllHardwareParams(hardwareParams);
 	for (auto& hardwareParam : hardwareParams)
@@ -3870,13 +3872,20 @@ bool Manager::CheckAddressLoco(const Protocol protocol, const Address address, s
 			}
 			return true;
 
-		case ProtocolMM:
 		case ProtocolMM1:
 		case ProtocolMM15:
-		case ProtocolMM2:
 			if (address > 80)
 			{
-				result.assign(Languages::GetText(Languages::TextLocoAddressMmTooHigh));
+				result.assign(Languages::GetText(Languages::TextLocoAddressMm1TooHigh));
+				return false;
+			}
+			return true;
+
+		case ProtocolMM:
+		case ProtocolMM2:
+			if (address > 255)
+			{
+				result.assign(Languages::GetText(Languages::TextLocoAddressMm2TooHigh));
 				return false;
 			}
 			return true;

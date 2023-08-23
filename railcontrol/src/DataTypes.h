@@ -99,13 +99,15 @@ enum ControlType : uint8_t
 {
 	ControlTypeHardware = 0,
 	ControlTypeInternal,
-	ControlTypeWebserver
+	ControlTypeWebServer,
+	ControlTypeZ21Server
 };
 
 enum ControlIDs : ControlID
 {
 	ControlIdNone = 0,
-	ControlIdWebserver,
+	ControlIdWebServer,
+	ControlIdZ21Server,
 	ControlIdFirstHardware = 10
 };
 

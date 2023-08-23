@@ -150,8 +150,8 @@ namespace Network
 		Utils::Utils::SetThreadName(threadName);
 		fd_set set;
 		struct timeval tv;
-		struct sockaddr_in6 client_addr;
-		socklen_t client_addr_len = sizeof(client_addr);
+		struct sockaddr_storage clientAddress;
+		socklen_t clientAddressLength = sizeof(clientAddress);
 		while (run == true)
 		{
 			// wait for connection and abort on shutdown
@@ -176,14 +176,14 @@ namespace Network
 			}
 
 			// accept connection
-			int socketClient = accept(socket, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addr_len);
+			int socketClient = accept(socket, reinterpret_cast<struct sockaddr*>(&clientAddress), &clientAddressLength);
 			if (socketClient < 0)
 			{
 				continue;
 			}
 
 			// create client
-			TcpConnection* connection = new TcpConnection(socketClient);
+			TcpConnection* connection = new TcpConnection(socketClient, &clientAddress);
 			Work(connection);
 		}
 	}

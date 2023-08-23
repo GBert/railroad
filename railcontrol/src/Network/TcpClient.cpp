@@ -29,10 +29,11 @@ namespace Network
 {
 	TcpConnection TcpClient::GetTcpClientConnection(Logger::Logger* logger, const std::string& host, const unsigned short port)
 	{
-	    struct sockaddr_in address;
-	    address.sin_family = AF_INET;
-	    address.sin_port = htons(port);
-	    int ok = inet_pton(AF_INET, host.c_str(), &address.sin_addr);
+	    struct sockaddr_storage address;
+	    struct sockaddr_in* addressPointer = reinterpret_cast<struct sockaddr_in*>(&address);
+	    addressPointer->sin_family = AF_INET;
+	    addressPointer->sin_port = htons(port);
+	    int ok = inet_pton(AF_INET, host.c_str(), &(addressPointer->sin_addr));
 	    if (ok <= 0)
 	    {
 			logger->Error(Languages::TextUnableToResolveAddress, host);
@@ -46,7 +47,7 @@ namespace Network
 	        return TcpConnection(0);
 	    }
 
-	    ok = ConnectWithTimeout(sock, (struct sockaddr *)&address, sizeof(address));
+	    ok = ConnectWithTimeout(sock, reinterpret_cast<struct sockaddr*>(addressPointer), sizeof(address));
 	    if (ok < 0)
 	    {
 	    	Languages::TextSelector text;
@@ -68,7 +69,7 @@ namespace Network
 	        return TcpConnection(0);
 	    }
 
-		return TcpConnection(sock);
+		return TcpConnection(sock, &address);
 	}
 
 	int TcpClient::ConnectWithTimeout(int sock, struct sockaddr *addr, socklen_t length)

@@ -332,12 +332,12 @@ namespace Hardware
 
 				case ProgramModeDccPomLoco:
 					logger->Info(Languages::TextProgramDccPomLocoRead, address, cv);
-					ProgramDccPom(PomLoco, PomReadByte, address, cv);
+					ProgramDccPom(Z21Enums::PomLoco, Z21Enums::PomReadByte, address, cv);
 					break;
 
 				case ProgramModeDccPomAccessory:
 					logger->Info(Languages::TextProgramDccPomAccessoryRead, address, cv);
-					ProgramDccPom(PomAccessory, PomReadByte, address, cv);
+					ProgramDccPom(Z21Enums::PomAccessory, Z21Enums::PomReadByte, address, cv);
 					break;
 
 				default:
@@ -362,12 +362,12 @@ namespace Hardware
 
 				case ProgramModeDccPomLoco:
 					logger->Info(Languages::TextProgramDccPomLocoWrite, address, cv, value);
-					ProgramDccPom(PomLoco, PomWriteByte, address, cv, value);
+					ProgramDccPom(Z21Enums::PomLoco, Z21Enums::PomWriteByte, address, cv, value);
 					break;
 
 				case ProgramModeDccPomAccessory:
 					logger->Info(Languages::TextProgramDccPomAccessoryWrite, address, cv, value);
-					ProgramDccPom(PomAccessory, PomWriteByte, address, cv, value);
+					ProgramDccPom(Z21Enums::PomAccessory, Z21Enums::PomWriteByte, address, cv, value);
 					break;
 
 				default:
@@ -403,11 +403,14 @@ namespace Hardware
 			Send(buffer, sizeof(buffer));
 		}
 
-		void Z21::ProgramDccPom(const PomDB0 db0, const PomOption option, const Address address, const CvNumber cv,
+		void Z21::ProgramDccPom(const Z21Enums::PomDB0 db0,
+			const Z21Enums::PomOption option,
+			const Address address,
+			const CvNumber cv,
 		    const CvValue value)
 		{
 			Address internalAddress = address;
-			if (db0 == PomAccessory)
+			if (db0 == Z21Enums::PomAccessory)
 			{
 				internalAddress <<= 4;
 			}
@@ -425,11 +428,10 @@ namespace Hardware
 			SendGetSerialNumber();
 			SendGetHardwareInfo();
 			SendGetCode();
-			SendBroadcastFlags(static_cast<BroadCastFlag>(
-			    BroadCastFlagBasic
-			        | BroadCastFlagRBus
-			        | BroadCastFlagAllLoco
-			        | BroadCastFlagCanDetector));
+			SendBroadcastFlags(static_cast<Z21Enums::BroadCastFlags>(Z21Enums::BroadCastFlagBasic
+				| Z21Enums::BroadCastFlagRBus
+				| Z21Enums::BroadCastFlagAllLoco
+				| Z21Enums::BroadCastFlagCanDetector));
 			SendGetDetectorState();
 		}
 
@@ -512,28 +514,28 @@ namespace Hardware
 				return -1;
 			}
 
-			uint16_t header = Utils::Utils::DataLittleEndianToShort(buffer + 2);
+			Z21Enums::Header header = static_cast<Z21Enums::Header>(Utils::Utils::DataLittleEndianToShort(buffer + 2));
 			switch (header)
 			{
-				case HeaderSerialNumber:
+				case Z21Enums::HeaderSerialNumber:
 					{
 					unsigned int serialNumber = Utils::Utils::DataLittleEndianToInt(buffer + 4);
 					logger->Info(Languages::TextSerialNumberIs, serialNumber);
 					break;
 				}
 
-				case HeaderCode:
+				case Z21Enums::HeaderGetCode:
 					switch (buffer[4])
 					{
-						case FeaturesNotRestricted:
+						case Z21Enums::FeaturesNotRestricted:
 							logger->Debug(Languages::TextZ21NotRestricted);
 							break;
 
-						case FeaturesStartLocked:
+						case Z21Enums::FeaturesStartLocked:
 							logger->Error(Languages::TextZ21StartLocked);
 							break;
 
-						case FeaturesStartUnlocked:
+						case Z21Enums::FeaturesStartUnlocked:
 							logger->Debug(Languages::TextZ21StartUnlocked);
 							break;
 
@@ -542,10 +544,10 @@ namespace Hardware
 					}
 					break;
 
-				case HeaderHardwareInfo:
+				case Z21Enums::HeaderGetHardwareInfo:
 					{
 					unsigned int hardwareType = Utils::Utils::DataLittleEndianToInt(buffer + 4);
-					const char* hardwareTypeText;
+					std::string hardwareTypeText;
 					switch (hardwareType)
 					{
 						case 0x00000200:
@@ -581,43 +583,43 @@ namespace Hardware
 					break;
 				}
 
-				case HeaderSeeXHeader:
+				case Z21Enums::HeaderSeeXHeader:
 					ParseXHeader(buffer);
 					break;
 
-				case HeaderBroadcastFlags:
+				case Z21Enums::HeaderGetBroadcastFlags:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case HeaderLocoMode:
+				case Z21Enums::HeaderGetLocoMode:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case HeaderTurnoutMode:
+				case Z21Enums::HeaderGetTurnoutMode:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case HeaderRmBusData:
+				case Z21Enums::HeaderRmBusData:
 					ParseRmBusData(buffer);
 					break;
 
-				case HeaderSystemData:
+				case Z21Enums::HeaderSystemData:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case HeaderRailComtData:
+				case Z21Enums::HeaderRailComtData:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case HeaderLocoNetRx:
-					case HeaderLocoNetTx:
-					case HeaderLocoNetLan:
-					case HeaderLocoNetDispatch:
-					case HeaderLocoNetDetector:
+				case Z21Enums::HeaderLocoNetRx:
+				case Z21Enums::HeaderLocoNetTx:
+				case Z21Enums::HeaderLocoNetLan:
+				case Z21Enums::HeaderLocoNetDispatch:
+				case Z21Enums::HeaderLocoNetDetector:
 					// we do not parse LocoNet data
 					break;
 
-				case HeaderDetector:
+				case Z21Enums::HeaderDetector:
 					ParseDetectorData(buffer);
 					break;
 
@@ -630,38 +632,38 @@ namespace Hardware
 
 		void Z21::ParseXHeader(const unsigned char* buffer)
 		{
-			unsigned char xHeader = buffer[4];
+			Z21Enums::XHeader xHeader = static_cast<Z21Enums::XHeader>(buffer[4]);
 			switch (xHeader)
 			{
-				case XHeaderTurnoutInfo:
+				case Z21Enums::XHeaderTurnoutInfo:
 					ParseTurnoutData(buffer);
 					break;
 
-				case XHeaderSeeDB0:
+				case Z21Enums::XHeaderSeeDB0_2:
 					ParseDB0(buffer);
 					break;
 
-				case XHeaderStatusChanged:
+				case Z21Enums::XHeaderStatusChanged:
 					connected = true;
 					break;
 
-				case XHeaderVersion:
+				case Z21Enums::XHeaderVersion:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case XHeaderCvResult:
+				case Z21Enums::XHeaderCvResult:
 					ParseCvData(buffer);
 					break;
 
-				case XHeaderBcStopped:
+				case Z21Enums::XHeaderBcStopped:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
-				case XHeaderLocoInfo:
+				case Z21Enums::XHeaderLocoInfo:
 					ParseLocoData(buffer);
 					break;
 
-				case XHeaderFirmwareVersion:
+				case Z21Enums::XHeaderFirmwareVersion:
 					logger->Warning(Languages::TextNotImplemented, __FILE__, __LINE__);
 					break;
 
@@ -674,7 +676,7 @@ namespace Hardware
 		{
 			switch (buffer[5])
 			{
-				case DB0PowerOff:
+				case Z21Enums::DB0PowerOff:
 					if (buffer[6] != 0x61)
 					{
 						logger->Error(Languages::TextCheckSumError);
@@ -683,7 +685,7 @@ namespace Hardware
 					manager->Booster(ControlTypeHardware, BoosterStateStop);
 					break;
 
-				case DB0PowerOn:
+				case Z21Enums::DB0PowerOn:
 					if (buffer[6] != 0x60)
 					{
 						logger->Error(Languages::TextCheckSumError);
@@ -692,7 +694,7 @@ namespace Hardware
 					manager->Booster(ControlTypeHardware, BoosterStateGo);
 					break;
 
-				case DB0ProgrammingMode:
+				case Z21Enums::DB0ProgrammingMode:
 					if (buffer[6] != 0x63)
 					{
 						logger->Error(Languages::TextCheckSumError);
@@ -701,7 +703,7 @@ namespace Hardware
 					manager->Booster(ControlTypeHardware, BoosterStateStop);
 					break;
 
-				case DB0ShortCircuit:
+				case Z21Enums::DB0ShortCircuit:
 					if (buffer[6] != 0x69)
 					{
 						logger->Error(Languages::TextCheckSumError);
@@ -710,7 +712,7 @@ namespace Hardware
 					manager->Booster(ControlTypeInternal, BoosterStateStop);
 					break;
 
-				case DB0CvShortCircuit:
+				case Z21Enums::DB0CvShortCircuit:
 					if (buffer[6] != 0x73)
 					{
 						logger->Error(Languages::TextCheckSumError);
@@ -719,7 +721,7 @@ namespace Hardware
 					manager->Booster(ControlTypeInternal, BoosterStateStop);
 					break;
 
-				case DB0CvNack:
+				case Z21Enums::DB0CvNack:
 					if (buffer[6] != 0x72)
 					{
 						logger->Error(Languages::TextCheckSumError);
@@ -727,7 +729,7 @@ namespace Hardware
 					logger->Debug(Languages::TextNoAnswerFromDecoder);
 					break;
 
-				case DB0UnknownCommand:
+				case Z21Enums::DB0UnknownCommand:
 					logger->Warning(Languages::TextZ21DoesNotUnderstand);
 					break;
 			}
@@ -992,26 +994,25 @@ namespace Hardware
 
 		void Z21::SendBroadcastFlags()
 		{
-			SendBroadcastFlags(static_cast<BroadCastFlag>(
-			    BroadCastFlagBasic
-			        | BroadCastFlagRBus
-			        | BroadCastFlagAllLoco
-			        | BroadCastFlagCanDetector));
+			SendBroadcastFlags(static_cast<Z21Enums::BroadCastFlags>(Z21Enums::BroadCastFlagBasic
+				| Z21Enums::BroadCastFlagRBus
+				| Z21Enums::BroadCastFlagAllLoco
+				| Z21Enums::BroadCastFlagCanDetector));
 		}
 
-		void Z21::SendBroadcastFlags(const BroadCastFlag flags)
+		void Z21::SendBroadcastFlags(const Z21Enums::BroadCastFlags flags)
 		{
 			unsigned char buffer[8] = { 0x08, 0x00, 0x50, 0x00 };
 			Utils::Utils::IntToDataLittleEndian(flags, buffer + 4);
 			Send(buffer, sizeof(buffer));
 		}
 
-		void Z21::SendSetMode(const Address address, const Command command, const ProtocolMode mode)
+		void Z21::SendSetMode(const Address address, const Z21Enums::Command command, const Z21Enums::ProtocolMode mode)
 		{
 			switch (command)
 			{
-				case CommandSetLocoMode:
-					case CommandSetTurnoutMode:
+				case Z21Enums::CommandSetLocoMode:
+				case Z21Enums::CommandSetTurnoutMode:
 					break;
 
 				default:
@@ -1020,14 +1021,14 @@ namespace Hardware
 
 			switch (mode)
 			{
-				case ProtocolModeMM:
+				case Z21Enums::ProtocolModeMM:
 					if (address > MaxMMAddress)
 					{
 						return;
 					}
 					break;
 
-				case ProtocolModeDCC:
+				case Z21Enums::ProtocolModeDCC:
 					break;
 
 				default:
@@ -1049,14 +1050,14 @@ namespace Hardware
 			switch (protocol)
 			{
 				case ProtocolMM1:
-					case ProtocolMM15:
-					case ProtocolMM2:
+				case ProtocolMM15:
+				case ProtocolMM2:
 					SendSetLocoModeMM(address);
 					break;
 
 				case ProtocolDCC14:
-					case ProtocolDCC28:
-					case ProtocolDCC128:
+				case ProtocolDCC28:
+				case ProtocolDCC128:
 					SendSetLocoModeDCC(address);
 					break;
 
@@ -1068,12 +1069,12 @@ namespace Hardware
 
 		void Z21::SendSetLocoModeMM(const Address address)
 		{
-			SendSetMode(address, CommandSetLocoMode, ProtocolModeMM);
+			SendSetMode(address, Z21Enums::CommandSetLocoMode, Z21Enums::ProtocolModeMM);
 		}
 
 		void Z21::SendSetLocoModeDCC(const Address address)
 		{
-			SendSetMode(address, CommandSetLocoMode, ProtocolModeDCC);
+			SendSetMode(address, Z21Enums::CommandSetLocoMode, Z21Enums::ProtocolModeDCC);
 		}
 
 		void Z21::SendSetTurnoutMode(const Address address, const Protocol protocol)
@@ -1102,13 +1103,13 @@ namespace Hardware
 		void Z21::SendSetTurnoutModeMM(const Address address)
 		{
 			const Address zeroBasedAddress = address - 1;
-			SendSetMode(zeroBasedAddress, CommandSetTurnoutMode, ProtocolModeMM);
+			SendSetMode(zeroBasedAddress, Z21Enums::CommandSetTurnoutMode, Z21Enums::ProtocolModeMM);
 		}
 
 		void Z21::SendSetTurnoutModeDCC(const Address address)
 		{
 			const Address zeroBasedAddress = address - 1;
-			SendSetMode(zeroBasedAddress, CommandSetTurnoutMode, ProtocolModeDCC);
+			SendSetMode(zeroBasedAddress, Z21Enums::CommandSetTurnoutMode, Z21Enums::ProtocolModeDCC);
 		}
 
 		int Z21::Send(const unsigned char* buffer, const size_t bufferLength)

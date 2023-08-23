@@ -35,6 +35,9 @@ namespace Network
 	{
 		public:
 			TcpClient() = delete;
+			TcpClient(const TcpClient&) = delete;
+			TcpClient& operator=(const TcpClient&) = delete;
+
 			static TcpConnection GetTcpClientConnection(Logger::Logger* logger, const std::string& host, const unsigned short port);
 
 		private:

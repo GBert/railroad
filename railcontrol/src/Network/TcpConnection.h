@@ -20,7 +20,10 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <cstring>
 #include <string>
+
+#include "Utils/Network.h"
 
 namespace Network
 {
@@ -30,9 +33,25 @@ namespace Network
 			TcpConnection() = delete;
 			TcpConnection& operator=(const TcpConnection&) = delete;
 
-			inline TcpConnection(int socket)
+			inline TcpConnection(int socket,
+				const struct sockaddr_storage* address = nullptr)
 			:	connectionSocket(socket),
 				connected(socket != 0)
+			{
+				if (address)
+				{
+					this->address = *address;
+				}
+				else
+				{
+					memset(&(this->address), 0, sizeof(struct sockaddr_storage));
+				}
+			}
+
+			inline TcpConnection(const TcpConnection& other)
+			:	connectionSocket(other.connectionSocket),
+				connected(other.connected),
+				address(other.address)
 			{
 			}
 
@@ -71,8 +90,14 @@ namespace Network
 				return connected;
 			}
 
+			inline std::string AddressAsString()
+			{
+				return Utils::Network::AddressToString(&address);
+			}
+
 		private:
 			mutable int connectionSocket;
 			mutable volatile bool connected;
+			struct sockaddr_storage address;
 	};
 }
