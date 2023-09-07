@@ -1,6 +1,6 @@
 ## Märlin CAN monitor
 
-This Git (OpenWRT feed) contains a Märklin CAN frame reader to print human readable informataions
+This Git (OpenWRT feed) contains a Märklin CAN frame reader to print human readable informataions (german)
 
 ![terminal](https://github.com/GBert/railroad/raw/master/can-monitor/docs/can-monitor_5.13_s.png)
 
