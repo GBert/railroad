@@ -38,6 +38,6 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/can_monitor/can-monitor $(1)/usr/bin/
-endif
+endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
