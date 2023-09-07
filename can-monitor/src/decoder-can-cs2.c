@@ -19,6 +19,12 @@
 #include "tools.h"
 #include "can-monitor.h"
 
+struct messwert_t Gleisbox_Messwerte[5] = { { 0, 0,  0,   0,   0,   0,   0,  0,    0,    0,    0,    0,    0,      "",  0.00,  0.00, "",  "" },
+					    { 0, 1, -3,  48, 240, 224, 192, 15, 2060, 1648, 1730, 1895, 2060, "TRACK",  0.00,  2.50, "", "A" },
+					    { 0, 2,  0,   0,   0,   0,   0,  0,    0,    0,    0,    0,    0,      "",  0.00,  0.00, "",  "" },
+					    { 0, 3, -3, 192,  12,  48, 192,  0, 3145,  925, 1202, 2590, 3145,  "VOLT", 10.00, 27.00, "", "V" },
+					    { 0, 4,  0,  12,   8, 240, 192,  0,  219,  107,  164,  205,  219,  "TEMP",  0.00, 80.00, "", "C" } };
+
 extern struct cs2_config_data_t config_data;
 int kanal = 0;
 uint32_t channel_uid;
@@ -65,9 +71,13 @@ struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t in
 
     while (tmp) {
 	messwert_tmp = tmp->daten;
-	if (messwert_tmp == NULL)
+	if (messwert_tmp == NULL) {
+	    /* MS2 doesn't read the channel definitions so chek if the UID belongs to GB2 */
+	    if (((uid & 0xFFF00000) == 0x47400000)
+		&& (index <= sizeof(Gleisbox_Messwerte) / sizeof(Gleisbox_Messwerte[0])))
+		return &Gleisbox_Messwerte[index];
 	    return NULL;
-
+	}
 	if ((messwert_tmp->uid == uid) && (messwert_tmp->index == index)) {
 	    // printf("Gefunden ");
 	    return tmp->daten;
@@ -187,6 +197,29 @@ void decode_cs2_can_identifier(struct can_frame *frame) {
     printf(" UID 0x%08X, Software Version %d.%d\n", uid, frame->data[4], frame->data[5]);
 }
 
+#if 0
+void print_measure_data(struct messwert_t *messwert) {
+    printf("UID: 0x%08X\n", messwert->uid);
+    printf("Index: %d\n", messwert->index);
+    printf("Potenz: %d\n", messwert->potenz);
+    printf("Farbe Bereich1: %d\n", messwert->farbe_bereich1);
+    printf("Farbe Bereich2: %d\n", messwert->farbe_bereich2);
+    printf("Farbe Bereich3: %d\n", messwert->farbe_bereich3);
+    printf("Farbe Bereich4: %d\n", messwert->farbe_bereich4);
+    printf("Nullpunkt: %d\n", messwert->nullpunkt);
+    printf("Max Limit: %d\n", messwert->max_limit);
+    printf("Ende Bereich1: %d\n", messwert->ende_bereich1);
+    printf("Ende Bereich2: %d\n", messwert->ende_bereich2);
+    printf("Ende Bereich3: %d\n", messwert->ende_bereich3);
+    printf("Ende Bereich4: %d\n", messwert->ende_bereich4);
+    printf("Messwert Name: %s\n", messwert->name);
+    printf("Min Bereich: %f\n", messwert->min_bereich);
+    printf("Max Bereich: %f\n", messwert->max_bereich);
+    printf("Bezeichnung Ende: %s\n", messwert->bezeichnung_ende);
+    printf("Messwert Einheit: %s\n", messwert->einheit);
+}
+#endif
+
 void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int messwerte) {
     char *p;
 
@@ -195,7 +228,7 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
 	/* Messwert */
 	a_messwert = calloc(1, sizeof(struct messwert_t));
 	a_messwert->uid = uid;
-	a_messwert->index  = buffer[0];
+	a_messwert->index = buffer[0];
 	a_messwert->potenz = buffer[1];
 	a_messwert->farbe_bereich1 = buffer[2];
 	a_messwert->farbe_bereich2 = buffer[3];
@@ -218,6 +251,7 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
 	a_messwert->einheit = calloc(1, strlen(p) + 1);
 	strcpy(a_messwert->einheit, p);
 	insert_right(messwert_knoten, a_messwert);
+	/* print_measure_data(a_messwert); */
     } else if (messwerte) {
 	/* Kanal Beschreibung */
     }
