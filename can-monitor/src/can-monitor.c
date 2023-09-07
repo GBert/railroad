@@ -36,7 +36,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
-#include "../lib.h"
+#include "lib.h"
 #include "decoder-can-cdb.h"
 #include "decoder-can-cs1.h"
 #include "decoder-can-cs2.h"

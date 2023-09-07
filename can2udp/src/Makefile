@@ -1,4 +1,4 @@
-BINS := can-bounce-test can-monitor can-replay can2eth can2udp can4lnx2udp can2serial clone-cs2-config \
+BINS := can-bounce-test can-replay can2eth can2udp can4lnx2udp can2serial clone-cs2-config \
         clone-cs2-trigger clone-ms2-loco read-cs2-ini gb2-update ir-tester cs2ping bpi-rs485 scan2lan\
         can2lan ms2wifi ms2-loco-list virtual_canbuster virtual_gfp virtual_links88 virtual_ms2 \
         get-cs-data get-cs-config pio-i2c-udp read_lococard s88udp-bpi s88udp-rpi s88test-bpi \
@@ -27,9 +27,6 @@ bpi-rs485: bpi-rs485.o
 
 can-bounce-test: can-bounce-test.o
 	$(CC) $(CFLAGS) -o can-bounce-test can-bounce-test.o
-
-can-monitor:
-	+$(MAKE) -C can_monitor
 
 can-replay: can-replay.o
 	$(CC) $(CFLAGS) -o can-replay can-replay.o
@@ -141,4 +138,3 @@ spitest: spitest.o
 
 clean:
 	$(RM) *.o $(BINS) s88udp
-	+$(MAKE) -C can_monitor clean

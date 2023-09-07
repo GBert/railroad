@@ -1,0 +1,22 @@
+
+        wProductChannel.setbeginrange(productchannel, atof(p[1]));
+        wProductChannel.setendrange(productchannel, atof(p[2]));
+
+
+
+static int __calcChannelValue(iONode productchannel, int value) {
+  float exp        = wProductChannel.getexp(productchannel);
+  float difval     = wProductChannel.getmaxval(productchannel) - wProductChannel.getminval(productchannel);
+  float difrange   = wProductChannel.getendrange(productchannel) - wProductChannel.getbeginrange(productchannel);
+  float newVal     = (difrange / difval) * value + wProductChannel.getbeginrange(productchannel);
+
+  int i = 0;
+  for( i = 0; i < exp; i++ )
+    newVal *= 10.0;
+
+  TraceOp.trc( name, TRCLEVEL_BYTE, __LINE__, 9999,
+      "exp=%.2f difval=%.2f difrange=%.2f value=%d calc=%.2f", exp, difval, difrange, value, newVal);
+
+  return (int)newVal;
+}
+
