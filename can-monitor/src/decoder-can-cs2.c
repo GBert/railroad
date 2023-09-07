@@ -72,9 +72,8 @@ struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t in
     while (tmp) {
 	messwert_tmp = tmp->daten;
 	if (messwert_tmp == NULL) {
-	    /* MS2 doesn't read the channel definitions so chek if the UID belongs to GB2 */
-	    if (((uid & 0xFFF00000) == 0x47400000)
-		&& (index <= sizeof(Gleisbox_Messwerte) / sizeof(Gleisbox_Messwerte[0])))
+	    /* MS2 doesn't read the channel definitions so chek if the UID belongs to GB2 and use defaults */
+	    if (((uid & 0xFFF00000) == 0x47400000) && (index <= sizeof(Gleisbox_Messwerte) / sizeof(Gleisbox_Messwerte[0])))
 		return &Gleisbox_Messwerte[index];
 	    return NULL;
 	}
