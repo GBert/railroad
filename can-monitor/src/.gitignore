@@ -1,0 +1,5 @@
+*.o
+*~
+can-monitor
+test.*
+*.pcap*
