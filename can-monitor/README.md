@@ -31,5 +31,6 @@ git clone https://github.com/GBert/railroad.git
 cd railroad/can-monitor/src
 cd src
 make
+sudo cp can-monitor /usr/bin
 ```
 
