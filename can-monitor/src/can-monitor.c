@@ -75,7 +75,7 @@ void INThandler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.11\n\n");
+    fprintf(stderr, "   Version 5.12\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
