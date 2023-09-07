@@ -482,12 +482,14 @@ void decode_cs2_system(struct can_frame *frame) {
 	if (frame->can_dlc == 8) {
 	    wert = be16(&frame->data[6]);
 	    if (response) {
-		printf("System: Statusabfrage UID 0x%08X Kanal 0x%02X Messwert 0x%04X", uid, frame->data[5], wert);
+		printf("System: Statusabfrage UID 0x%08X Kanal 0x%02X Messwert", uid, frame->data[5]);
 		c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
 		if (c_messwert) {
 		    char *s = berechne_messwert(c_messwert, wert);
 		    printf(" %s", s);
 		    free(s);
+		} else {
+		    printf("0x%04X", wert);
 		}
 	    } else {
 		printf("System: Konfiguration UID 0x%08X Kanal 0x%02X Konfigurationswert 0x%04X", uid, frame->data[5], wert);
