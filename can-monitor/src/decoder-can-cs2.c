@@ -466,13 +466,13 @@ void decode_cs2_system(struct can_frame *frame) {
 	printf("System: Neuanmeldezähler setzen UID 0x%08X Zähler 0x%04X", uid, wert);
 	break;
     case 0x0a:
-	printf("System: Überlast UID 0x%08X Kanal 0x%04X", uid, frame->data[5]);
+	printf("System: Überlast UID 0x%08X Kanal %d", uid, frame->data[5]);
 	break;
     case 0x0b:
 	if (frame->can_dlc == 6)
-	    printf("System: Statusabfrage UID 0x%08X Kanal 0x%02X", uid, frame->data[5]);
+	    printf("System: Statusabfrage UID 0x%08X Kanal %d", uid, frame->data[5]);
 	if (frame->can_dlc == 7) {
-	    printf("System: Konfiguration UID 0x%08X Kanal 0x%02X ", uid, frame->data[5]);
+	    printf("System: Konfiguration UID 0x%08X Kanal %d", uid, frame->data[5]);
 	    if (frame->data[6])
 		printf(" gültig(%d)", frame->data[6]);
 	    else
@@ -481,7 +481,7 @@ void decode_cs2_system(struct can_frame *frame) {
 	if (frame->can_dlc == 8) {
 	    wert = be16(&frame->data[6]);
 	    if (response) {
-		printf("System: Statusabfrage UID 0x%08X Kanal 0x%02X Messwert", uid, frame->data[5]);
+		printf("System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, frame->data[5]);
 		c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
 		if (c_messwert) {
 		    char *s = berechne_messwert(c_messwert, wert);
@@ -491,7 +491,7 @@ void decode_cs2_system(struct can_frame *frame) {
 		    printf("0x%04X", wert);
 		}
 	    } else {
-		printf("System: Konfiguration UID 0x%08X Kanal 0x%02X Konfigurationswert 0x%04X", uid, frame->data[5], wert);
+		printf("System: Konfiguration UID 0x%08X Kanal %d Konfigurationswert 0x%04X", uid, frame->data[5], wert);
 	    }
 	}
 	break;
