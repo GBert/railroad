@@ -245,3 +245,9 @@ char *find_first_ip(char *list, int type) {
     free(temp);
     return NULL;
 }
+
+void frame_to_can(unsigned char *netframe, struct can_frame *frame) {
+    frame->can_id = be32(netframe);
+    frame->can_dlc = netframe[4];
+    memcpy(&frame->data, &netframe[5], 8);
+}

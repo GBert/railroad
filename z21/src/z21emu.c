@@ -38,6 +38,7 @@
 #include "cs2-data-functions.h"
 #include "read-cs2-config.h"
 #include "subscriber.h"
+#include "measurement.h"
 #include "utils.h"
 #ifndef NO_XPN_TTY
 #include "xpn_tty.h"
@@ -46,6 +47,8 @@
 
 #define check_free(a) \
             do { if ( a ) free(a); } while (0)
+
+extern struct knoten *messwert_knoten;
 
 struct sockaddr_in *bsa;
 extern pthread_mutex_t lock;
@@ -671,9 +674,11 @@ int check_data_xpn(struct z21_data_t *z21_data, int udplength, int verbose) {
 
 int check_data_can(struct z21_data_t *z21_data, uint8_t * data, int verbose) {
     uint32_t uid;
-    uint16_t id;
+    uint16_t id, wert;
     uint8_t function, tport, tpower, value, state;
     char *vchar;
+    struct can_frame frame;
+    struct messwert_t *c_messwert = calloc(1, sizeof(struct messwert_t));
 
     vchar = NULL;
     uid = be32(&data[5]);
@@ -706,6 +711,23 @@ int check_data_can(struct z21_data_t *z21_data, uint8_t * data, int verbose) {
 		loco_save_speed(uid, 0);
 		v_printf(verbose, "\n");
 		send_xpn_loco_info(uid, verbose);
+	    }
+	    break;
+	/* measurement */
+	case 0x0b:
+	    if (data[4] == 8) {
+		wert = be16(&data[11]);
+		printf("System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, data[10]);
+		vas_printf(verbose, &vchar, "System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, data[10]);
+		c_messwert = suche_messwert(messwert_knoten, uid, data[10]);
+		if (c_messwert) {
+		    char *s = berechne_messwert(c_messwert, wert);
+		    printf(" %s", s);
+		    free(s);
+		} else {
+		    printf(" 0x%04X", wert);
+		}
+		printf("\n");
 	    }
 	    break;
 	default:
@@ -765,6 +787,12 @@ int check_data_can(struct z21_data_t *z21_data, uint8_t * data, int verbose) {
 	/* we use the simplest GBM */
 	vas_printf(verbose, &vchar, "LAN_LOCONET_DETECTOR %d state %d\n", id, state);
 	send_xpn_lcn_detector(id, state, vchar);
+	break;
+    /* Statusdaten Konfiguration / Messwerte */
+    case 0x3A:
+    case 0x3B:
+	frame_to_can(data, &frame);
+	decode_cs2_can_channels(&frame);
 	break;
     default:
 	v_printf(verbose, "\n");
@@ -827,6 +855,7 @@ int main(int argc, char **argv) {
 #endif
     memset(&z21_data, 0, sizeof z21_data);
     memset(&ifr, 0, sizeof ifr);
+    messwert_knoten = calloc(1, sizeof (struct knoten));
 
 #ifndef NO_XPN_TTY
     while ((opt = getopt(argc, argv, "a:c:p:s:b:g:i:t:xhf?")) != -1) {

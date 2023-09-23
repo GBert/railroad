@@ -13,6 +13,7 @@
 #define BROADCAST_IP	1
 
 #include <stdint.h>
+#include <linux/can.h>
 
 struct node {
     int id;
@@ -43,6 +44,8 @@ char *find_first_ip(char *list, int type);
 void print_udp_frame(char *format, int length, unsigned char *udpframe);
 void print_net_frame(char *format, unsigned char *udpframe, int verbose);
 int time_stamp(char *timestamp);
+void frame_to_can(unsigned char *netframe, struct can_frame *frame);
+
 
 uint16_t le16(uint8_t * u);
 uint16_t be16(uint8_t * u);
