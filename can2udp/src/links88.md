@@ -20,7 +20,7 @@ Laenge Bus 1 (Speicher 02 Laenge 00 03)
  9  Zykluszeit 1 - 16 [ms] min 10 default 100
 10  Zykluszeit Tastatur [ms] min 10 default 100
 11  Spalten Tastatur max 8
-12  Zeilen  Tastatur max 8
+12  Zeilen  Tastatur max 15
 ```
 
 ```
