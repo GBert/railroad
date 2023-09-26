@@ -91,7 +91,7 @@ char *berechne_messwert(struct messwert_t *c_messwert, uint16_t wert) {
     char *s = NULL;
 
     value = (c_messwert->max_bereich - c_messwert->min_bereich) / (c_messwert->max_limit - c_messwert->nullpunkt);
-    value = value * wert + c_messwert->min_bereich;
+    value = value * (wert - c_messwert->nullpunkt) + c_messwert->min_bereich;
     if (asprintf(&s, "%0.1f %s", value, c_messwert->einheit) == -1)
 	fprintf(stderr, "%s: can't alloc memory for measure", __func__);
     return s;
