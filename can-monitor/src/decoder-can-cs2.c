@@ -492,7 +492,7 @@ void decode_cs2_system(struct can_frame *frame) {
 		    printf(" %s", s);
 		    free(s);
 		} else {
-		    printf("0x%04X", wert);
+		    printf(" 0x%04X", wert);
 		}
 	    } else {
 		printf("System: Konfiguration UID 0x%08X Kanal %d Konfigurationswert 0x%04X", uid, frame->data[5], wert);
