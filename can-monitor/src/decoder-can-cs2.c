@@ -226,6 +226,10 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
     if (kanal && messwerte) {
 	/* Messwert */
 	a_messwert = calloc(1, sizeof(struct messwert_t));
+	if (!a_messwert) {
+	    fprintf(stderr, "Unable to allocate measurement buffer\n");
+	    return;
+	}
 	a_messwert->uid = uid;
 	a_messwert->index = buffer[0];
 	a_messwert->potenz = buffer[1];
