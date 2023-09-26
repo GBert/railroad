@@ -43,6 +43,11 @@ int inflate_data(struct cs2_config_data_t *config_data) {
 
     /* NULL terminating for printf */
     config_data->inflated_data = malloc(config_data->inflated_size + 1);
+    if (!config_data->inflated_data) {
+	fprintf(stderr, "Unable to allocate inflated data buffer\n");
+        return -1;
+    }
+
     config_data->inflated_data[config_data->inflated_size] = 0;
 
     strm.zalloc = Z_NULL;
