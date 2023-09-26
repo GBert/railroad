@@ -459,9 +459,12 @@ void decode_frame(struct can_frame *frame) {
 	    case 0x11:
 		printf(" Go");
 		break;
+	    /* TODO: check this */
+#if 0
 	    case 0x44:
 		printf(" Block %d", frame->data[5]);
 		break;
+#endif
 	    case 0xE4:
 		printf(" ?");
 		break;
