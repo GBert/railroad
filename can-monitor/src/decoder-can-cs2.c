@@ -245,6 +245,10 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
 	a_messwert->max_limit = a_messwert->ende_bereich4;
 	p = (char *)&buffer[16];
 	a_messwert->name = calloc(1, strlen(p) + 1);
+	if (!a_messwert->name) {
+            fprintf(stderr, "Unable to allocate buffer for measurement name\n");
+            return;
+        }
 	strcpy(a_messwert->name, p);
 	p = next_string(p);
 	a_messwert->min_bereich = (float) atof(p);
@@ -252,6 +256,10 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
 	a_messwert->max_bereich = (float) atof(p);
 	p = next_string(p);
 	a_messwert->einheit = calloc(1, strlen(p) + 1);
+	if (!a_messwert->einheit) {
+            fprintf(stderr, "Unable to allocate buffer for unit name\n");
+            return;
+	}
 	strcpy(a_messwert->einheit, p);
 	insert_right(messwert_knoten, a_messwert);
 	/* print_measure_data(a_messwert); */
@@ -489,8 +497,10 @@ void decode_cs2_system(struct can_frame *frame) {
 		c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
 		if (c_messwert) {
 		    char *s = berechne_messwert(c_messwert, wert);
-		    printf(" %s", s);
-		    free(s);
+		    if (s) {
+			printf(" %s", s);
+			free(s);
+		    }
 		} else {
 		    printf(" 0x%04X", wert);
 		}
