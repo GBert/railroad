@@ -246,19 +246,19 @@ void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int
 	p = (char *)&buffer[16];
 	a_messwert->name = calloc(1, strlen(p) + 1);
 	if (!a_messwert->name) {
-            fprintf(stderr, "Unable to allocate buffer for measurement name\n");
-            return;
-        }
+	    fprintf(stderr, "Unable to allocate buffer for measurement name\n");
+	    return;
+	}
 	strcpy(a_messwert->name, p);
 	p = next_string(p);
-	a_messwert->min_bereich = (float) atof(p);
+	a_messwert->min_bereich = (float)atof(p);
 	p = next_string(p);
-	a_messwert->max_bereich = (float) atof(p);
+	a_messwert->max_bereich = (float)atof(p);
 	p = next_string(p);
 	a_messwert->einheit = calloc(1, strlen(p) + 1);
 	if (!a_messwert->einheit) {
-            fprintf(stderr, "Unable to allocate buffer for unit name\n");
-            return;
+	    fprintf(stderr, "Unable to allocate buffer for unit name\n");
+	    return;
 	}
 	strcpy(a_messwert->einheit, p);
 	insert_right(messwert_knoten, a_messwert);
