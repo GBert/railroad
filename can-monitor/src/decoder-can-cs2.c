@@ -393,7 +393,6 @@ void decode_cs2_system(struct can_frame *frame) {
     static uint16_t crcreg;
     uint8_t modul;
     char s[32];
-    struct messwert_t *c_messwert = calloc(1, sizeof(struct messwert_t));
 
     memset(s, 0, sizeof(s));
     response = frame->can_id & 0x00010000;
@@ -494,7 +493,7 @@ void decode_cs2_system(struct can_frame *frame) {
 	    wert = be16(&frame->data[6]);
 	    if (response) {
 		printf("System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, frame->data[5]);
-		c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
+		struct messwert_t *c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
 		if (c_messwert) {
 		    char *s = berechne_messwert(c_messwert, wert);
 		    if (s) {
