@@ -2111,17 +2111,12 @@ Switch* Manager::GetSwitch(const ControlID controlID, const Protocol protocol, c
 	std::lock_guard<std::mutex> guard(switchMutex);
 	for (auto& mySwitch : switches)
 	{
-		const Switch* s = mySwitch.second;
-		if (s->GetControlID() != controlID
-			|| s->GetProtocol() != protocol)
+		Switch* s = mySwitch.second;
+		if ((s->GetControlID() == controlID)
+			&& (s->GetProtocol() == protocol)
+			&& (s->UsesAddress(address)))
 		{
-			continue;
-		}
-
-		if (s->GetAddress() == address
-			|| (s->GetType() == SwitchTypeThreeWay && (s->GetAddress() + 1) == address))
-		{
-			return mySwitch.second;
+			return s;
 		}
 	}
 	return nullptr;
@@ -2906,11 +2901,12 @@ Signal* Manager::GetSignal(const ControlID controlID, const Protocol protocol, c
 	std::lock_guard<std::mutex> guard(signalMutex);
 	for (auto& signal : signals)
 	{
-		if (signal.second->GetControlID() == controlID
-			&& signal.second->GetProtocol() == protocol
-			&& signal.second->GetAddress() == address)
+		Signal* s = signal.second;
+		if ((s->GetControlID() == controlID)
+			&& (s->GetProtocol() == protocol)
+			&& (s->UsesAddress(address)))
 		{
-			return signal.second;
+			return s;
 		}
 	}
 	return nullptr;

@@ -68,6 +68,23 @@ namespace DataModel
 		AccessoryBase::SetAccessoryState(checkedState);
 	}
 
+	bool Switch::UsesAddress(Address address) const
+	{
+		switch(GetType())
+		{
+			case SwitchTypeThreeWay:
+				return (GetAddress() == address)
+					|| (GetAddress() + 1 == address);
+
+			case SwitchTypeLeft:
+			case SwitchTypeRight:
+			case SwitchTypeMaerklinLeft:
+			case SwitchTypeMaerklinRight:
+			default:
+				return (GetAddress() == address);
+		}
+	}
+
 	std::map<DataModel::AccessoryState, Languages::TextSelector> Switch::GetStateOptions() const
 	{
 		std::map<DataModel::AccessoryState,Languages::TextSelector> out;

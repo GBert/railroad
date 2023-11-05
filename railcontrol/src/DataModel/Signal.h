@@ -109,6 +109,8 @@ namespace DataModel
 				this->track = track;
 			}
 
+			bool UsesAddress(Address address) const;
+
 			std::map<DataModel::AccessoryState,StateOption> GetStateOptions() const;
 
 			inline Address GetMappedAddress() const

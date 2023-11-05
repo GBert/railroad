@@ -78,6 +78,8 @@ namespace DataModel
 				SetSizeFromType();
 			}
 
+			bool UsesAddress(Address address) const;
+
 			std::map<DataModel::AccessoryState,Languages::TextSelector> GetStateOptions() const;
 
 			AccessoryState CalculateInvertedSwitchState(const Address address, const AccessoryState state) const;
