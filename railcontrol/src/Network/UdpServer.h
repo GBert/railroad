@@ -68,7 +68,7 @@ namespace Network
 			volatile bool run;
 			std::vector<std::thread> serverThreads;
 			std::string error;
-			const std::string& address;
+			const std::string address;
 			const unsigned short port;
 			int serverSocket;
 			const std::string threadName;
