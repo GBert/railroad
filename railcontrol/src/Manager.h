@@ -187,7 +187,7 @@ class Manager
 
 		void LocoBaseOrientation(const ControlType controlType,
 			DataModel::LocoBase* loco,
-			const Orientation orientation);
+			Orientation orientation);
 
 		void LocoFunctionState(const ControlType controlType,
 			const ControlID controlID,

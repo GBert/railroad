@@ -87,6 +87,7 @@ class Languages
 			TextChDwarf,
 			TextChLDistant,
 			TextChLMain,
+			TextChange,
 			TextCheckSumError,
 			TextClosingSQLite,
 			TextCluster,

@@ -122,6 +122,10 @@ namespace DataModel
 				Utils::Utils::SleepForMilliseconds(static_cast<unsigned int>(data) * 100);
 				return true;
 
+			case ObjectTypeMultipleUnit: // abused for loco orientation
+				manager->LocoBaseOrientation(ControlTypeInternal, locoID, static_cast<Orientation>(data));
+				return true;
+
 			default:
 				return false;
 		}
@@ -163,7 +167,7 @@ namespace DataModel
 		}
 
 		const ObjectType objectType2 = ObjectType2();
-		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause)
+		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause || objectType2 == ObjectTypeMultipleUnit)
 		{
 			return true;
 		}
@@ -194,7 +198,7 @@ namespace DataModel
 		}
 
 		const ObjectType objectType2 = ObjectType2();
-		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause)
+		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause || objectType2 == ObjectTypeMultipleUnit)
 		{
 			return true;
 		}

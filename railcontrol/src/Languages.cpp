@@ -87,6 +87,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextChDwarf */ { "Swiss dwarf", "Schweizer Zwergsignal", "Suiza enana" },
 /* TextChLDistant */ { "Swiss L distant", "Schweizer L Vorsignal", "Suiza L avanzada" },
 /* TextChLMain */ { "Swiss L main", "Schweizer L Hauptsignal", "Suiza L principal" },
+/* TextChange */ { "change", "wechseln", "cambiar" },
 /* TextCheckSumError */ { "Checksum error", "Checksummen fehler", "Error de checksum" },
 /* TextClosingSQLite */ { "Closing SQLite database", "Schliesse SQLite Datenbank", "Cerrando base de datos SQLite" },
 /* TextCluster */ { "Cluster", "Gruppe", "Grupo" },

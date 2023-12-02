@@ -77,7 +77,7 @@ namespace Network
 
 
 		protected:
-			inline virtual void Send(const unsigned char* buffer, const size_t size)
+			inline void Send(const unsigned char* buffer, const size_t size)
 			{
 				sendto(serverSocket, buffer, size, 0, reinterpret_cast<const struct sockaddr*>(&clientAddress), sizeof(struct sockaddr_storage));
 			}

@@ -889,12 +889,19 @@ Speed Manager::LocoSpeed(const LocoID locoID) const
 
 void Manager::LocoBaseOrientation(const ControlType controlType,
 	LocoBase* loco,
-	const Orientation orientation)
+	Orientation orientation)
 {
 	if (loco == nullptr)
 	{
 		return;
 	}
+
+	if (orientation == OrientationChange)
+	{
+		const Orientation oldOrientation = loco->GetOrientation();
+		orientation = (oldOrientation == OrientationLeft ? OrientationRight : OrientationLeft);
+	}
+
 	logger->Info(orientation ? Languages::TextLocoDirectionOfTravelIsRight : Languages::TextLocoDirectionOfTravelIsLeft, loco->GetName());
 	const Orientation oldOrientation = loco->GetOrientation();
 	if (oldOrientation == orientation)

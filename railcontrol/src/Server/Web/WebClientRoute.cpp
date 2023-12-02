@@ -331,7 +331,7 @@ namespace Server { namespace Web
 			string priorityString = to_string(relationId);
 			ObjectType objectType = static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "relation_atlock_" + priorityString + "_type"));
 			ObjectID objectId = Utils::Utils::GetIntegerMapEntry(arguments, "relation_atlock_" + priorityString + "_id", ObjectNone);
-			if (objectId == 0 && objectType != ObjectTypeLoco && objectType != ObjectTypePause)
+			if (objectId == 0 && objectType != ObjectTypeLoco && objectType != ObjectTypePause && objectType != ObjectTypeMultipleUnit)
 			{
 				continue;
 			}
@@ -360,7 +360,7 @@ namespace Server { namespace Web
 			string priorityString = to_string(relationId);
 			ObjectType objectType = static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "relation_atunlock_" + priorityString + "_type"));
 			ObjectID objectId = Utils::Utils::GetIntegerMapEntry(arguments, "relation_atunlock_" + priorityString + "_id", ObjectNone);
-			if (objectId == 0 && objectType != ObjectTypeLoco && objectType != ObjectTypePause)
+			if (objectId == 0 && objectType != ObjectTypeLoco && objectType != ObjectTypePause && objectType != ObjectTypeMultipleUnit)
 			{
 				continue;
 			}
@@ -602,6 +602,7 @@ namespace Server { namespace Web
 		objectTypeOptions[ObjectTypeTrack] = Languages::TextTrack;
 		objectTypeOptions[ObjectTypeRoute] = Languages::TextRoute;
 		objectTypeOptions[ObjectTypeLoco] = Languages::TextLoco;
+		objectTypeOptions[ObjectTypeMultipleUnit] = Languages::TextOrientation;
 		objectTypeOptions[ObjectTypePause] = Languages::TextPause;
 		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
 		select.AddClass("select_relation_objecttype");
@@ -851,6 +852,16 @@ namespace Server { namespace Web
 				time[90u] = "9s";
 				time[100u] = "10s";
 				content.AddChildTag(HtmlTagSelect(name + "_state", time, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
+				return content;
+			}
+
+			case ObjectTypeMultipleUnit: // abused for loco orientation
+			{
+				map<unsigned int,string> orientation;
+				orientation[0] = Languages::Languages::GetText(Languages::Languages::TextLeft);
+				orientation[1u] = Languages::Languages::GetText(Languages::Languages::TextRight);
+				orientation[2u] = Languages::Languages::GetText(Languages::Languages::TextChange);;
+				content.AddChildTag(HtmlTagSelect(name + "_state", orientation, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 

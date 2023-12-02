@@ -227,10 +227,11 @@ enum ObjectType : uint8_t
 	ObjectTypeMultipleUnit = 13
 };
 
-enum Orientation : bool
+enum Orientation : uint8_t
 {
-	OrientationLeft = false,
-	OrientationRight = true
+	OrientationLeft = 0,
+	OrientationRight = 1,
+	OrientationChange = 2
 };
 
 enum ProgramMode : uint8_t
