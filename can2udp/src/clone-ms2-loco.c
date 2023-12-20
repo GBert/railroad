@@ -816,7 +816,7 @@ int main(int argc, char **argv) {
 		}
 	    } else if (trigger_data.interval == 0) {
 		/* just do only once */
-		if (trigger_data.fsm_state = FSM_IDLE) {
+		if (trigger_data.fsm_state == FSM_IDLE) {
 		    trigger_data.fsm_state = FSM_START;
 		    get_ms2_dbsize(&trigger_data);
 		}
