@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.10\n\n");
+    fprintf(stderr, "   Version 1.11\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -816,8 +816,10 @@ int main(int argc, char **argv) {
 		}
 	    } else if (trigger_data.interval == 0) {
 		/* just do only once */
-		trigger_data.fsm_state = FSM_START;
-		get_ms2_dbsize(&trigger_data);
+		if (trigger_data.fsm_state = FSM_IDLE);
+		    trigger_data.fsm_state = FSM_START;
+		    get_ms2_dbsize(&trigger_data);
+		}
 	    }
 	    if (trigger_data.fsm_state == FSM_IDLE) {
 		fsm_watchdog = FSM_WATCHDOG_T;
