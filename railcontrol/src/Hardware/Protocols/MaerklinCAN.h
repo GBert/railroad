@@ -366,7 +366,7 @@ namespace Hardware
 				static inline FeedbackPin ParseFeedbackPin(const unsigned char* const buffer)
 				{
 					FeedbackPin pin = static_cast<FeedbackPin>(Utils::Utils::DataBigEndianToInt(buffer + 5));
-					pin = (pin & 0x03FF) | ((pin & 0x00FF0000) >> 4);
+					pin = (pin & 0x00000FFF) | ((pin & 0x00FF0000) >> 4);
 					return pin;
 				}
 
