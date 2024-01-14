@@ -165,6 +165,8 @@ unsigned int get_magnet_type(unsigned int id) {
     if (m) {
 	if (m->decoder_type == 0)
 	    return(0x3000);
+	else if(m->decoder_type == 1)
+	    return(0x3800);
     }
     /* otherwise return DCC */
     return(0x3800);

@@ -230,8 +230,6 @@ int add_magnet(struct magnet_data_t *magnet) {
     HASH_FIND_INT(magnet_data, &magnet->id, m);
 
     if (m == NULL) {
-	/* if ((!loco->name) || (!loco->type))
-	   return (EXIT_FAILURE); */
 	if (!magnet->id)
 	    return (EXIT_FAILURE);
 
@@ -1366,6 +1364,8 @@ int read_magnet_data(char *config_file, int config_type) {
 	    config_file = sret;
 	}
     }
+    if (magnet->id)
+	add_magnet(magnet);
 
     if (name)
 	free(name);

@@ -415,7 +415,7 @@ int send_can_turnout(uint16_t id, uint8_t port, uint8_t activate, int verbose) {
     uint16_t new_id;
 
     memcpy(udpframe, MS_TURNOUT, 13);
-    new_id = id + get_magnet_type(id);
+    new_id = id + get_magnet_type(id << 1);
     udpframe[7] = new_id >> 8;
     udpframe[8] = new_id & 0xFF;
     udpframe[9] = port;
