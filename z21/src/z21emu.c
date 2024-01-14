@@ -1019,9 +1019,14 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "can't alloc buffer for magnet_name: %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
     }
-    read_magnet_data(magnet_file, CONFIG_FILE);
-    z21_data.magnet_number = HASH_COUNT(magnet_data);
-    v_printf(z21_data.foreground, "magnet data: %u\n", z21_data.magnet_number);
+
+    /* we don't need to read the magnetartikel.cs2 if
+     *  default turnout decoder type is set */
+    if (!z21_data.turnout_type) {
+	read_magnet_data(magnet_file, CONFIG_FILE);
+	z21_data.magnet_number = HASH_COUNT(magnet_data);
+	v_printf(z21_data.foreground, "magnet data: %u\n", z21_data.magnet_number);
+    }
 
     /* send_xpn_locos(&z21_data, loco_data,z21_data.foreground); */
 
