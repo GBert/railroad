@@ -115,6 +115,7 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -t                  use tty interface (e.g. /dev/ttyUSB0)\n");
 #endif
     fprintf(stderr, "         -x                  enable turnout switching\n");
+    fprintf(stderr, "         -m <1 2>            turnout type: MM=1 DCC=2\n");
     fprintf(stderr, "         -f                  running in foreground\n\n");
 }
 
@@ -415,7 +416,12 @@ int send_can_turnout(uint16_t id, uint8_t port, uint8_t activate, int verbose) {
     uint16_t new_id;
 
     memcpy(udpframe, MS_TURNOUT, 13);
-    new_id = id + get_magnet_type(id << 1);
+    if (z21_data.turnout_type == 1)
+	new_id = id + 0x3000;
+    else if (z21_data.turnout_type == 2)
+	new_id = id + 0x3800;
+    else
+	new_id = id + get_magnet_type(id + 1);
     udpframe[7] = new_id >> 8;
     udpframe[8] = new_id & 0xFF;
     udpframe[9] = port;
@@ -858,9 +864,9 @@ int main(int argc, char **argv) {
     messwert_knoten = calloc(1, sizeof (struct knoten));
 
 #ifndef NO_XPN_TTY
-    while ((opt = getopt(argc, argv, "a:c:p:s:b:g:i:t:xhf?")) != -1) {
+    while ((opt = getopt(argc, argv, "a:c:p:s:b:g:i:t:xm:hf?")) != -1) {
 #else
-    while ((opt = getopt(argc, argv, "a:c:p:s:b:g:i:xhf?")) != -1) {
+    while ((opt = getopt(argc, argv, "a:c:p:s:b:g:i:xm:hf?")) != -1) {
 #endif
 	switch (opt) {
 	case 'a':
@@ -896,6 +902,14 @@ int main(int argc, char **argv) {
 	    break;
 	case 'x':
 	    z21_data.turnout_enable = 1;
+	    break;
+	case 'm':
+	    z21_data.turnout_type = atoi(optarg);
+	    if ((z21_data.turnout_type == 1) || (z21_data.turnout_type == 2)) {
+	    } else {
+		fprintf(stderr, "turnout type either 1 (MM) or 2 (DCC)\n");
+		exit(EXIT_FAILURE);
+	    }
 	    break;
 	case 'h':
 	case '?':

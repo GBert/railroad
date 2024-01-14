@@ -158,8 +158,7 @@ void print_locos_by_uid(void) {
 unsigned int get_magnet_type(unsigned int id) {
     struct magnet_data_t *m;
 
-    /* Maerklins starts ID with 1 */
-    id++;
+    id = id << 1;
     HASH_FIND(hh, magnet_data, &id, sizeof(unsigned int), m);
     /* TODO : SX1 */
     if (m) {

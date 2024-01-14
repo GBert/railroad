@@ -61,6 +61,7 @@ struct z21_data_t {
     int st;
     int foreground;
     int turnout_enable;
+    int turnout_type;
     int power;
     uint16_t loco_number;
     uint16_t magnet_number;
