@@ -27,8 +27,9 @@ class Config
 {
 	public:
 		Config(const std::string& fileName);
-		const std::string& getValue(const std::string& key, const std::string& defaultValue);
-		int getValue(const std::string& key, const int& defaultValue);
+		const std::string& getStringValue(const std::string& key, const std::string& defaultValue);
+		int getIntValue(const std::string& key, const int defaultValue);
+		bool getBoolValue(const std::string& key, const bool defaultValue);
 
 	private:
 		std::map<std::string, std::string> config;

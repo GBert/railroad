@@ -138,5 +138,9 @@ namespace Utils
 			}
 
 			static bool HostResolves(const std::string& host);
-	};
-}
+
+			static uint8_t CalcXORCheckSum(const uint8_t* const buffer, size_t length);
+
+			static std::string StringToLower(const std::string& input);
+	}; // class Utils
+} // namespace Utils

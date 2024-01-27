@@ -247,7 +247,7 @@ namespace DataModel
 
 	bool Route::Execute(Logger::Logger* logger, const LocoID locoID)
 	{
-		bool isInUse = IsInUse();
+		const bool isInUse = IsInUse();
 		if (isInUse && locoID != GetLoco())
 		{
 			logger->Info(Languages::TextRouteIsLocked, GetName());

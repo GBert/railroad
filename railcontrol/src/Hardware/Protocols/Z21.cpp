@@ -207,19 +207,19 @@ namespace Hardware
 			switch (protocol)
 			{
 				case ProtocolMM1:
-					case ProtocolDCC14:
+				case ProtocolDCC14:
 					buffer[5] = 0x10;
 					buffer[8] = EncodeSpeed14(speed);
 					break;
 
 				case ProtocolMM15:
-					case ProtocolDCC28:
+				case ProtocolDCC28:
 					buffer[5] = 0x12;
 					buffer[8] = EncodeSpeed28(speed);
 					break;
 
 				case ProtocolMM2:
-					case ProtocolDCC128:
+				case ProtocolDCC128:
 					buffer[5] = 0x13;
 					buffer[8] = EncodeSpeed128(speed);
 					break;

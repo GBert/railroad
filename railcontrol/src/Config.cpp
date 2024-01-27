@@ -50,13 +50,14 @@ Config::Config(const std::string& fileName)
 		string eq;
 		string configValue;
 
-		if (configKey[0] == '#')
+		iss >> configKey >> eq >> configValue >> std::ws;
+
+		if ((configKey.size() == 0) || (configKey[0] == '#'))
 		{
 			continue;
 		}
 
-		bool error = (!(iss >> configKey >> eq >> configValue >> std::ws) || eq != "=" || iss.get() != EOF);
-		if (error == true)
+		if (eq.compare("=") != 0)
 		{
 			continue;
 		}
@@ -67,7 +68,7 @@ Config::Config(const std::string& fileName)
 	configFile.close();
 }
 
-const string& Config::getValue(const string& key, const string& defaultValue)
+const string& Config::getStringValue(const string& key, const string& defaultValue)
 {
 	if (config.count(key) != 1)
 	{
@@ -76,7 +77,7 @@ const string& Config::getValue(const string& key, const string& defaultValue)
 	return config[key];
 }
 
-int Config::getValue(const string& key, const int& defaultValue)
+int Config::getIntValue(const string& key, const int defaultValue)
 {
 	if (config.count(key) != 1)
 	{
@@ -85,3 +86,8 @@ int Config::getValue(const string& key, const int& defaultValue)
 	return Utils::Utils::StringToInteger(config[key], defaultValue);
 }
 
+bool Config::getBoolValue(const string& key, const bool defaultValue)
+{
+	const string value = Utils::Utils::StringToLower(getStringValue(key, string(defaultValue ? "1" : "0")));
+	return ((value.compare("true") == 0) || (value.compare("on") == 0) || (value.compare("1") == 0));
+}

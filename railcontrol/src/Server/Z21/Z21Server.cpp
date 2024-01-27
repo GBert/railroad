@@ -27,6 +27,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Server/Z21/Z21Server.h"
 #include "Utils/Network.h"
 
+using DataModel::Loco;
 using DataModel::LocoBase;
 using DataModel::LocoFunctionNr;
 using DataModel::LocoFunctionState;
@@ -92,22 +93,49 @@ namespace Server { namespace Z21
 	}
 
 	void Z21Server::LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
-		__attribute__((unused)) const LocoBase* loco,
+		const LocoBase* locoBase,
 		__attribute__((unused)) const Speed speed)
 	{
+		const Loco* loco = dynamic_cast<const Loco*>(locoBase);
+		if (nullptr == loco)
+		{
+			return;
+		}
+		for (auto client : clients)
+		{
+			reinterpret_cast<Z21Client*>(client)->SendLocoInfo(loco);
+		}
 	}
 
 	void Z21Server::LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
-		__attribute__((unused)) const LocoBase* loco,
+		const LocoBase* locoBase,
 		__attribute__((unused)) const Orientation orientation)
 	{
+		const Loco* loco = dynamic_cast<const Loco*>(locoBase);
+		if (nullptr == loco)
+		{
+			return;
+		}
+		for (auto client : clients)
+		{
+			reinterpret_cast<Z21Client*>(client)->SendLocoInfo(loco);
+		}
 	}
 
 	void Z21Server::LocoBaseFunction(__attribute__((unused)) const ControlType controlType,
-		__attribute__((unused)) const LocoBase* loco,
+		const LocoBase* locoBase,
 		__attribute__((unused)) const LocoFunctionNr function,
 		__attribute__((unused)) const LocoFunctionState state)
 	{
+		const Loco* loco = dynamic_cast<const Loco*>(locoBase);
+		if (nullptr == loco)
+		{
+			return;
+		}
+		for (auto client : clients)
+		{
+			reinterpret_cast<Z21Client*>(client)->SendLocoInfo(loco);
+		}
 	}
 
 	void Z21Server::AccessoryState(__attribute__((unused)) const ControlType controlType,

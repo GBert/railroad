@@ -54,6 +54,13 @@ namespace Server { namespace Z21
 
 			void ParseDB0(const unsigned char* buffer);
 
+			void ParseLocoDrive(const unsigned char* buffer);
+
+			inline uint16_t ParseLocoAddress(const unsigned char* buffer)
+			{
+				return ((buffer[0] & 0x3F) << 8) + buffer[1];
+			}
+
 			inline void SendPowerOff()
 			{
 				const unsigned char sendBuffer[7] = { 0x07, 0x00, 0x40, 0x00, 0x61, 0x00, 0x61 };
@@ -65,6 +72,8 @@ namespace Server { namespace Z21
 				const unsigned char sendBuffer[7] = { 0x07, 0x00, 0x40, 0x00, 0x61, 0x01, 0x60 };
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
+
+			void SendLocoInfo(const DataModel::LocoBase* const loco);
 
 		private:
 			inline void SendCode()
@@ -119,7 +128,7 @@ namespace Server { namespace Z21
 			inline void SendLocoMode(const uint16_t address)
 			{
 				unsigned char sendBuffer[7] = { 0x07, 0x00, 0x60, 0x00 };
-				*(reinterpret_cast<uint16_t*>(sendBuffer + 4)) = address;
+				Utils::Utils::ShortToDataBigEndian(address, sendBuffer + 4);
 				sendBuffer[6] = 0x00; // we always use DCC
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
@@ -127,7 +136,7 @@ namespace Server { namespace Z21
 			inline void SendTurnoutMode(const uint16_t address)
 			{
 				unsigned char sendBuffer[7] = { 0x07, 0x00, 0x70, 0x00 };
-				*(reinterpret_cast<uint16_t*>(sendBuffer + 4)) = address;
+				Utils::Utils::ShortToDataBigEndian(address, sendBuffer + 4);
 				sendBuffer[6] = 0x00; // we always use DCC
 				Send(sendBuffer, sizeof(sendBuffer));
 			}

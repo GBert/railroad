@@ -124,11 +124,25 @@ namespace Hardware
 
 				void Accessory(const Protocol protocol, const Address address, const DataModel::AccessoryState state,
 				    const DataModel::AccessoryPulseDuration duration) override;
+
 				void AccessoryOnOrOff(const Protocol protocol, const Address address,
 				    const DataModel::AccessoryState state, const bool on) override;
-				void ProgramRead(const ProgramMode mode, const Address address, const CvNumber cv) override;
-				void ProgramWrite(const ProgramMode mode, const Address address, const CvNumber cv, const CvValue value)
-				    override;
+
+				void ProgramRead(const ProgramMode mode,
+					const Address address,
+					const CvNumber cv) override;
+
+				void ProgramWrite(const ProgramMode mode,
+					const Address address,
+					const CvNumber cv,
+					const CvValue value) override;
+
+				static unsigned char EncodeSpeed14(const Speed speed);
+				static unsigned char EncodeSpeed28(const Speed speed);
+				static unsigned char EncodeSpeed128(const Speed speed);
+				static Speed DecodeSpeed14(unsigned char data);
+				static Speed DecodeSpeed28(unsigned char data);
+				static Speed DecodeSpeed128(unsigned char data);
 
 			private:
 				static const unsigned short Z21Port = 21105;
@@ -220,13 +234,6 @@ namespace Hardware
 				{
 					return Send(reinterpret_cast<const unsigned char*>(buffer), bufferLength);
 				}
-
-				unsigned char EncodeSpeed14(const Speed speed);
-				unsigned char EncodeSpeed28(const Speed speed);
-				unsigned char EncodeSpeed128(const Speed speed);
-				Speed DecodeSpeed14(unsigned char data);
-				Speed DecodeSpeed28(unsigned char data);
-				Speed DecodeSpeed128(unsigned char data);
 		};
 	} // namespace
 } // namespace

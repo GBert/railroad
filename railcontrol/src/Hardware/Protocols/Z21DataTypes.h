@@ -98,6 +98,8 @@ namespace Hardware
 				XHeaderCvResult           = 0x64,
 				XHeaderSetStop            = 0x80,
 				XHeaderBcStopped          = 0x81,
+				XHeaderGetLocoInfo        = 0xE3,
+				XHeaderLocoDrive          = 0xE4,
 				XHeaderSetLocoBinaryState = 0xE5,
 				XHeaderLocoInfo           = 0xEF,
 				XHeaderGetFirmwareVersion = 0xF1,
@@ -111,14 +113,18 @@ namespace Hardware
 				DB0ProgrammingMode        = 0x02,
 				DB0ShortCircuit           = 0x08,
 				DB0FirmwareVersion        = 0x0A,
+				DB0SetLocoDrive14         = 0x10,
+				DB0SetLocoDrive28         = 0x12,
 				DB0CvShortCircuit         = 0x12,
+				DB0SetLocoDrive128        = 0x13,
 				DB0CvNack                 = 0x13,
 				DB0Version                = 0x21,
 				DB0StatusChanged          = 0x22,
 				DB0Status                 = 0x24,
 				DB0SetPowerOff            = 0x80,
 				DB0SetPowerOn             = 0x81,
-				DB0UnknownCommand         = 0x82
+				DB0UnknownCommand         = 0x82,
+				DB0LocoFunction           = 0xF8
 			};
 
 			enum PomDB0 : uint8_t

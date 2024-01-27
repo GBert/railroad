@@ -74,8 +74,8 @@ Manager::Manager(Config& config)
 {
 	StorageParams storageParams;
 	storageParams.module = "Sqlite";
-	storageParams.filename = config.getValue("dbfilename", "railcontrol.sqlite");
-	storageParams.keepBackups = config.getValue("dbkeepbackups", 10);
+	storageParams.filename = config.getStringValue("dbfilename", "railcontrol.sqlite");
+	storageParams.keepBackups = config.getIntValue("dbkeepbackups", 10);
 	storage = new StorageHandler(this, &storageParams);
 	if (storage == nullptr)
 	{
@@ -92,8 +92,12 @@ Manager::Manager(Config& config)
 	selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::StringToInteger(storage->GetSetting("SelectRouteApproach")));
 	nrOfTracksToReserve = static_cast<DataModel::Loco::NrOfTracksToReserve>(Utils::Utils::StringToInteger(storage->GetSetting("NrOfTracksToReserve"), 2));
 
-	controls[ControlIdWebServer] = new Server::Web::WebServer(*this, config.getValue("webserveraddress", "any"), config.getValue("webserverport", 8082));
-	controls[ControlIdZ21Server] = new Server::Z21::Z21Server(*this, Server::Z21::Z21Server::Z21Port);
+	controls[ControlIdWebServer] = new Server::Web::WebServer(*this, config.getStringValue("webserveraddress", "any"), config.getIntValue("webserverport", 8082));
+
+	if (config.getBoolValue("z21server", false))
+	{
+		controls[ControlIdZ21Server] = new Server::Z21::Z21Server(*this, Server::Z21::Z21Server::Z21Port);
+	}
 
 	storage->AllHardwareParams(hardwareParams);
 	for (auto& hardwareParam : hardwareParams)

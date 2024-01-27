@@ -8,8 +8,18 @@ dbfilename = railcontrol.sqlite
 # Default dbkeepbackups is 10
 dbkeepbackups = 10
 
+# Default logkeepbackups is 10
+logkeepbackups = 10;
+
+# If this is set to any the webserver will listen to all addresses
+# If this is set to localhost the webserver will listen to the IPv6 localhost address only
+webserveraddress = any
+
 # Default webserver port is 80, but
 # RailControl should not be started as root.
 # Therefore we use alternate port 8082
 webserverport = 8082
+
+# To turn on Z21 Server emulation set this to "true"
+z21server = false
 

@@ -153,7 +153,7 @@ int main (int argc, char* argv[])
 	}
 	Config config(configFileName);
 
-	unsigned int logKeepBackups = config.getValue("logkeepbackups", 10);
+	unsigned int logKeepBackups = config.getIntValue("logkeepbackups", 10);
 	Utils::Utils::RemoveOldBackupFiles(logger, logFileName, logKeepBackups);
 
 	Manager m(config);
