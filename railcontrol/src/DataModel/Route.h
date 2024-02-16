@@ -143,16 +143,16 @@ namespace DataModel
 				const DataModel::LocoBase* loco,
 				const bool allowLocoTurn);
 
-			bool Execute(Logger::Logger* logger, const LocoID locoID);
+			bool Execute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 
 			inline static bool ExecuteStatic(Logger::Logger* logger, Route* route)
 			{
-				return route->Execute(logger, LocoNone);
+				return route->Execute(logger, ObjectIdentifier());
 			}
 
-			bool Reserve(Logger::Logger* logger, const LocoID locoID) override;
-			bool Lock(Logger::Logger* logger, const LocoID locoID) override;
-			bool Release(Logger::Logger* logger, const LocoID locoID) override;
+			bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
 
 			inline Delay GetDelay() const
 			{
@@ -341,8 +341,8 @@ namespace DataModel
 			bool ObjectIsPartOfRoute(const ObjectIdentifier& identifier) const;
 
 		private:
-			bool ReleaseInternal(Logger::Logger* logger, const LocoID locoID);
-			void ReleaseInternalWithToTrack(Logger::Logger* logger, const LocoID locoID);
+			bool ReleaseInternal(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
+			void ReleaseInternalWithToTrack(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 			static void DeleteRelations(std::vector<DataModel::Relation*>& relations);
 			bool AssignRelations(std::vector<DataModel::Relation*>& relations, const std::vector<DataModel::Relation*>& newRelations);
 

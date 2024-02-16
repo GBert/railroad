@@ -61,7 +61,7 @@ namespace DataModel
 		return true;
 	}
 
-	bool Relation::Execute(Logger::Logger* logger, const LocoID locoID, const Delay delay)
+	bool Relation::Execute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier, const Delay delay)
 	{
 		switch (ObjectType2())
 		{
@@ -100,20 +100,20 @@ namespace DataModel
 				return true;
 
 			case ObjectTypeRoute:
-				return manager->RouteExecute(logger, locoID, ObjectID2());
+				return manager->RouteExecute(logger, locoBaseIdentifier, ObjectID2());
 
 			case ObjectTypeLoco:
 			{
 				const DataModel::LocoFunctionNr nr = static_cast<DataModel::LocoFunctionNr>(ObjectID2());
 				if (data > DataModel::LocoFunctionStateOn)
 				{
-					manager->LocoBaseFunctionState(ControlTypeInternal, locoID, nr, DataModel::LocoFunctionStateOn);
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, nr, DataModel::LocoFunctionStateOn);
 					Utils::Utils::SleepForMilliseconds(static_cast<unsigned int>(data) * 100);
-					manager->LocoBaseFunctionState(ControlTypeInternal, locoID, nr, DataModel::LocoFunctionStateOff);
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, nr, DataModel::LocoFunctionStateOff);
 				}
 				else
 				{
-					manager->LocoBaseFunctionState(ControlTypeInternal, locoID, nr, static_cast<DataModel::LocoFunctionState>(data));
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, nr, static_cast<DataModel::LocoFunctionState>(data));
 				}
 				return true;
 			}
@@ -123,7 +123,7 @@ namespace DataModel
 				return true;
 
 			case ObjectTypeMultipleUnit: // abused for loco orientation
-				manager->LocoBaseOrientation(ControlTypeInternal, locoID, static_cast<Orientation>(data));
+				manager->LocoBaseOrientation(ControlTypeInternal, locoBaseIdentifier, static_cast<Orientation>(data));
 				return true;
 
 			default:
@@ -157,9 +157,9 @@ namespace DataModel
 		}
 	}
 
-	bool Relation::Reserve(Logger::Logger* logger, const LocoID locoID)
+	bool Relation::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Reserve(logger, locoID);
+		bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
 		if (ret == false)
 		{
 			logger->Debug(Languages::TextUnableToReserve);
@@ -176,22 +176,22 @@ namespace DataModel
 		if (lockable == nullptr)
 		{
 			logger->Debug(Languages::TextRelationTargetNotFound);
-			LockableItem::Release(logger, locoID);
+			LockableItem::Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
 		Route* route = dynamic_cast<Route*>(lockable);
 		if (route != nullptr)
 		{
-			return route->Reserve(logger, locoID);
+			return route->Reserve(logger, locoBaseIdentifier);
 		}
 
-		return lockable->Reserve(logger, locoID);
+		return lockable->Reserve(logger, locoBaseIdentifier);
 	}
 
-	bool Relation::Lock(Logger::Logger* logger, const LocoID locoID)
+	bool Relation::Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Lock(logger, locoID);
+		bool ret = LockableItem::Lock(logger, locoBaseIdentifier);
 		if (ret == false)
 		{
 			return false;
@@ -206,17 +206,17 @@ namespace DataModel
 		LockableItem* lockable = GetObject2();
 		if (lockable == nullptr)
 		{
-			LockableItem::Release(logger, locoID);
+			LockableItem::Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
 		Route* route = dynamic_cast<Route*>(lockable);
 		if (route != nullptr)
 		{
-			return route->Lock(logger, locoID);
+			return route->Lock(logger, locoBaseIdentifier);
 		}
 
-		bool retLockable = lockable->Lock(logger, locoID);
+		bool retLockable = lockable->Lock(logger, locoBaseIdentifier);
 		if (retLockable == true)
 		{
 			return true;
@@ -232,14 +232,14 @@ namespace DataModel
 		return false;
 	}
 
-	bool Relation::Release(Logger::Logger* logger, const LocoID locoID)
+	bool Relation::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		LockableItem* object = GetObject2();
 		if (object != nullptr)
 		{
-			object->Release(logger, locoID);
+			object->Release(logger, locoBaseIdentifier);
 		}
-		return LockableItem::Release(logger, locoID);
+		return LockableItem::Release(logger, locoBaseIdentifier);
 	}
 } // namespace DataModel
 

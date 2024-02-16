@@ -58,7 +58,7 @@ namespace DataModel
 		return true;
 	}
 
-	bool Cluster::CanSetLocoOrientation(const Orientation orientation, const LocoID locoId)
+	bool Cluster::CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(orientationMutex);
 		if (this->orientation == orientation)
@@ -76,7 +76,7 @@ namespace DataModel
 			{
 				continue;
 			}
-			if (track->GetLoco() == locoId)
+			if (track->GetLocoBase() == locoBaseIdentifier)
 			{
 				continue;
 			}
@@ -85,7 +85,7 @@ namespace DataModel
 		return true;
 	}
 
-	bool Cluster::SetLocoOrientation(const Orientation orientation, const LocoID locoId)
+	bool Cluster::SetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(orientationMutex);
 		if (this->orientation == orientation)
@@ -103,7 +103,7 @@ namespace DataModel
 			{
 				continue;
 			}
-			if (track->GetLoco() == locoId)
+			if (track->GetLocoBase() == locoBaseIdentifier)
 			{
 				continue;
 			}

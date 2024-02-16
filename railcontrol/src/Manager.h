@@ -33,6 +33,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/DataModel.h"
 #include "DataModel/FeedbackConfig.h"
 #include "DataModel/LocoConfig.h"
+#include "DataModel/ObjectIdentifier.h"
 #include "Hardware/HardwareParams.h"
 #include "Hardware/LocoCache.h"
 #include "Logger/Logger.h"
@@ -104,9 +105,7 @@ class Manager
 		const std::map<std::string,DataModel::LocoConfig> GetUnmatchedLocosOfControl(const ControlID controlId,
 			const std::string& matchKey) const;
 
-		const std::string& GetLocoName(const LocoID locoID) const;
-
-		const std::map<std::string,LocoID> LocoListFree() const;
+		const std::map<std::string,LocoID> LocoBaseListFree() const;
 
 		const std::map<std::string,DataModel::LocoConfig> LocoConfigByName() const;
 
@@ -154,11 +153,11 @@ class Manager
 		}
 
 		inline bool LocoBaseSpeed(const ControlType controlType,
-			const LocoID locoID,
+			const DataModel::ObjectIdentifier& locoBaseIdentifier,
 			const Speed speed)
 		{
 			// nullptr check of loco is done within submethod
-			return LocoBaseSpeed(controlType, GetLocoBase(locoID), speed);
+			return LocoBaseSpeed(controlType, GetLocoBase(locoBaseIdentifier), speed);
 		}
 
 		bool LocoBaseSpeed(const ControlType controlType,
@@ -178,11 +177,11 @@ class Manager
 		}
 
 		inline void LocoBaseOrientation(const ControlType controlType,
-			const LocoID locoID,
+			const DataModel::ObjectIdentifier& locoBaseIdentifier,
 			const Orientation orientation)
 		{
 			// nullptr check of loco is done within submethod
-			LocoBaseOrientation(controlType, GetLocoBase(locoID), orientation);
+			LocoBaseOrientation(controlType, GetLocoBase(locoBaseIdentifier), orientation);
 		}
 
 		void LocoBaseOrientation(const ControlType controlType,
@@ -201,7 +200,7 @@ class Manager
 		}
 
 		void LocoBaseFunctionState(const ControlType controlType,
-			const LocoID locoID,
+			const DataModel::ObjectIdentifier& locoBaseIdentifier,
 			const DataModel::LocoFunctionNr function,
 			const DataModel::LocoFunctionState on);
 
@@ -246,16 +245,20 @@ class Manager
 			return MultipleUnitDelete(multipleUnitId, result);
 		}
 
+		bool MultipleUnitRelease(const MultipleUnitID multipleUnitID);
+
 		// locobase
-		inline DataModel::LocoBase* GetLocoBase(const LocoID locoId) const
+		inline DataModel::LocoBase* GetLocoBase(const DataModel::ObjectIdentifier& locoBaseIdentifier) const
 		{
-			MultipleUnitID multipleUnitId = locoId & (~MultipleUnitIdPrefix);
-			return locoId == multipleUnitId ? static_cast<DataModel::LocoBase*>(GetLoco(locoId)) : static_cast<DataModel::LocoBase*>(GetMultipleUnit(multipleUnitId));
+
+			return locoBaseIdentifier.GetObjectType() == ObjectTypeLoco
+				? static_cast<DataModel::LocoBase*>(GetLoco(locoBaseIdentifier.GetObjectID()))
+				: static_cast<DataModel::LocoBase*>(GetMultipleUnit(locoBaseIdentifier.GetObjectID()));
 		}
 
 		const std::map<std::string,LocoID> LocoBaseIdsByName() const;
 
-		const std::string& GetLocoBaseName(const LocoID locoID) const;
+		const std::string& GetLocoBaseName(const DataModel::ObjectIdentifier& locoBaseIdentifier) const;
 
 		// accessory
 		void AccessoryState(const ControlType controlType, const ControlID controlID, const Protocol protocol, const Address address, const DataModel::AccessoryState state);
@@ -416,7 +419,7 @@ class Manager
 		void SwitchRemoveMatchKey(const SwitchID switchId);
 
 		// route
-		bool RouteExecute(Logger::Logger* logger, const LocoID locoID, const RouteID routeID);
+		bool RouteExecute(Logger::Logger* logger, const DataModel::ObjectIdentifier& locoBaseIdentifier, const RouteID routeID);
 
 		void RouteExecuteAsync(Logger::Logger* logger, const RouteID routeID);
 
@@ -554,15 +557,15 @@ class Manager
 			std::string& result);
 
 		// automode
-		bool LocoIntoTrack(Logger::Logger* logger, const LocoID locoID, const TrackID trackID);
+		bool LocoBaseIntoTrack(Logger::Logger* logger, const DataModel::ObjectIdentifier& locoBaseIdentifier, const TrackID trackID);
 		bool LocoRelease(const LocoID locoID);
 		bool TrackRelease(const TrackID trackID);
-		bool LocoReleaseOnTrack(const TrackID trackID);
+		bool LocoBaseReleaseOnTrack(const TrackID trackID);
 
-		bool TrackStartLoco(const TrackID trackID,
+		bool TrackStartLocoBase(const TrackID trackID,
 			const DataModel::Loco::AutoModeType type);
 
-		bool TrackStopLoco(const TrackID trackID);
+		bool TrackStopLocoBase(const TrackID trackID);
 		void TrackBlock(const TrackID trackID, const bool blocked);
 		void TrackSetLocoOrientation(const TrackID trackID, const Orientation orientation);
 		void TrackPublishState(const DataModel::Track* track);
@@ -572,20 +575,20 @@ class Manager
 			const DataModel::Route* route,
 			const DataModel::Track* track);
 
-		bool LocoStart(const LocoID locoID,
+		bool LocoBaseStart(const DataModel::ObjectIdentifier& locoBaseIdentifier,
 			const DataModel::Loco::AutoModeType type);
+		bool LocoBaseStartAll();
 
-		bool LocoStop(const LocoID locoID);
-		bool LocoStartAll();
-		bool LocoStopAll();
-		void StopAllLocosImmediately(const ControlType controlType);
+		bool LocoBaseStop(const DataModel::ObjectIdentifier& locoBaseIdentifier);
+		bool LocoBaseStopAll();
+		void LocoBaseStopAllImmediately(const ControlType controlType);
 
-		bool LocoAddTimeTable(const LocoID locoId, DataModel::ObjectIdentifier& identifier);
+		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoIdentifier, const DataModel::ObjectIdentifier& identifier);
 
-		inline LocoID GetLocoIdOfTrack(const TrackID trackId)
+		inline DataModel::ObjectIdentifier GetLocoBaseIdentifierOfTrack(const TrackID trackId)
 		{
 			const DataModel::Track* track = GetTrack(trackId);
-			return (track ? track->GetLoco() : LocoNone);
+			return (track ? track->GetLocoBase() : DataModel::ObjectIdentifier());
 		}
 
 		// settings
@@ -791,7 +794,7 @@ class Manager
 		bool CheckControlProtocolAddress(const AddressType type, const ControlID controlID, const Protocol protocol, const Address address, std::string& result);
 		const std::map<std::string,Protocol> ProtocolsOfControl(const AddressType type, const ControlID) const;
 
-		bool LocoReleaseInternal(DataModel::Loco* loco);
+		bool LocoBaseReleaseInternal(DataModel::LocoBase* locoBase);
 
 		bool LayerHasElements(const DataModel::Layer* layer,
 			std::string& result);

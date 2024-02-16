@@ -244,6 +244,7 @@ namespace Server { namespace Web
 			void HandleMultipleUnitList();
 			void HandleMultipleUnitAskDelete(const std::map<std::string, std::string>& arguments);
 			void HandleMultipleUnitDelete(const std::map<std::string, std::string>& arguments);
+			void HandleMultipleUnitRelease(const std::map<std::string, std::string>& arguments);
 			void HandleProtocol(const std::map<std::string, std::string>& arguments);
 			void HandleLayout(const std::map<std::string,std::string>& arguments);
 			void HandleAccessoryEdit(const std::map<std::string,std::string>& arguments);

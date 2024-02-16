@@ -18,11 +18,13 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#include "DataModel/ObjectIdentifier.h"
 #include "DataModel/Route.h"
 #include "DataModel/Track.h"
 #include "Manager.h"
 #include "Server/Web/HtmlTagTrack.h"
 
+using DataModel::ObjectIdentifier;
 using std::string;
 using std::to_string;
 
@@ -33,22 +35,16 @@ namespace Server { namespace Web
 	{
 		const bool occupied = track->GetFeedbackStateDelayed() == DataModel::Feedback::FeedbackStateOccupied;
 
-		const LocoID locoID = track->GetLocoDelayed();
-		const bool reserved = locoID != LocoNone;
+		const ObjectIdentifier locoBaseIdentifier = track->GetLocoBaseDelayed();
+		const bool reserved = locoBaseIdentifier.IsSet();
 
 		const bool blocked = track->GetBlocked();
 
-		string typeString;
-		ObjectType objectType = layout->GetObjectType();
-		switch (objectType)
+		if (layout->GetObjectType() != ObjectTypeTrack)
 		{
-			case ObjectTypeTrack:
-				typeString = "track";
-				break;
-
-			default:
-				return;
+			return;
 		}
+
 		onClickMenuDiv.AddClass(reserved ? "loco_known" : "loco_unknown");
 		onClickMenuDiv.AddClass(blocked ? "track_blocked" : "track_unblocked");
 		onClickMenuDiv.AddClass(track->GetLocoOrientation() == OrientationRight ? "orientation_right" : "orientation_left");
@@ -56,7 +52,7 @@ namespace Server { namespace Web
 		const string& trackName = track->GetName();
 		AddOnClickMenuEntry(trackName);
 		AddContextMenuEntry(trackName);
-		urlIdentifier = typeString + "=" + to_string(layout->GetID());
+		urlIdentifier = "track=" + to_string(layout->GetID());
 
 		imageDiv.AddClass("track_item");
 		string trackClass;
@@ -146,7 +142,7 @@ namespace Server { namespace Web
 			default:
 				image = "<polygon class=\"track\" points=\"15,0 21,0 21," + layoutHeight + " 15," + layoutHeight + "\"/>";
 				const string& orientationSign = track->GetLocoOrientation() == OrientationRight ? "&rarr; " : "&larr; ";
-				const string& locoName = reserved ? orientationSign + manager.GetLocoName(locoID) : "";
+				const string& locoName = reserved ? orientationSign + manager.GetLocoBaseName(locoBaseIdentifier) : "";
 				const string textPositionX = to_string(EdgeLength * trackHeight - 1);
 				image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\" font-size=\"14\">" + locoName + "</text>";
 				if (track->GetShowName())

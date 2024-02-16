@@ -48,6 +48,37 @@ namespace DataModel
 		return true;
 	}
 
+	bool MultipleUnit::GetPushpull() const
+	{
+		bool slavePushpull = true;
+		for (auto slave : slaves)
+		{
+			Loco* loco = manager->GetLoco(slave->ObjectID2());
+			if (loco == nullptr)
+			{
+				continue;
+			}
+			slavePushpull &= loco->GetPushpull();
+		}
+		return slavePushpull;
+	}
+
+	Propulsion MultipleUnit::GetPropulsion() const
+	{
+		uint8_t slavePropulsion = PropulsionUnknown;
+		for (auto slave : slaves)
+		{
+			Loco* loco = manager->GetLoco(slave->ObjectID2());
+			if (loco == nullptr)
+			{
+				continue;
+			}
+			const uint8_t locoPropulsion = loco->GetPropulsion();
+			slavePropulsion |= locoPropulsion;
+		}
+		return static_cast<Propulsion>(slavePropulsion);
+	}
+
 	void MultipleUnit::DeleteSlaves()
 	{
 		while (slaves.size() > 0)
@@ -70,7 +101,7 @@ namespace DataModel
 		LocoBase::SetSpeed(speed);
 		for (auto slave : slaves)
 		{
-			manager->LocoBaseSpeed(ControlTypeInternal, slave->ObjectID2(), speed);
+			manager->LocoBaseSpeed(ControlTypeInternal, slave->ObjectIdentifier2(), speed);
 		}
 	}
 
@@ -80,7 +111,7 @@ namespace DataModel
 		LocoBase::SetFunctionState(nr, state);
 		for (auto slave : slaves)
 		{
-			manager->LocoBaseFunctionState(ControlTypeInternal, slave->ObjectID2(), nr, state);
+			manager->LocoBaseFunctionState(ControlTypeInternal, slave->ObjectIdentifier2(), nr, state);
 		}
 	}
 
@@ -89,7 +120,7 @@ namespace DataModel
 		LocoBase::SetOrientation(orientation);
 		for (auto slave : slaves)
 		{
-			manager->LocoBaseOrientation(ControlTypeInternal, slave->ObjectID2(), orientation);
+			manager->LocoBaseOrientation(ControlTypeInternal, slave->ObjectIdentifier2(), orientation);
 		}
 	}
 

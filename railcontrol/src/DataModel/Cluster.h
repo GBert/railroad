@@ -64,8 +64,8 @@ namespace DataModel
 			std::string Serialize() const override;
 			bool Deserialize(const std::string& serialized) override;
 
-			bool CanSetLocoOrientation(const Orientation orientation, const LocoID locoId);
-			bool SetLocoOrientation(const Orientation orientation, const LocoID locoId);
+			bool CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier);
+			bool SetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier);
 
 			inline Orientation GetLocoOrientation() const
 			{

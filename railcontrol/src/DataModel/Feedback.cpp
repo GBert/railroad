@@ -63,15 +63,6 @@ namespace DataModel
 		stateCounter = Utils::Utils::GetBoolMapEntry(arguments, "state", FeedbackStateFree) ? MaxStateCounter : 0;
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
-		if (trackID == TrackNone)
-		{
-			// FIXME: 2022-07-10 remove identifier later
-			ObjectIdentifier trackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "track");
-			if (trackIdentifier.GetObjectType() == ObjectTypeTrack)
-			{
-				trackID = trackIdentifier.GetObjectID();
-			}
-		}
 		return true;
 	}
 

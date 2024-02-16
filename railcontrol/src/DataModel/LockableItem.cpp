@@ -30,21 +30,25 @@ namespace DataModel
 {
 	string LockableItem::Serialize() const
 	{
-		return "lockState=" + std::to_string(lockState) + ";locoID=" + std::to_string(locoID);
-
+		return "lockstate=" + std::to_string(lockState)
+			+ ";locobaseid=" + std::to_string(locoBaseIdentifier.GetObjectID())
+			+ ";locobasetype=" + std::to_string(locoBaseIdentifier.GetObjectType());
 	}
 
 	bool LockableItem::Deserialize(const map<string, string> arguments)
 	{
-		locoID = Utils::Utils::GetIntegerMapEntry(arguments, "locoID", LocoNone);
-		lockState = static_cast<LockState>(Utils::Utils::GetIntegerMapEntry(arguments, "lockState", LockStateFree));
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "locoID", LocoNone); // FIXME: Remove later: 2024-02-08
+		locoBaseIdentifier.SetObjectID(Utils::Utils::GetIntegerMapEntry(arguments, "locobaseid", locoID));
+		locoBaseIdentifier.SetObjectType(static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "locobasetype", ObjectTypeLoco)));
+		lockState = static_cast<LockState>(Utils::Utils::GetIntegerMapEntry(arguments, "lockState", LockStateFree));  // FIXME: Remove later: 2024-02-08
+		lockState = static_cast<LockState>(Utils::Utils::GetIntegerMapEntry(arguments, "lockstate", lockState));
 		return true;
 	}
 
-	bool LockableItem::Reserve(Logger::Logger* logger, const LocoID locoID)
+	bool LockableItem::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(lockMutex);
-		if (this->locoID == locoID)
+		if (this->locoBaseIdentifier == locoBaseIdentifier)
 		{
 			if (lockState == LockStateFree)
 			{
@@ -53,7 +57,7 @@ namespace DataModel
 			return true;
 		}
 
-		if (this->locoID != LocoNone)
+		if (this->locoBaseIdentifier.IsSet())
 		{
 			Object *object = dynamic_cast<Object*>(this);
 			if (object == nullptr)
@@ -77,15 +81,15 @@ namespace DataModel
 			return false;
 		}
 		lockState = LockStateReserved;
-		this->locoID = locoID;
+		this->locoBaseIdentifier = locoBaseIdentifier;
 		return true;
 	}
 
-	bool LockableItem::Lock(Logger::Logger* logger, const LocoID locoID)
+	bool LockableItem::Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(lockMutex);
 
-		if (this->locoID != locoID)
+		if (this->locoBaseIdentifier != locoBaseIdentifier)
 		{
 			Object *object = dynamic_cast<Object*>(this);
 			if (object == nullptr)
@@ -113,14 +117,14 @@ namespace DataModel
 		return true;
 	}
 
-	bool LockableItem::Release(__attribute__((unused)) Logger::Logger* logger, const LocoID locoID)
+	bool LockableItem::Release(__attribute__((unused)) Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(lockMutex);
-		if (this->locoID != locoID && locoID != LocoNone)
+		if (this->locoBaseIdentifier != locoBaseIdentifier && locoBaseIdentifier.IsSet())
 		{
 			return false;
 		}
-		this->locoID = LocoNone;
+		this->locoBaseIdentifier.Clear();
 		lockState = LockStateFree;
 		return true;
 	}

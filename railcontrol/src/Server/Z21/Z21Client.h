@@ -76,6 +76,12 @@ namespace Server { namespace Z21
 			void SendLocoInfo(const DataModel::LocoBase* const loco);
 
 		private:
+			inline void SendSerialNumber()
+			{
+				const unsigned char sendBuffer[8] = { 0x08, 0x00, 0x10, 0x00, 0x12, 0x34, 0x56, 0x78 };
+				Send(sendBuffer, sizeof(sendBuffer));
+			}
+
 			inline void SendCode()
 			{
 				const unsigned char sendBuffer[5] = { 0x05, 0x00, 0x18, 0x00, 0x00 };
@@ -102,7 +108,7 @@ namespace Server { namespace Z21
 
 			inline void SendFirmwareVersion()
 			{
-				const unsigned char sendBuffer[9] = { 0x09, 0x00, 0x40, 0x00, 0xF3, 0x0A, 0x01, 0x23, 0xDB };
+				const unsigned char sendBuffer[9] = { 0x09, 0x00, 0x40, 0x00, 0xF3, 0x0A, 0x01, 0x43, 0xBB };
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
 

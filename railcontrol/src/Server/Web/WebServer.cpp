@@ -327,10 +327,10 @@ namespace Server { namespace Web
 
 	void WebServer::TrackState(const DataModel::Track* track)
 	{
-		const LocoBase* loco = manager.GetLoco(track->GetLocoDelayed());
-		const bool reserved = loco != nullptr;
+		const LocoBase* locoBase = manager.GetLocoBase(track->GetLocoBaseDelayed());
+		const bool reserved = locoBase != nullptr;
 		const string& trackName = track->GetName();
-		const string& locoName = reserved ? loco->GetName() : "";
+		const string& locoName = reserved ? locoBase->GetName() : "";
 		const bool occupied = track->GetFeedbackStateDelayed() == DataModel::Feedback::FeedbackStateOccupied;
 		const bool blocked = track->GetBlocked();
 		const Orientation orientation = track->GetLocoOrientation();

@@ -381,21 +381,22 @@ namespace Server { namespace Web
 
 		if (track->IsInUse())
 		{
-			client.ReplyHtmlWithHeaderAndParagraph(Languages::TextTrackIsUsedByLoco, track->GetName(), manager.GetLocoName(track->GetLoco()));
+			client.ReplyHtmlWithHeaderAndParagraph(Languages::TextTrackIsUsedByLoco, track->GetName(), manager.GetLocoBaseName(track->GetLocoBase()));
 			return;
 		}
 
-		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		if (locoID != LocoNone)
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
+		if (locoBaseIdentifier.IsSet())
 		{
-			bool ret = manager.LocoIntoTrack(logger, locoID, trackID);
-			string trackName = track->GetName();
-			ret ? client.ReplyResponse(WebClient::ResponseInfo, Languages::TextLocoIsOnTrack, manager.GetLocoName(locoID), trackName)
-				: client.ReplyResponse(WebClient::ResponseError, Languages::TextUnableToAddLocoToTrack, manager.GetLocoName(locoID), trackName);
+			const bool ret = manager.LocoBaseIntoTrack(logger, locoBaseIdentifier, trackID);
+			const string trackName = track->GetName();
+			ret ? client.ReplyResponse(WebClient::ResponseInfo, Languages::TextLocoIsOnTrack, manager.GetLocoBaseName(locoBaseIdentifier), trackName)
+				: client.ReplyResponse(WebClient::ResponseError, Languages::TextUnableToAddLocoToTrack, manager.GetLocoBaseName(locoBaseIdentifier), trackName);
 			return;
 		}
 
-		map<string,LocoID> locos = manager.LocoListFree();
+		map<string,LocoID> locos = manager.LocoBaseListFree();
 		content.AddChildTag(HtmlTag("h1").AddContent(Languages::TextSelectLocoForTrack, track->GetName()));
 		content.AddChildTag(HtmlTagInputHidden("cmd", "tracksetloco"));
 		content.AddChildTag(HtmlTagInputHidden("track", to_string(trackID)));
@@ -417,14 +418,14 @@ namespace Server { namespace Web
 	{
 		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
 		Loco::AutoModeType type = static_cast<Loco::AutoModeType>(Utils::Utils::GetIntegerMapEntry(arguments, "automodetype", Loco::AutoModeTypeFull));
-		bool ret = manager.TrackStartLoco(trackID, type);
+		bool ret = manager.TrackStartLocoBase(trackID, type);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Loco started" : "Loco not started");
 	}
 
 	void WebClientTrack::HandleTrackStopLoco(const map<string, string>& arguments)
 	{
 		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
-		bool ret = manager.TrackStopLoco(trackID);
+		bool ret = manager.TrackStopLocoBase(trackID);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Loco stopped" : "Loco not stopped");
 	}
 

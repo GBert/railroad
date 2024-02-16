@@ -199,7 +199,7 @@ Manager::Manager(Config& config)
 
 Manager::~Manager()
 {
-	while (!LocoStopAll())
+	while (!LocoBaseStopAll())
 	{
 		Utils::Utils::SleepForSeconds(1);
 	}
@@ -667,25 +667,27 @@ Loco* Manager::GetLoco(const ControlID controlID, const Protocol protocol, const
 	return nullptr;
 }
 
-const std::string& Manager::GetLocoName(const LocoID locoID) const
-{
-	std::lock_guard<std::mutex> guard(locoMutex);
-	if (locos.count(locoID) != 1)
-	{
-		return unknownLoco;
-	}
-	return locos.at(locoID)->GetName();
-}
-
-const map<string,LocoID> Manager::LocoListFree() const
+const map<string,LocoID> Manager::LocoBaseListFree() const
 {
 	map<string,LocoID> out;
-	std::lock_guard<std::mutex> guard(locoMutex);
-	for (auto& loco : locos)
 	{
-		if (loco.second->IsInUse() == false)
+		std::lock_guard<std::mutex> guard(locoMutex);
+		for (auto& loco : locos)
 		{
-			out[loco.second->GetName()] = loco.second->GetID();
+			if (loco.second->IsInUse() == false)
+			{
+				out[loco.second->GetName()] = loco.second->GetID();
+			}
+		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(multipleUnitMutex);
+		for (auto& multipleUnit : multipleUnits)
+		{
+			if (multipleUnit.second->IsInUse() == false)
+			{
+				out[multipleUnit.second->GetName()] = multipleUnit.second->GetID() + MultipleUnitIdPrefix;
+			}
 		}
 	}
 	return out;
@@ -921,11 +923,11 @@ void Manager::LocoBaseOrientation(const ControlType controlType,
 }
 
 void Manager::LocoBaseFunctionState(const ControlType controlType,
-	const LocoID locoID,
+	const ObjectIdentifier& locoBaseIdentifier,
 	const DataModel::LocoFunctionNr function,
 	const DataModel::LocoFunctionState on)
 {
-	LocoBase* loco = GetLocoBase(locoID);
+	LocoBase* loco = GetLocoBase(locoBaseIdentifier);
 	if (loco == nullptr)
 	{
 		return;
@@ -1128,9 +1130,9 @@ const map<string,LocoID> Manager::LocoBaseIdsByName() const
 	return out;
 }
 
-const std::string& Manager::GetLocoBaseName(const LocoID locoID) const
+const std::string& Manager::GetLocoBaseName(const ObjectIdentifier& locoBaseIdentifier) const
 {
-	const LocoBase* locoBase = GetLocoBase(locoID);
+	const LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
 	if (!locoBase)
 	{
 		return unknownLoco;
@@ -1422,8 +1424,7 @@ bool Manager::AccessoryRelease(const AccessoryID accessoryID)
 	{
 		return false;
 	}
-	LocoID locoID = accessory->GetLoco();
-	return accessory->Release(logger, locoID);
+	return accessory->Release(logger, accessory->GetLocoBase());
 }
 
 AccessoryConfig Manager::GetAccessoryOfConfigByMatchKey(const ControlID controlId, const string& matchKey) const
@@ -2013,7 +2014,7 @@ bool Manager::TrackDelete(const TrackID trackID,
 
 		if (track->IsInUse())
 		{
-			result = Logger::Logger::Format(Languages::GetText(Languages::TextTrackIsUsedByLoco), track->GetName(), GetLocoName(track->GetLoco()));
+			result = Logger::Logger::Format(Languages::GetText(Languages::TextTrackIsUsedByLoco), track->GetName(), GetLocoBaseName(track->GetLocoBase()));
 			return false;
 		}
 
@@ -2330,8 +2331,7 @@ bool Manager::SwitchRelease(const RouteID switchID)
 	{
 		return false;
 	}
-	LocoID locoID = mySwitch->GetLoco();
-	return mySwitch->Release(logger, locoID);
+	return mySwitch->Release(logger, mySwitch->GetLocoBase());
 }
 
 Switch* Manager::GetSwitchByMatchKey(const ControlID controlId, const string& matchKey) const
@@ -2362,14 +2362,14 @@ void Manager::SwitchRemoveMatchKey(const SwitchID switchId)
 * Route                   *
 ***************************/
 
-bool Manager::RouteExecute(Logger::Logger* logger, const LocoID locoID, const RouteID routeID)
+bool Manager::RouteExecute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier, const RouteID routeID)
 {
 	Route* route = GetRoute(routeID);
 	if (route == nullptr)
 	{
 		return false;
 	}
-	return route->Execute(logger, locoID);
+	return route->Execute(logger, locoBaseIdentifier);
 }
 
 void Manager::RouteExecuteAsync(Logger::Logger* logger, const RouteID routeID)
@@ -3069,7 +3069,7 @@ bool Manager::SignalDelete(const SignalID signalID,
 
 		if (signal->IsInUse())
 		{
-			result = Logger::Logger::Format(Languages::GetText(Languages::TextSignalIsUsedByLoco), signal->GetName(), GetLocoName(signal->GetLoco()));
+			result = Logger::Logger::Format(Languages::GetText(Languages::TextSignalIsUsedByLoco), signal->GetName(), GetLocoBaseName(signal->GetLocoBase()));
 			return false;
 		}
 
@@ -3167,7 +3167,7 @@ bool Manager::SignalRelease(const SignalID signalID)
 	{
 		return false;
 	}
-	return signal->Release(logger, LocoNone);
+	return signal->Release(logger, ObjectIdentifier());
 }
 
 /***************************
@@ -3430,7 +3430,7 @@ bool Manager::TextDelete(const TextID textID, string& result)
 * Automode                 *
 ***************************/
 
-bool Manager::LocoIntoTrack(Logger::Logger* logger, const LocoID locoID, const TrackID trackID)
+bool Manager::LocoBaseIntoTrack(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier, const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
 	if (track == nullptr)
@@ -3438,34 +3438,34 @@ bool Manager::LocoIntoTrack(Logger::Logger* logger, const LocoID locoID, const T
 		return false;
 	}
 
-	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
+	if (locoBase == nullptr)
 	{
 		return false;
 	}
 
-	bool reserved = track->ReserveForce(logger, locoID);
+	bool reserved = track->ReserveForce(logger, locoBaseIdentifier);
 	if (reserved == false)
 	{
 		return false;
 	}
 
-	reserved = loco->SetTrack(trackID);
+	reserved = locoBase->SetTrack(trackID);
 	if (reserved == false)
 	{
-		track->Release(logger, locoID);
+		track->Release(logger, locoBaseIdentifier);
 		return false;
 	}
 
-	reserved = track->Lock(logger, locoID);
+	reserved = track->Lock(logger, locoBaseIdentifier);
 	if (reserved == false)
 	{
-		loco->Release();
-		track->Release(logger, locoID);
+		locoBase->Release();
+		track->Release(logger, locoBaseIdentifier);
 		return false;
 	}
 
-	const string& locoName = loco->GetName();
+	const string& locoName = locoBase->GetName();
 	const string& trackName = track->GetName();
 	logger->Info(Languages::TextLocoIsOnTrack, locoName, trackName);
 
@@ -3480,14 +3480,24 @@ bool Manager::LocoRelease(const LocoID locoID)
 	{
 		return false;
 	}
-	return LocoReleaseInternal(loco);
+	return LocoBaseReleaseInternal(loco);
 }
 
-bool Manager::LocoReleaseInternal(Loco* loco)
+bool Manager::MultipleUnitRelease(const MultipleUnitID multipleUnitID)
 {
-	LocoBaseSpeed(ControlTypeInternal, loco, MinSpeed);
+	MultipleUnit* multipleUnit = GetMultipleUnit(multipleUnitID);
+	if (multipleUnit == nullptr)
+	{
+		return false;
+	}
+	return LocoBaseReleaseInternal(multipleUnit);
+}
 
-	bool ret = loco->Release();
+bool Manager::LocoBaseReleaseInternal(LocoBase* locoBase)
+{
+	LocoBaseSpeed(ControlTypeInternal, locoBase, MinSpeed);
+
+	bool ret = locoBase->Release();
 	if (ret == false)
 	{
 		return false;
@@ -3495,7 +3505,7 @@ bool Manager::LocoReleaseInternal(Loco* loco)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->LocoBaseRelease(loco);
+		control.second->LocoBaseRelease(locoBase);
 	}
 	return true;
 }
@@ -3507,27 +3517,27 @@ bool Manager::TrackRelease(const TrackID trackID)
 	{
 		return false;
 	}
-	return track->ReleaseForce(logger, LocoNone);
+	return track->ReleaseForce(logger, ObjectIdentifier());
 }
 
-bool Manager::LocoReleaseOnTrack(const TrackID trackID)
+bool Manager::LocoBaseReleaseOnTrack(const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
 	}
-	LocoID locoID = track->GetLoco();
-	track->ReleaseForce(logger, locoID);
-	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	ObjectIdentifier locoBaseIdentifier = track->GetLocoBase();
+	track->ReleaseForce(logger, locoBaseIdentifier);
+	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
+	if (locoBase == nullptr)
 	{
 		return false;
 	}
-	return LocoReleaseInternal(loco);
+	return LocoBaseReleaseInternal(locoBase);
 }
 
-bool Manager::TrackStartLoco(const TrackID trackID,
+bool Manager::TrackStartLocoBase(const TrackID trackID,
 	const DataModel::Loco::AutoModeType type)
 {
 	Track* track = GetTrack(trackID);
@@ -3535,17 +3545,17 @@ bool Manager::TrackStartLoco(const TrackID trackID,
 	{
 		return false;
 	}
-	return LocoStart(track->GetLoco(), type);
+	return LocoBaseStart(track->GetLocoBase(), type);
 }
 
-bool Manager::TrackStopLoco(const TrackID trackID)
+bool Manager::TrackStopLocoBase(const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
 	if (track == nullptr)
 	{
 		return false;
 	}
-	return LocoStop(track->GetLoco());
+	return LocoBaseStop(track->GetLocoBase());
 }
 
 void Manager::TrackBlock(const TrackID trackID, const bool blocked)
@@ -3586,8 +3596,7 @@ bool Manager::RouteRelease(const RouteID routeID)
 	{
 		return false;
 	}
-	LocoID locoID = route->GetLoco();
-	return route->Release(logger, locoID);
+	return route->Release(logger, route->GetLocoBase());
 }
 
 bool Manager::LocoDestinationReached(const LocoBase* loco,
@@ -3602,14 +3611,14 @@ bool Manager::LocoDestinationReached(const LocoBase* loco,
 	return true;
 }
 
-bool Manager::LocoStart(const LocoID locoID, const DataModel::Loco::AutoModeType type)
+bool Manager::LocoBaseStart(const ObjectIdentifier& locoBaseIdentifier, const DataModel::Loco::AutoModeType type)
 {
-	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
+	if (locoBase == nullptr)
 	{
 		return false;
 	}
-	bool ret = loco->GoToAutoMode(type);
+	bool ret = locoBase->GoToAutoMode(type);
 	if (ret == false)
 	{
 		return false;
@@ -3617,51 +3626,65 @@ bool Manager::LocoStart(const LocoID locoID, const DataModel::Loco::AutoModeType
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->LocoBaseStart(loco);
+		control.second->LocoBaseStart(locoBase);
 	}
 	return true;
 }
 
-bool Manager::LocoStartAll()
+bool Manager::LocoBaseStartAll()
 {
-	std::lock_guard<std::mutex> guard(locoMutex);
-	for (auto& loco : locos)
 	{
-		const bool started = loco.second->GoToAutoMode();
-		if (!started)
+		std::lock_guard<std::mutex> guard(locoMutex);
+		for (auto& loco : locos)
 		{
-			continue;
+			const bool started = loco.second->GoToAutoMode();
+			if (!started)
+			{
+				continue;
+			}
+			Utils::Utils::SleepForMilliseconds(50);
 		}
-		Utils::Utils::SleepForMilliseconds(50);
+	}
+	{
+		std::lock_guard<std::mutex> guard(multipleUnitMutex);
+		for (auto& multipleUnit : multipleUnits)
+		{
+			const bool started = multipleUnit.second->GoToAutoMode();
+			if (!started)
+			{
+				continue;
+			}
+			Utils::Utils::SleepForMilliseconds(50);
+		}
 	}
 	return true;
 }
 
-bool Manager::LocoStop(const LocoID locoID)
+bool Manager::LocoBaseStop(const ObjectIdentifier& locoBaseIdentifier)
 {
-	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
+	if (locoBase == nullptr)
 	{
 		return false;
 	}
-	if (loco->IsInManualMode())
+	if (locoBase->IsInManualMode())
 	{
 		return true;
 	}
-	loco->RequestManualMode();
-	while (loco->GoToManualMode() == false)
+	locoBase->RequestManualMode();
+	while (locoBase->GoToManualMode() == false)
 	{
 		Utils::Utils::SleepForSeconds(1);
 	}
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->LocoBaseStop(loco);
+		control.second->LocoBaseStop(locoBase);
 	}
 	return true;
 }
 
-bool Manager::LocoStopAll()
+bool Manager::LocoBaseStopAll()
 {
 	{
 		std::lock_guard<std::mutex> guard(locoMutex);
@@ -3674,46 +3697,84 @@ bool Manager::LocoStopAll()
 			loco.second->RequestManualMode();
 		}
 	}
+	{
+		std::lock_guard<std::mutex> guard(multipleUnitMutex);
+		for (auto& multipleUnit : multipleUnits)
+		{
+			if (!multipleUnit.second->IsInAutoMode())
+			{
+				continue;
+			}
+			multipleUnit.second->RequestManualMode();
+		}
+	}
 	bool anyLocosInAutoMode = true;
 	while (anyLocosInAutoMode)
 	{
 		Utils::Utils::SleepForSeconds(1);
 		anyLocosInAutoMode = false;
-		std::lock_guard<std::mutex> guard(locoMutex);
-		for (auto& loco : locos)
 		{
-			if (loco.second->IsInManualMode())
+			std::lock_guard<std::mutex> guard(locoMutex);
+			for (auto& loco : locos)
 			{
-				continue;
+				if (loco.second->IsInManualMode())
+				{
+					continue;
+				}
+				const bool locoInManualMode = loco.second->GoToManualMode();
+				if (!locoInManualMode)
+				{
+					loco.second->RequestManualMode();
+				}
+				anyLocosInAutoMode |= !locoInManualMode;
 			}
-			const bool locoInManualMode = loco.second->GoToManualMode();
-			if (!locoInManualMode)
+		}
+		{
+			std::lock_guard<std::mutex> guard(multipleUnitMutex);
+			for (auto& multipleUnit : multipleUnits)
 			{
-				loco.second->RequestManualMode();
+				if (multipleUnit.second->IsInManualMode())
+				{
+					continue;
+				}
+				const bool multipleUnitInManualMode = multipleUnit.second->GoToManualMode();
+				if (!multipleUnitInManualMode)
+				{
+					multipleUnit.second->RequestManualMode();
+				}
+				anyLocosInAutoMode |= !multipleUnitInManualMode;
 			}
-			anyLocosInAutoMode |= !locoInManualMode;
 		}
 	}
 	return true;
 }
 
-void Manager::StopAllLocosImmediately(const ControlType controlType)
+void Manager::LocoBaseStopAllImmediately(const ControlType controlType)
 {
-	std::lock_guard<std::mutex> guard(locoMutex);
-	for (auto& loco : locos)
 	{
-		LocoBaseSpeed(controlType, loco.second, MinSpeed);
+		std::lock_guard<std::mutex> guard(locoMutex);
+		for (auto& loco : locos)
+		{
+			LocoBaseSpeed(controlType, loco.second, MinSpeed);
+		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(multipleUnitMutex);
+		for (auto& multipleUnit : multipleUnits)
+		{
+			LocoBaseSpeed(controlType, multipleUnit.second, MinSpeed);
+		}
 	}
 }
 
-bool Manager::LocoAddTimeTable(const LocoID locoId, ObjectIdentifier& identifier)
+bool Manager::LocoBaseAddTimeTable(const ObjectIdentifier& locoIdentifier, const ObjectIdentifier& identifier)
 {
-	Loco* loco = GetLoco(locoId);
-	if (loco == nullptr)
+	LocoBase* locoBase = GetLocoBase(locoIdentifier);
+	if (locoBase == nullptr)
 	{
 		return false;
 	}
-	return loco->AddTimeTable(identifier);
+	return locoBase->AddTimeTable(identifier);
 }
 
 /***************************

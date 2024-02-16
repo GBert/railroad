@@ -133,7 +133,8 @@ enum Protocol : uint8_t
 	ProtocolSX1 = 11,
 	ProtocolSX2 = 12,
 	ProtocolFMZ = 13,
-	ProtocolEnd = ProtocolFMZ
+	ProtocolMulti = 14,
+	ProtocolEnd = ProtocolMulti
 };
 
 static const std::string ProtocolSymbols[] =
@@ -151,7 +152,8 @@ static const std::string ProtocolSymbols[] =
 	"MM 1.5",
 	"SX1",
 	"SX2",
-	"FMZ"
+	"FMZ",
+	"Multi"
 };
 
 enum AddressType : uint8_t

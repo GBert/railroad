@@ -41,7 +41,7 @@ namespace DataModel
 
 			inline LockableItem()
 			:	lockState(LockStateFree),
-			 	locoID(LocoNone)
+			 	locoBaseIdentifier()
 			{
 			}
 
@@ -51,9 +51,9 @@ namespace DataModel
 			bool Deserialize(const std::map<std::string,std::string> arguments);
 
 
-			inline LocoID GetLoco() const
+			inline ObjectIdentifier GetLocoBase() const
 			{
-				return locoID;
+				return locoBaseIdentifier;
 			}
 
 			inline LockState GetLockState() const
@@ -61,19 +61,19 @@ namespace DataModel
 				return lockState;
 			}
 
-			virtual bool Reserve(Logger::Logger* logger, const LocoID locoID);
-			virtual bool Lock(Logger::Logger* logger, const LocoID locoID);
-			virtual bool Release(Logger::Logger* logger, const LocoID locoID);
+			virtual bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
+			virtual bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
+			virtual bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 
 			inline bool IsInUse() const
 			{
-				return lockState != LockStateFree || locoID != LocoNone;
+				return lockState != LockStateFree || locoBaseIdentifier.IsSet();
 			}
 
 		private:
 			std::mutex lockMutex;
 			LockState lockState;
-			LocoID locoID;
+			ObjectIdentifier locoBaseIdentifier;
 	};
 } // namespace DataModel
 

@@ -98,7 +98,7 @@ namespace DataModel
 
 			inline bool IsSet() const
 			{
-				return objectType != ObjectTypeNone;
+				return (objectType != ObjectTypeNone) && (objectID != ObjectNone);
 			}
 
 			inline ObjectType GetObjectType() const

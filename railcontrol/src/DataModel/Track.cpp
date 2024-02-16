@@ -21,6 +21,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <algorithm>
 #include <deque>
 #include <map>
+#include <random>
 #include <string>
 
 #include "DataModel/Feedback.h"
@@ -63,7 +64,9 @@ namespace DataModel
 		str += ";blocked=";
 		str += to_string(blocked);
 		str += ";locodelayed=";
-		str += to_string(locoIdDelayed);
+		str += to_string(locoBaseDelayed.GetObjectID());
+		str += ";locotypedelayed=";
+		str += to_string(locoBaseDelayed.GetObjectType());
 		str += ";allowlocoturn=";
 		str += to_string(allowLocoTurn);
 		str += ";releasewhenfree=";
@@ -107,7 +110,9 @@ namespace DataModel
 		trackStateDelayed = static_cast<DataModel::Feedback::FeedbackState>(Utils::Utils::GetBoolMapEntry(arguments, "trackstatedelayed", trackState));
 		locoOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "locoorientation", OrientationRight));
 		blocked = Utils::Utils::GetBoolMapEntry(arguments, "blocked", false);
-		locoIdDelayed = static_cast<LocoID>(Utils::Utils::GetIntegerMapEntry(arguments, "locodelayed", GetLoco()));
+		const ObjectIdentifier locoBaseDelayedIdentifier = GetLocoBase();
+		locoBaseDelayed.SetObjectID(Utils::Utils::GetIntegerMapEntry(arguments, "locodelayed", locoBaseDelayedIdentifier.GetObjectID()));
+		locoBaseDelayed.SetObjectType(static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "locotypedelayed", locoBaseDelayedIdentifier.GetObjectType())));
 		allowLocoTurn = Utils::Utils::GetBoolMapEntry(arguments, "allowlocoturn", true);
 		releaseWhenFree = Utils::Utils::GetBoolMapEntry(arguments, "releasewhenfree", false);
 		showName = Utils::Utils::GetBoolMapEntry(arguments, "showname", true);
@@ -177,7 +182,7 @@ namespace DataModel
 		}
 	}
 
-	void Track::StopAllSignals(const LocoID locoId)
+	void Track::StopAllSignals(const ObjectIdentifier& locoBaseIdentifier)
 	{
 		for (auto signalRelation : signals)
 		{
@@ -186,8 +191,8 @@ namespace DataModel
 			{
 				continue;
 			}
-			LocoID locoOfSignal = signal->GetLoco();
-			if (locoId != locoOfSignal && locoOfSignal != LocoNone)
+			ObjectIdentifier locoBaseOfSignal = signal->GetLocoBase();
+			if (locoBaseOfSignal.IsSet() && (locoBaseIdentifier != locoBaseOfSignal))
 			{
 				continue;
 			}
@@ -206,15 +211,15 @@ namespace DataModel
 		{
 			return true;
 		}
-		return cluster->SetLocoOrientation(orientation, GetLoco());
+		return cluster->SetLocoBaseOrientation(orientation, GetLocoBase());
 	}
 
-	bool Track::Reserve(Logger::Logger* logger, const LocoID locoID)
+	bool Track::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(updateMutex);
-		if (this->locoIdDelayed != LocoNone && this->locoIdDelayed != locoID)
+		if (this->locoBaseDelayed.IsSet() && (this->locoBaseDelayed != locoBaseIdentifier))
 		{
-			logger->Debug(Languages::TextTrackIsUsedByLoco, GetName(), manager->GetLocoName(locoIdDelayed));
+			logger->Debug(Languages::TextTrackIsUsedByLoco, GetName(), manager->GetLocoBaseName(locoBaseDelayed));
 			return false;
 		}
 		if (blocked == true)
@@ -227,23 +232,23 @@ namespace DataModel
 			logger->Debug(Languages::TextIsNotFree, GetName());
 			return false;
 		}
-		return ReserveForce(logger, locoID);
+		return ReserveForce(logger, locoBaseIdentifier);
 	}
 
-	bool Track::ReserveForce(Logger::Logger* logger, const LocoID locoID)
+	bool Track::ReserveForce(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Reserve(logger, locoID);
+		bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
 		if (ret == false)
 		{
 			return false;
 		}
-		this->locoIdDelayed = locoID;
+		this->locoBaseDelayed = locoBaseIdentifier;
 		return true;
 	}
 
-	bool Track::Lock(Logger::Logger* logger, const LocoID locoID)
+	bool Track::Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Lock(logger, locoID);
+		bool ret = LockableItem::Lock(logger, locoBaseIdentifier);
 		if (ret)
 		{
 			PublishState();
@@ -251,12 +256,12 @@ namespace DataModel
 		return ret;
 	}
 
-	bool Track::Release(Logger::Logger* logger, const LocoID locoID)
+	bool Track::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		StopAllSignals(locoID);
+		StopAllSignals(locoBaseIdentifier);
 		{
 			std::lock_guard<std::mutex> Guard(updateMutex);
-			bool ret = LockableItem::Release(logger, locoID);
+			bool ret = LockableItem::Release(logger, locoBaseIdentifier);
 			if (ret == false)
 			{
 				return false;
@@ -265,30 +270,30 @@ namespace DataModel
 			{
 				return true;
 			}
-			this->locoIdDelayed = LocoNone;
+			this->locoBaseDelayed.Clear();
 			this->trackStateDelayed = DataModel::Feedback::FeedbackStateFree;
 		}
 		PublishState();
 		return true;
 	}
 
-	bool Track::ReleaseForce(Logger::Logger* logger, const LocoID locoId)
+	bool Track::ReleaseForce(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		StopAllSignals(locoId);
+		StopAllSignals(locoBaseIdentifier);
 		bool ret;
 		{
 			std::lock_guard<std::mutex> Guard(updateMutex);
-			ret = ReleaseForceUnlocked(logger, locoId);
+			ret = ReleaseForceUnlocked(logger, locoBaseIdentifier);
 		}
 		PublishState();
 		return ret;
 	}
 
-	bool Track::ReleaseForceUnlocked(Logger::Logger* logger, const LocoID locoID)
+	bool Track::ReleaseForceUnlocked(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Release(logger, locoID);
+		bool ret = LockableItem::Release(logger, locoBaseIdentifier);
 		this->trackState = DataModel::Feedback::FeedbackStateFree;
-		this->locoIdDelayed = LocoNone;
+		this->locoBaseDelayed.Clear();
 		this->trackStateDelayed = DataModel::Feedback::FeedbackStateFree;
 		return ret;
 	}
@@ -317,8 +322,8 @@ namespace DataModel
 	{
 		if (newTrackState == DataModel::Feedback::FeedbackStateOccupied)
 		{
-			Loco* loco = manager->GetLoco(GetLocoDelayed());
-			if (loco == nullptr)
+			LocoBase* locoBase = manager->GetLocoBase(GetLocoBaseDelayed());
+			if (locoBase == nullptr)
 			{
 				if (blocked == false && manager->GetStopOnFeedbackInFreeTrack())
 				{
@@ -328,7 +333,7 @@ namespace DataModel
 			}
 			else
 			{
-				loco->LocationReached(feedbackID);
+				locoBase->LocationReached(feedbackID);
 			}
 
 			this->trackState = newTrackState;
@@ -350,26 +355,26 @@ namespace DataModel
 		}
 		this->trackState = DataModel::Feedback::FeedbackStateFree;
 
-		LocoID locoID = GetLoco();
+		ObjectIdentifier locoBaseIdentifier = GetLocoBase();
 		if (releaseWhenFree)
 		{
-			Loco* loco = manager->GetLoco(locoID);
-			if (loco != nullptr && loco->IsRunningFromTrack(GetID()))
+			LocoBase* locoBase = manager->GetLocoBase(locoBaseIdentifier);
+			if (locoBase != nullptr && locoBase->IsRunningFromTrack(GetID()))
 			{
-				StopAllSignals(locoID);
-				bool ret = ReleaseForceUnlocked(loco->GetLogger(), locoID);
+				StopAllSignals(locoBaseIdentifier);
+				bool ret = ReleaseForceUnlocked(locoBase->GetLogger(), locoBaseIdentifier);
 				PublishState();
 				return ret;
 			}
 		}
 
-		if (locoID != LocoNone)
+		if (locoBaseIdentifier.IsSet())
 		{
 			return true;
 		}
 
 		this->trackStateDelayed = DataModel::Feedback::FeedbackStateFree;
-		this->locoIdDelayed = LocoNone;
+		this->locoBaseDelayed.Clear();
 		return true;
 	}
 
@@ -428,8 +433,12 @@ namespace DataModel
 		{
 
 			case SelectRouteRandom:
-				std::random_shuffle(validRoutes.begin(), validRoutes.end());
+			{
+			    static std::random_device rd;
+			    static std::mt19937 g(rd());
+				std::shuffle(validRoutes.begin(), validRoutes.end(), g);
 				break;
+			}
 
 			case SelectRouteMinTrackLength:
 				std::sort(validRoutes.begin(), validRoutes.end(), Route::CompareShortest);

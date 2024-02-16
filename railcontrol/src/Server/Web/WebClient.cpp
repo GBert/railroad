@@ -293,6 +293,10 @@ namespace Server { namespace Web
 			{
 				HandleMultipleUnitDelete(arguments);
 			}
+			else if (arguments["cmd"].compare("multipleunitrelease") == 0)
+			{
+				HandleMultipleUnitRelease(arguments);
+			}
 			else if (arguments["cmd"].compare("accessoryedit") == 0)
 			{
 				HandleAccessoryEdit(arguments);
@@ -567,15 +571,15 @@ namespace Server { namespace Web
 			}
 			else if (arguments["cmd"].compare("stopallimmediately") == 0)
 			{
-				manager.StopAllLocosImmediately(ControlTypeWebServer);
+				manager.LocoBaseStopAllImmediately(ControlTypeWebServer);
 			}
 			else if (arguments["cmd"].compare("startall") == 0)
 			{
-				manager.LocoStartAll();
+				manager.LocoBaseStartAll();
 			}
 			else if (arguments["cmd"].compare("stopall") == 0)
 			{
-				manager.LocoStopAll();
+				manager.LocoBaseStopAll();
 			}
 			else if (arguments["cmd"].compare("settingsedit") == 0)
 			{
@@ -1097,39 +1101,45 @@ namespace Server { namespace Web
 
 	void WebClient::HandleLocoBaseSpeed(const map<string, string>& arguments)
 	{
-		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		Speed speed = Utils::Utils::GetIntegerMapEntry(arguments, "speed", MinSpeed);
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const Speed speed = Utils::Utils::GetIntegerMapEntry(arguments, "speed", MinSpeed);
 
-		manager.LocoBaseSpeed(ControlTypeWebServer, locoID, speed);
+		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
 
-		ReplyHtmlWithHeaderAndParagraph(Languages::TextLocoSpeedIs, manager.GetLocoBaseName(locoID), speed);
+		manager.LocoBaseSpeed(ControlTypeWebServer, locoBaseIdentifier, speed);
+
+		ReplyHtmlWithHeaderAndParagraph(Languages::TextLocoSpeedIs, manager.GetLocoBaseName(locoBaseIdentifier), speed);
 	}
 
 	void WebClient::HandleLocoBaseOrientation(const map<string, string>& arguments)
 	{
-		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		Orientation orientation = (Utils::Utils::GetBoolMapEntry(arguments, "on") ? OrientationRight : OrientationLeft);
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const Orientation orientation = (Utils::Utils::GetBoolMapEntry(arguments, "on") ? OrientationRight : OrientationLeft);
 
-		manager.LocoBaseOrientation(ControlTypeWebServer, locoID, orientation);
+		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
 
-		ReplyHtmlWithHeaderAndParagraph(orientation == OrientationLeft ? Languages::TextLocoDirectionOfTravelIsLeft : Languages::TextLocoDirectionOfTravelIsRight, manager.GetLocoName(locoID));
+		manager.LocoBaseOrientation(ControlTypeWebServer, locoBaseIdentifier, orientation);
+
+		ReplyHtmlWithHeaderAndParagraph(orientation == OrientationLeft ? Languages::TextLocoDirectionOfTravelIsLeft : Languages::TextLocoDirectionOfTravelIsRight, manager.GetLocoBaseName(locoBaseIdentifier));
 	}
 
 	void WebClient::HandleLocoFunction(const map<string, string>& arguments)
 	{
-		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		DataModel::LocoFunctionNr function = Utils::Utils::GetIntegerMapEntry(arguments, "function", 0);
-		DataModel::LocoFunctionState state = static_cast<DataModel::LocoFunctionState>(Utils::Utils::GetBoolMapEntry(arguments, "on"));
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const DataModel::LocoFunctionNr function = Utils::Utils::GetIntegerMapEntry(arguments, "function", 0);
+		const DataModel::LocoFunctionState state = static_cast<DataModel::LocoFunctionState>(Utils::Utils::GetBoolMapEntry(arguments, "on"));
 
-		manager.LocoBaseFunctionState(ControlTypeWebServer, locoID, function, state);
+		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
 
-		ReplyHtmlWithHeaderAndParagraph(state ? Languages::TextLocoFunctionIsOn : Languages::TextLocoFunctionIsOff, manager.GetLocoName(locoID), function);
+		manager.LocoBaseFunctionState(ControlTypeWebServer, locoBaseIdentifier, function, state);
+
+		ReplyHtmlWithHeaderAndParagraph(state ? Languages::TextLocoFunctionIsOn : Languages::TextLocoFunctionIsOff, manager.GetLocoBaseName(locoBaseIdentifier), function);
 	}
 
 	void WebClient::HandleLocoRelease(const map<string, string>& arguments)
 	{
 		bool ret = false;
-		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
 		if (locoID != LocoNone)
 		{
 			ret = manager.LocoRelease(locoID);
@@ -1137,21 +1147,38 @@ namespace Server { namespace Web
 		else
 		{
 			TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
-			ret = manager.LocoReleaseOnTrack(trackID);
+			ret = manager.LocoBaseReleaseOnTrack(trackID);
+		}
+		ReplyHtmlWithHeaderAndParagraph(ret ? "Loco released" : "Loco not released");
+	}
+
+	void WebClient::HandleMultipleUnitRelease(const map<string, string>& arguments)
+	{
+		bool ret = false;
+		MultipleUnitID multipleUnitID = Utils::Utils::GetIntegerMapEntry(arguments, "multipleunit", MultipleUnitNone);
+		if (multipleUnitID != LocoNone)
+		{
+			ret = manager.MultipleUnitRelease(multipleUnitID);
+		}
+		else
+		{
+			TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
+			ret = manager.LocoBaseReleaseOnTrack(trackID);
 		}
 		ReplyHtmlWithHeaderAndParagraph(ret ? "Loco released" : "Loco not released");
 	}
 
 	void WebClient::HandleLocoAddTimeTable(const map<string, string>& arguments)
 	{
-		LocoID locoId = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		if (locoId == LocoNone)
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
+		if (!locoBaseIdentifier.IsSet())
 		{
 			TrackID trackId = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
-			locoId = manager.GetLocoIdOfTrack(trackId);
+			locoBaseIdentifier = manager.GetLocoBaseIdentifierOfTrack(trackId);
 		}
-		ObjectIdentifier identifier = Utils::Utils::GetStringMapEntry(arguments, "timetable");
-		bool ret = manager.LocoAddTimeTable(locoId, identifier);
+		ObjectIdentifier timetableIdentifier = Utils::Utils::GetStringMapEntry(arguments, "timetable");
+		bool ret = manager.LocoBaseAddTimeTable(locoBaseIdentifier, timetableIdentifier);
 		ReplyHtmlWithHeaderAndParagraph(ret ? "Timetable added" : "Timetable not added");
 	}
 
@@ -1486,7 +1513,6 @@ namespace Server { namespace Web
 		const MultipleUnitID multipleUnitId = Utils::Utils::GetIntegerMapEntry(arguments, "multipleunit", MultipleUnitNone);
 		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlNone);
 		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		Address address = AddressDefault;
 		string name = Languages::GetText(Languages::TextNew);
 		bool pushpull = false;
 		Length length = 0;
@@ -1506,7 +1532,6 @@ namespace Server { namespace Web
 			{
 				controlId = multipleUnit->GetControlID();
 				matchKey = multipleUnit->GetMatchKey();
-				address = multipleUnit->GetAddress();
 				name = multipleUnit->GetName();
 				pushpull = multipleUnit->GetPushpull();
 				length = multipleUnit->GetLength();
@@ -1526,7 +1551,6 @@ namespace Server { namespace Web
 
 			if ((multipleUnit.GetControlId() == controlId) && (multipleUnit.GetMatchKey() == matchKey))
 			{
-				address = multipleUnit.GetAddress();
 				name = multipleUnit.GetName();
 				multipleUnit.GetFunctions(locoFunctions);
 			}
@@ -1551,7 +1575,6 @@ namespace Server { namespace Web
 		basicContent.AddClass("tab_content");
 		basicContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
 		basicContent.AddChildTag(HtmlTagControlMultipleUnit(controlId, "multipleunit", multipleUnitId));
-		basicContent.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextAddress, address, 1, 9999));
 		basicContent.AddChildTag(HtmlTagInputIntegerWithLabel("length", Languages::TextTrainLength, length, 0, 99999));
 
 		basicContent.AddChildTag(WebClientStatic::HtmlTagSelectTrainType(trainType));
@@ -3336,14 +3359,15 @@ namespace Server { namespace Web
 	void WebClient::HandleLoco(const map<string, string>& arguments)
 	{
 		string content;
-		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		if (locoID == LocoNone)
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
+		if (!locoBaseIdentifier.IsSet())
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextPleaseSelectLoco);
 			return;
 		}
-		LocoBase* loco = manager.GetLocoBase(locoID);
-		if (loco == nullptr)
+		LocoBase* locoBase = manager.GetLocoBase(locoBaseIdentifier);
+		if (locoBase == nullptr)
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextLocoDoesNotExist);
 			return;
@@ -3351,37 +3375,36 @@ namespace Server { namespace Web
 
 		HtmlTag container("div");
 		container.AddAttribute("class", "inner_loco");
-		container.AddChildTag(HtmlTag("p").AddId("loconame").AddContent(loco->GetName()));
-		unsigned int speed = loco->GetSpeed();
+		container.AddChildTag(HtmlTag("p").AddId("loconame").AddContent(locoBase->GetName()));
+		unsigned int speed = locoBase->GetSpeed();
 		map<string, string> buttonArguments;
 		buttonArguments["loco"] = to_string(locoID);
 
 		string id = "locospeed_" + to_string(locoID);
-		container.AddChildTag(HtmlTagInputSliderLocoSpeed(id, MinSpeed, loco->GetMaxSpeed(), speed, locoID));
+		container.AddChildTag(HtmlTagInputSliderLocoSpeed(id, MinSpeed, locoBase->GetMaxSpeed(), speed, locoID));
 		buttonArguments["speed"] = to_string(MinSpeed);
 		container.AddChildTag(HtmlTagButtonCommand("0", id + "_0", buttonArguments));
-		buttonArguments["speed"] = to_string(loco->GetCreepingSpeed());
+		buttonArguments["speed"] = to_string(locoBase->GetCreepingSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("I", id + "_1", buttonArguments));
-		buttonArguments["speed"] = to_string(loco->GetReducedSpeed());
+		buttonArguments["speed"] = to_string(locoBase->GetReducedSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("II", id + "_2", buttonArguments));
-		buttonArguments["speed"] = to_string(loco->GetTravelSpeed());
+		buttonArguments["speed"] = to_string(locoBase->GetTravelSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("III", id + "_3", buttonArguments));
-		buttonArguments["speed"] = to_string(loco->GetMaxSpeed());
+		buttonArguments["speed"] = to_string(locoBase->GetMaxSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("IV", id + "_4", buttonArguments));
 		buttonArguments.erase("speed");
 
-		if (locoID > MultipleUnitIdPrefix)
+		if (locoBaseIdentifier.GetObjectType() == ObjectTypeMultipleUnit)
 		{
-			const MultipleUnitID multipleUnitId = locoID & (~MultipleUnitIdPrefix);
-			id = "multipleunitedit_" + to_string(multipleUnitId);
-			buttonArguments["multipleunit"] = to_string(multipleUnitId);
+			id = "multipleunitedit_" + to_string(locoBaseIdentifier.GetObjectID());
+			buttonArguments["multipleunit"] = to_string(locoBaseIdentifier.GetObjectID());
 		}
 		else
 		{
 			id = "locoedit_" + to_string(locoID);
 		}
 		container.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><circle r=\"7\" cx=\"14\" cy=\"14\" fill=\"black\" /><line x1=\"14\" y1=\"5\" x2=\"14\" y2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"6.2\" x2=\"18.5\" y2=\"21.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"9.5\" x2=\"21.8\" y2=\"18.5\" stroke-width=\"2\" stroke=\"black\" /><line y1=\"14\" x1=\"5\" y2=\"14\" x2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"21.8\" x2=\"18.5\" y2=\"6.2\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"18.5\" x2=\"21.8\" y2=\"9.5\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"5\" cx=\"14\" cy=\"14\" fill=\"lightgray\" /><circle r=\"4\" cx=\"24\" cy=\"24\" fill=\"black\" /><line x1=\"18\" y1=\"24\" x2=\"30\" y2=\"24\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"28.2\" y1=\"28.2\" x2=\"19.8\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"24\" y1=\"18\" x2=\"24\" y2=\"30\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"19.8\" y1=\"28.2\" x2=\"28.2\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"2\" cx=\"24\" cy=\"24\" fill=\"lightgray\" /></svg>", id, buttonArguments));
-		if (locoID > MultipleUnitIdPrefix)
+		if (locoBaseIdentifier.GetObjectType() == ObjectTypeMultipleUnit)
 		{
 			buttonArguments.erase("multipleunit");
 		}
@@ -3391,10 +3414,10 @@ namespace Server { namespace Web
 			"<polyline points=\"5,15 31,15 31,23 5,23\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" />"
 			"<polyline points=\"16,8 0,19 16,30\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" class=\"orientation_left\" />"
 			"<polyline points=\"20,8 36,19 20,30\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" class=\"orientation_right\" />"
-			"</svg>", id, loco->GetOrientation(), buttonArguments).AddClass("button_orientation"));
+			"</svg>", id, locoBase->GetOrientation(), buttonArguments).AddClass("button_orientation"));
 
 		id = "locofunction_" + to_string(locoID);
-		std::vector<DataModel::LocoFunctionEntry> functions = loco->GetFunctionStates();
+		std::vector<DataModel::LocoFunctionEntry> functions = locoBase->GetFunctionStates();
 		for (DataModel::LocoFunctionEntry& function : functions)
 		{
 			string nrText(to_string(function.nr));

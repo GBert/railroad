@@ -58,6 +58,10 @@ namespace DataModel
 
 			bool Deserialize(const std::string& serialized) override;
 
+			virtual bool GetPushpull() const override;
+
+			virtual Propulsion GetPropulsion() const override;
+
 			void DeleteSlaves();
 
 			bool AssignSlaves(const std::vector<DataModel::Relation*>& newslaves);

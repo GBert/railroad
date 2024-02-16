@@ -117,26 +117,8 @@ namespace DataModel
 			return true;
 		}
 		fromTrack = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "fromTrack", TrackNone));
-		if (fromTrack == TrackNone)
-		{
-			// FIXME: 2022-07-10 remove identifier later
-			ObjectIdentifier fromTrackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "fromTrack");
-			if (fromTrackIdentifier.GetObjectType() == ObjectTypeTrack)
-			{
-				fromTrack = fromTrackIdentifier.GetObjectID();
-			}
-		}
 		fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
 		toTrack = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "toTrack", TrackNone));
-		if (toTrack == TrackNone)
-		{
-			// FIXME: 2022-07-10 remove identifier later
-			ObjectIdentifier toTrackIdentifier = Utils::Utils::GetStringMapEntry(arguments, "toTrack");
-			if (toTrackIdentifier.GetObjectType() == ObjectTypeTrack)
-			{
-				toTrack = toTrackIdentifier.GetObjectID();
-			}
-		}
 		toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		speed = static_cast<Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", SpeedTravel));
 		feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdReduced", FeedbackNone);
@@ -176,7 +158,7 @@ namespace DataModel
 	bool Route::FromTrackOrientation(Logger::Logger* logger,
 		const TrackID trackID,
 		const Orientation trackOrientation,
-		const LocoBase* loco,
+		const LocoBase* locoBase,
 		const bool allowLocoTurn)
 	{
 		if (automode == false)
@@ -189,7 +171,7 @@ namespace DataModel
 			return false;
 		}
 
-		const Length locoLength = loco->GetLength();
+		const Length locoLength = locoBase->GetLength();
 		if (locoLength < minTrainLength)
 		{
 			logger->Debug(Languages::TextTrainIsToShort, GetName());
@@ -201,21 +183,21 @@ namespace DataModel
 			return false;
 		}
 
-		const bool locoPushpull = loco->GetPushpull();
+		const bool locoPushpull = locoBase->GetPushpull();
 		if (pushpull != locoPushpull && pushpull != PushpullTypeBoth)
 		{
 			logger->Debug(Languages::TextDifferentPushpullTypes, GetName());
 			return false;
 		}
 
-		const Propulsion locoPropulsion = loco->GetPropulsion();
-		if (!(propulsion & locoPropulsion))
+		const Propulsion locoPropulsion = locoBase->GetPropulsion();
+		if ((propulsion & locoPropulsion) != locoPropulsion)
 		{
 			logger->Debug(Languages::TextDifferentPropulsions, GetName());
 			return false;
 		}
 
-		const TrainType locoTrainType = loco->GetTrainType();
+		const TrainType locoTrainType = locoBase->GetTrainType();
 		if (!(trainType & locoTrainType))
 		{
 			logger->Debug(Languages::TextDifferentTrainTypes, GetName());
@@ -245,10 +227,10 @@ namespace DataModel
 	}
 
 
-	bool Route::Execute(Logger::Logger* logger, const LocoID locoID)
+	bool Route::Execute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		const bool isInUse = IsInUse();
-		if (isInUse && locoID != GetLoco())
+		if (isInUse && (locoBaseIdentifier != GetLocoBase()))
 		{
 			logger->Info(Languages::TextRouteIsLocked, GetName());
 			return false;
@@ -263,7 +245,7 @@ namespace DataModel
 		std::lock_guard<std::mutex> Guard(updateMutex);
 		for (auto relation : relationsAtLock)
 		{
-			bool retRelation = relation->Execute(logger, locoID, delay);
+			bool retRelation = relation->Execute(logger, locoBaseIdentifier, delay);
 			if (retRelation == false)
 			{
 				return false;
@@ -279,7 +261,7 @@ namespace DataModel
 		return true;
 	}
 
-	bool Route::Reserve(Logger::Logger* logger, const LocoID locoID)
+	bool Route::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		if (manager->Booster() == BoosterStateStop)
 		{
@@ -288,7 +270,7 @@ namespace DataModel
 		}
 
 		std::lock_guard<std::mutex> Guard(updateMutex);
-		bool ret = LockableItem::Reserve(logger, locoID);
+		bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
 		if (ret == false)
 		{
 			return false;
@@ -299,29 +281,29 @@ namespace DataModel
 			Track* track = manager->GetTrack(toTrack);
 			if (track == nullptr)
 			{
-				ReleaseInternal(logger, locoID);
+				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
 			}
-			if (track->Reserve(logger, locoID) == false)
+			if (track->Reserve(logger, locoBaseIdentifier) == false)
 			{
-				ReleaseInternal(logger, locoID);
+				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
 			}
 		}
 
 		for (auto relation : relationsAtLock)
 		{
-			bool retRelation = relation->Reserve(logger, locoID);
+			bool retRelation = relation->Reserve(logger, locoBaseIdentifier);
 			if (retRelation == false)
 			{
-				ReleaseInternalWithToTrack(logger, locoID);
+				ReleaseInternalWithToTrack(logger, locoBaseIdentifier);
 				return false;
 			}
 		}
 		return true;
 	}
 
-	bool Route::Lock(Logger::Logger* logger, const LocoID locoID)
+	bool Route::Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		if (manager->Booster() == BoosterStateStop)
 		{
@@ -330,7 +312,7 @@ namespace DataModel
 		}
 
 		std::lock_guard<std::mutex> Guard(updateMutex);
-		bool ret = LockableItem::Lock(logger, locoID);
+		bool ret = LockableItem::Lock(logger, locoBaseIdentifier);
 		if (ret == false)
 		{
 			return false;
@@ -341,61 +323,61 @@ namespace DataModel
 			Track* track = manager->GetTrack(toTrack);
 			if (track == nullptr)
 			{
-				ReleaseInternal(logger, locoID);
+				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
 			}
-			if (track->Lock(logger, locoID) == false)
+			if (track->Lock(logger, locoBaseIdentifier) == false)
 			{
-				ReleaseInternal(logger, locoID);
+				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
 			}
 		}
 
 		for (auto relation : relationsAtLock)
 		{
-			bool retRelation = relation->Lock(logger, locoID);
+			bool retRelation = relation->Lock(logger, locoBaseIdentifier);
 			if (retRelation == false)
 			{
-				ReleaseInternalWithToTrack(logger, locoID);
+				ReleaseInternalWithToTrack(logger, locoBaseIdentifier);
 				return false;
 			}
 		}
 		return true;
 	}
 
-	bool Route::Release(Logger::Logger* logger, const LocoID locoID)
+	bool Route::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(updateMutex);
-		return ReleaseInternal(logger, locoID);
+		return ReleaseInternal(logger, locoBaseIdentifier);
 	}
 
-	bool Route::ReleaseInternal(Logger::Logger* logger, const LocoID locoID)
+	bool Route::ReleaseInternal(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		if (executeAtUnlock)
 		{
 			for (auto relation : relationsAtUnlock)
 			{
-				relation->Execute(logger, locoID, delay);
+				relation->Execute(logger, locoBaseIdentifier, delay);
 			}
 			executeAtUnlock = false;
 		}
 
 		for (auto relation : relationsAtLock)
 		{
-			relation->Release(logger, locoID);
+			relation->Release(logger, locoBaseIdentifier);
 		}
 
-		return LockableItem::Release(logger, locoID);
+		return LockableItem::Release(logger, locoBaseIdentifier);
 	}
 
-	void Route::ReleaseInternalWithToTrack(Logger::Logger* logger, const LocoID locoID)
+	void Route::ReleaseInternalWithToTrack(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		Track* track = manager->GetTrack(toTrack);
 		if (track != nullptr)
 		{
-			track->Release(logger, locoID);
+			track->Release(logger, locoBaseIdentifier);
 		}
-		ReleaseInternal(logger, locoID);
+		ReleaseInternal(logger, locoBaseIdentifier);
 	}
 
 	bool Route::ObjectIsPartOfRoute(const ObjectIdentifier& identifier) const

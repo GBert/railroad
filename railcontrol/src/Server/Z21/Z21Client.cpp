@@ -20,9 +20,12 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <cstring>		//memset
 
+#include "DataModel/ObjectIdentifier.h"
 #include "Hardware/Protocols/Z21.h"
 #include "Manager.h"
 #include "Server/Z21/Z21Client.h"
+
+using DataModel::ObjectIdentifier;
 
 namespace Z21Enums = Hardware::Protocols::Z21Enums;
 
@@ -73,6 +76,10 @@ namespace Server { namespace Z21
 		const uint16_t header = Utils::Utils::DataLittleEndianToShort(buffer + 2);
 		switch (header)
 		{
+			case Z21Enums::HeaderSerialNumber:
+				SendSerialNumber();
+				break;
+
 			case Z21Enums::HeaderGetCode:
 				SendCode();
 				break;
@@ -142,21 +149,12 @@ namespace Server { namespace Z21
 				return;
 
 			case Z21Enums::XHeaderSetStop:
-				if (buffer[5] != 0x80)
-				{
-					logger->Error(Languages::TextCheckSumError);
-					return;
-				}
+				logger->Debug(Languages::TextBoosterIsTurnedOff);
 				manager.Booster(ControlTypeZ21Server, BoosterStateStop);
 				SendBcStopped();
 				return;
 
 			case Z21Enums::XHeaderGetLocoInfo:
-				if (buffer[5] != 0xF0)
-				{
-					logger->Error(Languages::TextCheckSumError);
-					return;
-				}
 				{
 					const DataModel::Loco* const loco = manager.GetLoco(ParseLocoAddress(buffer + 6));
 					if (nullptr == loco)
@@ -186,11 +184,6 @@ namespace Server { namespace Z21
 				return;
 
 			case Z21Enums::XHeaderGetFirmwareVersion:
-				if ((buffer[5] != 0x0A) || (buffer[6] != 0xFB))
-				{
-					logger->Error(Languages::TextCheckSumError);
-					return;
-				}
 				SendFirmwareVersion();
 				return;
 
@@ -206,23 +199,18 @@ namespace Server { namespace Z21
 		{
 			case Z21Enums::DB0Status:
 			{
-				if (buffer[6] != 0x05)
-				{
-					logger->Error(Languages::TextCheckSumError);
-					return;
-				}
 				SendStatusChanged();
 				return;
 			}
 
 			case Z21Enums::DB0SetPowerOff:
 				logger->Debug(Languages::TextBoosterIsTurnedOff);
-				manager.Booster(ControlTypeHardware, BoosterStateStop);
+				manager.Booster(ControlTypeZ21Server, BoosterStateStop);
 				return;
 
 			case Z21Enums::DB0SetPowerOn:
 				logger->Debug(Languages::TextBoosterIsTurnedOn);
-				manager.Booster(ControlTypeHardware, BoosterStateGo);
+				manager.Booster(ControlTypeZ21Server, BoosterStateGo);
 				return;
 
 			default:
@@ -233,7 +221,8 @@ namespace Server { namespace Z21
 
 	void Z21Client::ParseLocoDrive(const unsigned char* buffer)
 	{
-		Address address = ParseLocoAddress(buffer + 6);
+		// FIXME: multiple units are not runnable
+		const ObjectIdentifier locoBaseIdentifier(ObjectTypeLoco, ParseLocoAddress(buffer + 6));
 		Speed speed;
 		switch(buffer[5])
 		{
@@ -253,7 +242,7 @@ namespace Server { namespace Z21
 			{
 				const DataModel::LocoFunctionNr nr = buffer[8] & 0x3F;
 				const DataModel::LocoFunctionState on = static_cast<DataModel::LocoFunctionState>((buffer[8] >> 6) & 0x01);
-				manager.LocoBaseFunctionState(ControlTypeZ21Server, address, nr, on);
+				manager.LocoBaseFunctionState(ControlTypeZ21Server, locoBaseIdentifier, nr, on);
 				return;
 			}
 
@@ -261,8 +250,8 @@ namespace Server { namespace Z21
 				speed = 0;
 				break;
 		}
-		manager.LocoBaseSpeed(ControlTypeZ21Server, address, speed);
-		manager.LocoBaseOrientation(ControlTypeZ21Server, address, static_cast<Orientation>(buffer[8] >> 7));
+		manager.LocoBaseSpeed(ControlTypeZ21Server, locoBaseIdentifier, speed);
+		manager.LocoBaseOrientation(ControlTypeZ21Server, locoBaseIdentifier, static_cast<Orientation>(buffer[8] >> 7));
 	}
 
 	void Z21Client::SendLocoInfo(const DataModel::LocoBase* const loco)

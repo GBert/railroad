@@ -110,9 +110,8 @@ namespace Hardware
 
 			if (maskedAddress == 0x2000)
 			{
-				protocol = ProtocolNone;
+				protocol = ProtocolMulti;
 				address &= 0x03FF;
-				type = LocoTypeMultipleUnit;
 				return;
 			}
 
@@ -168,6 +167,10 @@ namespace Hardware
 			else if (protocol == ProtocolMFX)
 			{
 				localID |= 0x4000;
+			}
+			else if (protocol == ProtocolMulti)
+			{
+				localID |= 0x2000;
 			}
 			// else expect PROTOCOL_MM2: do nothing
 			Utils::Utils::IntToDataBigEndian(localID, buffer + 5);

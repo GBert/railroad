@@ -82,17 +82,7 @@ namespace DataModel
 	{
 		Object::Deserialize(arguments);
 		HardwareHandle::Deserialize(arguments);
-		TrackID trackFromID = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
-		if (trackFromID == TrackNone)
-		{
-			// FIXME: 2022-07-10 remove identifier later
-			ObjectIdentifier trackFromIdentifier = Utils::Utils::GetStringMapEntry(arguments, "track");
-			if (trackFromIdentifier.GetObjectType() == ObjectTypeTrack)
-			{
-				trackFromID = trackFromIdentifier.GetObjectID();
-			}
-		}
-		trackFrom = manager->GetTrack(trackFromID);
+		trackFrom = manager->GetTrack(static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone)));
 		functions.Deserialize(Utils::Utils::GetStringMapEntry(arguments, "functions", "0"));
 		orientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "orientation", OrientationRight));
 		length = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "length", 0));
@@ -106,6 +96,16 @@ namespace DataModel
 		trainType = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeUnknown));
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		return true;
+	}
+
+	bool LocoBase::GetPushpull() const
+	{
+		return pushpull;
+	}
+
+	Propulsion LocoBase::GetPropulsion() const
+	{
+		return propulsion;
 	}
 
 	bool LocoBase::SetTrack(const TrackID trackID)
@@ -137,27 +137,27 @@ namespace DataModel
 
 		if (routeFirst != nullptr)
 		{
-			routeFirst->Release(logger, GetID());
+			routeFirst->Release(logger, GetObjectIdentifier());
 			routeFirst = nullptr;
 		}
 		if (routeSecond != nullptr)
 		{
-			routeSecond->Release(logger, GetID());
+			routeSecond->Release(logger, GetObjectIdentifier());
 			routeSecond = nullptr;
 		}
 		if (trackFrom != nullptr)
 		{
-			trackFrom->Release(logger, GetID());
+			trackFrom->Release(logger, GetObjectIdentifier());
 			trackFrom = nullptr;
 		}
 		if (trackFirst != nullptr)
 		{
-			trackFirst->Release(logger, GetID());
+			trackFirst->Release(logger, GetObjectIdentifier());
 			trackFirst = nullptr;
 		}
 		if (trackSecond != nullptr)
 		{
-			trackSecond->Release(logger, GetID());
+			trackSecond->Release(logger, GetObjectIdentifier());
 			trackSecond = nullptr;
 		}
 		feedbackIdOver = FeedbackNone;
@@ -520,7 +520,7 @@ namespace DataModel
 		return route;
 	}
 
-	bool LocoBase::AddTimeTable(ObjectIdentifier& identifier)
+	bool LocoBase::AddTimeTable(const ObjectIdentifier& identifier)
 	{
 		switch (identifier.GetObjectType())
 		{
@@ -595,11 +595,11 @@ namespace DataModel
 			return nullptr;
 		}
 
-		LocoID locoIdOfTrack = track->GetLoco();
-		if (locoIdOfTrack != GetID())
+		const ObjectIdentifier locoBaseOfTrack = track->GetLocoBase();
+		if (locoBaseOfTrack != GetObjectIdentifier())
 		{
 			state = LocoStateError;
-			logger->Error(Languages::TextIsOnOcupiedTrack, GetName(), track->GetName(), manager->GetLocoName(locoIdOfTrack));
+			logger->Error(Languages::TextIsOnOcupiedTrack, GetName(), track->GetName(), manager->GetLocoBaseName(locoBaseOfTrack));
 			return nullptr;
 		}
 
@@ -621,15 +621,15 @@ namespace DataModel
 	{
 		logger->Debug(Languages::TextExecutingRoute, route->GetName());
 
-		LocoID objectID = GetID();
-		if (route->Reserve(logger, objectID) == false)
+		const ObjectIdentifier locoBaseIdentifier = GetObjectIdentifier();
+		if (route->Reserve(logger, locoBaseIdentifier) == false)
 		{
 			return false;
 		}
 
-		if (route->Lock(logger, objectID) == false)
+		if (route->Lock(logger, locoBaseIdentifier) == false)
 		{
-			route->Release(logger, objectID);
+			route->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
@@ -637,29 +637,29 @@ namespace DataModel
 
 		if (newTrack == nullptr)
 		{
-			route->Release(logger, objectID);
+			route->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
-		bool canSetOrientation = newTrack->CanSetLocoOrientation(route->GetToOrientation(), GetID());
+		bool canSetOrientation = newTrack->CanSetLocoBaseOrientation(route->GetToOrientation(), locoBaseIdentifier);
 		if (canSetOrientation == false)
 		{
-			route->Release(logger, objectID);
-			newTrack->Release(logger, objectID);
+			route->Release(logger, locoBaseIdentifier);
+			newTrack->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
 		if (!allowLocoTurn && track->GetLocoOrientation() != route->GetFromOrientation())
 		{
-			route->Release(logger, objectID);
-			newTrack->Release(logger, objectID);
+			route->Release(logger, locoBaseIdentifier);
+			newTrack->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
-		if (route->Execute(logger, objectID) == false)
+		if (route->Execute(logger, locoBaseIdentifier) == false)
 		{
-			route->Release(logger, objectID);
-			newTrack->Release(logger, objectID);
+			route->Release(logger, locoBaseIdentifier);
+			newTrack->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 		return true;
@@ -812,11 +812,11 @@ namespace DataModel
 		}
 
 
-		routeFirst->Release(logger, GetID());
+		routeFirst->Release(logger, GetObjectIdentifier());
 		routeFirst = routeSecond;
 		routeSecond = nullptr;
 
-		trackFrom->Release(logger, GetID());
+		trackFrom->Release(logger, GetObjectIdentifier());
 		trackFrom = trackFirst;
 		trackFirst = trackSecond;
 		trackSecond = nullptr;
@@ -861,10 +861,10 @@ namespace DataModel
 		manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 
 		manager->LocoDestinationReached(this, routeFirst, trackFrom);
-		routeFirst->Release(logger, GetID());
+		routeFirst->Release(logger, GetObjectIdentifier());
 		routeFirst = nullptr;
 
-		trackFrom->Release(logger, GetID());
+		trackFrom->Release(logger, GetObjectIdentifier());
 		trackFrom = trackFirst;
 		trackFirst = nullptr;
 		logger->Info(Languages::TextReachedItsDestination, GetName());

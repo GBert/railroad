@@ -132,7 +132,7 @@ namespace DataModel
 
 			bool GoToManualMode();
 
-			bool AddTimeTable(ObjectIdentifier& identifier);
+			bool AddTimeTable(const ObjectIdentifier& identifier);
 
 			bool SetTrack(const TrackID trackID);
 
@@ -200,10 +200,7 @@ namespace DataModel
 					|| this->routeFirst != nullptr;
 			}
 
-			inline bool GetPushpull() const
-			{
-				return pushpull;
-			}
+			virtual bool GetPushpull() const;
 
 			inline Length GetLength() const
 			{
@@ -265,10 +262,7 @@ namespace DataModel
 				this->propulsion = propulsion;
 			}
 
-			inline Propulsion GetPropulsion() const
-			{
-				return propulsion;
-			}
+			virtual Propulsion GetPropulsion() const;
 
 			inline void SetTrainType(const TrainType trainType)
 			{

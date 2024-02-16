@@ -109,6 +109,17 @@ namespace Server { namespace Web
 				const Speed travelSpeed,
 				const Speed reducedSpeed,
 				const Speed creepingSpeed);
+
+			static inline DataModel::ObjectIdentifier LocoIdToObjectIdentifier(const LocoID locoID)
+			{
+				const MultipleUnitID multipleUnitID = locoID & (~MultipleUnitIdPrefix);
+				if (locoID == multipleUnitID)
+				{
+					return DataModel::ObjectIdentifier(ObjectTypeLoco, locoID);
+				}
+				return DataModel::ObjectIdentifier(ObjectTypeMultipleUnit, multipleUnitID);
+			}
+
 	};
 
 }} // namespace Server::Web

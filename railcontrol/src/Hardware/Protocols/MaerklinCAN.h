@@ -64,11 +64,12 @@ namespace Hardware
 					protocols.push_back(ProtocolMM);
 					protocols.push_back(ProtocolMFX);
 					protocols.push_back(ProtocolDCC);
+					protocols.push_back(ProtocolMulti);
 				}
 
 				inline bool LocoProtocolSupported(Protocol protocol) const override
 				{
-					return (protocol == ProtocolMM || protocol == ProtocolMFX || protocol == ProtocolDCC);
+					return (protocol == ProtocolMM || protocol == ProtocolMFX || protocol == ProtocolDCC || protocol == ProtocolMulti);
 				}
 
 				inline void GetAccessoryProtocols(std::vector<Protocol>& protocols) const override

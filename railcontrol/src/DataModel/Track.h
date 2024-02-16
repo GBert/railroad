@@ -79,7 +79,7 @@ namespace DataModel
 				trackStateDelayed(DataModel::Feedback::FeedbackStateFree),
 				locoOrientation(OrientationRight),
 				blocked(false),
-				locoIdDelayed(LocoNone),
+				locoBaseDelayed(),
 				allowLocoTurn(true),
 				releaseWhenFree(false),
 				showName(true)
@@ -166,9 +166,9 @@ namespace DataModel
 				return locoOrientation;
 			}
 
-			inline bool CanSetLocoOrientation(const Orientation orientation, const LocoID locoId)
+			inline bool CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
 			{
-				return cluster == nullptr ? true : cluster->CanSetLocoOrientation(orientation, locoId);
+				return cluster == nullptr ? true : cluster->CanSetLocoBaseOrientation(orientation, locoBaseIdentifier);
 			}
 
 			bool SetLocoOrientation(const Orientation orientation);
@@ -183,9 +183,9 @@ namespace DataModel
 				this->blocked = blocked;
 			}
 
-			inline LocoID GetLocoDelayed() const
+			inline ObjectIdentifier GetLocoBaseDelayed() const
 			{
-				return this->locoIdDelayed;
+				return this->locoBaseDelayed;
 			}
 
 			inline bool GetReleaseWhenFree() const
@@ -233,12 +233,12 @@ namespace DataModel
 				return feedbacks.size() == 0 ? FeedbackNone : feedbacks[0];
 			}
 
-			bool Reserve(Logger::Logger* logger, const LocoID locoID) override;
-			bool Lock(Logger::Logger* logger, const LocoID locoID) override;
-			bool Release(Logger::Logger* logger, const LocoID locoID) override;
+			bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
 
-			bool ReserveForce(Logger::Logger* logger, const LocoID locoID);
-			bool ReleaseForce(Logger::Logger* logger, const LocoID locoID);
+			bool ReserveForce(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
+			bool ReleaseForce(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 
 			inline const std::vector<DataModel::Relation*>& GetSignals() const
 			{
@@ -252,12 +252,12 @@ namespace DataModel
 		private:
 			void PublishState() const;
 
-			void StopAllSignals(const LocoID locoId);
+			void StopAllSignals(const ObjectIdentifier& locoBaseIdentifier);
 
 			bool FeedbackStateInternal(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state);
 			void OrderValidRoutes(std::vector<DataModel::Route*>& validRoutes) const;
 			SelectRouteApproach GetSelectRouteApproachCalculated() const;
-			bool ReleaseForceUnlocked(Logger::Logger* logger, const LocoID locoID);
+			bool ReleaseForceUnlocked(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 
 			Manager* manager;
 			TrackType trackType;
@@ -272,7 +272,7 @@ namespace DataModel
 			std::vector<Route*> routes;
 			Orientation locoOrientation;
 			bool blocked;
-			LocoID locoIdDelayed;
+			ObjectIdentifier locoBaseDelayed;
 			bool allowLocoTurn;
 			bool releaseWhenFree;
 			bool showName;

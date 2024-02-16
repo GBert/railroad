@@ -76,7 +76,9 @@ namespace DataModel
 				Deserialize(serialized);
 			}
 
-			virtual ~Relation() {}
+			virtual ~Relation()
+			{
+			}
 
 			virtual std::string Serialize() const override;
 			virtual bool Deserialize(const std::string& serialized) override;
@@ -101,6 +103,11 @@ namespace DataModel
 				return object2.GetObjectID();
 			}
 
+			inline ObjectIdentifier ObjectIdentifier2() const
+			{
+				return object2;
+			}
+
 			LockableItem* GetObject2();
 
 			inline Type GetType() const
@@ -123,10 +130,10 @@ namespace DataModel
 				return object2 == identifier;
 			}
 
-			bool Reserve(Logger::Logger* logger, const LocoID locoID) override;
-			bool Lock(Logger::Logger* logger, const LocoID locoID) override;
-			bool Release(Logger::Logger* logger, const LocoID locoID) override;
-			bool Execute(Logger::Logger* logger, const LocoID locoID, const Delay delay);
+			bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool Execute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier, const Delay delay);
 
 		private:
 			inline ObjectType ObjectType1() const
