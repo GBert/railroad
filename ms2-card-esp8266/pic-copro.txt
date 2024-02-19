@@ -1,0 +1,6 @@
+Product	Status	Program Memory Size (KB)	RAM (KB)	Pin Count
+PIC16F18313	In Production	3.5	256	8
+PIC16F15313	In Production	3.5	256	8
+PIC16F15213	In Production	3.5	256	8
+PIC16F15214	In Production	7	512	8
+
