@@ -20,6 +20,9 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+void killRailControlIfNeeded(Logger::Logger* logger);
 void stopRailControlSignal(int);
 void stopRailControlWebserver();
+bool isShutdownRunning();
+bool isKillRunning();
 

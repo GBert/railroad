@@ -40,16 +40,11 @@ along with RailControl; see the file LICENCE. If not see
 using std::vector;
 using std::string;
 
-static volatile unsigned int runRailcontrol;
-
 static volatile unsigned char stopSignalCounter;
 static const unsigned char maxStopSignalCounter = 3;
 
-void stopRailControlSignal(int signo)
+void killRailControlIfNeeded(Logger::Logger* logger)
 {
-	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
-	logger->Info(Languages::TextStoppingRequestedBySignal, signo);
-	runRailcontrol = false;
 	if (++stopSignalCounter < maxStopSignalCounter)
 	{
 		return;
@@ -58,10 +53,28 @@ void stopRailControlSignal(int signo)
 	exit(1);
 }
 
+void stopRailControlSignal(int signo)
+{
+	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
+	logger->Info(Languages::TextStoppingRequestedBySignal, signo);
+	killRailControlIfNeeded(logger);
+}
+
 void stopRailControlWebserver()
 {
-	Logger::Logger::GetLogger("Main")->Info(Languages::TextStoppingRequestedByWebClient);
-	runRailcontrol = false;
+	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
+	logger->Info(Languages::TextStoppingRequestedByWebClient);
+	killRailControlIfNeeded(logger);
+}
+
+bool isShutdownRunning()
+{
+	return stopSignalCounter > 0;
+}
+
+bool isKillRunning()
+{
+	return stopSignalCounter > 1;
 }
 
 int main (int argc, char* argv[])
@@ -107,7 +120,6 @@ int main (int argc, char* argv[])
 	const string RailControl = "RailControl";
 	Utils::Utils::SetThreadName(RailControl);
 
-	runRailcontrol = true;
 	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
 
 	const bool silent = daemonize || argumentHandler.GetArgumentBool('s');
@@ -181,7 +193,7 @@ int main (int argc, char* argv[])
 				__attribute__((unused)) size_t unused = read(STDIN_FILENO, &input, sizeof(input));
 			}
 		}
-	} while (input != 'q' && runRailcontrol);
+	} while ((input != 'q') && !isShutdownRunning());
 
 	logger->Info(Languages::TextStoppingRailControl);
 	return EXIT_SUCCESS;

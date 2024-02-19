@@ -781,8 +781,7 @@ namespace Hardware
 						default:
 							locoCache.SetProtocol(address, ProtocolDCC14);
 							protocol = ProtocolDCC14;
-							logger->Warning(Languages::TextActualAndStoredProtocolsDiffer,
-							    ProtocolSymbols[ProtocolDCC14], ProtocolSymbols[storedProtocol]);
+							logger->Warning(Languages::TextActualAndStoredProtocolsDiffer, ProtocolSymbols[ProtocolDCC14], ProtocolSymbols[storedProtocol]);
 							break;
 					}
 					newSpeed = DecodeSpeed14(speedData);
@@ -802,8 +801,7 @@ namespace Hardware
 						default:
 							locoCache.SetProtocol(address, ProtocolDCC28);
 							protocol = ProtocolDCC28;
-							logger->Warning(Languages::TextActualAndStoredProtocolsDiffer,
-							    ProtocolSymbols[ProtocolDCC28], ProtocolSymbols[storedProtocol]);
+							logger->Warning(Languages::TextActualAndStoredProtocolsDiffer, ProtocolSymbols[ProtocolDCC28], ProtocolSymbols[storedProtocol]);
 							break;
 					}
 					newSpeed = DecodeSpeed28(speedData);
@@ -823,8 +821,7 @@ namespace Hardware
 						default:
 							locoCache.SetProtocol(address, ProtocolDCC128);
 							protocol = ProtocolDCC128;
-							logger->Warning(Languages::TextActualAndStoredProtocolsDiffer,
-							    ProtocolSymbols[ProtocolDCC128], ProtocolSymbols[storedProtocol]);
+							logger->Warning(Languages::TextActualAndStoredProtocolsDiffer, ProtocolSymbols[ProtocolDCC128], ProtocolSymbols[storedProtocol]);
 							break;
 					}
 					newSpeed = DecodeSpeed128(speedData);

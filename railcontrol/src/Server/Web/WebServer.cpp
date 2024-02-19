@@ -558,6 +558,24 @@ namespace Server { namespace Web
 		AddUpdate(command.str(), Languages::TextLocoDeleted, name);
 	}
 
+	void WebServer::MultipleUnitSettings(const MultipleUnitID multipleUnitID,
+		const std::string& name,
+		__attribute__((unused)) const std::string& matchKey)
+	{
+		stringstream command;
+		command << "multipleunitsettings;loco=" << multipleUnitID;
+		AddUpdate(command.str(), Languages::TextLocoUpdated, name);
+	}
+
+	void WebServer::MultipleUnitDelete(const MultipleUnitID multipleUnitID,
+		const std::string& name,
+		__attribute__((unused)) const std::string& matchkey)
+	{
+		stringstream command;
+		command << "multipleunitdelete;loco=" << multipleUnitID;
+		AddUpdate(command.str(), Languages::TextLocoDeleted, name);
+	}
+
 	void WebServer::LayerSettings(const LayerID layerID, const std::string& name)
 	{
 		stringstream command;

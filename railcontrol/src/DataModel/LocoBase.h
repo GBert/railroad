@@ -104,7 +104,8 @@ namespace DataModel
 			inline LocoBase(Manager* manager, const std::string& serialized)
 			:	LocoBase(manager, LocoNone)
 			{
-				Deserialize(serialized);
+				LocoBase::Deserialize(serialized);
+				logger = Logger::Logger::GetLogger(GetName());
 			}
 
 			virtual ~LocoBase();
@@ -186,12 +187,6 @@ namespace DataModel
 				return this->state == LocoStateManual;
 			}
 
-			inline bool IsInAutoMode() const
-			{
-				return this->state != LocoStateManual
-					&& this->state != LocoStateTerminated;
-			}
-
 			inline bool IsInUse() const
 			{
 				return this->speed > 0
@@ -199,8 +194,6 @@ namespace DataModel
 					|| this->trackFrom != nullptr
 					|| this->routeFirst != nullptr;
 			}
-
-			virtual bool GetPushpull() const;
 
 			inline Length GetLength() const
 			{
@@ -210,6 +203,11 @@ namespace DataModel
 			inline void SetLength(const Length length)
 			{
 				this->length = length;
+			}
+
+			inline bool GetPushpull() const
+			{
+				return pushpull;
 			}
 
 			inline Speed GetMaxSpeed() const

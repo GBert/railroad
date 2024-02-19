@@ -45,13 +45,13 @@ namespace Hardware
 	// set loco speed
 	void Virtual::LocoSpeed(const Protocol protocol, const Address address, const Speed speed)
 	{
-		logger->Info(Languages::TextSettingSpeedWithProtocol, protocol, address, speed);
+		logger->Info(Languages::TextSettingSpeedWithProtocol, Utils::Utils::ProtocolToString(protocol), address, speed);
 	}
 
 	// set the direction of a loco
 	void Virtual::LocoOrientation(const Protocol protocol, const Address address, const Orientation orientation)
 	{
-		logger->Info(Languages::TextSettingDirectionOfTravelWithProtocol, protocol, address, Languages::GetLeftRight(orientation));
+		logger->Info(Languages::TextSettingDirectionOfTravelWithProtocol, Utils::Utils::ProtocolToString(protocol), address, Languages::GetLeftRight(orientation));
 	}
 
 	// set loco function
@@ -60,13 +60,13 @@ namespace Hardware
 		const DataModel::LocoFunctionNr function,
 		const DataModel::LocoFunctionState on)
 	{
-		logger->Info(Languages::TextSettingFunctionWithProtocol, static_cast<int>(function), static_cast<int>(protocol), address, Languages::GetOnOff(on));
+		logger->Info(Languages::TextSettingFunctionWithProtocol, static_cast<int>(function), Utils::Utils::ProtocolToString(protocol), address, Languages::GetOnOff(on));
 	}
 
 	// accessory command
 	void Virtual::AccessoryOnOrOff(const Protocol protocol, const Address address, const DataModel::AccessoryState state, const bool on)
 	{
-		logger->Info(Languages::TextSettingAccessoryWithProtocol, static_cast<int>(protocol), address, Languages::GetGreenRed(state), Languages::GetOnOff(on));
+		logger->Info(Languages::TextSettingAccessoryWithProtocol, Utils::Utils::ProtocolToString(protocol), address, Languages::GetGreenRed(state), Languages::GetOnOff(on));
 	}
 
 	// read CV value

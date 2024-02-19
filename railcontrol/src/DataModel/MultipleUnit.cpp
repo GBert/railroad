@@ -48,21 +48,6 @@ namespace DataModel
 		return true;
 	}
 
-	bool MultipleUnit::GetPushpull() const
-	{
-		bool slavePushpull = true;
-		for (auto slave : slaves)
-		{
-			Loco* loco = manager->GetLoco(slave->ObjectID2());
-			if (loco == nullptr)
-			{
-				continue;
-			}
-			slavePushpull &= loco->GetPushpull();
-		}
-		return slavePushpull;
-	}
-
 	Propulsion MultipleUnit::GetPropulsion() const
 	{
 		uint8_t slavePropulsion = PropulsionUnknown;
@@ -120,7 +105,7 @@ namespace DataModel
 		LocoBase::SetOrientation(orientation);
 		for (auto slave : slaves)
 		{
-			manager->LocoBaseOrientation(ControlTypeInternal, slave->ObjectIdentifier2(), orientation);
+			manager->LocoBaseOrientation(ControlTypeInternal, slave->ObjectIdentifier2(), OrientationChange);
 		}
 	}
 

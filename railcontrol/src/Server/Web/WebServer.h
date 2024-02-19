@@ -68,7 +68,6 @@ namespace Server { namespace Web
 			void FeedbackState(const std::string& name, const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state) override;
 			void LayerDelete(const LayerID layerID, const std::string& name) override;
 			void LayerSettings(const LayerID layerID, const std::string& name) override;
-			void LocoDelete(const LocoID locoID, const std::string& name, const std::string& matchKey) override;
 
 			void LocoBaseDestinationReached(const DataModel::LocoBase* loco,
 				const DataModel::Route* route,
@@ -85,16 +84,29 @@ namespace Server { namespace Web
 
 			void LocoBaseRelease(const DataModel::LocoBase* loco) override;
 
-			void LocoSettings(const LocoID locoID,
-				const std::string& name,
-				const std::string& matchKey) override;
-
 			void LocoBaseSpeed(const ControlType controlType,
 				const DataModel::LocoBase* loco,
 				const Speed speed) override;
 
 			void LocoBaseStart(const DataModel::LocoBase* loco) override;
 			void LocoBaseStop(const DataModel::LocoBase* loco) override;
+
+			void LocoSettings(const LocoID locoID,
+				const std::string& name,
+				const std::string& matchKey) override;
+
+			void LocoDelete(const LocoID locoID,
+				const std::string& name,
+				const std::string& matchKey) override;
+
+			void MultipleUnitSettings(const MultipleUnitID multipleUnitID,
+				const std::string& name,
+				const std::string& matchKey) override;
+
+			void MultipleUnitDelete(const MultipleUnitID multipleUnitID,
+				const std::string& name,
+				const std::string& matchkey) override;
+
 			void RouteDelete(const RouteID routeID, const std::string& name) override;
 			void RouteRelease(const RouteID routeID) override;
 			void RouteSettings(const RouteID routeID, const std::string& name) override;

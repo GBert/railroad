@@ -212,7 +212,7 @@ namespace Storage
 	bool SQLite::CheckTableRelations()
 	{
 		vector<TableInfo> tableInfos;
-		const char* query = "PRAGMA table_info('relations');";
+		string query = "PRAGMA table_info('relations');";
 		bool ret = Execute(query, CallbackTableInfo, &tableInfos);
 		if (ret == false)
 		{
@@ -229,6 +229,15 @@ namespace Storage
 		{
 			return UpdateTableRelations1();
 		}
+
+		// FIXME: simple check, extend with check if each object really exists
+		query = "DELETE FROM relations WHERE objectid1 like 0 OR objectid2 like 0;";
+		ret = Execute(query);
+		if (ret == false)
+		{
+			return false;
+		}
+
 		logger->Info(Languages::TextIsUpToDate, name);
 		return true;
 	}

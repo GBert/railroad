@@ -1395,19 +1395,14 @@ namespace Server { namespace Web
 		ReplyHtmlWithHeader(HtmlTagSelectFeedbackForTrack(counter, trackID));
 	}
 
-	map<string,ObjectID> WebClient::GetMultipleUnitSlaveOptions(const LocoID locoID) const
+	map<string,ObjectID> WebClient::GetMultipleUnitSlaveOptions() const
 	{
 		map<string, ObjectID> options;
 
 		map<string, LocoConfig> allLocos = manager.LocoConfigByName();
 		for (auto& loco : allLocos)
 		{
-			LocoID slaveID = loco.second.GetLocoId();
-			if (locoID == slaveID)
-			{
-				continue;
-			}
-			options[loco.first] = slaveID;
+			options[loco.first] = loco.second.GetLocoId();
 		}
 		return options;
 	}
@@ -1582,7 +1577,7 @@ namespace Server { namespace Web
 
 		formContent.AddChildTag(WebClientStatic::HtmlTagTabFunctions(locoFunctions));
 
-		formContent.AddChildTag(HtmlTagSlaveSelect("slave", slaves, GetMultipleUnitSlaveOptions(multipleUnitId)));
+		formContent.AddChildTag(HtmlTagSlaveSelect("slave", slaves, GetMultipleUnitSlaveOptions()));
 
 		formContent.AddChildTag(WebClientStatic::HtmlTagTabAutomode(pushpull, maxSpeed, travelSpeed, reducedSpeed, creepingSpeed));
 

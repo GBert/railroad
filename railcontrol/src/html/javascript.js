@@ -1492,11 +1492,15 @@ function dataUpdate(event)
 		deleteElement(elementName);
 		deleteElement(elementName + '_context');
 	}
-	else if (command == 'locosettings' || command == 'locodelete')
+	else if ((command == 'locosettings')
+		|| (command == 'locodelete')
+		|| (command == 'multipleunitsettings')
+		|| (command == 'multipleunitdelete'))
 	{
 		loadLocoSelectors();
 	}
-	else if (command == 'layersettings' || command == 'layerdelete')
+	else if ((command == 'layersettings')
+		|| (command == 'layerdelete'))
 	{
 		loadLayerSelector();
 	}

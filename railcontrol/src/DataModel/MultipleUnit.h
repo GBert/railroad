@@ -35,16 +35,17 @@ namespace DataModel
 			MultipleUnit(const MultipleUnit&) = delete;
 			MultipleUnit& operator=(const MultipleUnit&) = delete;
 
-			inline MultipleUnit(Manager* manager, const LocoID locoID)
-			:	LocoBase(manager, locoID)
+			inline MultipleUnit(Manager* manager, const MultipleUnitID multipleUnitID)
+			:	LocoBase(manager, multipleUnitID)
 			{
 			}
 
 			inline MultipleUnit(Manager* manager, const std::string& serialized)
-			:	LocoBase(manager, LocoNone)
+			:	LocoBase(manager, serialized)
 			{
-				Deserialize(serialized);
+				MultipleUnit::Deserialize(serialized);
 			}
+
 			virtual ~MultipleUnit()
 			{
 			}
@@ -57,8 +58,6 @@ namespace DataModel
 			std::string Serialize() const override;
 
 			bool Deserialize(const std::string& serialized) override;
-
-			virtual bool GetPushpull() const override;
 
 			virtual Propulsion GetPropulsion() const override;
 

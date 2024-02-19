@@ -217,9 +217,7 @@ class Manager
 
 		const std::map<std::string,DataModel::LocoConfig> MultipleUnitConfigByName() const;
 
-		bool MultipleUnitSave
-		(
-			MultipleUnitID multipleUnitID,
+		bool MultipleUnitSave(MultipleUnitID multipleUnitID,
 			const std::string& name,
 			const ControlID controlID,
 			const std::string& matchKey,
@@ -233,8 +231,7 @@ class Manager
 			const TrainType type,
 			const std::vector<DataModel::LocoFunctionEntry>& locoFunctions,
 			const std::vector<DataModel::Relation*>& slaves,
-			std::string& result
-		);
+			std::string& result);
 
 		bool MultipleUnitDelete(const MultipleUnitID multipleUnitID,
 			std::string& result);
@@ -250,7 +247,6 @@ class Manager
 		// locobase
 		inline DataModel::LocoBase* GetLocoBase(const DataModel::ObjectIdentifier& locoBaseIdentifier) const
 		{
-
 			return locoBaseIdentifier.GetObjectType() == ObjectTypeLoco
 				? static_cast<DataModel::LocoBase*>(GetLoco(locoBaseIdentifier.GetObjectID()))
 				: static_cast<DataModel::LocoBase*>(GetMultipleUnit(locoBaseIdentifier.GetObjectID()));

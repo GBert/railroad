@@ -39,7 +39,7 @@ namespace DataModel
 	{
 		map<string, string> arguments;
 		ParseArguments(serialized, arguments);
-		return Deserialize(arguments);
+		return Object::Deserialize(arguments);
 	}
 
 	bool Object::Deserialize(const map<string, string>& arguments)

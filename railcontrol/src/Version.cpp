@@ -38,7 +38,7 @@ unsigned int GetVersionInfoGitDirty()
 
 time_t GetVersionInfoCompileTimestamp()
 {
-	return 1708074570;
+	return 1708301000;
 }
 
 const std::string& GetVersionInfoRailControlVersion()

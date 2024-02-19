@@ -156,8 +156,9 @@ namespace Hardware
 			logger->Info(Languages::TextMyUidHash, uidString, Utils::Utils::IntegerToHex(hash));
 		}
 
-		void MaerklinCAN::CreateLocalIDLoco(unsigned char* buffer, const Protocol& protocol,
-			const Address& address)
+		void MaerklinCAN::CreateLocalIDLoco(unsigned char* buffer,
+			const Protocol protocol,
+			const Address address)
 		{
 			uint32_t localID = address;
 			if (protocol == ProtocolDCC)
@@ -176,8 +177,9 @@ namespace Hardware
 			Utils::Utils::IntToDataBigEndian(localID, buffer + 5);
 		}
 
-		void MaerklinCAN::CreateLocalIDAccessory(unsigned char* buffer, const Protocol& protocol,
-			const Address& address)
+		void MaerklinCAN::CreateLocalIDAccessory(unsigned char* buffer,
+			const Protocol protocol,
+			const Address address)
 		{
 			uint32_t localID = address - 1; // GUI-address is 1-based, protocol-address is 0-based
 			if (protocol == ProtocolDCC)
@@ -203,7 +205,7 @@ namespace Hardware
 		void MaerklinCAN::LocoSpeed(const Protocol protocol, const Address address, const Speed speed)
 		{
 			unsigned char buffer[CANCommandBufferLength];
-			logger->Info(Languages::TextSettingSpeedWithProtocol, protocol, address, speed);
+			logger->Info(Languages::TextSettingSpeedWithProtocol, Utils::Utils::ProtocolToString(protocol), address, speed);
 			CreateCommandHeader(buffer, CanCommandLocoSpeed, CanResponseCommand, 6);
 			CreateLocalIDLoco(buffer, protocol, address);
 			Utils::Utils::ShortToDataBigEndian(speed, buffer + 9);
@@ -214,8 +216,7 @@ namespace Hardware
 			const Orientation orientation)
 		{
 			unsigned char buffer[CANCommandBufferLength];
-			logger->Info(Languages::TextSettingDirectionOfTravelWithProtocol, protocol, address,
-				Languages::GetLeftRight(orientation));
+			logger->Info(Languages::TextSettingDirectionOfTravelWithProtocol, Utils::Utils::ProtocolToString(protocol), address, Languages::GetLeftRight(orientation));
 			CreateCommandHeader(buffer, CanCommandLocoDirection, CanResponseCommand, 5);
 			CreateLocalIDLoco(buffer, protocol, address);
 			buffer[9] = (orientation ? 1 : 2);
@@ -228,8 +229,7 @@ namespace Hardware
 			const DataModel::LocoFunctionState on)
 		{
 			unsigned char buffer[CANCommandBufferLength];
-			logger->Info(Languages::TextSettingFunctionWithProtocol, static_cast<int>(function),
-				static_cast<int>(protocol), address, Languages::GetOnOff(on));
+			logger->Info(Languages::TextSettingFunctionWithProtocol, static_cast<int>(function), Utils::Utils::ProtocolToString(protocol), address, Languages::GetOnOff(on));
 			CreateCommandHeader(buffer, CanCommandLocoFunction, CanResponseCommand, 6);
 			CreateLocalIDLoco(buffer, protocol, address);
 			buffer[9] = function;
@@ -241,8 +241,7 @@ namespace Hardware
 			const DataModel::AccessoryState state, const bool on)
 		{
 			unsigned char buffer[CANCommandBufferLength];
-			logger->Info(Languages::TextSettingAccessoryWithProtocol, static_cast<int>(protocol), address,
-				Languages::GetGreenRed(state), Languages::GetOnOff(on));
+			logger->Info(Languages::TextSettingAccessoryWithProtocol, Utils::Utils::ProtocolToString(protocol), address, Languages::GetGreenRed(state), Languages::GetOnOff(on));
 			CreateCommandHeader(buffer, CanCommandAccessory, CanResponseCommand, 6);
 			CreateLocalIDAccessory(buffer, protocol, address);
 			buffer[9] = state & 0x03;
@@ -461,7 +460,7 @@ namespace Hardware
 			LocoType type;
 			ParseAddressProtocol(buffer, address, protocol, type);
 			Speed speed = Utils::Utils::DataBigEndianToShort(buffer + 9);
-			logger->Info(Languages::TextReceivedSpeedCommand, protocol, address, speed);
+			logger->Info(Languages::TextReceivedSpeedCommand, Utils::Utils::ProtocolToString(protocol), address, speed);
 			manager->LocoSpeed(ControlTypeHardware, controlID, protocol, address, speed);
 		}
 
@@ -476,7 +475,7 @@ namespace Hardware
 			LocoType type;
 			ParseAddressProtocol(buffer, address, protocol, type);
 			Orientation orientation = (buffer[9] == 1 ? OrientationRight : OrientationLeft);
-			logger->Info(Languages::TextReceivedDirectionCommand, protocol, address, orientation);
+			logger->Info(Languages::TextReceivedDirectionCommand, Utils::Utils::ProtocolToString(protocol), address, orientation);
 			// changing direction implies speed = 0
 			manager->LocoSpeed(ControlTypeHardware, controlID, protocol, address, MinSpeed);
 			manager->LocoOrientation(ControlTypeHardware, controlID, protocol, address, orientation);
@@ -493,9 +492,8 @@ namespace Hardware
 			LocoType type;
 			ParseAddressProtocol(buffer, address, protocol, type);
 			DataModel::LocoFunctionNr function = buffer[9];
-			DataModel::LocoFunctionState on = (
-				buffer[10] != 0 ? DataModel::LocoFunctionStateOn : DataModel::LocoFunctionStateOff);
-			logger->Info(Languages::TextReceivedFunctionCommand, protocol, address, function, on);
+			DataModel::LocoFunctionState on = (buffer[10] != 0 ? DataModel::LocoFunctionStateOn : DataModel::LocoFunctionStateOff);
+			logger->Info(Languages::TextReceivedFunctionCommand, Utils::Utils::ProtocolToString(protocol), address, function, on);
 			manager->LocoFunctionState(ControlTypeHardware, controlID, protocol, address, function, on);
 		}
 
@@ -512,7 +510,7 @@ namespace Hardware
 			DataModel::AccessoryState state = (buffer[9] ? DataModel::AccessoryStateOn : DataModel::AccessoryStateOff);
 			// GUI-address is 1-based, protocol-address is 0-based
 			++address;
-			logger->Info(Languages::TextReceivedAccessoryCommand, protocol, address, state);
+			logger->Info(Languages::TextReceivedAccessoryCommand, Utils::Utils::ProtocolToString(protocol), address, state);
 			manager->AccessoryState(ControlTypeHardware, controlID, protocol, address, state);
 		}
 

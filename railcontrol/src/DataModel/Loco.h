@@ -46,9 +46,9 @@ namespace DataModel
 			}
 
 			inline Loco(Manager* manager, const std::string& serialized)
-			:	Loco(manager, LocoNone)
+			:	LocoBase(manager, serialized)
 			{
-				Deserialize(serialized);
+				Loco::Deserialize(serialized);
 			}
 
 			virtual ~Loco()

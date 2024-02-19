@@ -216,7 +216,7 @@ namespace Server { namespace Web
 
 			HtmlTag HtmlTagInputBitValue(std::string name) const;
 
-			std::map<std::string,ObjectID> GetMultipleUnitSlaveOptions(const LocoID locoID = LocoNone) const;
+			std::map<std::string,ObjectID> GetMultipleUnitSlaveOptions() const;
 
 			void HandleSelectLoco(const std::map<std::string, std::string>& arguments);
 			void HandleLayerEdit(const std::map<std::string, std::string>& arguments);

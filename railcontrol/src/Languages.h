@@ -540,6 +540,8 @@ class Languages
 			TextReleaseTrack,
 			TextReleaseTrackAndLoco,
 			TextReleaseWhenFree,
+			TextReleasingLoco,
+			TextReleasingMultipleUnit,
 			TextRemoveBackupFile,
 			TextRenamingFromTo,
 			TextRestarting,

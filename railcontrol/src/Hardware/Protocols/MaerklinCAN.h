@@ -423,8 +423,8 @@ namespace Hardware
 				static CanHash CalcHash(const CanUid uid);
 				void GenerateUidHash();
 
-				void CreateLocalIDLoco(unsigned char* buffer, const Protocol& protocol, const Address& address);
-				void CreateLocalIDAccessory(unsigned char* buffer, const Protocol& protocol, const Address& address);
+				void CreateLocalIDLoco(unsigned char* buffer, const Protocol protocol, const Address address);
+				void CreateLocalIDAccessory(unsigned char* buffer, const Protocol protocol, const Address address);
 
 				void Wait(const unsigned int duration) const;
 				void Cs2MasterThread();

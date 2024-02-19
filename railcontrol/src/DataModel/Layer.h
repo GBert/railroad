@@ -33,12 +33,26 @@ namespace DataModel
 	class Layer : public Object
 	{
 		public:
-			Layer(const std::string& serialized) { Deserialize(serialized); }
-			Layer(__attribute__((unused)) Manager* manager, const LayerID layerID) : Object(layerID) {}
+			Layer(const std::string& serialized)
+			:	Object()
+			{
+				Object::Deserialize(serialized);
+			}
 
-			virtual std::string Serialize() const { return "objectType=Layer;" + Object::Serialize(); }
+			Layer(__attribute__((unused)) Manager* manager, const LayerID layerID)
+			:	Object(layerID)
+			{
+			}
 
-			ObjectType GetObjectType() const { return ObjectTypeLayer; }
+			virtual std::string Serialize() const
+			{
+				return "objectType=Layer;" + Object::Serialize();
+			}
+
+			ObjectType GetObjectType() const
+			{
+				return ObjectTypeLayer;
+			}
 	};
 } // namespace DataModel
 

@@ -30,6 +30,8 @@ along with RailControl; see the file LICENCE. If not see
 #include <thread>
 #include <vector>
 
+#include "DataTypes.h"
+
 namespace Logger
 {
 	class Logger;
@@ -142,5 +144,10 @@ namespace Utils
 			static uint8_t CalcXORCheckSum(const uint8_t* const buffer, size_t length);
 
 			static std::string StringToLower(const std::string& input);
+
+			static inline std::string ProtocolToString(const Protocol protocol)
+			{
+				return ProtocolSymbols[protocol];
+			}
 	}; // class Utils
 } // namespace Utils

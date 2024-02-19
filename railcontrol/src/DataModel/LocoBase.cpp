@@ -75,7 +75,7 @@ namespace DataModel
 	{
 		map<string, string> arguments;
 		ParseArguments(serialized, arguments);
-		return Deserialize(arguments);
+		return LocoBase::Deserialize(arguments);
 	}
 
 	bool LocoBase::Deserialize(const std::map<std::string,std::string>& arguments)
@@ -96,11 +96,6 @@ namespace DataModel
 		trainType = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeUnknown));
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		return true;
-	}
-
-	bool LocoBase::GetPushpull() const
-	{
-		return pushpull;
 	}
 
 	Propulsion LocoBase::GetPropulsion() const
@@ -179,12 +174,12 @@ namespace DataModel
 		std::lock_guard<std::mutex> Guard(stateMutex);
 		if (trackFrom == nullptr)
 		{
-			logger->Warning(Languages::TextCanNotStartNotOnTrack, GetName());
+			logger->Warning(Languages::TextCanNotStartNotOnTrack);
 			return false;
 		}
 		if (state == LocoStateError)
 		{
-			logger->Warning(Languages::TextCanNotStartInErrorState, GetName());
+			logger->Warning(Languages::TextCanNotStartInErrorState);
 			return false;
 		}
 		if (state == LocoStateTerminated)
@@ -194,7 +189,7 @@ namespace DataModel
 		}
 		if (state != LocoStateManual)
 		{
-			logger->Info(Languages::TextCanNotStartAlreadyRunning, GetName());
+			logger->Info(Languages::TextCanNotStartAlreadyRunning);
 			return false;
 		}
 
@@ -254,7 +249,7 @@ namespace DataModel
 		Utils::Utils::SetMinThreadPriority();
 		const string& name = GetName();
 		Utils::Utils::SetThreadName(name);
-		logger->Info(Languages::TextIsNowInAutoMode, name);
+		logger->Info(Languages::TextIsNowInAutoMode);
 
 		while (true)
 		{
@@ -278,7 +273,7 @@ namespace DataModel
 				{
 					case LocoStateOff:
 						// automode is turned off, terminate thread
-						logger->Info(Languages::TextIsNowInManualMode, name);
+						logger->Info(Languages::TextIsNowInManualMode);
 						state = LocoStateTerminated;
 						requestManualMode = false;
 						return;
@@ -300,7 +295,7 @@ namespace DataModel
 					case LocoStateAutomodeGetSecond:
 						if (requestManualMode)
 						{
-							logger->Info(Languages::TextIsRunningWaitingUntilDestination, name);
+							logger->Info(Languages::TextIsRunningWaitingUntilDestination);
 							state = LocoStateStopping;
 							break;
 						}
@@ -352,28 +347,28 @@ namespace DataModel
 						// loco is already running, waiting until destination reached
 						if (requestManualMode)
 						{
-							logger->Info(Languages::TextIsRunningWaitingUntilDestination, name);
+							logger->Info(Languages::TextIsRunningWaitingUntilDestination);
 							state = LocoStateStopping;
 						}
 						break;
 
 					case LocoStateStopping:
-						logger->Info(Languages::TextHasNotReachedDestination, name);
+						logger->Info(Languages::TextHasNotReachedDestination);
 
 						break;
 
 					case LocoStateTerminated:
-						logger->Error(Languages::TextIsInTerminatedState, name);
+						logger->Error(Languages::TextIsInTerminatedState);
 						state = LocoStateError;
 						break;
 
 					case LocoStateManual:
-						logger->Error(Languages::TextIsInManualState, name);
+						logger->Error(Languages::TextIsInManualState);
 						state = LocoStateError;
 						#include "Fallthrough.h"
 
 					case LocoStateError:
-						logger->Error(Languages::TextIsInErrorState, name);
+						logger->Error(Languages::TextIsInErrorState);
 						manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 						if (requestManualMode)
 						{
@@ -392,7 +387,7 @@ namespace DataModel
 		if (routeFirst != nullptr)
 		{
 			state = LocoStateError;
-			logger->Error(Languages::TextHasAlreadyReservedRoute, GetName());
+			logger->Error(Languages::TextHasAlreadyReservedRoute);
 			return;
 		}
 
@@ -405,14 +400,14 @@ namespace DataModel
 		if (routeFirst != nullptr)
 		{
 			state = LocoStateError;
-			logger->Error(Languages::TextHasAlreadyReservedRoute, GetName());
+			logger->Error(Languages::TextHasAlreadyReservedRoute);
 			return;
 		}
 
 		Route* const route = GetDestinationFromTimeTable(trackFrom, true);
 		if (route == nullptr)
 		{
-			logger->Debug(Languages::TextNoValidTimetableEntryFound, GetName());
+			logger->Debug(Languages::TextNoValidTimetableEntryFound);
 			return;
 		}
 		PrepareDestinationFirst(route, LocoStateTimetableGetSecond);
@@ -584,14 +579,14 @@ namespace DataModel
 		if (routeSecond != nullptr)
 		{
 			state = LocoStateError;
-			logger->Error(Languages::TextHasAlreadyReservedRoute, GetName());
+			logger->Error(Languages::TextHasAlreadyReservedRoute);
 			return nullptr;
 		}
 
 		if (track == nullptr)
 		{
 			state = LocoStateOff;
-			logger->Info(Languages::TextIsNotOnTrack, GetName());
+			logger->Info(Languages::TextIsNotOnTrack);
 			return nullptr;
 		}
 
@@ -599,7 +594,7 @@ namespace DataModel
 		if (locoBaseOfTrack != GetObjectIdentifier())
 		{
 			state = LocoStateError;
-			logger->Error(Languages::TextIsOnOcupiedTrack, GetName(), track->GetName(), manager->GetLocoBaseName(locoBaseOfTrack));
+			logger->Error(Languages::TextIsOnOcupiedTrack, track->GetName(), manager->GetLocoBaseName(locoBaseOfTrack));
 			return nullptr;
 		}
 
@@ -689,7 +684,7 @@ namespace DataModel
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 			manager->Booster(ControlTypeInternal, BoosterStateStop);
-			logger->Error(Languages::TextHitOverrun, GetName(), manager->GetFeedbackName(feedbackID));
+			logger->Error(Languages::TextHitOverrun, manager->GetFeedbackName(feedbackID));
 			return;
 		}
 
@@ -801,7 +796,7 @@ namespace DataModel
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 			state = LocoStateError;
-			logger->Error(Languages::TextIsInAutomodeWithoutRouteTrack, GetName());
+			logger->Error(Languages::TextIsInAutomodeWithoutRouteTrack);
 			return;
 		}
 
@@ -837,7 +832,7 @@ namespace DataModel
 				break;
 
 			default:
-				logger->Error(Languages::TextIsInInvalidAutomodeState, GetName(), state, manager->GetFeedbackName(feedbackIdFirst));
+				logger->Error(Languages::TextIsInInvalidAutomodeState, state, manager->GetFeedbackName(feedbackIdFirst));
 				state = LocoStateError;
 				break;
 		}
@@ -853,7 +848,7 @@ namespace DataModel
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 			state = LocoStateError;
-			logger->Error(Languages::TextIsInAutomodeWithoutRouteTrack, GetName());
+			logger->Error(Languages::TextIsInAutomodeWithoutRouteTrack);
 			return;
 		}
 
@@ -867,7 +862,7 @@ namespace DataModel
 		trackFrom->Release(logger, GetObjectIdentifier());
 		trackFrom = trackFirst;
 		trackFirst = nullptr;
-		logger->Info(Languages::TextReachedItsDestination, GetName());
+		logger->Info(Languages::TextReachedItsDestination);
 
 		// set state
 		switch (state)
@@ -885,7 +880,7 @@ namespace DataModel
 				break;
 
 			default:
-				logger->Error(Languages::TextIsInInvalidAutomodeState, GetName(), state, manager->GetFeedbackName(feedbackIdStop));
+				logger->Error(Languages::TextIsInInvalidAutomodeState, state, manager->GetFeedbackName(feedbackIdStop));
 				state = LocoStateError;
 				break;
 		}
