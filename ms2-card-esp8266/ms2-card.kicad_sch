@@ -3490,7 +3490,7 @@
     (uuid 00000000-0000-0000-0000-00006210c221)
     (property "Reference" "SW1" (id 0) (at 46.355 88.011 0))
     (property "Value" "RESET" (id 1) (at 46.355 90.3224 0))
-    (property "Footprint" "w_switch:PCB_PUSH" (id 2) (at 46.355 90.17 0)
+    (property "Footprint" "Button_Switch_THT:SW_PUSH_6mm_H4.3mm" (id 2) (at 46.355 90.17 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 46.355 90.17 0)
@@ -5685,7 +5685,7 @@
       (reference "R32") (unit 1) (value "330") (footprint "Resistor_SMD:R_0603_1608Metric")
     )
     (path "/00000000-0000-0000-0000-00006210c221"
-      (reference "SW1") (unit 1) (value "RESET") (footprint "w_switch:PCB_PUSH")
+      (reference "SW1") (unit 1) (value "RESET") (footprint "Button_Switch_THT:SW_PUSH_6mm_H4.3mm")
     )
     (path "/00000000-0000-0000-0000-00006208ee80"
       (reference "U1") (unit 1) (value "ESP-12F") (footprint "ESP8266:ESP-12E")
