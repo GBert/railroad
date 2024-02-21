@@ -1,4 +1,5 @@
 (fp_lib_table
   (lib (name "PogoPin")(type "KiCad")(uri "${KIPRJMOD}/PogoPin.pretty")(options "")(descr ""))
   (lib (name "MS2-Card")(type "KiCad")(uri "${KIPRJMOD}/MS2-Card.pretty")(options "")(descr ""))
+  (lib (name "sd-card-conn")(type "KiCad")(uri "${KIPRJMOD}/sd-card-conn.pretty")(options "")(descr ""))
 )
