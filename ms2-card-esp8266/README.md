@@ -12,6 +12,15 @@ Schalter (BL1551B - Signal I2C_Select) getrennt.
 Der Prozessor signalisiert das Einstecken der Lokkarte (Signal Card) durch Verbindung
 der Kontakte am Kartenrand.
 
+TODOs
+-----
+
+CP2102 Test
+I2C intern Test
+I2C extern Test
+ESP Programmierung Test
+SD Kartenanbindung Test
+SD Kartenanbindung optimieren
 
 ESP8266
 -------
@@ -60,6 +69,11 @@ esptool.py --port /dev/ttyUSB1 --baud 460800 write_flash --flash_size=detect 0 .
 SD-CARD
 -------
 https://github.com/arendst/Tasmota/discussions/13938
+https://www.mikrocontroller.net/articles/MMC-_und_SD-Karten
+
+Pull-up D0
+SPI-Mode Pull-up ungenutzter Ports (TODO)
+470 nH Vdd (TODO)
 
 
 Raspberry Pi I2C Slave
