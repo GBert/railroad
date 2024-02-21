@@ -1,3 +1,18 @@
+Lokkarten Emulator
+------------------
+
+Auf der Lokkarte befindet sich ein I2C EEPROM (24LC64 64kBit -> 8kByte). Die Schaltung
+ersetzt den Speicher durch ein kompatiblen FRAM Baustein. Dadurch entfällt die
+zeitkritische I2C Slave Behandlung.
+
+Der Prozessor (ESP8266 oder extern) befüllt den FRAM Baustein mit Lokkarten Daten. Damit
+es zu keinen Komplikationen auf dem I2C Bus kommen kann, ist der I2C Bus durch analoge
+Schalter (BL1551B - Signal I2C_Select) getrennt.
+
+Der Prozessor signalisiert das Einstecken der Lokkarte (Signal Card) durch Verbindung
+der Kontakte am Kartenrand.
+
+
 ESP8266
 -------
 
