@@ -12,6 +12,34 @@ Schalter (BL1551B - Signal I2C_Select) getrennt.
 Der Prozessor signalisiert das Einstecken der Lokkarte (Signal Card) durch Verbindung
 der Kontakte am Kartenrand.
 
+Detail-Beschreibung
+-------------------
+
+Power Select: hier wählt man zwiechen Versorgung durch MS2 oder USB.
+
+Schaltregler kann als Ersatz dienen, wenn der Längsregler U6 nicht ausreicht.
+Dazu muss U6 aber entfernt werden.
+
+Für C1 ist ein Tantal Kondensator vorgesehen. Da Tantal aber ein Rohstoff aus Krisengebieten
+ist, ist auch ein anderer Kondensator mit niedrigem ESR ratsam. Die Pads sollten
+genügend Platz bieten, einen anderen Kondensator einzusetzen.
+
+Silabs CP2102 wurde für die Seriell-USB Anbindung gewählt, weil dieser ein guter Kompromiss
+zwischen Stabilität, Unterstützung und Preis ist.
+
+Q1/Q2 und R8/R9 dienen dazu, das Update der ESP8266 ohne Eingriff zu ermöglichen.
+
+U3 und U4 trennen den I2C Bus von der MS2, damit es keine Störungen des MS2 I2C-Busses gibt.
+I2C Select schaltet entweder den ESP8266 oder alternativ einen anderen I2C Master
+führ den Zugriff auf das FRAM hinzu.
+
+U20 dient dazu, einen Kartenwechsel der MS2 zu signalisieren.
+
+Der I2C Bus wird zusätzlich auch noch über R3/R4 angebunden. Diese Verbindungen dienen
+nicht dazu am I2C Bus teilzunehmen, sondern Aktivität zu bemerken. Ein Kartenwechsel
+(Signal Card) kann erst dann passieren, wenn die Karte ausgelesen und die Anzeige
+aktualisiert wurde. Das Programm muss hier schauen, wenn ein "Kartenwechsel" möglich ist.
+
 TODOs
 -----
 
