@@ -231,7 +231,7 @@ namespace Storage
 		}
 
 		// FIXME: simple check, extend with check if each object really exists
-		query = "DELETE FROM relations WHERE objectid1 like 0 OR objectid2 like 0;";
+		query = "DELETE FROM relations WHERE objectid1 like 0;";
 		ret = Execute(query);
 		if (ret == false)
 		{
