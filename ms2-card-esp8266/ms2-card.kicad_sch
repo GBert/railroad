@@ -6,8 +6,8 @@
 
   (title_block
     (title "Lokkarten Emulator")
-    (date "2024-02-23")
-    (rev "0.97")
+    (date "2024-02-25")
+    (rev "0.98")
     (company "Modellbahn eXtreme")
     (comment 1 "Gerhard Bertelsmann")
   )
@@ -3723,7 +3723,7 @@
   )
 
   (symbol (lib_id "ms2-card-rescue:CP-Device") (at 76.708 118.872 0) (unit 1)
-    (in_bom yes) (on_board yes)
+    (in_bom no) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000622cda82)
     (property "Reference" "C1" (id 0) (at 79.7052 117.7036 0)
       (effects (font (size 1.27 1.27)) (justify left))
