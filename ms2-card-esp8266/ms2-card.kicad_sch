@@ -5720,7 +5720,7 @@
     (property "JLCPCB Rotation Offset" "180" (id 5) (at 256.032 114.808 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "JLCPCB Position Offset" "" (id 6) (at 256.032 114.808 0)
+    (property "JLCPCB Position Offset" "5.73,0.0" (id 6) (at 256.032 114.808 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 61489188-3805-4c47-84ec-2f1e309bf153))

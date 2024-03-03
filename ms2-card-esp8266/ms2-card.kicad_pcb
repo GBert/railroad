@@ -626,7 +626,7 @@
     (at 182.9 109 -90)
     (descr "http://www.farnell.com/datasheets/1917242.pdf")
     (tags "MicroSD card socket")
-    (property "JLCPCB Position Offset" "")
+    (property "JLCPCB Position Offset" "5.73,0.0")
     (property "JLCPCB Rotation Offset" "180")
     (property "LCSC" "C2889258")
     (property "Sheetfile" "ms2-card.kicad_sch")
