@@ -64,7 +64,7 @@
   (pad "8" smd rect (at 5.45 -0.8) (size 0.7 1.6) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 11764bf7-41c9-4e83-8a90-ce7334193938))
   (pad "9" smd rect (at 6.55 -0.8) (size 0.7 1.6) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp cd27039a-0074-403f-9635-3117924d1600))
   (pad "10" smd rect (at 7.75 -1.4) (size 1.2 1.4) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 10906171-6af3-42b1-9e27-4c510eacf26b))
-  (model "zap.3dshapes/GCT-MEM2055-00-190-01-A.wrl"
+  (model "${KIPRJMOD}/sd-card-conn/GCT-MEM2055-00-190-01-A.wrl"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

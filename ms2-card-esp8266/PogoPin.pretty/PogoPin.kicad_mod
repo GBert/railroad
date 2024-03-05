@@ -1,6 +1,6 @@
 (footprint "PogoPin" (version 20221018) (generator pcbnew)
   (layer "F.Cu")
-  (attr through_hole)
+  (attr through_hole allow_soldermask_bridges)
   (fp_text reference "Pg**" (at -0.1 -3.3 unlocked) (layer "F.SilkS")
       (effects (font (size 1 1) (thickness 0.15)))
     (tstamp 75463360-1904-4251-92e2-55c1dccd1687)
