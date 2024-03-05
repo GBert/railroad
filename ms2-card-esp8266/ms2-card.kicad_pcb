@@ -1568,7 +1568,7 @@
     (at 185.6 127.3 -90)
     (descr "Wi-Fi Module, http://wiki.ai-thinker.com/_media/esp8266/docs/aithinker_esp_12f_datasheet_en.pdf")
     (tags "Wi-Fi Module")
-    (property "JLCPCB Position Offset" "0.0,-4.03")
+    (property "JLCPCB Position Offset" "0.0,-4.13")
     (property "JLCPCB Rotation Offset" "-90")
     (property "LCSC" "C82891")
     (property "Sheetfile" "ms2-card.kicad_sch")
