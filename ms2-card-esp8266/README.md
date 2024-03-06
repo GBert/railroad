@@ -12,6 +12,12 @@ Schalter (BL1551B - Signal I2C_Select) getrennt.
 Der Prozessor signalisiert das Einstecken der Lokkarte (Signal Card) durch Verbindung
 der Kontakte am Kartenrand.
 
+Die Platine wurde mit KiCad 7.0.11 erstellt. Die Produktionsdaten wurden mit dem JLCPCB
+Fabrication Toolkit generiert.
+
+Die zwei Fehler im DRC Check (Corteyards overlap) können ignoriert werden, da die Bestückung
+mit dem SPI EEPROM U10 und C11 alternativ ist.
+
 Detail-Beschreibung
 -------------------
 
@@ -35,20 +41,18 @@ führ den Zugriff auf das FRAM hinzu.
 
 U20 dient dazu, einen Kartenwechsel der MS2 zu signalisieren.
 
-Der I2C Bus wird zusätzlich auch noch über R3/R4 angebunden. Diese Verbindungen dienen
-nicht dazu am I2C Bus teilzunehmen, sondern Aktivität zu bemerken. Ein Kartenwechsel
-(Signal Card) kann erst dann passieren, wenn die Karte ausgelesen und die Anzeige
-aktualisiert wurde. Das Programm muss hier schauen, wenn ein "Kartenwechsel" möglich ist.
+Das MS2 I2C Bus Clock Signal wird zusätzlich auch noch über Q1 und ein RC Glied an den ADC
+des ESP8266 Moduls angeschlossen, um den Zeitpunkt des letzten I2C Bus Zugriffs zu messen.
 
 TODOs
 -----
 
-CP2102 Test
-I2C intern Test
-I2C extern Test
-ESP Programmierung Test
-SD Kartenanbindung Test
-SD Kartenanbindung optimieren
+- CP2102 Test
+- I2C intern Test
+- I2C extern Test
+- ESP Programmierung Test
+- SD Kartenanbindung Test
+- Allternative zur SD-Karte - SPI EEPROM
 
 ESP8266
 -------
