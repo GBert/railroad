@@ -64,6 +64,7 @@ namespace Server { namespace Web
 		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		Protocol protocol = ProtocolNone;
 		Address address = AddressDefault;
+		Address serverAddress = AddressNone;
 		string name = Languages::GetText(Languages::TextNew);
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
@@ -82,6 +83,7 @@ namespace Server { namespace Web
 				matchKey = signal->GetMatchKey();
 				protocol = signal->GetProtocol();
 				address = signal->GetAddress();
+				serverAddress = signal->GetServerAddress();
 				name = signal->GetName();
 				posx = signal->GetPosX();
 				posy = signal->GetPosY();
@@ -135,6 +137,10 @@ namespace Server { namespace Web
 		mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextBaseAddress, address, 1, 2044));
 		mainContent.AddChildTag(WebClientStatic::HtmlTagDuration(duration));
 		mainContent.AddChildTag(HtmlTagInputCheckboxWithLabel("inverted", Languages::TextInverted, "true", inverted));
+		if (manager.IsServerEnabled())
+		{
+			mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("serveraddress", Languages::TextServerAddress, serverAddress, 0, 2044));
+		}
 		formContent.AddChildTag(mainContent);
 
 		HtmlTag addressContent("div");
@@ -190,22 +196,23 @@ namespace Server { namespace Web
 
 	void WebClientSignal::HandleSignalSave(const map<string, string>& arguments)
 	{
-		SignalID signalID = Utils::Utils::GetIntegerMapEntry(arguments, "signal", SignalNone);
-		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
-		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
-		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		Protocol protocol = static_cast<Protocol>(Utils::Utils::GetIntegerMapEntry(arguments, "protocol", ProtocolNone));
-		Address address = Utils::Utils::GetIntegerMapEntry(arguments, "address", AddressDefault);
-		LayoutPosition posX = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
-		LayoutPosition posY = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
-		LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
-		LayoutItemSize height = Utils::Utils::GetIntegerMapEntry(arguments, "length", 1);
-		LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
-		DataModel::AccessoryType signalType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "signaltype", DataModel::SignalTypeSimpleLeft));
+		const SignalID signalID = Utils::Utils::GetIntegerMapEntry(arguments, "signal", SignalNone);
+		const string name = Utils::Utils::GetStringMapEntry(arguments, "name");
+		const ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
+		const string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
+		const Protocol protocol = static_cast<Protocol>(Utils::Utils::GetIntegerMapEntry(arguments, "protocol", ProtocolNone));
+		const Address address = Utils::Utils::GetIntegerMapEntry(arguments, "address", AddressDefault);
+		const Address serverAddress = Utils::Utils::GetIntegerMapEntry(arguments, "serveraddress", AddressNone);
+		const LayoutPosition posX = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
+		const LayoutPosition posY = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
+		const LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
+		const LayoutItemSize height = Utils::Utils::GetIntegerMapEntry(arguments, "length", 1);
+		const LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
+		const DataModel::AccessoryType signalType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "signaltype", DataModel::SignalTypeSimpleLeft));
 		std::map<AccessoryState,AddressOffset> offsets;
 		for (AddressOffset i = 0; i < SignalStateMax; ++i)
 		{
-			AddressOffset address = Utils::Utils::GetIntegerMapEntry(arguments, "address" + to_string(i), -1);
+			const AddressOffset address = Utils::Utils::GetIntegerMapEntry(arguments, "address" + to_string(i), -1);
 			if ((signalType == SignalTypeChDwarf || signalType == SignalTypeDeCombined) && i == SignalStateAspect2)
 			{
 				// FIXME: Remove later: 2022-05-27
@@ -214,8 +221,8 @@ namespace Server { namespace Web
 			}
 			offsets[static_cast<AccessoryState>(i)] = address;
 		}
-		DataModel::AccessoryPulseDuration duration = Utils::Utils::GetIntegerMapEntry(arguments, "duration", manager.GetDefaultAccessoryDuration());
-		bool inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted");
+		const DataModel::AccessoryPulseDuration duration = Utils::Utils::GetIntegerMapEntry(arguments, "duration", manager.GetDefaultAccessoryDuration());
+		const bool inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted");
 		string result;
 		if (!manager.SignalSave(signalID,
 			name,
@@ -228,6 +235,7 @@ namespace Server { namespace Web
 			matchKey,
 			protocol,
 			address,
+			serverAddress,
 			signalType,
 			offsets,
 			duration,

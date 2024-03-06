@@ -35,8 +35,9 @@ namespace DataModel
 		public:
 			inline HardwareHandle()
 			:	controlID(ControlNone),
-			 	protocol(ProtocolNone),
-			 	address(AddressNone)
+				protocol(ProtocolNone),
+				address(AddressDefault),
+				serverAddress(AddressNone)
 			{
 			}
 
@@ -66,12 +67,36 @@ namespace DataModel
 
 			inline void SetAddress(Address address)
 			{
-				this->address = address;
+				if (address == AddressNone)
+				{
+					this->address = AddressDefault;
+				}
+				else
+				{
+					this->address = address;
+				}
 			}
 
 			inline Address GetAddress() const
 			{
 				return address;
+			}
+
+			inline void SetServerAddress(const Address serverAddress)
+			{
+				if (serverAddress == AddressNone)
+				{
+					this->serverAddress = this->address;
+				}
+				else
+				{
+					this->serverAddress = serverAddress;
+				}
+			}
+
+			inline Address GetServerAddress() const
+			{
+				return serverAddress;
 			}
 
 		protected:
@@ -82,6 +107,7 @@ namespace DataModel
 			ControlID controlID;
 			Protocol protocol;
 			Address address;
+			Address serverAddress;
 	};
 } // namespace DataModel
 

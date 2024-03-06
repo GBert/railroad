@@ -1,3 +1,5 @@
+- Wartezeit bei Erreichen Fahrstrassen-Ende
+- Vorzeitiges Freigeben von Gleisen bei Fahrstrassen in "Beim Sperren"
 - Rückmelder-Gleis als Relation speichern
 - Notaus bei Rückmelder an/aus
 - Fahrstrassen mit unverschlossenen Objekten
@@ -18,5 +20,4 @@
 - Rückmelder für Weichenlage
 - Ausleuchtung von Gleisen aufgrund von Nachbargleis
 - Autokonversion der Protokolle bei Zentralenwechsel
-- Z21-Server
 - CS2-Server

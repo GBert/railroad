@@ -754,7 +754,7 @@ namespace Hardware
 			const Address zeroBasedAddress = Utils::Utils::DataBigEndianToShort(buffer + 5);
 			const Address address = zeroBasedAddress + 1;
 			const Protocol protocol = turnoutCache.GetProtocol(address);
-			manager->AccessoryState(ControlTypeHardware, controlID, protocol, address, state);
+			manager->AccessoryBaseState(ControlTypeHardware, controlID, protocol, address, state);
 		}
 
 		void Z21::ParseLocoData(const unsigned char* buffer)

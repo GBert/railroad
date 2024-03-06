@@ -571,7 +571,7 @@ namespace Hardware
 			{
 				DataModel::AccessoryState state = (
 				    value == 0 ? DataModel::AccessoryStateOn : DataModel::AccessoryStateOff);
-				manager->AccessoryState(ControlTypeHardware, controlID, ProtocolServer, address, state);
+				manager->AccessoryBaseState(ControlTypeHardware, controlID, ProtocolServer, address, state);
 				return;
 			}
 		}

@@ -511,7 +511,7 @@ namespace Hardware
 			// GUI-address is 1-based, protocol-address is 0-based
 			++address;
 			logger->Info(Languages::TextReceivedAccessoryCommand, Utils::Utils::ProtocolToString(protocol), address, state);
-			manager->AccessoryState(ControlTypeHardware, controlID, protocol, address, state);
+			manager->AccessoryBaseState(ControlTypeHardware, controlID, protocol, address, state);
 		}
 
 		void MaerklinCAN::ParseCommandPing(const unsigned char* const buffer)

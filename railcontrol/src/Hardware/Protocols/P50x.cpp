@@ -672,7 +672,7 @@ namespace Hardware
 			{
 				struct TurnoutCommand command = commandQueue.front();
 				commandQueue.pop();
-				manager->AccessoryState(ControlTypeHardware, controlID, ProtocolServer, command.address, command.state);
+				manager->AccessoryBaseState(ControlTypeHardware, controlID, ProtocolServer, command.address, command.state);
 			}
 		}
 

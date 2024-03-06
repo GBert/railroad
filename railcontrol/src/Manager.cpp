@@ -62,6 +62,7 @@ Manager::Manager(Config& config)
 	run(false),
 	debounceRun(false),
 	initLocosDone(false),
+	serverEnabled(false),
 	unknownControl(Languages::GetText(Languages::TextControlDoesNotExist)),
 	unknownLoco(Languages::GetText(Languages::TextLocoDoesNotExist)),
 	unknownMultipleUnit(Languages::GetText(Languages::TextMultipleUnitDoesNotExist)),
@@ -97,6 +98,7 @@ Manager::Manager(Config& config)
 	if (config.getBoolValue("z21server", false))
 	{
 		controls[ControlIdZ21Server] = new Server::Z21::Z21Server(*this, Server::Z21::Z21Server::Z21Port);
+		serverEnabled = true;
 	}
 
 	storage->AllHardwareParams(hardwareParams);
@@ -733,6 +735,7 @@ bool Manager::LocoSave(LocoID locoID,
 	const std::string& matchKey,
 	const Protocol protocol,
 	const Address address,
+	const Address serverAddress,
 	const Length length,
 	const bool pushpull,
 	const Speed maxSpeed,
@@ -769,6 +772,7 @@ bool Manager::LocoSave(LocoID locoID,
 	loco->SetMatchKey(matchKey);
 	loco->SetProtocol(protocol);
 	loco->SetAddress(address);
+	loco->SetServerAddress(serverAddress);
 	loco->SetLength(length);
 	loco->SetPushpull(pushpull);
 	loco->SetMaxSpeed(maxSpeed);
@@ -1014,6 +1018,7 @@ bool Manager::MultipleUnitSave(MultipleUnitID multipleUnitID,
 	const ControlID controlID,
 	const std::string& matchKey,
 	const Address address,
+	const Address serverAddress,
 	const Length length,
 	const bool pushpull,
 	const Speed maxSpeed,
@@ -1058,6 +1063,7 @@ bool Manager::MultipleUnitSave(MultipleUnitID multipleUnitID,
 	multipleUnit->SetMatchKey(matchKey);
 	multipleUnit->SetProtocol(ProtocolNone);
 	multipleUnit->SetAddress(address);
+	multipleUnit->SetServerAddress(serverAddress);
 	multipleUnit->SetLength(length);
 	multipleUnit->SetPushpull(pushpull);
 	multipleUnit->SetMaxSpeed(maxSpeed);
@@ -1149,10 +1155,14 @@ const std::string& Manager::GetLocoBaseName(const ObjectIdentifier& locoBaseIden
 }
 
 /***************************
-* Accessory                *
+* Accessory Base           *
 ***************************/
 
-void Manager::AccessoryState(const ControlType controlType, const ControlID controlID, const Protocol protocol, const Address address, const DataModel::AccessoryState state)
+void Manager::AccessoryBaseState(const ControlType controlType,
+	const ControlID controlID,
+	const Protocol protocol,
+	const Address address,
+	const DataModel::AccessoryState state)
 {
 	Accessory* accessory = GetAccessory(controlID, protocol, address);
 	if (accessory != nullptr)
@@ -1177,6 +1187,33 @@ void Manager::AccessoryState(const ControlType controlType, const ControlID cont
 
 	logger->Warning(Languages::TextAccessoryControlProtocolAddressDoesNotExist, controlID, protocol, address);
 }
+
+void Manager::AccessoryBaseState(const ControlType controlType,
+	const ObjectIdentifier& identifier,
+	const DataModel::AccessoryState state)
+{
+	switch (identifier.GetObjectType())
+	{
+		case ObjectTypeAccessory:
+			AccessoryState(controlType, identifier.GetObjectID(), state);
+			return;
+
+		case ObjectTypeSwitch:
+			SwitchState(controlType, identifier.GetObjectID(), state);
+			return;
+
+		case ObjectTypeSignal:
+			SignalState(controlType, identifier.GetObjectID(), state);
+			return;
+
+		default:
+			return;
+	}
+}
+
+/***************************
+* Accessory                *
+***************************/
 
 bool Manager::AccessoryState(const ControlType controlType, const AccessoryID accessoryID, const DataModel::AccessoryState state, const bool force)
 {
@@ -1277,6 +1314,7 @@ bool Manager::AccessorySave(AccessoryID accessoryID,
 	const std::string& matchKey,
 	const Protocol protocol,
 	const Address address,
+	const Address serverAddress,
 	const DataModel::AccessoryType type,
 	const DataModel::AccessoryPulseDuration duration,
 	const bool inverted,
@@ -1316,6 +1354,7 @@ bool Manager::AccessorySave(AccessoryID accessoryID,
 	accessory->SetMatchKey(matchKey);
 	accessory->SetProtocol(protocol);
 	accessory->SetAddress(address);
+	accessory->SetServerAddress(serverAddress);
 	accessory->SetType(type);
 	accessory->SetAccessoryPulseDuration(duration);
 	accessory->SetInverted(inverted);
@@ -2168,6 +2207,7 @@ bool Manager::SwitchSave(SwitchID switchID,
 	const string& matchKey,
 	const Protocol protocol,
 	const Address address,
+	const Address serverAddress,
 	const DataModel::AccessoryType type,
 	const DataModel::AccessoryPulseDuration duration,
 	const bool inverted,
@@ -2208,6 +2248,7 @@ bool Manager::SwitchSave(SwitchID switchID,
 	mySwitch->SetMatchKey(matchKey);
 	mySwitch->SetProtocol(protocol);
 	mySwitch->SetAddress(address);
+	mySwitch->SetServerAddress(serverAddress);
 	mySwitch->SetType(type);
 	mySwitch->SetAccessoryPulseDuration(duration);
 	mySwitch->SetInverted(inverted);
@@ -2969,6 +3010,7 @@ bool Manager::SignalSave(SignalID signalID,
 	const string& matchKey,
 	const Protocol protocol,
 	const Address address,
+	const Address serverAddress,
 	const DataModel::AccessoryType type,
 	const std::map<DataModel::AccessoryState,DataModel::AddressOffset>& offsets,
 	const DataModel::AccessoryPulseDuration duration,
@@ -3010,6 +3052,7 @@ bool Manager::SignalSave(SignalID signalID,
 	signal->SetMatchKey(matchKey);
 	signal->SetProtocol(protocol);
 	signal->SetAddress(address);
+	signal->SetServerAddress(serverAddress);
 	signal->SetType(type);
 	signal->SetStateAddressOffsets(offsets);
 	signal->SetAccessoryPulseDuration(duration);
@@ -4395,6 +4438,71 @@ bool Manager::LayoutItemNewPosition(const DataModel::ObjectIdentifier& identifie
 		default:
 			return false;
 	}
+}
+
+ObjectIdentifier Manager::GetIdentifierOfServerLocoAddress(const Address serverAddress) const
+{
+	{
+		std::lock_guard<std::mutex> guard(locoMutex);
+		for (auto& loco : locos)
+		{
+			if (loco.second->GetServerAddress() == serverAddress)
+			{
+				return ObjectIdentifier(ObjectTypeLoco, loco.second->GetID());
+			}
+		}
+	}
+
+	{
+		std::lock_guard<std::mutex> guard(multipleUnitMutex);
+		for (auto& multipleUnit : multipleUnits)
+		{
+			if (multipleUnit.second->GetServerAddress() == serverAddress)
+			{
+				return ObjectIdentifier(ObjectTypeMultipleUnit, multipleUnit.second->GetID());
+			}
+		}
+	}
+
+	return ObjectIdentifier(ObjectTypeNone, ObjectNone);
+}
+
+ObjectIdentifier Manager::GetIdentifierOfServerAccessoryAddress(const Address serverAddress) const
+{
+	{
+		std::lock_guard<std::mutex> guard(accessoryMutex);
+		for (auto& accessory : accessories)
+		{
+			if (accessory.second->GetServerAddress() == serverAddress)
+			{
+				return ObjectIdentifier(ObjectTypeAccessory, accessory.second->GetID());
+			}
+		}
+	}
+
+	{
+		std::lock_guard<std::mutex> guard(switchMutex);
+		for (auto& mySwitch : switches)
+		{
+			if (mySwitch.second->GetServerAddress() == serverAddress)
+			{
+				return ObjectIdentifier(ObjectTypeSwitch, mySwitch.second->GetID());
+			}
+		}
+	}
+
+	{
+		std::lock_guard<std::mutex> guard(signalMutex);
+		for (auto& signal : signals)
+		{
+			if (signal.second->GetServerAddress() == serverAddress)
+			{
+				return ObjectIdentifier(ObjectTypeSignal, signal.second->GetID());
+			}
+		}
+	}
+
+	return ObjectIdentifier(ObjectTypeNone, ObjectNone);
 }
 
 Hardware::HardwareParams* Manager::CreateAndAddControl()

@@ -61,6 +61,11 @@ namespace Server { namespace Z21
 				return ((buffer[0] & 0x3F) << 8) + buffer[1];
 			}
 
+			inline uint16_t ParseAccessoryAddress(const unsigned char* buffer)
+			{
+				return ((buffer[0] << 8) + buffer[1]) + 1; // + 1 because Z21 protocol is 0 based
+			}
+
 			inline void SendPowerOff()
 			{
 				const unsigned char sendBuffer[7] = { 0x07, 0x00, 0x40, 0x00, 0x61, 0x00, 0x61 };
@@ -73,7 +78,9 @@ namespace Server { namespace Z21
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
 
-			void SendLocoInfo(const DataModel::LocoBase* const loco);
+			void SendLocoInfo(const DataModel::LocoBase* const locoBase);
+
+			void SendTurnoutInfo(const DataModel::AccessoryBase* const accessoryBase);
 
 		private:
 			inline void SendSerialNumber()
@@ -96,7 +103,9 @@ namespace Server { namespace Z21
 
 			inline void SendSystemStatusChanged()
 			{
-				const unsigned char sendBuffer[20] = { 0x14, 0x00, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x4E, 0x50, 0x46, 0x00, 0x00, 0x00, 0x73 };
+				const BoosterState booster = manager.Booster();
+				const unsigned char centralState = (!booster) << 1;
+				const unsigned char sendBuffer[20] = { 0x14, 0x00, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x4E, 0x50, 0x46, centralState, 0x00, 0x00, 0x71 };
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
 
@@ -120,7 +129,10 @@ namespace Server { namespace Z21
 
 			inline void SendStatusChanged()
 			{
-				const unsigned char sendBuffer[8] = { 0x08, 0x00, 0x40, 0x00, 0x62, 0x22, 0x00, 0x08 };
+				const BoosterState booster = manager.Booster();
+				const unsigned char centralState = (!booster) << 1;
+				unsigned char sendBuffer[8] = { 0x08, 0x00, 0x40, 0x00, 0x62, 0x22, centralState };
+				sendBuffer[sizeof(sendBuffer) - 1] = Utils::Utils::CalcXORCheckSum(sendBuffer, sizeof(sendBuffer) - 1);
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
 

@@ -92,6 +92,8 @@ namespace Hardware
 			{
 				XHeaderSeeDB0_1           = 0x21,
 				XHeaderTurnoutInfo        = 0x43,
+				XHeaderGetTurnoutInfo     = 0x43,
+				XHeaderSetTurnout         = 0x53,
 				XHeaderSeeDB0_2           = 0x61,
 				XHeaderStatusChanged      = 0x62,
 				XHeaderVersion            = 0x63,

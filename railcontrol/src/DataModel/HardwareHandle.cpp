@@ -32,6 +32,7 @@ namespace DataModel
 		string str = "controlID=" + to_string(controlID);
 		str += ";protocol=" + to_string(protocol);
 		str += ";address=" + to_string(address);
+		str += ";serveraddress=" + to_string(serverAddress);
 		return str;
 	}
 
@@ -40,6 +41,7 @@ namespace DataModel
 		controlID = Utils::Utils::GetIntegerMapEntry(arguments, "controlID", ControlIdNone);
 		protocol = static_cast<Protocol>(Utils::Utils::GetIntegerMapEntry(arguments, "protocol", ProtocolNone));
 		address = Utils::Utils::GetIntegerMapEntry(arguments, "address");
+		serverAddress = static_cast<Address>(Utils::Utils::GetIntegerMapEntry(arguments, "serveraddress", AddressNone));
 		return true;
 	}
 } // namespace DataModel
