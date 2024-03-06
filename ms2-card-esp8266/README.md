@@ -17,7 +17,7 @@ Der Prozessor signalisiert das Einstecken der Lokkarte (Signal Card) durch Verbi
 der Kontakte am Kartenrand.
 
 Die Platine wurde mit KiCad 7.0.11 erstellt. Die Produktionsdaten wurden mit dem JLCPCB
-Fabrication Toolkit generiert.
+Fabrication Toolkit Plugin generiert.
 
 Die zwei Fehler im DRC Check (Corteyards overlap) können ignoriert werden, da die Bestückung
 mit dem SPI EEPROM U10 und C11 alternativ ist.
