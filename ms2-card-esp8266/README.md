@@ -37,7 +37,7 @@ Q1/Q2 und R8/R9 dienen dazu, das Update der ESP8266 ohne Eingriff zu ermögliche
 
 U3 und U4 trennen den I2C Bus von der MS2, damit es keine Störungen des MS2 I2C-Busses gibt.
 I2C Select schaltet entweder den ESP8266 oder alternativ einen anderen I2C Master
-führ den Zugriff auf das FRAM hinzu.
+für den Zugriff auf das FRAM hinzu.
 
 U20 dient dazu, einen Kartenwechsel der MS2 zu signalisieren.
 
@@ -101,6 +101,7 @@ esptool.py --port /dev/ttyUSB1 --baud 460800 write_flash --flash_size=detect 0 .
 SD-CARD
 -------
 https://github.com/arendst/Tasmota/discussions/13938
+
 https://www.mikrocontroller.net/articles/MMC-_und_SD-Karten
 
 Pull-up D0
@@ -108,13 +109,11 @@ SPI-Mode Pull-up ungenutzter Ports (TODO)
 470 nH Vdd (TODO)
 
 
-Raspberry Pi I2C Slave
-----------------------
+Raspberry Pi I2C
+----------------
 
 |Function  | GPIO   | Pin    |      |
 |----------|--------|--------|------|
 |SDA       | GPIO2  | Pin 3  |      |
 |SCL       | GPIO3  | Pin 5  |      |
-|SDA Slave | GPIO10 | Pin 19 | used |
-|SCL Slave | GPIO11 | Pin 23 | used |
 
