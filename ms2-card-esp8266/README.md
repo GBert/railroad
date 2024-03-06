@@ -1,5 +1,9 @@
 Lokkarten Emulator
-------------------
+==================
+
+
+[alt Lokkarten Emulator](https://raw.githubusercontent.com/GBert/railroad/master/ms2-card-esp8266/ms2-card_sd-card.png)
+
 
 Auf der Lokkarte befindet sich ein I2C EEPROM (24LC64 64kBit -> 8kByte). Die Schaltung
 ersetzt den Speicher durch ein kompatiblen FRAM Baustein. Dadurch entfällt die
