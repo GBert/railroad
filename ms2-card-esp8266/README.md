@@ -6,11 +6,11 @@ Lokkarten Emulator
 
 
 Auf der Lokkarte befindet sich ein I2C EEPROM (24LC64 64kBit -> 8kByte). Die Schaltung
-ersetzt den Speicher durch ein kompatiblen FRAM Baustein. Dadurch entfällt die
+ersetzt den Speicher durch ein kompatiblen FRAM Baustein (U2). Dadurch entfällt die
 zeitkritische I2C Slave Behandlung.
 
 Der Prozessor (ESP8266 oder extern) befüllt den FRAM Baustein mit Lokkarten Daten. Damit
-es zu keinen Komplikationen auf dem I2C Bus kommen kann, ist der I2C Bus durch analoge
+es zu keinen Komplikationen auf dem MS2 I2C Bus kommen kann, ist der I2C Bus durch analoge
 Schalter (BL1551B - Signal I2C_Select) getrennt.
 
 Der Prozessor signalisiert das Einstecken der Lokkarte (Signal Card) durch Verbindung
@@ -27,8 +27,9 @@ Detail-Beschreibung
 -------------------
 
 Der Kartenwechsel wird bei der MS2 über einen mechanischen Taster erkannt. Bei der MS2 wurden
-verschiedene Arten der Kontakte verbaut. Die Platine verwendet einen federnden Testpin, damit
-Kartenwechsel simuliert werden kann: https://dirtypcbs.com/store/designer/details/ian/12/dirty-pogo-pins
+verschiedene Arten des Tasters verbaut. Die Platine verwendet einen federnden Testpin, damit
+ein Kartenwechsel für die verschiedene Bauarten simuliert werden kann:
+https://dirtypcbs.com/store/designer/details/ian/12/dirty-pogo-pins
 
 Power Select: hier wählt man zwiechen Versorgung durch MS2 oder USB.
 
