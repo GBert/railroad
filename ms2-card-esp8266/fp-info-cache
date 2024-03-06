@@ -1,4 +1,4 @@
-23039987211419112
+23041697016289005
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -82888,6 +82888,13 @@ TO-264-5 Vertical RM 3.81mm
 5
 PogoPin
 PogoPin
+
+
+0
+1
+1
+PogoPin
+PogoPin2
 
 
 0

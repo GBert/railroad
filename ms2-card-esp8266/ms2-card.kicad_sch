@@ -5692,7 +5692,7 @@
     (property "Value" "PogoPin" (at 113.03 31.75 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "PogoPin:PogoPin" (at 109.22 35.56 0)
+    (property "Footprint" "PogoPin:PogoPin2" (at 109.22 35.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 109.22 35.56 0)
