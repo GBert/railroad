@@ -18,8 +18,13 @@ Fabrication Toolkit generiert.
 Die zwei Fehler im DRC Check (Corteyards overlap) können ignoriert werden, da die Bestückung
 mit dem SPI EEPROM U10 und C11 alternativ ist.
 
+
 Detail-Beschreibung
 -------------------
+
+Der Kartenwechsel wird bei der MS2 über einen mechanischen Taster erkannt. Bei der MS2 wurden
+verschiedene Arten der Kontakte verbaut. Die Platine verwendet einen federnden Testpin, damit
+Kartenwechsel simuliert werden kann: https://dirtypcbs.com/store/designer/details/ian/12/dirty-pogo-pins
 
 Power Select: hier wählt man zwiechen Versorgung durch MS2 oder USB.
 
@@ -27,8 +32,8 @@ Schaltregler kann als Ersatz dienen, wenn der Längsregler U6 nicht ausreicht.
 Dazu muss U6 aber entfernt werden.
 
 Für C1 ist ein Tantal Kondensator vorgesehen. Da Tantal aber ein Rohstoff aus Krisengebieten
-ist, ist auch ein anderer Kondensator mit niedrigem ESR ratsam. Die Pads sollten
-genügend Platz bieten, einen anderen Kondensator einzusetzen.
+ist, ist ein anderer Kondensator mit niedrigem ESR ratsam. Die Pads sollten genügend Platz bieten,
+einen anderen Kondensator einzusetzen, wie z.B. Reichelts "VF 100/6,3 P-C" oder "VF 100/16 P-D".
 
 Silabs CP2102 wurde für die Seriell-USB Anbindung gewählt, weil dieser ein guter Kompromiss
 zwischen Stabilität, Unterstützung und Preis ist.
