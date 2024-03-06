@@ -1054,7 +1054,7 @@
     (property "ki_description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)")
     (property "ki_keywords" "connector")
     (path "/42c177be-3b94-48a6-9752-17dc203b8aee")
-    (attr through_hole exclude_from_bom)
+    (attr through_hole exclude_from_pos_files exclude_from_bom)
     (fp_text reference "J21" (at 0.784 -1.146 unlocked) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.1)))
       (tstamp 31888b9d-13b3-4734-811e-e2682ac4b824)
