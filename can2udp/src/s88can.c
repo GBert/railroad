@@ -195,6 +195,7 @@ void bpi_poll(struct s88_bus *s88) {
     uint32_t mask, s88_bit;
     uint8_t newvalue;
 
+    mask = 0;
     s88_bit = 0;
     gpio_aw_set(LOAD_PIN, HIGH ^ invert);
     usec_sleep(utime);

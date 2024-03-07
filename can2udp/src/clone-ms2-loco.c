@@ -794,7 +794,7 @@ int main(int argc, char **argv) {
     FD_ZERO(&exceptfds);
     /* delete pending push button event */
     if ((trigger_data.pb_pin) > 0) {
-	if (read(trigger_data.pb_fd, NULL, 100) < 0)
+	if (read(trigger_data.pb_fd, buffer, sizeof(buffer)) < 0)
 	    fprintf(stderr, "error reading GPIO trigger: %s\n", strerror(errno));
 	lseek(trigger_data.pb_fd, 0, SEEK_SET);
     }

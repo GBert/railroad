@@ -320,7 +320,8 @@ int main(int argc, char **argv) {
 	    } else if (strstr(line, " .name=") == line) {
 		if (gbs_valid) {
 		    memset(gbs_name, 0, sizeof(gbs_name));
-		    strncpy(gbs_name, &line[7], sizeof(gbs_name) - 1);
+		    // strncpy(gbs_name, &line[7], sizeof(gbs_name) - 1);
+		    memcpy(gbs_name, &line[7], sizeof(gbs_name) - 1);
 		    strcat(gbs_name, ".cs2");
 		    config_data.filename = gbs_name;
 		    get_data(&config_data, sockfd);
