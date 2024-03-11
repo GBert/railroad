@@ -513,7 +513,7 @@ void decode_cs2_system(struct can_frame *frame) {
 	    printf("System: Geraetekennung UID 0x%08X", uid);
 	} else {
 	    wert = be16(&frame->data[5]);
-	    printf("System: Geraetekennung UID 0x%08X ist 0x%04X", uid, wert);
+	    printf("System: Geraetekennung UID 0x%08X ist %d (0x%04X)", uid, wert, wert);
 	}
 	break;
 	/* Modellzeit */
