@@ -42,7 +42,9 @@
 #define PREAMBLE_MFX2		0x00F5
 #define PREAMBLE_MFX_F32	0x0117
 
-static char *I2C_DEF_PATH  = "/sys/bus/i2c/devices/1-0050/eeprom";
+#define BASIC_DATA_SIZE		384
+static char *I2C_DEF_PATH  = "/dev/i2card";	/* sys/bus/i2c/devices/1-0050/eeprom"; */
+static char *LOCOPIC_PATH  = "/www/config/locopic.png";
 static char *BCASTFILENAME = "/www/config/bclocard";
 static char *BCASTTRIGGER  = "cansend can0 00434763#62636C6F63617264";
 
@@ -55,12 +57,16 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -v                  verbose output\n\n");
 }
 
-uint16_t le16(uint8_t * u) {
+uint16_t le16(uint8_t *u) {
     return (u[1] << 8) | u[0];
 }
 
-uint32_t le32(uint8_t * u) {
+uint32_t le32(uint8_t *u) {
     return (u[3] << 24) | (u[2] << 16) | (u[1] << 8) | u[0];
+}
+
+uint32_t be32(uint8_t *u) {
+    return (u[0] << 24) | (u[1] << 16) | (u[2] << 8) | u[3];
 }
 
 void print_bitmap(unsigned char *data) {
@@ -93,7 +99,12 @@ unsigned char *read_data(struct loco_config_t *loco_config) {
     }
 
     fseek(fp, 0, SEEK_END);
-    loco_config->eeprom_size = ftell(fp);
+    long int sz = ftell(fp);
+    if (sz < 0L) {
+	fprintf(stderr, "%s: error ftell failed, random access not supported.\n", __func__);
+	return NULL;
+    }
+    loco_config->eeprom_size = sz;
     fseek(fp, 0, SEEK_SET);
 
     if ((data = malloc(loco_config->eeprom_size)) == NULL) {
@@ -102,14 +113,14 @@ unsigned char *read_data(struct loco_config_t *loco_config) {
 	return NULL;
     }
 
-    if ((fread((void *)data, 1, loco_config->eeprom_size, fp)) != loco_config->eeprom_size) {
+    if ((fread((void *)data, 1, BASIC_DATA_SIZE, fp)) != BASIC_DATA_SIZE) {
 	fprintf(stderr, "%s: error: fread failed for [%s]\n", __func__, loco_config->filename);
 	fclose(fp);
 	free(data);
 	return NULL;
     }
 
-    fclose(fp);
+    loco_config->fp = fp;
     return data;
 }
 
@@ -131,6 +142,36 @@ int write_data(struct loco_config_t *loco_config) {
 	return EXIT_FAILURE;
     }
 
+    fclose(fp);
+    return 0;
+}
+
+int write_locopic(struct loco_config_t *loco_config, unsigned int png_start, unsigned int png_size) {
+    FILE *fp;
+    unsigned int toread = png_start + png_size - BASIC_DATA_SIZE + 1;
+    unsigned char *data = loco_config->bin + BASIC_DATA_SIZE;
+    if ((png_start + png_size) > loco_config->eeprom_size) {
+	fprintf(stderr, "%s: error: sizes will not fit for [%s]\n", __func__, loco_config->filename);
+	return EXIT_FAILURE;
+    }
+    printf("Still %d bytes to read.\n", toread);
+    if ((fread((void *)data, 1, toread, loco_config->fp)) != toread) {
+	fprintf(stderr, "%s: error: fread failed for [%s]\n", __func__, loco_config->filename);
+	return EXIT_FAILURE;
+    }
+
+    data = loco_config->bin + png_start;
+    printf("PNG image %d pixel wide and %d pixel high.\n", be32(data + 16), be32(data + 20));
+    fp = fopen(LOCOPIC_PATH, "wb");
+    if (fp == NULL) {
+	fprintf(stderr, "%s: error fopen failed [%s]\n", __func__, LOCOPIC_PATH);
+	return EXIT_FAILURE;
+    }
+    if ((fwrite((void *)data, 1, png_size, fp)) != png_size) {
+	fprintf(stderr, "%s: error writing failed [%s]\n", __func__, LOCOPIC_PATH);
+	fclose(fp);
+	return EXIT_FAILURE;
+    }
     fclose(fp);
     return 0;
 }
@@ -182,9 +223,9 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
     case PREAMBLE_MM:
 	printf("ID 0x%04x type: mm 8 functions\n", id);
 	break;
-	case PREAMBLE_MM2_PRG:
+    case PREAMBLE_MM2_PRG:
 	printf("ID 0x%04x type mm2\n", id);
-	break;	
+	break;
     case PREAMBLE_MFX_F32:
 	printf("ID 0x%04x type: mfx 32 functions\n", id);
 	break;
@@ -242,7 +283,7 @@ int decode_sc_data(struct loco_config_t *loco_config, struct loco_data_t *loco_d
 		    png_size = length + (loco_config->bin[i++] << 8);
 		    printf("    png start: 0x%04x  end: 0x%04x  size: 0x%04x  %u bytes\n",
 			   i, i + png_size, png_size, png_size);
-		    return EXIT_SUCCESS;
+		    return write_locopic(loco_config, i, png_size);
 		default:
 		    printf("decoding problem: 0x%02x\n", id);
 		    break;
@@ -456,8 +497,8 @@ int main(int argc, char **argv) {
     if (verbose)
 	printf("EEPROM Size (%s) : %u\n", filename, loco_config.eeprom_size);
 
-    if (verbose)
-	decode_sc_data(&loco_config, &loco_data);
+    decode_sc_data(&loco_config, &loco_data);
+    fclose(loco_config.fp);
 
     if (cs2_output)
 	print_loco(stdout, &loco_data, 0);
