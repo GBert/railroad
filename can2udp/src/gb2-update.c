@@ -77,10 +77,10 @@ struct updatefile {
     uint8_t fill;
     uint32_t size;
     uint32_t rows;
-    int major;
-    int minor;
-    int month;
-    int year;
+    uint16_t major;
+    uint16_t minor;
+    uint16_t month;
+    uint16_t year;
 };
 
 #define ACTUAL	0
@@ -131,7 +131,7 @@ unsigned char M_MS2_SOFT_RESET[] 		= { 0x00, 0x36, 0x47, 0x11, 0x05, 0x00, 0x00,
 unsigned char udpframe[MAXDG];
 
 unsigned char *binfile;
-int device_fsize, fsize;
+unsigned int device_fsize, fsize;
 int force = 0, verbose = 0, print_version = 0;
 uint16_t device_file_version, version = 0;
 unsigned int device_id = 0;
@@ -147,7 +147,7 @@ int finished;
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -l <port> -d <port> -b <broacast_addr> -i <can interface> <update file>\n", prg);
-    fprintf(stderr, "   Version 0.4\n");
+    fprintf(stderr, "   Version 0.5\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "         -d <port>           destination UDP port - default 15731\n");
     fprintf(stderr, "         -l <port>           listening UDP port   - default 15730\n");
@@ -281,7 +281,7 @@ unsigned char *read_data(struct update_config *device_config) {
     device_fsize = (fsize + device_config->padding) & (0xFFFFFFFFUL - device_config->padding);
 
     if ((data = malloc(device_fsize)) == NULL) {
-	fprintf(stderr, "%s: can't alloc %d bytes for data\n", __func__, fsize);
+	fprintf(stderr, "%s: can't alloc %u bytes for data\n", __func__, fsize);
 	fclose(fp);
 	return NULL;
     }
@@ -545,7 +545,6 @@ int main(int argc, char **argv) {
     char broadcast_address[16];
     socklen_t caddrlen;
     fd_set readfds;
-    char *filename;
 
     /* wait for response */
     timeout.tv_sec = TIMEOUT;
@@ -627,9 +626,7 @@ int main(int argc, char **argv) {
 	}
     }
     if (optind < argc) {
-	filename = (char *)malloc(strlen(argv[optind] + 1));
-	strncpy(filename, argv[optind], sizeof(*filename) - 1);
-	device_config.filename = filename;
+	device_config.filename = argv[optind];
     }
 
     if ((verbose) | print_version)
@@ -642,8 +639,8 @@ int main(int argc, char **argv) {
     if (binfile == NULL)
 	exit(EXIT_FAILURE);
     dev_bin_blocks = (device_fsize - 1) >> device_config.shift;
-    /* printf("%s: fsize 0x%04X device_fsize 0x%04X blocks 0x%02X last 0x%04X\n", filename, fsize, device_fsize,
-       dev_bin_blocks, device_fsize - dev_bin_blocks * device_config.block_size); */
+    /* printf("%s: fsize 0x%04X device_fsize 0x%04X blocks 0x%02X last 0x%04X\n", device_config.filename,
+	   fsize, device_fsize, dev_bin_blocks, device_fsize - dev_bin_blocks * device_config.block_size); */
 
     if (can_mode) {
 	if ((sc = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
