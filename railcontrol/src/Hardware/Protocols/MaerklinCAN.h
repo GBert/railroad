@@ -64,12 +64,13 @@ namespace Hardware
 					protocols.push_back(ProtocolMM);
 					protocols.push_back(ProtocolMFX);
 					protocols.push_back(ProtocolDCC);
-					protocols.push_back(ProtocolMulti);
 				}
 
 				inline bool LocoProtocolSupported(Protocol protocol) const override
 				{
-					return (protocol == ProtocolMM || protocol == ProtocolMFX || protocol == ProtocolDCC || protocol == ProtocolMulti);
+					return ((protocol == ProtocolMM)
+						|| (protocol == ProtocolMFX)
+						|| (protocol == ProtocolDCC));
 				}
 
 				inline void GetAccessoryProtocols(std::vector<Protocol>& protocols) const override
@@ -80,36 +81,44 @@ namespace Hardware
 
 				inline bool AccessoryProtocolSupported(Protocol protocol) const override
 				{
-					return (protocol == ProtocolMM || protocol == ProtocolDCC);
+					return ((protocol == ProtocolMM)
+						|| (protocol == ProtocolDCC));
 				}
 
 				void Booster(const BoosterState status) override;
 				void LocoSpeed(const Protocol protocol, const Address address, const Speed speed) override;
-				void LocoOrientation(const Protocol protocol, const Address address, const Orientation orientation)
-				    override;
+				void LocoOrientation(const Protocol protocol, const Address address, const Orientation orientation) override;
 
 				void LocoFunction(const Protocol protocol,
 				    const Address address,
 				    const DataModel::LocoFunctionNr function,
 				    const DataModel::LocoFunctionState on) override;
 
-				void AccessoryOnOrOff(const Protocol protocol, const Address address,
-				    const DataModel::AccessoryState state, const bool on) override;
+				void AccessoryOnOrOff(const Protocol protocol, const Address address, const DataModel::AccessoryState state, const bool on) override;
 				void ProgramRead(const ProgramMode mode, const Address address, const CvNumber cv) override;
-				void ProgramWrite(const ProgramMode mode, const Address address, const CvNumber cv, const CvValue value)
-				    override;
+				void ProgramWrite(const ProgramMode mode, const Address address, const CvNumber cv, const CvValue value) override;
 
-				inline virtual const std::map<std::string, Hardware::LocoCacheEntry>& GetLocoDatabase() const override
+				virtual const std::map<std::string, Hardware::LocoCacheEntry>& GetLocoDatabase() const override
 				{
 					return locoCache.GetAll();
 				}
 
-				inline virtual DataModel::LocoConfig GetLocoByMatchKey(const std::string& matchKey) const override
+				virtual DataModel::LocoConfig GetLocoByMatchKey(const std::string& matchKey) const override
 				{
 					return DataModel::LocoConfig(locoCache.Get(matchKey));
 				}
 
-				inline virtual void SetLocoIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
+				virtual DataModel::LocoConfig GetMultipleUnitByMatchKey(const std::string& matchKey) const override
+				{
+					return DataModel::LocoConfig(locoCache.Get(matchKey));
+				}
+
+				virtual void SetLocoIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
+				{
+					locoCache.SetLocoId(locoId, matchKey);
+				}
+
+				virtual void SetMultipleUnitIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
 				{
 					locoCache.SetLocoId(locoId, matchKey);
 				}
@@ -397,6 +406,7 @@ namespace Hardware
 				bool ParseCs2FileKeyValue(const std::string& line, std::string& key, std::string& value);
 				bool ParseCs2FileSubkeyValue(const std::string& line, std::string& key, std::string& value);
 				void ParseCs2FileLocomotiveFunction(std::deque<std::string>& lines, LocoCacheEntry& cacheEntry);
+				void ParseCs2FileLocomotiveTraktion(std::deque<std::string>& lines, LocoCacheEntry& cacheEntry);
 				void ParseCs2FileLocomotive(std::deque<std::string>& lines);
 				void ParseCs2FileLocomotivesSession(std::deque<std::string>& lines);
 				void ParseCs2FileLocomotivesVersion(std::deque<std::string>& lines);

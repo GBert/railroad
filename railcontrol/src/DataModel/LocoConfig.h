@@ -62,7 +62,8 @@ namespace DataModel
 				type(loco.GetType()),
 				name(loco.GetName()),
 				matchKey(loco.GetMatchKey()),
-				isInUse(false)
+				isInUse(false),
+				slaves(loco.GetSlaveIDs())
 			{
 				ConfigureFunctions(loco.GetFunctionStates());
 			}
@@ -91,6 +92,7 @@ namespace DataModel
 				name = loco.GetName();
 				matchKey = loco.GetMatchKey();
 				ConfigureFunctions(loco.GetFunctionStates());
+				slaves = loco.GetSlaveIDs();
 				return *this;
 			}
 
@@ -105,6 +107,7 @@ namespace DataModel
 				matchKey = multipleUnit.GetMatchKey();
 				isInUse = multipleUnit.IsInUse();
 				ConfigureFunctions(multipleUnit.GetFunctionStates());
+				slaves = multipleUnit.GetSlaveIDs();
 				return *this;
 			}
 
@@ -168,6 +171,16 @@ namespace DataModel
 				functions.ConfigureFunctions(newEntries);
 			}
 
+			inline void AddSlave(const LocoID locoID)
+			{
+				slaves.push_back(locoID);
+			}
+
+			inline const std::vector<LocoID>& GetSlaves() const
+			{
+				return slaves;
+			}
+
 		private:
 			ControlID controlId;
 			LocoID locoId;
@@ -178,5 +191,6 @@ namespace DataModel
 			std::string matchKey;
 			bool isInUse;
 			LocoFunctions functions;
+			std::vector<LocoID> slaves;
 	};
 } // namespace DataModel

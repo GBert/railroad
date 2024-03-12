@@ -133,8 +133,8 @@ enum Protocol : uint8_t
 	ProtocolSX1 = 11,
 	ProtocolSX2 = 12,
 	ProtocolFMZ = 13,
-	ProtocolMulti = 14,
-	ProtocolEnd = ProtocolMulti
+	ProtocolMultipleUnit = 14,
+	ProtocolEnd = ProtocolMultipleUnit
 };
 
 static const std::string ProtocolSymbols[] =

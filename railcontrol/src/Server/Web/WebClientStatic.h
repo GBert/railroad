@@ -120,6 +120,9 @@ namespace Server { namespace Web
 				return DataModel::ObjectIdentifier(ObjectTypeMultipleUnit, multipleUnitID);
 			}
 
+			static std::vector<DataModel::Relation*> ConvertSlaveIDVectorToRelation(Manager& manager,
+				const MultipleUnitID multipleUnitID,
+				const std::vector<LocoID>& slaveIDs);
 	};
 
 }} // namespace Server::Web

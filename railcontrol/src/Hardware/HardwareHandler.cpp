@@ -567,7 +567,10 @@ namespace Hardware
 		for (auto& entry : database)
 		{
 			const Hardware::LocoCacheEntry& loco = entry.second;
-			if (loco.GetLocoID() != LocoNone && loco.GetMatchKey().size() && loco.GetMatchKey() != matchKey)
+			if ((loco.GetType() != LocoTypeLoco)
+				&& (loco.GetLocoID() != LocoNone)
+				&& (loco.GetMatchKey().size())
+				&& (loco.GetMatchKey() != matchKey))
 			{
 				continue;
 			}
@@ -583,6 +586,62 @@ namespace Hardware
 			return DataModel::LocoConfig(LocoTypeLoco);
 		}
 		return instance->GetLocoByMatchKey(match);
+	}
+
+	void HardwareHandler::AddUnmatchedMultipleUnits(std::map<std::string,DataModel::LocoConfig>& list) const
+	{
+		if (instance == nullptr)
+		{
+			return;
+		}
+
+		const std::map<std::string,Hardware::LocoCacheEntry>& database = instance->GetLocoDatabase();
+		for (auto& entry : database)
+		{
+			const Hardware::LocoCacheEntry& loco = entry.second;
+			if (loco.GetLocoID() != LocoNone)
+			{
+				continue;
+			}
+			if (loco.GetType() != LocoTypeMultipleUnit)
+			{
+				continue;
+			}
+			list[loco.GetName() + " (" + instance->GetShortName() + ")"] = loco;
+		}
+	}
+
+	std::map<std::string,DataModel::LocoConfig> HardwareHandler::GetUnmatchedMultipleUnits(const std::string& matchKey) const
+	{
+		std::map<std::string,DataModel::LocoConfig> out;
+		if (instance == nullptr)
+		{
+			return out;
+		}
+
+		const std::map<std::string,Hardware::LocoCacheEntry>& database = instance->GetLocoDatabase();
+		for (auto& entry : database)
+		{
+			const Hardware::LocoCacheEntry& loco = entry.second;
+			if ((loco.GetType() != LocoTypeMultipleUnit)
+				&& (loco.GetLocoID() != LocoNone)
+				&& (loco.GetMatchKey().size())
+				&& (loco.GetMatchKey() != matchKey))
+			{
+				continue;
+			}
+			out[loco.GetName()] = loco;
+		}
+		return out;
+	}
+
+	DataModel::LocoConfig HardwareHandler::GetMultipleUnitByMatchKey(const std::string& match) const
+	{
+		if (instance == nullptr)
+		{
+			return DataModel::LocoConfig(LocoTypeMultipleUnit);
+		}
+		return instance->GetMultipleUnitByMatchKey(match);
 	}
 
 	void HardwareHandler::AddUnmatchedAccessories(std::map<std::string,DataModel::AccessoryConfig>& list) const

@@ -155,26 +155,30 @@ namespace Server { namespace Z21
 				return;
 
 			case Z21Enums::XHeaderGetLocoInfo:
+			{
+				const Address address = ParseLocoAddress(buffer + 6);
+				logger->Debug("Address: {0}", address);
+				const DataModel::LocoBase* const locoBase = manager.GetLocoBase(manager.GetIdentifierOfServerLocoAddress(address));
+				if (nullptr == locoBase)
 				{
-					const DataModel::LocoBase* const locoBase = manager.GetLocoBase(manager.GetIdentifierOfServerLocoAddress(ParseLocoAddress(buffer + 6)));
-					if (nullptr == locoBase)
-					{
-						return;
-					}
-					SendLocoInfo(locoBase);
+					return;
 				}
+				SendLocoInfo(locoBase);
 				return;
+			}
 
 			case Z21Enums::XHeaderGetTurnoutInfo:
+			{
+				const Address address = ParseLocoAddress(buffer + 5);
+				logger->Debug("Address: {0}", address);
+				const DataModel::AccessoryBase* const accessoryBase = manager.GetAccessoryBase(manager.GetIdentifierOfServerAccessoryAddress(address));
+				if (nullptr == accessoryBase)
 				{
-					const DataModel::AccessoryBase* const accessoryBase = manager.GetAccessoryBase(manager.GetIdentifierOfServerAccessoryAddress(ParseLocoAddress(buffer + 5)));
-					if (nullptr == accessoryBase)
-					{
-						return;
-					}
-					SendTurnoutInfo(accessoryBase);
+					return;
 				}
+				SendTurnoutInfo(accessoryBase);
 				return;
+			}
 
 			case Z21Enums::XHeaderLocoDrive:
 				switch(buffer[5])
@@ -223,11 +227,13 @@ namespace Server { namespace Z21
 	{
 		switch (buffer[5])
 		{
+			case Z21Enums::DB0Version:
+				SendVersion();
+				return;
+
 			case Z21Enums::DB0Status:
-			{
 				SendStatusChanged();
 				return;
-			}
 
 			case Z21Enums::DB0SetPowerOff:
 				logger->Debug(Languages::TextBoosterIsTurnedOff);

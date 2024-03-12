@@ -70,6 +70,16 @@ namespace DataModel
 				return slaves;
 			}
 
+			inline const std::vector<LocoID> GetSlaveIDs() const
+			{
+				std::vector<LocoID> out;
+				for (auto const & slave : slaves)
+				{
+					out.push_back(slave->ObjectID2());
+				}
+				return out;
+			}
+
 			void SetSpeed(const Speed speed) override;
 
 			void SetFunctionState(const DataModel::LocoFunctionNr nr,

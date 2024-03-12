@@ -555,4 +555,19 @@ namespace Server { namespace Web
 		automodeContent.AddChildTag(HtmlTagInputIntegerWithLabel("creepingspeed", Languages::TextCreepingSpeed, creepingSpeed, 0, MaxSpeed));
 		return automodeContent;
 	}
+
+	vector<DataModel::Relation*> WebClientStatic::ConvertSlaveIDVectorToRelation(Manager& manager,
+		const MultipleUnitID multipleUnitID,
+		const vector<LocoID>& slaveIDs)
+	{
+		vector<DataModel::Relation*> slaves;
+		for (auto const & slaveID : slaveIDs)
+		{
+			slaves.push_back(new Relation(&manager,
+				ObjectIdentifier(ObjectTypeMultipleUnit, multipleUnitID),
+				ObjectIdentifier(ObjectTypeLoco, slaveID),
+				Relation::TypeMultipleUnitSlave));
+		}
+		return slaves;
+	}
 }} // namespace Server::Web

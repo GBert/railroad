@@ -998,7 +998,7 @@ const map<string,DataModel::LocoConfig> Manager::MultipleUnitConfigByName() cons
 {
 	map<string,DataModel::LocoConfig> out;
 	{
-		std::lock_guard<std::mutex> guard(locoMutex);
+		std::lock_guard<std::mutex> guard(multipleUnitMutex);
 		for (auto& multipleUnit : multipleUnits)
 		{
 			out[multipleUnit.second->GetName()] = *(multipleUnit.second);

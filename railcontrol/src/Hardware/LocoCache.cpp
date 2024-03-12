@@ -23,6 +23,19 @@ along with RailControl; see the file LICENCE. If not see
 
 namespace Hardware
 {
+	void LocoCacheEntry::UpdateSlaves(Manager* manager)
+	{
+		for (auto & slave : slaves)
+		{
+			DataModel::Loco* loco = manager->GetLocoByMatchKey(controlId, slave.GetMatchKey());
+			if (!loco)
+			{
+				continue;
+			}
+			slave.SetLocoID(loco->GetID());
+		}
+	}
+
 	void LocoCache::Save(LocoCacheEntry& entry, const std::string& oldMatchKey)
 	{
 		const std::string& matchKey = entry.GetMatchKey();

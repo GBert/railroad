@@ -23,6 +23,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <cstring>
 #include <string>
 #include <map>
+#include <vector>
 
 #include "DataTypes.h"
 #include "DataModel/LocoFunctions.h"
@@ -31,6 +32,53 @@ class Manager;
 
 namespace Hardware
 {
+	class LocoCacheEntrySlave
+	{
+		public:
+			LocoCacheEntrySlave() = delete;
+
+			inline LocoCacheEntrySlave(const Protocol protocol,
+				const Address address,
+				const std::string matchKey)
+			:	protocol(protocol),
+				address(address),
+				matchKey(matchKey),
+				locoID(LocoNone)
+			{
+			}
+
+			inline Protocol GetProtocol() const
+			{
+				return protocol;
+			}
+
+			inline Address GetAddress() const
+			{
+				return address;
+			}
+
+			inline const std::string& GetMatchKey() const
+			{
+				return matchKey;
+			}
+
+			inline void SetLocoID(LocoID locoID)
+			{
+				this->locoID = locoID;
+			}
+
+			inline LocoID GetLocoID() const
+			{
+				return locoID;
+			}
+
+		private:
+			Protocol protocol;
+			Address address;
+			std::string matchKey;
+			LocoID locoID;
+	};
+
 	class LocoCacheEntry
 	{
 		public:
@@ -134,6 +182,28 @@ namespace Hardware
 				this->matchKey = std::to_string(matchKey);
 			}
 
+			inline void AddSlave(const Protocol protocol, const Address address, const std::string& matchKey)
+			{
+				slaves.push_back(LocoCacheEntrySlave(protocol, address, matchKey));
+			}
+
+			void UpdateSlaves(Manager* manager);
+
+			inline std::vector<LocoID> GetSlaveIDs() const
+			{
+				std::vector<LocoID> out;
+				for (auto const & slave : slaves)
+				{
+					const LocoID slaveID = slave.GetLocoID();
+					if (slaveID == LocoNone)
+					{
+						continue;
+					}
+					out.push_back(slaveID);
+				}
+				return out;
+			}
+
 		private:
 			const ControlID controlId;
 			LocoID locoId;
@@ -143,6 +213,7 @@ namespace Hardware
 			LocoType type;
 			std::string matchKey;
 			DataModel::LocoFunctions functions;
+			std::vector<LocoCacheEntrySlave> slaves;
 	};
 
 	class LocoCache
@@ -187,6 +258,14 @@ namespace Hardware
 			}
 
 			void SetLocoId(const LocoID locoId, const std::string& matckKey);
+
+			inline void UpdateSlaves()
+			{
+				for (auto & entry : entries)
+				{
+					entry.second.UpdateSlaves(manager);
+				}
+			}
 
 		private:
 			const ControlID controlId;

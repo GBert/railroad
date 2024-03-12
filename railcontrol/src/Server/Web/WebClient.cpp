@@ -1556,6 +1556,7 @@ namespace Server { namespace Web
 			{
 				name = multipleUnit.GetName();
 				multipleUnit.GetFunctions(locoFunctions);
+				slaves = WebClientStatic::ConvertSlaveIDVectorToRelation(manager, multipleUnitId, multipleUnit.GetSlaves());
 			}
 		}
 		// else new multiple unit
@@ -1738,15 +1739,8 @@ namespace Server { namespace Web
 			locoFunctions.push_back(locoFunctionEntry);
 		}
 
-		vector<Relation*> slaves;
-		vector<LocoID> slaveIds = WebClientStatic::InterpretSlaveData("slave", arguments);
-		for (auto slaveId : slaveIds)
-		{
-			slaves.push_back(new Relation(&manager,
-				ObjectIdentifier(ObjectTypeMultipleUnit, multipleUnitId),
-				ObjectIdentifier(ObjectTypeLoco, slaveId),
-				Relation::TypeMultipleUnitSlave));
-		}
+		vector<LocoID> slaveIDs = WebClientStatic::InterpretSlaveData("slave", arguments);
+		vector<Relation*> slaves = WebClientStatic::ConvertSlaveIDVectorToRelation(manager, multipleUnitId, slaveIDs);
 
 		string result;
 
@@ -1795,7 +1789,7 @@ namespace Server { namespace Web
 			{
 				locoArgument["control"] = to_string(locoConfig.GetControlId());
 				locoArgument["matchkey"] = locoConfig.GetMatchKey();
-				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextImport, "locoedit_list_" + locoIdString, locoArgument)));
+				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextImport, "locoedit_list_0", locoArgument)));
 				row.AddChildTag(HtmlTag("td").AddContent("&nbsp;"));
 				row.AddChildTag(HtmlTag("td").AddContent("&nbsp;"));
 			}

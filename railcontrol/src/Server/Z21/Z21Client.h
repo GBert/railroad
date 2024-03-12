@@ -132,7 +132,14 @@ namespace Server { namespace Z21
 				const BoosterState booster = manager.Booster();
 				const unsigned char centralState = (!booster) << 1;
 				unsigned char sendBuffer[8] = { 0x08, 0x00, 0x40, 0x00, 0x62, 0x22, centralState };
-				sendBuffer[sizeof(sendBuffer) - 1] = Utils::Utils::CalcXORCheckSum(sendBuffer, sizeof(sendBuffer) - 1);
+				sendBuffer[sizeof(sendBuffer) - 1] = Utils::Utils::CalcXORCheckSum(sendBuffer + 4, sizeof(sendBuffer) - 5);
+				Send(sendBuffer, sizeof(sendBuffer));
+			}
+
+			inline void SendVersion()
+			{
+				unsigned char sendBuffer[9] = { 0x09, 0x00, 0x40, 0x00, 0x63, 0x21, 0x40, 0x12 };
+				sendBuffer[sizeof(sendBuffer) - 1] = Utils::Utils::CalcXORCheckSum(sendBuffer + 4, sizeof(sendBuffer) - 5);
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
 
