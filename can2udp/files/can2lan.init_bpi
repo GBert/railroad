@@ -2,6 +2,7 @@
 # Copyright (C) 2018 OpenWrt.org
 
 START=99
+STOP=10
 
 start() {
 	# modprobe sun4i_can
@@ -28,3 +29,10 @@ start() {
 stop() {
 	killall can2lan
 }
+
+shutdown() {
+	# inform can slaves about shutdown
+	/usr/bin/cansend can0 00000301#0000000000
+	sleep 1
+}
+
