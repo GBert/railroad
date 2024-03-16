@@ -6,8 +6,8 @@
 
   (title_block
     (title "Lokkarten Emulator")
-    (date "2024-03-04")
-    (rev "0.99")
+    (date "2024-03-14")
+    (rev "0.995")
     (company "Modellbahn eXtreme")
     (comment 1 "Gerhard Bertelsmann")
   )
@@ -4721,7 +4721,7 @@
     (property "Reference" "R1" (at 75.438 25.5016 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "330" (at 73.66 28.575 90)
+    (property "Value" "470" (at 73.66 28.575 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 71.882 26.67 90)
@@ -4730,7 +4730,7 @@
     (property "Datasheet" "~" (at 73.66 26.67 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "C23138" (at 73.66 26.67 0)
+    (property "LCSC" "C23179" (at 73.66 26.67 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 5d02ee80-c1b5-4847-9124-55979d1c277d))
