@@ -35,25 +35,25 @@ namespace Server { namespace Web
 
 		imageDiv.AddClass("switch_item");
 
-		const DataModel::AccessoryType type = mySwitch->GetType();
+		const DataModel::AccessoryType type = mySwitch->GetAccessoryType();
 		switch (type)
 		{
 			case DataModel::SwitchTypeLeft:
-				image += "<polygon points=\"15,30 21,36 15,36\" fill=\"white\" />"
+				image = "<polygon points=\"15,30 21,36 15,36\" fill=\"white\" />"
 					"<polygon points=\"0,15 15,30 15,36 0,21\" fill=\"gray\" class=\"turnout\"/>"
 					"<polygon points=\"15,0 21,0 21,36 15,30\" fill=\"gray\" class=\"straight\"/>";
 				imageDiv.AddAttribute("onclick", "return onClickSwitch(event, " + idText + ");");
 				break;
 
 			case DataModel::SwitchTypeRight:
-				image += "<polygon points=\"21,30 21,36 15,36\" fill=\"white\" />"
+				image = "<polygon points=\"21,30 21,36 15,36\" fill=\"white\" />"
 					"<polygon points=\"21,30 36,15 36,21 21,36\" fill=\"gray\" class=\"turnout\"/>"
 					"<polygon points=\"15,0 21,0 21,30 15,36\" fill=\"gray\" class=\"straight\"/>";
 				imageDiv.AddAttribute("onclick", "return onClickSwitch(event, " + idText + ");");
 				break;
 
 			case DataModel::SwitchTypeThreeWay:
-				image += "<polygon points=\"18,33 21,36 15,36\" fill=\"white\" />"
+				image = "<polygon points=\"18,33 21,36 15,36\" fill=\"white\" />"
 					"<polygon points=\"0,15 15,30 15,36 0,21\" fill=\"gray\" class=\"turnout\"/>"
 					"<polygon points=\"15,36 15,30 18,33\" fill=\"gray\" class=\"turnout straight\"/>"
 					"<polygon points=\"15,0 21,0 21,30 18,33 15,30\" fill=\"gray\" class=\"straight\"/>"
@@ -66,7 +66,7 @@ namespace Server { namespace Web
 				break;
 
 			case DataModel::SwitchTypeMaerklinLeft:
-				image += "<polygon points=\"0,15 9,24 9,30 0,21\" fill=\"white\" />"
+				image = "<polygon points=\"0,15 9,24 9,30 0,21\" fill=\"white\" />"
 					"<polygon points=\"15,0 21,0 21,24 15,18\" fill=\"white\" />"
 					"<polygon points=\"27,42 36,51 36,57 27,48\" fill=\"white\" />"
 					"<polygon points=\"15,48 21,54 21,72 15,72\" fill=\"white\" />"
@@ -77,7 +77,7 @@ namespace Server { namespace Web
 				break;
 
 			case DataModel::SwitchTypeMaerklinRight:
-				image += "<polygon points=\"0,51 9,42 9,48 0,57\" fill=\"white\" />"
+				image = "<polygon points=\"0,51 9,42 9,48 0,57\" fill=\"white\" />"
 					"<polygon points=\"15,0 21,0 21,18 15,24\" fill=\"white\" />"
 					"<polygon points=\"27,24 36,15 36,21 27,30\" fill=\"white\" />"
 					"<polygon points=\"15,54 21,48 21,72 15,72\" fill=\"white\" />"

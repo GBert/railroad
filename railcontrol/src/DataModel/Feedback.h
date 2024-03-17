@@ -35,6 +35,13 @@ namespace DataModel
 {
 	class Track;
 
+	enum FeedbackType : unsigned char
+	{
+		FeedbackTypeDefault = 0,
+		FeedbackTypeStraight = 1,
+		FeedbackTypeTurn = 2
+	};
+
 	class Feedback : public LayoutItem
 	{
 		public:
@@ -50,6 +57,7 @@ namespace DataModel
 			 	controlID(ControlIdNone),
 			 	pin(FeedbackPinNone),
 			 	manager(manager),
+			 	feedbackType(FeedbackTypeDefault),
 			 	inverted(false),
 			 	trackID(TrackNone),
 			 	track(nullptr),
@@ -81,6 +89,16 @@ namespace DataModel
 			inline std::string GetLayoutType() const override
 			{
 				return Languages::GetText(Languages::TextFeedback);
+			}
+
+			inline FeedbackType GetFeedbackType() const
+			{
+				return feedbackType;
+			}
+
+			inline void SetFeedbackType(const FeedbackType type)
+			{
+				this->feedbackType = type;
 			}
 
 			inline void SetInverted(const bool inverted)
@@ -180,6 +198,7 @@ namespace DataModel
 			FeedbackPin pin;
 
 			Manager* manager;
+			FeedbackType feedbackType;
 			bool inverted;
 			TrackID trackID;
 			Track* track;

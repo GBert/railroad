@@ -61,7 +61,7 @@ namespace DataModel
 	void Switch::SetAccessoryState(const AccessoryState state)
 	{
 		AccessoryState checkedState = state;
-		if (GetType() != SwitchTypeThreeWay && state == SwitchStateThird)
+		if (GetAccessoryType() != SwitchTypeThreeWay && state == SwitchStateThird)
 		{
 			checkedState = SwitchStateTurnout;
 		}
@@ -70,7 +70,7 @@ namespace DataModel
 
 	bool Switch::UsesAddress(Address address) const
 	{
-		switch(GetType())
+		switch(GetAccessoryType())
 		{
 			case SwitchTypeThreeWay:
 				return (GetAddress() == address)
@@ -89,7 +89,7 @@ namespace DataModel
 	{
 		std::map<DataModel::AccessoryState,Languages::TextSelector> out;
 		out[DataModel::SwitchStateStraight] = Languages::TextStraight;
-		switch(GetType())
+		switch(GetAccessoryType())
 		{
 			case DataModel::SwitchTypeThreeWay:
 				out[DataModel::SwitchStateTurnout] = Languages::TextLeft;

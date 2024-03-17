@@ -72,9 +72,9 @@ namespace DataModel
 
 			void SetAccessoryState(const AccessoryState state);
 
-			virtual inline void SetType(AccessoryType type) override
+			virtual inline void SetAccessoryType(AccessoryType type) override
 			{
-				AccessoryBase::SetType(type);
+				AccessoryBase::SetAccessoryType(type);
 				SetSizeFromType();
 			}
 
@@ -92,7 +92,7 @@ namespace DataModel
 			inline void SetSizeFromType()
 			{
 				SetWidth(Width1);
-				SetHeight(CalculateHeightFromType(GetType()));
+				SetHeight(CalculateHeightFromType(GetAccessoryType()));
 			}
 	};
 } // namespace DataModel

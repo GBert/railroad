@@ -380,7 +380,7 @@ namespace Hardware
 		Protocol protocol =  mySwitch->GetProtocol();
 		Address address =  mySwitch->GetAddress();
 		DataModel::AccessoryPulseDuration duration = mySwitch->GetAccessoryPulseDuration();
-		if (mySwitch->GetType() != DataModel::SwitchTypeThreeWay)
+		if (mySwitch->GetAccessoryType() != DataModel::SwitchTypeThreeWay)
 		{
 			instance->Accessory(protocol, address, mySwitch->GetInvertedAccessoryState(), duration);
 			return;

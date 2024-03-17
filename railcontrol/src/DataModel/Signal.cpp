@@ -89,7 +89,7 @@ namespace DataModel
 		stateAddressMap.clear();
 		SetStateAddressOffset(SignalStateStop, 0);
 		SetStateAddressOffset(SignalStateClear, 1);
-		switch(GetType())
+		switch(GetAccessoryType())
 		{
 			case SignalTypeDeCombined:
 				SetStateAddressOffset(SignalStateStopExpected, 2);
@@ -118,7 +118,7 @@ namespace DataModel
 
 	bool Signal::UsesAddress(Address address) const
 	{
-		switch(GetType())
+		switch(GetAccessoryType())
 		{
 			case SignalTypeDeCombined:
 			case SignalTypeChLMain:
@@ -142,7 +142,7 @@ namespace DataModel
 		std::map<DataModel::AccessoryState,Signal::StateOption> out;
 		out.emplace(SignalStateStop, StateOption(Languages::TextSignalStateStop, GetStateAddressOffset(SignalStateStop)));
 		out.emplace(SignalStateClear, StateOption(Languages::TextSignalStateClear, GetStateAddressOffset(SignalStateClear)));
-		switch(GetType())
+		switch(GetAccessoryType())
 		{
 			case SignalTypeDeCombined:
 				out.emplace(SignalStateStopExpected, StateOption(Languages::TextSignalStateStopExpected, GetStateAddressOffset(SignalStateStopExpected)));

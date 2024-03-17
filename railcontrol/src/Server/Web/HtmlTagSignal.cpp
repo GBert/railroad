@@ -42,7 +42,7 @@ namespace Server { namespace Web
 		imageDiv.AddClass(stateClassText);
 		onClickMenuDiv.AddClass(stateClassText);
 
-		const DataModel::AccessoryType type = signal->GetType();
+		const DataModel::AccessoryType type = signal->GetAccessoryType();
 		switch (type)
 		{
 			case DataModel::SignalTypeDeCombined:
@@ -117,7 +117,7 @@ namespace Server { namespace Web
 
 	string HtmlTagSignal::GetSignalImagePlain(const DataModel::Signal* const signal)
 	{
-		switch (signal->GetType())
+		switch (signal->GetAccessoryType())
 		{
 			case DataModel::SignalTypeDeCombined:
 				return "<polygon points=\"0,0 14,0 14,31 0,31\" fill=\"white\"/>"

@@ -277,13 +277,18 @@ body {
 	visibility: visible;
 }
 
-.accessory_off {
+.accessory_item .track,
+.feedback_item .track {
+	fill: white;
+}
+
+.accessory_off .accessory {
 	stroke: white;
 	stroke-width: 2px;
 	fill: red;
 }
 
-.accessory_on {
+.accessory_on .accessory {
 	stroke: white;
 	stroke-width: 2px;
 	fill: lightgreen;

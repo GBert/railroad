@@ -46,14 +46,18 @@ namespace Server { namespace Web
 						feedback->GetPosX(),
 					onControlLayer ?
 						(feedback->GetPin() - 1) >> 4 :
-						feedback->GetPosY())
+						feedback->GetPosY(),
+					onControlLayer ?
+						DataModel::FeedbackTypeDefault :
+						feedback->GetFeedbackType())
 			{
 			}
 
 		private:
 			HtmlTagFeedback(const DataModel::Feedback* feedback,
 				const DataModel::LayoutItem::LayoutPosition posX,
-				const DataModel::LayoutItem::LayoutPosition posY);
+				const DataModel::LayoutItem::LayoutPosition posY,
+				const DataModel::FeedbackType feedbackType);
 	};
 }} // namespace Server::Web
 

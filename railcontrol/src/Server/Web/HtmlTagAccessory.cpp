@@ -31,7 +31,21 @@ namespace Server { namespace Web
 	HtmlTagAccessory::HtmlTagAccessory(const DataModel::Accessory* accessory)
 	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(accessory))
 	{
-		image += "<polygon points=\"10,10 26,10 26,26 10,26\" />";
+		switch (accessory->GetAccessoryType())
+		{
+			case DataModel::AccessoryTypeStraight:
+				image = "<polygon class=\"track\" points=\"15,0 21,0 21,36 15,36\"/>";
+				break;
+
+			case DataModel::AccessoryTypeTurn:
+				image = "<polygon class=\"track\" points=\"0,21 0,15 21,36 15,36\"/>";
+				break;
+
+			case DataModel::AccessoryTypeDefault:
+			default:
+				break;
+		}
+		image += "<polygon class=\"accessory\" points=\"10,10 26,10 26,26 10,26\" />";
 
 		const DataModel::AccessoryState state = accessory->GetAccessoryState();
 

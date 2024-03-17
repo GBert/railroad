@@ -78,9 +78,9 @@ namespace DataModel
 				Deserialize(serialized);
 			}
 
-			inline void SetType(AccessoryType type) override
+			inline void SetAccessoryType(AccessoryType type) override
 			{
-				AccessoryBase::SetType(type);
+				AccessoryBase::SetAccessoryType(type);
 				ResetStateAddressMap();
 			}
 

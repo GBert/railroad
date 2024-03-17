@@ -141,6 +141,7 @@ class Languages
 			TextDebounceThreadTerminated,
 			TextDebouncer,
 			TextDebug,
+			TextDefault,
 			TextDefaultSwitchingDuration,
 			TextDelete,
 			TextDeleteAccessory,

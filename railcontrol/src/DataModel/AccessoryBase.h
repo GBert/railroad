@@ -32,6 +32,8 @@ namespace DataModel
 	enum AccessoryType : unsigned char
 	{
 		AccessoryTypeDefault = 0,
+		AccessoryTypeStraight = 1,
+		AccessoryTypeTurn = 2,
 
 		SignalTypeSimpleLeft = 0,
 		SignalTypeSimpleRight = 1,
@@ -109,14 +111,14 @@ namespace DataModel
 
 			virtual ~AccessoryBase() {}
 
-			inline AccessoryType GetType() const
+			inline AccessoryType GetAccessoryType() const
 			{
 				return accessoryType;
 			}
 
-			virtual inline void SetType(AccessoryType type)
+			virtual inline void SetAccessoryType(AccessoryType accessoryType)
 			{
-				this->accessoryType = type;
+				this->accessoryType = accessoryType;
 			}
 
 			inline AccessoryState GetAccessoryState() const

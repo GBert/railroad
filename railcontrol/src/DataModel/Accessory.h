@@ -42,8 +42,8 @@ namespace DataModel
 		public:
 			inline Accessory(const AccessoryID accessoryID)
 			:	AccessoryBase(),
-			 	LayoutItem(accessoryID),
-			 	LockableItem()
+				LayoutItem(accessoryID),
+				LockableItem()
 			{
 			}
 

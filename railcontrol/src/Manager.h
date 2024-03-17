@@ -309,6 +309,7 @@ class Manager
 			const DataModel::LayoutItem::LayoutPosition x,
 			const DataModel::LayoutItem::LayoutPosition y,
 			const DataModel::LayoutItem::LayoutPosition z,
+			const DataModel::LayoutItem::LayoutRotation rotation,
 			const ControlID controlID,
 			const std::string& matchKey,
 			const Protocol protocol,
@@ -354,10 +355,12 @@ class Manager
 			const DataModel::LayoutItem::LayoutPosition posX,
 			const DataModel::LayoutItem::LayoutPosition posY,
 			const DataModel::LayoutItem::LayoutPosition posZ,
+			const DataModel::LayoutItem::LayoutRotation rotation,
 			const ControlID controlID,
 			const std::string& matchKey,
 			const FeedbackPin pin,
 			const bool inverted,
+			const DataModel::FeedbackType feedbackType,
 			std::string& result);
 
 		bool FeedbackDelete(const FeedbackID feedbackID,
@@ -745,6 +748,12 @@ class Manager
 		bool TrackPosition(const TrackID trackID,
 			const DataModel::LayoutItem::LayoutPosition posX,
 			const DataModel::LayoutItem::LayoutPosition posY,
+			std::string& result);
+
+		bool AccessoryRotate(const AccessoryID accessoryID,
+			std::string& result);
+
+		bool FeedbackRotate(const FeedbackID feedbackID,
 			std::string& result);
 
 		bool SignalRotate(const SignalID signalID,

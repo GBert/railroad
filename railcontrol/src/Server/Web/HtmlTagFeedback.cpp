@@ -31,10 +31,25 @@ namespace Server { namespace Web
 {
 	HtmlTagFeedback::HtmlTagFeedback(const DataModel::Feedback* feedback,
 		const DataModel::LayoutItem::LayoutPosition posX,
-		const DataModel::LayoutItem::LayoutPosition posY)
+		const DataModel::LayoutItem::LayoutPosition posY,
+		const DataModel::FeedbackType feedbackType)
 	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(feedback), posX, posY)
 	{
-		image += "<svg width=\"" + EdgeLengthString + "\" height=\"" + EdgeLengthString + "\" id=\"" + id + "_img\"><circle r=\"12\" cx=\"18\" cy=\"18\" stroke=\"white\" stroke-width=\"2\" class=\"feedback\"/></svg>";
+		switch (feedbackType)
+		{
+			case DataModel::FeedbackTypeStraight:
+				image = "<polygon class=\"track\" points=\"15,0 21,0 21,36 15,36\"/>";
+				break;
+
+			case DataModel::FeedbackTypeTurn:
+				image = "<polygon class=\"track\" points=\"0,21 0,15 21,36 15,36\"/>";
+				break;
+
+			case DataModel::FeedbackTypeDefault:
+			default:
+				break;
+		}
+		image += "<circle r=\"12\" cx=\"18\" cy=\"18\" stroke=\"white\" stroke-width=\"2\" class=\"feedback\"/>";
 
 		const DataModel::Feedback::FeedbackState state = feedback->GetState();
 

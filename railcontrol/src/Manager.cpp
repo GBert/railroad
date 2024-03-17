@@ -1310,6 +1310,7 @@ bool Manager::AccessorySave(AccessoryID accessoryID,
 	const LayoutPosition posX,
 	const LayoutPosition posY,
 	const LayoutPosition posZ,
+	const LayoutRotation rotation,
 	const ControlID controlID,
 	const std::string& matchKey,
 	const Protocol protocol,
@@ -1350,12 +1351,13 @@ bool Manager::AccessorySave(AccessoryID accessoryID,
 	accessory->SetPosX(posX);
 	accessory->SetPosY(posY);
 	accessory->SetPosZ(posZ);
+	accessory->SetRotation(rotation);
 	accessory->SetControlID(controlID);
 	accessory->SetMatchKey(matchKey);
 	accessory->SetProtocol(protocol);
 	accessory->SetAddress(address);
 	accessory->SetServerAddress(serverAddress);
-	accessory->SetType(type);
+	accessory->SetAccessoryType(type);
 	accessory->SetAccessoryPulseDuration(duration);
 	accessory->SetInverted(inverted);
 
@@ -1382,6 +1384,29 @@ bool Manager::AccessoryPosition(const AccessoryID accessoryID,
 
 	accessory->SetPosX(posX);
 	accessory->SetPosY(posY);
+
+	AccessorySaveAndPublishSettings(accessory);
+	return true;
+}
+
+bool Manager::AccessoryRotate(const AccessoryID accessoryID,
+	string& result)
+{
+	Accessory* accessory = GetAccessory(accessoryID);
+	if (accessory == nullptr)
+	{
+		result = Languages::GetText(Languages::TextAccessoryDoesNotExist);
+		return false;
+	}
+
+	LayoutRotation newRotation = accessory->GetRotation();
+	++newRotation;
+	if (!CheckLayoutItemPosition(accessory, accessory->GetPosX(), accessory->GetPosY(), accessory->GetPosZ(), LayoutItem::Width1, LayoutItem::Height1, newRotation, result))
+	{
+		return false;
+	}
+
+	accessory->SetRotation(newRotation);
 
 	AccessorySaveAndPublishSettings(accessory);
 	return true;
@@ -1530,7 +1555,7 @@ void Manager::FeedbackState(const ControlID controlID, const FeedbackPin pin, co
 	logger->Info(Languages::TextAddingFeedback, name);
 	string result;
 
-	FeedbackSave(FeedbackNone, name, DataModel::LayoutItem::VisibleNo, 0, 0, 0, controlID, "", pin, false, result);
+	FeedbackSave(FeedbackNone, name, DataModel::LayoutItem::VisibleNo, 0, 0, 0, DataModel::LayoutItem::Rotation0, controlID, "", pin, false, FeedbackTypeDefault, result);
 }
 
 void Manager::FeedbackState(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state)
@@ -1626,10 +1651,12 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 	const LayoutPosition posX,
 	const LayoutPosition posY,
 	const LayoutPosition posZ,
+	const LayoutRotation rotation,
 	const ControlID controlID,
 	const string& matchKey,
 	const FeedbackPin pin,
 	const bool inverted,
+	const FeedbackType feedbackType,
 	string& result)
 {
 	Feedback* feedback = GetFeedback(feedbackID);
@@ -1657,10 +1684,12 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 	feedback->SetPosX(posX);
 	feedback->SetPosY(posY);
 	feedback->SetPosZ(posZ);
+	feedback->SetRotation(rotation);
 	feedback->SetControlID(controlID);
 	feedback->SetMatchKey(matchKey);
 	feedback->SetPin(pin);
 	feedback->SetInverted(inverted);
+	feedback->SetFeedbackType(feedbackType);
 
 	FeedbackSaveAndPublishSettings(feedback);
 	return true;
@@ -1690,6 +1719,29 @@ bool Manager::FeedbackPosition(const FeedbackID feedbackID,
 
 	feedback->SetPosX(posX);
 	feedback->SetPosY(posY);
+
+	FeedbackSaveAndPublishSettings(feedback);
+	return true;
+}
+
+bool Manager::FeedbackRotate(const FeedbackID feedbackID,
+	string& result)
+{
+	Feedback* feedback = GetFeedback(feedbackID);
+	if (feedback == nullptr)
+	{
+		result = Languages::GetText(Languages::TextFeedbackDoesNotExist);
+		return false;
+	}
+
+	LayoutRotation newRotation = feedback->GetRotation();
+	++newRotation;
+	if (!CheckLayoutItemPosition(feedback, feedback->GetPosX(), feedback->GetPosY(), feedback->GetPosZ(), LayoutItem::Width1, LayoutItem::Height1, newRotation, result))
+	{
+		return false;
+	}
+
+	feedback->SetRotation(newRotation);
 
 	FeedbackSaveAndPublishSettings(feedback);
 	return true;
@@ -2249,7 +2301,7 @@ bool Manager::SwitchSave(SwitchID switchID,
 	mySwitch->SetProtocol(protocol);
 	mySwitch->SetAddress(address);
 	mySwitch->SetServerAddress(serverAddress);
-	mySwitch->SetType(type);
+	mySwitch->SetAccessoryType(type);
 	mySwitch->SetAccessoryPulseDuration(duration);
 	mySwitch->SetInverted(inverted);
 
@@ -3053,7 +3105,7 @@ bool Manager::SignalSave(SignalID signalID,
 	signal->SetProtocol(protocol);
 	signal->SetAddress(address);
 	signal->SetServerAddress(serverAddress);
-	signal->SetType(type);
+	signal->SetAccessoryType(type);
 	signal->SetStateAddressOffsets(offsets);
 	signal->SetAccessoryPulseDuration(duration);
 	signal->SetInverted(inverted);
@@ -4385,6 +4437,12 @@ bool Manager::LayoutItemRotate(const DataModel::ObjectIdentifier& identifier,
 	ObjectID id = identifier.GetObjectID();
 	switch (type)
 	{
+		case ObjectTypeAccessory:
+			return AccessoryRotate(id, result);
+
+		case ObjectTypeFeedback:
+			return FeedbackRotate(id, result);
+
 		case ObjectTypeSignal:
 			return SignalRotate(id, result);
 
@@ -4397,8 +4455,6 @@ bool Manager::LayoutItemRotate(const DataModel::ObjectIdentifier& identifier,
 		case ObjectTypeTrack:
 			return TrackRotate(id, result);
 
-		case ObjectTypeAccessory:
-		case ObjectTypeFeedback:
 		case ObjectTypeRoute:
 		default:
 			return false;

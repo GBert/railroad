@@ -89,7 +89,7 @@ namespace Server { namespace Web
 				posy = signal->GetPosY();
 				posz = signal->GetPosZ();
 				rotation = signal->GetRotation();
-				signalType = signal->GetType();
+				signalType = signal->GetAccessoryType();
 				duration = signal->GetAccessoryPulseDuration();
 				inverted = signal->GetInverted();
 			}
@@ -164,9 +164,9 @@ namespace Server { namespace Web
 		AccessoryType type = static_cast<AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "type"));
 		SignalID signalId = Utils::Utils::GetIntegerMapEntry(arguments, "signal", SignalNone);
 		Signal* signal = manager.GetSignal(signalId);
-		if (signal == nullptr || signal->GetType() != type)
+		if (signal == nullptr || signal->GetAccessoryType() != type)
 		{
-			signalDummy.SetType(type);
+			signalDummy.SetAccessoryType(type);
 			signal = &signalDummy;
 		}
 
