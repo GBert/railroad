@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -331,7 +331,11 @@ namespace Server { namespace Web
 			string priorityString = to_string(relationId);
 			ObjectType objectType = static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "relation_atlock_" + priorityString + "_type"));
 			ObjectID objectId = Utils::Utils::GetIntegerMapEntry(arguments, "relation_atlock_" + priorityString + "_id", ObjectNone);
-			if (objectId == 0 && objectType != ObjectTypeLoco && objectType != ObjectTypePause && objectType != ObjectTypeMultipleUnit)
+			if (objectId == 0
+				&& objectType != ObjectTypeLoco
+				&& objectType != ObjectTypePause
+				&& objectType != ObjectTypeMultipleUnit
+				&& objectType != ObjectTypeBooster)
 			{
 				continue;
 			}
@@ -347,7 +351,7 @@ namespace Server { namespace Web
 			relationsAtLock.push_back(new Relation(&manager,
 				ObjectIdentifier(ObjectTypeRoute, routeID),
 				ObjectIdentifier(objectType, objectId),
-				Relation::TypeRouteAtLock,
+				Relation::RelationTypeRouteAtLock,
 				priorityAtLock,
 				state));
 			++priorityAtLock;
@@ -360,7 +364,11 @@ namespace Server { namespace Web
 			string priorityString = to_string(relationId);
 			ObjectType objectType = static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "relation_atunlock_" + priorityString + "_type"));
 			ObjectID objectId = Utils::Utils::GetIntegerMapEntry(arguments, "relation_atunlock_" + priorityString + "_id", ObjectNone);
-			if (objectId == 0 && objectType != ObjectTypeLoco && objectType != ObjectTypePause && objectType != ObjectTypeMultipleUnit)
+			if (objectId == 0
+				&& objectType != ObjectTypeLoco
+				&& objectType != ObjectTypePause
+				&& objectType != ObjectTypeMultipleUnit
+				&& objectType != ObjectTypeBooster)
 			{
 				continue;
 			}
@@ -376,7 +384,7 @@ namespace Server { namespace Web
 			relationsAtUnlock.push_back(new Relation(&manager,
 				ObjectIdentifier(ObjectTypeRoute, routeID),
 				ObjectIdentifier(objectType, objectId),
-				Relation::TypeRouteAtUnlock,
+				Relation::RelationTypeRouteAtUnlock,
 				priorityAtUnlock,
 				state));
 			++priorityAtUnlock;
@@ -604,6 +612,7 @@ namespace Server { namespace Web
 		objectTypeOptions[ObjectTypeLoco] = Languages::TextLoco;
 		objectTypeOptions[ObjectTypeMultipleUnit] = Languages::TextOrientation;
 		objectTypeOptions[ObjectTypePause] = Languages::TextPause;
+		objectTypeOptions[ObjectTypeBooster] = Languages::TextBooster;
 		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
 		select.AddClass("select_relation_objecttype");
 		select.AddAttribute("onchange", "loadRelationObject('" + atlock + "', '" + priorityString + "');return false;");
@@ -862,6 +871,15 @@ namespace Server { namespace Web
 				orientation[1u] = Languages::Languages::GetText(Languages::Languages::TextRight);
 				orientation[2u] = Languages::Languages::GetText(Languages::Languages::TextChange);;
 				content.AddChildTag(HtmlTagSelect(name + "_state", orientation, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
+				return content;
+			}
+
+			case ObjectTypeBooster:
+			{
+				map<unsigned int,string> booster;
+				booster[0] = Languages::Languages::GetText(Languages::Languages::TextOff);
+				booster[1u] = Languages::Languages::GetText(Languages::Languages::TextOn);
+				content.AddChildTag(HtmlTagSelect(name + "_state", booster, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 

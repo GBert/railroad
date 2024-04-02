@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -75,6 +75,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextBaseAddress */ { "Baseaddress", "Basisadresse", "Dirección basica" },
 /* TextBasic */ { "Basic data", "Basisdaten", "Datos básicos" },
 /* TextBlockTrack */ { "Block track", "Blockiere Gleis", "Bloquear vía" },
+/* TextBooster */ { "Booster", "Booster", "Booster" },
 /* TextBoosterIsTurnedOff */ { "Booster is turned off", "Booster ist ausgeschaltet", "Booster está apagado" },
 /* TextBoosterIsTurnedOn */ { "Booster is turned on", "Booster ist eingeschaltet", "Booster está encendido" },
 /* TextBridge */ { "Bridge", "Brücke", "Puente" },
@@ -132,8 +133,8 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextCs2MasterLocoOldName */ { "CS2 Master has locomotive with former name {0}", "CS2 Master hat eine Lokomotive mit dem bisherigen Namen {0}", "CS2 master tiene una locomotora con el nombre antiguo {0}" },
 /* TextCs2MasterLocoProtocolAddress */ { "CS2 Master has locomotive with address {0}/{1}", "CS2 Master hat eine Lokomotive mit der Adresse {0}/{1}", "CS2 master tiene una locomotora con la dirección {0}/{1}" },
 /* TextCs2MasterLocoRemove */ { "CS2 Master has removed locomotive with name {0}", "CS2 Master hat eine Lokomotive mit dem Namen {0} gelöscht", "CS2 master ha eliminado la locomotora con el nombre {0}" },
-/* TextCs2MasterLocoSlaveName */ { "CS2 Master has locomotive with a slave locomotive with name {0}", "CS2 Master hat eine Lokomotive mit einer Slave Lokomotive mit Namen {0}", "CS2 master tiene una locomotora con una locomotora slave con nombre {0}" },
 /* TextCs2MasterLocoSlaveAddressProtocol */ { "CS2 Master has locomotive with a slave locomotive with address {0}/{1}", "CS2 Master hat eine Lokomotive mit einer Slave Lokomotive mit der Adresse {0}/{1}", "CS2 master tiene una locomotora con una locomotora slave con la dirección {0}/{1}" },
+/* TextCs2MasterLocoSlaveName */ { "CS2 Master has locomotive with a slave locomotive with name {0}", "CS2 Master hat eine Lokomotive mit einer Slave Lokomotive mit Namen {0}", "CS2 master tiene una locomotora con una locomotora slave con nombre {0}" },
 /* TextCs2MinorVersionIsUnknown */ { "Minor version of received file unknown", "Minor Version des erhaltenen files ist nicht bekannt", "La versión menor del archivo recibido no está conocido" },
 /* TextDcc */ { "DCC", "DCC", "DCC" },
 /* TextDeCombined */ { "German Ks", "Deutsches Ks", "Alemania Ks" },
@@ -191,6 +192,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextError */ { "error", "Fehler", "error" },
 /* TextErrorReadingData */ { "Error reading data: {0}", "Fehler beim Daten lesen {0}", "Error leer data: {0}" },
 /* TextExecuteAccessory */ { "Execute accessories", "Schalte Zubehörartikel", "Cambia los accesorios" },
+/* TextExecuteRoute */ { "Execute route", "Fahrstrasse ausführen", "Ejecuta itinerario" },
 /* TextExecutingRoute */ { "Executing route {0}", "Führe Fahrstrasse {0} aus", "Ejecutando itinerario {0}" },
 /* TextExitRailControl */ { "Exit RailControl", "RailControl beenden", "Apagar RailControl" },
 /* TextFeedback */ { "feedback", "Rückmelder", "retroseñal" },
@@ -469,6 +471,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextParameterFoundInConfigFile */ { "Parameter found in config file: {0} = {1}", "Parameter gefunden in Konfigurationsdate: {0} = {1}", "Parametro encontrado en fila de configuración: {0} = {1}" },
 /* TextPause */ { "Pause", "Pause", "Pausa" },
 /* TextPin */ { "Pin", "Anschluss", "Contacto" },
+/* TextPingSenderStarted */ { "Ping sender started", "Ping sender gestartet", "Ping enviador creado" },
 /* TextPleaseSelectLoco */ { "Please select a locomotive", "Bitte eine Lokomotive wählen", "Por favor selecciona una locomotora" },
 /* TextPosX */ { "Position X", "Position X", "Posición X" },
 /* TextPosY */ { "Position Y", "Position Y", "Posición Y" },
@@ -666,6 +669,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextTcpConnectionEstablished */ { "TCP connection to {0} established", "TCP Verbindung zu {0} hergestellt", "Connectión TCP a {0} establecido" },
 /* TextTerminatingAccessorySenderThread */ { "Terminating accessory sender thread", "Beende Zubehörartikel Sender Thread", "Apagando thread enviador accesorio" },
 /* TextTerminatingHeartBeatThread */ { "Terminating heartbeat thread", "Beende Heartbeat-Thread", "Apagando thread heartbeat" },
+/* TextTerminatingPingSender */ { "Terminating ping sender", "Beende Ping Sender", "apagando ping enviador" },
 /* TextTerminatingReceiverThread */ { "Terminating receiver thread", "Beende Empfangs-Thread", "Apagando thread recibiendo" },
 /* TextTerminatingSenderSocket */ { "Terminating sender socket", "Beende Sende Socket", "Apagando socket enviando" },
 /* TextTerminatingSenderThread */ { "Terminating sender thread", "Beende Sende-Thread", "Apagando thread enviando" },
@@ -683,7 +687,6 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextTrack */ { "track", "Gleis", "vía" },
 /* TextTrackDeleted */ { "Track {0} deleted", "Gleis {0} gelöscht", "Vía {0} eliminado" },
 /* TextTrackDoesNotExist */ { "Track does not exist", "Gleis existiert nicht", "Vía no existe" },
-/* TextTrackHasAssociatedFeedback */ { "Track {0} has associated feedback {1}", "Gleis {0} hat verknüpften Rückmelder {1}", "Vía {0} tiene enlaze a retroseñal {1}" },
 /* TextTrackIsUsedByLoco */ { "Track {0} is used by locomotive {1}", "Gleis {0} wird von Lokomotive {1} benutzt", "Vía {0} está utilizado por locomotora {1}" },
 /* TextTrackIsUsedByRoute */ { "Track {0} is used by route {1}", "Gleis {0} wird von Fahrstrasse {1} benutzt", "Vía {0} está utilizado por itinerario {1}" },
 /* TextTrackSaved */ { "Track {0} saved", "Gleis {0} gespeichert", "Vía {0} guardado" },

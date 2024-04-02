@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -41,18 +41,7 @@ namespace DataModel
 	std::string Track::Serialize() const
 	{
 		std::string str;
-		str = "objectType=Track;";
-		std::string feedbackString;
-		for (auto feedback : feedbacks)
-		{
-			if (feedbackString.size() > 0)
-			{
-				feedbackString += ",";
-			}
-			feedbackString += std::to_string(feedback);
-		}
-		str += "feedbacks=";
-		str += feedbackString;
+		str = "objectType=Track";
 		str += ";selectrouteapproach=";
 		str += to_string(selectRouteApproach);
 		str += ";trackstate=";
@@ -93,18 +82,26 @@ namespace DataModel
 		}
 		LayoutItem::Deserialize(arguments);
 		LockableItem::Deserialize(arguments);
+
+		// FIXME: remove later: 2024-03-22 feedback vector has been replaced by relation
 		string feedbackStrings = Utils::Utils::GetStringMapEntry(arguments, "feedbacks");
 		deque<string> feedbackStringVector;
 		Utils::Utils::SplitString(feedbackStrings, ",", feedbackStringVector);
 		for (auto& feedbackString : feedbackStringVector)
 		{
-			FeedbackID feedbackID = Utils::Utils::StringToInteger(feedbackString);
-			if (!manager->FeedbackExists(feedbackID))
+			const FeedbackID feedbackID = Utils::Utils::StringToInteger(feedbackString);
+			Feedback* feedback = manager->GetFeedback(feedbackID);
+			if (!feedback)
 			{
 				continue;
 			}
-			feedbacks.push_back(feedbackID);
+			feedback->SetTrack(this);
+			feedbacks.push_back(new Relation(manager,
+				ObjectIdentifier(ObjectTypeTrack, GetID()),
+				ObjectIdentifier(ObjectTypeFeedback, feedbackID),
+				Relation::RelationTypeTrackFeedback));
 		}
+
 		selectRouteApproach = static_cast<SelectRouteApproach>(Utils::Utils::GetIntegerMapEntry(arguments, "selectrouteapproach", SelectRouteSystemDefault));
 		trackState = static_cast<DataModel::Feedback::FeedbackState>(Utils::Utils::GetBoolMapEntry(arguments, "trackstate", DataModel::Feedback::FeedbackStateFree));
 		trackStateDelayed = static_cast<DataModel::Feedback::FeedbackState>(Utils::Utils::GetBoolMapEntry(arguments, "trackstatedelayed", trackState));
@@ -138,33 +135,47 @@ namespace DataModel
 		return true;
 	}
 
+	void Track::DeleteFeedbacks()
+	{
+		while (feedbacks.size() > 0)
+		{
+			Relation* feedbackRelation = feedbacks.back();
+			Feedback* feedback = manager->GetFeedback(feedbackRelation->ObjectID2());
+			if (feedback)
+			{
+				feedback->SetTrack();
+			}
+			feedbacks.pop_back();
+			delete feedbackRelation;
+		}
+	}
+
+	void Track::AssignFeedbacks(const std::vector<DataModel::Relation*>& newFeedbacks)
+	{
+		DeleteFeedbacks();
+		feedbacks = newFeedbacks;
+		for (auto feedbackRelation : feedbacks)
+		{
+			Feedback* feedback = manager->GetFeedback(feedbackRelation->ObjectID2());
+			if (feedback)
+			{
+				feedback->SetTrack(this);
+			}
+		}
+	}
+
 	void Track::DeleteSignals()
 	{
 		while (signals.size() > 0)
 		{
 			Relation* signalRelation = signals.back();
-			Signal* signal = dynamic_cast<Signal*>(signalRelation->GetObject2());
-			if (signal != nullptr)
+			Signal* signal = manager->GetSignal(signalRelation->ObjectID2());
+			if (signal)
 			{
-				signal->SetTrack(nullptr);
+				signal->SetTrack();
 			}
 			signals.pop_back();
 			delete signalRelation;
-		}
-	}
-
-	void Track::DeleteSignal(Signal* signalToDelete)
-	{
-		for (unsigned int index = 0; index < signals.size(); ++index)
-		{
-			if (signals[index]->GetObject2() != signalToDelete)
-			{
-				continue;
-			}
-			delete signals[index];
-			signals.erase(signals.begin() + index);
-			signalToDelete->SetTrack(nullptr);
-			return;
 		}
 	}
 
@@ -174,8 +185,8 @@ namespace DataModel
 		signals = newSignals;
 		for (auto signalRelation : signals)
 		{
-			Signal* signal = dynamic_cast<Signal*>(signalRelation->GetObject2());
-			if (signal != nullptr)
+			Signal* signal = manager->GetSignal(signalRelation->ObjectID2());
+			if (signal)
 			{
 				signal->SetTrack(this);
 			}
@@ -186,8 +197,8 @@ namespace DataModel
 	{
 		for (auto signalRelation : signals)
 		{
-			Signal* signal = dynamic_cast<Signal*>(signalRelation->GetObject2());
-			if (signal == nullptr)
+			Signal* signal = manager->GetSignal(signalRelation->ObjectID2());
+			if (!signal)
 			{
 				continue;
 			}
@@ -302,14 +313,14 @@ namespace DataModel
 	{
 		{
 			std::lock_guard<std::mutex> Guard(updateMutex);
-			DataModel::Feedback::FeedbackState oldTrackState = this->trackState;
-			bool oldBlocked = blocked;
-			bool ret = FeedbackStateInternal(feedbackID, newTrackState);
+			const DataModel::Feedback::FeedbackState oldTrackState = this->trackState;
+			const bool oldBlocked = blocked;
+			const bool ret = FeedbackStateInternal(feedbackID, newTrackState);
 			if (ret == false)
 			{
 				return false;
 			}
-			if (oldTrackState == newTrackState && oldBlocked == blocked)
+			if ((oldTrackState == newTrackState) && (oldBlocked == blocked))
 			{
 				return true;
 			}
@@ -323,9 +334,9 @@ namespace DataModel
 		if (newTrackState == DataModel::Feedback::FeedbackStateOccupied)
 		{
 			LocoBase* locoBase = manager->GetLocoBase(GetLocoBaseDelayed());
-			if (locoBase == nullptr)
+			if (!locoBase)
 			{
-				if (blocked == false && manager->GetStopOnFeedbackInFreeTrack())
+				if ((blocked == false) && manager->GetStopOnFeedbackInFreeTrack())
 				{
 					manager->Booster(ControlTypeInternal, BoosterStateStop);
 					blocked = true;
@@ -341,10 +352,10 @@ namespace DataModel
 			return true;
 		}
 
-		for (auto feedbackID : feedbacks)
+		for (auto feedbackRelation : feedbacks)
 		{
-			DataModel::Feedback* feedback = manager->GetFeedbackUnlocked(feedbackID);
-			if (feedback == nullptr)
+			DataModel::Feedback* feedback = manager->GetFeedbackUnlocked(feedbackRelation->ObjectID2());
+			if (!feedback)
 			{
 				continue;
 			}
@@ -355,11 +366,11 @@ namespace DataModel
 		}
 		this->trackState = DataModel::Feedback::FeedbackStateFree;
 
-		ObjectIdentifier locoBaseIdentifier = GetLocoBase();
+		const ObjectIdentifier locoBaseIdentifier = GetLocoBase();
 		if (releaseWhenFree)
 		{
-			LocoBase* locoBase = manager->GetLocoBase(locoBaseIdentifier);
-			if (locoBase != nullptr && locoBase->IsRunningFromTrack(GetID()))
+			const LocoBase* locoBase = manager->GetLocoBase(locoBaseIdentifier);
+			if (locoBase && locoBase->CheckFreeingTrack(GetID()))
 			{
 				StopAllSignals(locoBaseIdentifier);
 				bool ret = ReleaseForceUnlocked(locoBase->GetLogger(), locoBaseIdentifier);

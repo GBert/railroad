@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -37,17 +37,18 @@ namespace DataModel
 	class Relation : protected Serializable, public LockableItem
 	{
 		public:
-			enum Type : unsigned char
+			enum RelationType : unsigned char
 			{
-				TypeCalculate = 0,
-				TypeLocoSlave = (ObjectTypeLoco << 3), // not used anymore, TypeMultipeUnitSlave instead
-				TypeTrackSignal = (ObjectTypeTrack << 3),
-				TypeFeedbackAtSet = ObjectTypeFeedback << 3,
-				TypeFeedbackAtUnset = (ObjectTypeFeedback << 3) + 1,
-				TypeRouteAtLock = (ObjectTypeRoute << 3),
-				TypeRouteAtUnlock = (ObjectTypeRoute << 3) + 1,
-				TypeClusterTrack = (ObjectTypeCluster << 3),
-				TypeMultipleUnitSlave = (ObjectTypeMultipleUnit << 3),
+				RelationTypeCalculate         = 0,
+				RelationTypeLocoSlave         = (ObjectTypeLoco << 3), // FIXME: 2024-03-17: not used anymore, TypeMultipeUnitSlave instead
+				RelationTypeTrackSignal       = (ObjectTypeTrack << 3),
+				RelationTypeTrackFeedback     = (ObjectTypeTrack << 3) + 1,
+				RelationTypeFeedbackAtSet     = (ObjectTypeFeedback << 3),
+				RelationTypeFeedbackAtUnset   = (ObjectTypeFeedback << 3) + 1,
+				RelationTypeRouteAtLock       = (ObjectTypeRoute << 3),
+				RelationTypeRouteAtUnlock     = (ObjectTypeRoute << 3) + 1,
+				RelationTypeClusterTrack      = (ObjectTypeCluster << 3),
+				RelationTypeMultipleUnitSlave = (ObjectTypeMultipleUnit << 3),
 			};
 
 			typedef unsigned short Data;
@@ -56,7 +57,7 @@ namespace DataModel
 			inline Relation(Manager* manager,
 				const ObjectIdentifier& object1,
 				const ObjectIdentifier& object2,
-				const Type type,
+				const RelationType type,
 				const Priority priority = 0,
 				const unsigned short data = 0)
 			:	manager(manager),
@@ -110,7 +111,7 @@ namespace DataModel
 
 			LockableItem* GetObject2();
 
-			inline Type GetType() const
+			inline RelationType GetType() const
 			{
 				return type;
 			}
@@ -144,7 +145,7 @@ namespace DataModel
 			Manager* manager;
 			ObjectIdentifier object1;
 			ObjectIdentifier object2;
-			Type type;
+			RelationType type;
 			Priority priority;
 			Data data;
 	};

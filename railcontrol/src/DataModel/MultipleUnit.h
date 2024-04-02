@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -46,8 +46,9 @@ namespace DataModel
 				MultipleUnit::Deserialize(serialized);
 			}
 
-			virtual ~MultipleUnit()
+			inline ~MultipleUnit()
 			{
+				DeleteSlaves();
 			}
 
 			inline ObjectType GetObjectType() const override

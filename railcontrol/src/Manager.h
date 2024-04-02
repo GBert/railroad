@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -361,6 +361,7 @@ class Manager
 			const FeedbackPin pin,
 			const bool inverted,
 			const DataModel::FeedbackType feedbackType,
+			const RouteID routeId,
 			std::string& result);
 
 		bool FeedbackDelete(const FeedbackID feedbackID,
@@ -403,7 +404,7 @@ class Manager
 			const DataModel::LayoutItem::LayoutItemSize width,
 			const DataModel::LayoutItem::LayoutRotation rotation,
 			const DataModel::TrackType trackType,
-			const std::vector<FeedbackID>& feedbacks,
+			const std::vector<DataModel::Relation*>& newFeedbacks,
 			const std::vector<DataModel::Relation*>& newSignals,
 			const DataModel::SelectRouteApproach selectRouteApproach,
 			const bool allowLocoTurn,
@@ -862,9 +863,6 @@ class Manager
 				delete content;
 			}
 		}
-
-		const std::vector<FeedbackID> CleanupAndCheckFeedbacksForTrack(const TrackID trackID,
-			const std::vector<FeedbackID>& newFeedbacks);
 
 		void DebounceWorker();
 

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -110,7 +110,7 @@ namespace DataModel
 
 			virtual ~LocoBase();
 
-			inline Logger::Logger* GetLogger()
+			inline Logger::Logger* GetLogger() const
 			{
 				return logger;
 			}
@@ -141,7 +141,7 @@ namespace DataModel
 
 			bool Release();
 
-			bool IsRunningFromTrack(const TrackID trackID) const;
+			bool CheckFreeingTrack(const TrackID trackID) const;
 
 			void LocationReached(const FeedbackID feedbackID);
 

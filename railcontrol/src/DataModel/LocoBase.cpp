@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -163,10 +163,22 @@ namespace DataModel
 		return true;
 	}
 
-	bool LocoBase::IsRunningFromTrack(const TrackID trackID) const
+	bool LocoBase::CheckFreeingTrack(const TrackID trackID) const
 	{
 		std::lock_guard<std::mutex> Guard(stateMutex);
-		return trackFirst != nullptr && trackFrom != nullptr && trackFrom->GetID() == trackID;
+		if (trackFrom && (trackFrom->GetID() == trackID) && !trackFirst)
+		{
+			return false;
+		}
+		if (trackFirst && (trackFirst->GetID() == trackID))
+		{
+			return false;
+		}
+		if (trackSecond && (trackSecond->GetID() == trackID))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	bool LocoBase::GoToAutoMode(const AutoModeType type)

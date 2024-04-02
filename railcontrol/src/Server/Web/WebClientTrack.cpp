@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -51,6 +51,23 @@ using std::vector;
 
 namespace Server { namespace Web
 {
+	map<string,ObjectID> WebClientTrack::GetFeedbackOptions(const TrackID trackId) const
+	{
+		map<string, ObjectID> feedbackOptions;
+
+		map<string, Feedback*> allFeedbacks = manager.FeedbackListByName();
+		for (auto& feedback : allFeedbacks)
+		{
+			Track* trackOfFeedback = feedback.second->GetTrack();
+			if (trackOfFeedback && (trackOfFeedback->GetID() != trackId))
+			{
+				continue;
+			}
+			feedbackOptions[feedback.first] = feedback.second->GetID();
+		}
+		return feedbackOptions;
+	}
+
 	map<string,ObjectID> WebClientTrack::GetSignalOptions(const TrackID trackId) const
 	{
 		map<string, ObjectID> signalOptions;
@@ -59,7 +76,7 @@ namespace Server { namespace Web
 		for (auto& signal : allSignals)
 		{
 			Track* trackOfSignal = signal.second->GetTrack();
-			if (trackOfSignal != nullptr && trackOfSignal->GetID() != trackId)
+			if (trackOfSignal && (trackOfSignal->GetID() != trackId))
 			{
 				continue;
 			}
@@ -80,7 +97,7 @@ namespace Server { namespace Web
 		LayoutItemSize height = Utils::Utils::GetIntegerMapEntry(arguments, "length", DataModel::LayoutItem::Height1);
 		LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
 		DataModel::TrackType type = DataModel::TrackTypeStraight;
-		vector<FeedbackID> feedbacks;
+		vector<Relation*> feedbacks;
 		vector<Relation*> signals;
 		Cluster* cluster = nullptr;
 		DataModel::SelectRouteApproach selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::GetIntegerMapEntry(arguments, "selectrouteapproach", DataModel::SelectRouteSystemDefault));
@@ -128,7 +145,7 @@ namespace Server { namespace Web
 		HtmlTag tabMenu("div");
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
-		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedback", Languages::TextFeedbacks));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedbacks", Languages::TextFeedbacks));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("signals", Languages::TextSignals));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
 		content.AddChildTag(tabMenu);
@@ -186,7 +203,7 @@ namespace Server { namespace Web
 
 		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, rotation));
 
-		formContent.AddChildTag(HtmlTagTabTrackFeedback(client, feedbacks, trackID));
+		formContent.AddChildTag(client.HtmlTagSlaveSelect("feedback", feedbacks, GetFeedbackOptions(trackID)));
 
 		formContent.AddChildTag(client.HtmlTagSlaveSelect("signal", signals, GetSignalOptions(trackID)));
 
@@ -226,14 +243,16 @@ namespace Server { namespace Web
 				height = Utils::Utils::GetIntegerMapEntry(arguments, "length", 1);
 				break;
 		}
-		vector<FeedbackID> feedbacks;
-		unsigned int feedbackCounter = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackcounter", 1);
-		for (unsigned int feedback = 1; feedback <= feedbackCounter; ++feedback)
+
+		vector<Relation*> feedbacks;
 		{
-			FeedbackID feedbackID = Utils::Utils::GetIntegerMapEntry(arguments, "feedback_" + to_string(feedback), FeedbackNone);
-			if (feedbackID != FeedbackNone)
+			vector<FeedbackID> feedbackIDs = WebClientStatic::InterpretSlaveData("feedback", arguments);
+			for (auto feedbackId : feedbackIDs)
 			{
-				feedbacks.push_back(feedbackID);
+				feedbacks.push_back(new Relation(&manager,
+					ObjectIdentifier(ObjectTypeTrack, trackId),
+					ObjectIdentifier(ObjectTypeFeedback, feedbackId),
+					Relation::RelationTypeTrackFeedback));
 			}
 		}
 
@@ -245,7 +264,7 @@ namespace Server { namespace Web
 				signals.push_back(new Relation(&manager,
 					ObjectIdentifier(ObjectTypeTrack, trackId),
 					ObjectIdentifier(ObjectTypeSignal, signalId),
-					Relation::TypeTrackSignal));
+					Relation::RelationTypeTrackSignal));
 			}
 		}
 
@@ -443,33 +462,6 @@ namespace Server { namespace Web
 		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
 		manager.TrackSetLocoOrientation(trackID, orientation);
 		client.ReplyHtmlWithHeaderAndParagraph("Loco orientation of track set");
-	}
-
-	HtmlTag WebClientTrack::HtmlTagTabTrackFeedback(const WebClient& client,
-		const std::vector<FeedbackID>& feedbacks,
-		const TrackID trackID)
-	{
-		unsigned int feedbackCounter = 0;
-		HtmlTag existingFeedbacks("div");
-		existingFeedbacks.AddId("feedbackcontent");
-		for (auto feedbackID : feedbacks)
-		{
-			existingFeedbacks.AddChildTag(client.HtmlTagSelectFeedbackForTrack(++feedbackCounter, trackID, feedbackID));
-		}
-		existingFeedbacks.AddChildTag(HtmlTag("div").AddId("div_feedback_" + to_string(feedbackCounter + 1)));
-
-		HtmlTag feedbackContent("div");
-		feedbackContent.AddId("tab_feedback");
-		feedbackContent.AddClass("tab_content");
-		feedbackContent.AddClass("hidden");
-		feedbackContent.AddChildTag(HtmlTagInputHidden("feedbackcounter", to_string(feedbackCounter)));
-		feedbackContent.AddChildTag(existingFeedbacks);
-		HtmlTagButton newButton(Languages::TextNew, "newfeedback");
-		newButton.AddAttribute("onclick", "addFeedback();return false;");
-		newButton.AddClass("wide_button");
-		feedbackContent.AddChildTag(newButton);
-		feedbackContent.AddChildTag(HtmlTag("br"));
-		return feedbackContent;
 	}
 
 	HtmlTag WebClientTrack::HtmlTagTabTrackAutomode(DataModel::SelectRouteApproach selectRouteApproach,

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -48,7 +48,7 @@ namespace Hardware
 
 	void CS2Tcp::Receiver()
 	{
-		Utils::Utils::SetThreadName("CS2Tcp");
+		Utils::Utils::SetThreadName("CS2 TCP Receiver");
 		logger->Info(Languages::TextReceiverThreadStarted);
 		if (connection.IsConnected() == false)
 		{

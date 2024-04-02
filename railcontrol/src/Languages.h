@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -75,6 +75,7 @@ class Languages
 			TextBaseAddress,
 			TextBasic,
 			TextBlockTrack,
+			TextBooster,
 			TextBoosterIsTurnedOff,
 			TextBoosterIsTurnedOn,
 			TextBridge,
@@ -191,6 +192,7 @@ class Languages
 			TextError,
 			TextErrorReadingData,
 			TextExecuteAccessory,
+			TextExecuteRoute,
 			TextExecutingRoute,
 			TextExitRailControl,
 			TextFeedback,
@@ -469,6 +471,7 @@ class Languages
 			TextParameterFoundInConfigFile,
 			TextPause,
 			TextPin,
+			TextPingSenderStarted,
 			TextPleaseSelectLoco,
 			TextPosX,
 			TextPosY,
@@ -666,6 +669,7 @@ class Languages
 			TextTcpConnectionEstablished,
 			TextTerminatingAccessorySenderThread,
 			TextTerminatingHeartBeatThread,
+			TextTerminatingPingSender,
 			TextTerminatingReceiverThread,
 			TextTerminatingSenderSocket,
 			TextTerminatingSenderThread,
@@ -683,7 +687,6 @@ class Languages
 			TextTrack,
 			TextTrackDeleted,
 			TextTrackDoesNotExist,
-			TextTrackHasAssociatedFeedback,
 			TextTrackIsUsedByLoco,
 			TextTrackIsUsedByRoute,
 			TextTrackSaved,

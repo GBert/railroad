@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -52,7 +52,7 @@ namespace DataModel
 		ParseArguments(serialized, arguments);
 		LockableItem::Deserialize(arguments);
 		object1.SetObjectType(static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "objectType1")));
-		type = static_cast<Type>(Utils::Utils::GetIntegerMapEntry(arguments, "type"));
+		type = static_cast<RelationType>(Utils::Utils::GetIntegerMapEntry(arguments, "type"));
 		object1.SetObjectID(static_cast<ObjectID>(Utils::Utils::GetIntegerMapEntry(arguments, "objectID1")));
 		object2.SetObjectType(static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "objectType2")));
 		object2.SetObjectID(static_cast<ObjectID>(Utils::Utils::GetIntegerMapEntry(arguments, "objectID2")));
@@ -126,6 +126,10 @@ namespace DataModel
 				manager->LocoBaseOrientation(ControlTypeInternal, locoBaseIdentifier, static_cast<Orientation>(data));
 				return true;
 
+			case ObjectTypeBooster:
+				manager->Booster(ControlTypeInternal, static_cast<BoosterState>(data));
+				return true;
+
 			default:
 				return false;
 		}
@@ -167,7 +171,10 @@ namespace DataModel
 		}
 
 		const ObjectType objectType2 = ObjectType2();
-		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause || objectType2 == ObjectTypeMultipleUnit)
+		if (objectType2 == ObjectTypeLoco
+			|| objectType2 == ObjectTypePause
+			|| objectType2 == ObjectTypeMultipleUnit
+			|| objectType2 == ObjectTypeBooster)
 		{
 			return true;
 		}
@@ -198,7 +205,10 @@ namespace DataModel
 		}
 
 		const ObjectType objectType2 = ObjectType2();
-		if (objectType2 == ObjectTypeLoco || objectType2 == ObjectTypePause || objectType2 == ObjectTypeMultipleUnit)
+		if (objectType2 == ObjectTypeLoco
+			|| objectType2 == ObjectTypePause
+			|| objectType2 == ObjectTypeMultipleUnit
+			|| objectType2 == ObjectTypeBooster)
 		{
 			return true;
 		}

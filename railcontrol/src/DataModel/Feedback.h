@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -58,8 +58,8 @@ namespace DataModel
 			 	pin(FeedbackPinNone),
 			 	manager(manager),
 			 	feedbackType(FeedbackTypeDefault),
+			 	routeId(RouteNone),
 			 	inverted(false),
-			 	trackID(TrackNone),
 			 	track(nullptr),
 				stateCounter(0)
 			{
@@ -83,7 +83,7 @@ namespace DataModel
 
 			inline bool IsInUse() const
 			{
-				return IsRelatedTrackSet();
+				return track != nullptr;
 			}
 
 			inline std::string GetLayoutType() const override
@@ -99,6 +99,16 @@ namespace DataModel
 			inline void SetFeedbackType(const FeedbackType type)
 			{
 				this->feedbackType = type;
+			}
+
+			inline RouteID GetRouteId() const
+			{
+				return routeId;
+			}
+
+			inline void SetRouteId(const RouteID routeId)
+			{
+				this->routeId = routeId;
 			}
 
 			inline void SetInverted(const bool inverted)
@@ -140,36 +150,13 @@ namespace DataModel
 				return pin;
 			}
 
-			inline void ClearRelatedTrack()
+			inline void SetTrack(DataModel::Track* track = nullptr)
 			{
-				trackID = TrackNone;
-				track = nullptr;
-			}
-
-			inline bool IsRelatedTrackSet() const
-			{
-				return trackID != TrackNone;
-			}
-
-			inline void SetRelatedTrack(const TrackID trackID)
-			{
-				this->trackID = trackID;
-				track = nullptr;
-			}
-
-			inline TrackID GetRelatedTrack() const
-			{
-				return trackID;
-			}
-
-			inline bool CompareRelatedTrack(const TrackID trackID) const
-			{
-				return this->trackID == trackID;
+				this->track = track;
 			}
 
 			inline Track* GetTrack()
 			{
-				UpdateTrack();
 				return track;
 			}
 
@@ -191,7 +178,6 @@ namespace DataModel
 			Feedback& operator=(const Hardware::FeedbackCacheEntry& feedback);
 
 		private:
-			void UpdateTrack();
 			void UpdateTrackState(const FeedbackState state);
 
 			ControlID controlID;
@@ -199,8 +185,8 @@ namespace DataModel
 
 			Manager* manager;
 			FeedbackType feedbackType;
+			RouteID routeId;
 			bool inverted;
-			TrackID trackID;
 			Track* track;
 			unsigned char stateCounter;
 			static const unsigned char MaxStateCounter = 10;

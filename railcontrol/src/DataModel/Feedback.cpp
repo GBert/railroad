@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2023 Dominik (Teddy) Mahrer - www.railcontrol.org
+Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -38,10 +38,10 @@ namespace DataModel
 		str += ";controlID=" + to_string(controlID);
 		str += ";pin=" + to_string(pin);
 		str += ";feedbacktype=" + to_string(feedbackType);
+		str += ";route=" + to_string(routeId);
 		str += ";inverted=" + to_string(inverted);
 		str += ";state=" + to_string(stateCounter > 0);
 		str += ";matchkey=" + matchKey;
-		str += ";track=" + to_string(trackID);
 		return str;
 	}
 
@@ -60,10 +60,10 @@ namespace DataModel
 		controlID = Utils::Utils::GetIntegerMapEntry(arguments, "controlID", ControlIdNone);
 		pin = Utils::Utils::GetIntegerMapEntry(arguments, "pin");
 		feedbackType = static_cast<FeedbackType>(Utils::Utils::GetIntegerMapEntry(arguments, "feedbacktype", FeedbackTypeDefault));
+		routeId = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
 		inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted", false);
 		stateCounter = Utils::Utils::GetBoolMapEntry(arguments, "state", FeedbackStateFree) ? MaxStateCounter : 0;
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
 		return true;
 	}
 
@@ -82,7 +82,7 @@ namespace DataModel
 				return;
 			}
 
-			unsigned char oldStateCounter = stateCounter;
+			const unsigned char oldStateCounter = stateCounter;
 			stateCounter = MaxStateCounter;
 
 			if (oldStateCounter > 0)
@@ -93,22 +93,18 @@ namespace DataModel
 
 		manager->FeedbackPublishState(this);
 		UpdateTrackState(FeedbackStateOccupied);
-	}
 
-	void Feedback::UpdateTrack()
-	{
-		if (track != nullptr)
+		Route* route = manager->GetRoute(routeId);
+		if (route)
 		{
-			return;
+			static Logger::Logger* logger = Logger::Logger::GetLogger(Languages::GetText(Languages::TextManager));
+			route->Execute(logger, ObjectIdentifier());
 		}
-
-		track = manager->GetTrack(trackID);
 	}
 
 	void Feedback::UpdateTrackState(const FeedbackState state)
 	{
-		UpdateTrack();
-		if (track == nullptr)
+		if (!track)
 		{
 			return;
 		}
