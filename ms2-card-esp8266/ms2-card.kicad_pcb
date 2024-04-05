@@ -7,7 +7,7 @@
   (paper "A4")
   (title_block
     (title "Lokkkarten Emulator")
-    (date "2024-03-17")
+    (date "2024-03-18")
     (rev "0.996")
     (comment 1 "Gerhard Bertelsmann")
   )
@@ -1916,7 +1916,7 @@
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 6e60d2a9-ddda-48a8-a72c-a36f78e54a45)
     )
-    (fp_text value "FM24C64B" (at -4.75 0.5 90) (layer "F.Fab") hide
+    (fp_text value "FM24CL64B" (at -4.75 0.5 90) (layer "F.Fab") hide
         (effects (font (size 0.8 0.8) (thickness 0.15)))
       (tstamp 2cecd7fd-dab8-4733-8b92-41cdab9ef0f2)
     )

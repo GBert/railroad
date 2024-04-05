@@ -6,7 +6,7 @@
 
   (title_block
     (title "Lokkarten Emulator")
-    (date "2024-03-17")
+    (date "2024-03-18")
     (rev "0.996")
     (company "Modellbahn eXtreme")
     (comment 1 "Gerhard Bertelsmann")
@@ -5167,7 +5167,7 @@
     (property "Reference" "U2" (at 51.5494 134.7302 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "FM24C64B" (at 51.5494 137.2671 0)
+    (property "Value" "FM24CL64B" (at 51.5494 137.2671 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 49.53 146.05 0)
