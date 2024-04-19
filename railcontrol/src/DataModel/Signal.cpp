@@ -128,7 +128,7 @@ namespace DataModel
 
 			case SignalTypeChDwarf:
 				return (GetAddress() == address)
-					|| (GetAddress() + 2 == address);
+					|| (GetAddress() + 1 == address);
 
 			case SignalTypeSimpleLeft:
 			case SignalTypeSimpleRight:
@@ -168,6 +168,20 @@ namespace DataModel
 				break;
 		}
 		return out;
+	}
+
+	AccessoryState Signal::CalculateMappedSignalState(const Address address, const AccessoryState state) const
+	{
+		const Address baseAddress = GetAddress();
+		const AddressOffset addressOffset = ((address - baseAddress) << 1) + state;
+		for (auto& state : stateAddressMap)
+		{
+			if (state.second == addressOffset)
+			{
+				return state.first;
+			}
+		}
+		return InvalidState;
 	}
 } // namespace DataModel
 

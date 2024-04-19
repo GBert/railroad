@@ -56,8 +56,8 @@ namespace DataModel
 	{
 		DefaultState = 0,
 
-		AccessoryStateOff = 0,
-		AccessoryStateOn = 1,
+		AccessoryStateOff           = 0,
+		AccessoryStateOn            = 1,
 
 		SignalStateStop             = 0,
 		SignalStateClear,
@@ -84,9 +84,11 @@ namespace DataModel
 		SignalStateAspect10Expected,
 		SignalStateMax              = SignalStateAspect10Expected,
 
-		SwitchStateTurnout = 0,
-		SwitchStateStraight = 1,
-		SwitchStateThird = 2,
+		SwitchStateTurnout          = 0,
+		SwitchStateStraight         = 1,
+		SwitchStateThird            = 2,
+
+		InvalidState                = 0xFF
 	};
 
 	typedef signed char AddressOffset;

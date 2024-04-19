@@ -144,6 +144,8 @@ namespace DataModel
 				return stateAddressMap.count(state) != 1 ? -1 : stateAddressMap.at(state);
 			}
 
+			AccessoryState CalculateMappedSignalState(const Address address, const AccessoryState state) const;
+
 			Signal& operator=(const Hardware::AccessoryCacheEntry& accessory);
 
 		private:

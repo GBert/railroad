@@ -1181,7 +1181,7 @@ void Manager::AccessoryBaseState(const ControlType controlType,
 	Signal* signal = GetSignal(controlID, protocol, address);
 	if (signal != nullptr)
 	{
-		SignalState(controlType, signal, signal->CalculateInvertedAccessoryState(state), true);
+		SignalState(controlType, signal, signal->CalculateMappedSignalState(address, state), true);
 		return;
 	}
 
