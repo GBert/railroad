@@ -7,8 +7,8 @@
   (paper "A4")
   (title_block
     (title "Lokkkarten Emulator")
-    (date "2024-03-18")
-    (rev "0.996")
+    (date "2024-04-21")
+    (rev "1.0")
     (comment 1 "Gerhard Bertelsmann")
   )
 
