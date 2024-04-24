@@ -24,6 +24,7 @@ uint8_t loco_id = 10;
 int sd_card;
 File root;
 
+/* Test with simple BIN File of BR86 */
 void copy_loco_data(){
   uint16_t i;
   for (i = 0; i < LOCO_SIZE; i++) {
@@ -100,7 +101,7 @@ void setup() {
   }
 
   if (sd_card) {
-    root = SD.open("/");
+    root = SD.open("/LocoCards");
     printDirectory(root, 0);
   }
 
