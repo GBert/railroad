@@ -96,13 +96,17 @@ void setup() {
     Serial.println("initialization failed - no SD Card inserted ?");
     sd_card = 0;
   } else {
-    Serial.println("success !");
+    Serial.println("success :-)");
     sd_card = 1;
   }
 
   if (sd_card) {
     root = SD.open("/LocoCards");
-    printDirectory(root, 0);
+    if (root) {
+      printDirectory(root, 0);
+    } else {
+      Serial.println("no directorty /LocoCards !");
+    }
   }
 
   Wire.begin(I2C_SDA, I2C_SCL);
