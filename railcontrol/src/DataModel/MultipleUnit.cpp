@@ -48,9 +48,9 @@ namespace DataModel
 		return true;
 	}
 
-	Propulsion MultipleUnit::GetPropulsion() const
+	void MultipleUnit::CalculatePropulsion()
 	{
-		uint8_t slavePropulsion = PropulsionUnknown;
+		uint8_t newPropulsion = PropulsionUnknown;
 		for (auto slave : slaves)
 		{
 			Loco* loco = manager->GetLoco(slave->ObjectID2());
@@ -59,9 +59,9 @@ namespace DataModel
 				continue;
 			}
 			const uint8_t locoPropulsion = loco->GetPropulsion();
-			slavePropulsion |= locoPropulsion;
+			newPropulsion |= locoPropulsion;
 		}
-		return static_cast<Propulsion>(slavePropulsion);
+		LocoBase::SetPropulsion(static_cast<Propulsion>(newPropulsion));
 	}
 
 	void MultipleUnit::DeleteSlaves()
@@ -78,6 +78,7 @@ namespace DataModel
 	{
 		DeleteSlaves();
 		slaves = newslaves;
+		CalculatePropulsion();
 		return true;
 	}
 

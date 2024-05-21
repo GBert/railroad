@@ -77,6 +77,7 @@ namespace DataModel
 		str += ";mintrainlength=" + to_string(minTrainLength);
 		str += ";maxtrainlength=" + to_string(maxTrainLength);
 		str += ";waitafterrelease=" + to_string(waitAfterRelease);
+		str += ";followuproute=" + to_string(followUpRoute);
 		return str;
 	}
 
@@ -114,6 +115,7 @@ namespace DataModel
 			minTrainLength = 0;
 			maxTrainLength = 0;
 			waitAfterRelease = 0;
+			followUpRoute = RouteNone;
 			return true;
 		}
 		fromTrack = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "fromTrack", TrackNone));
@@ -131,6 +133,7 @@ namespace DataModel
 		minTrainLength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "mintrainlength", 0));
 		maxTrainLength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "maxtrainlength", 0));
 		waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
+		followUpRoute = Utils::Utils::GetIntegerMapEntry(arguments, "followuproute", RouteNone);
 		return true;
 	}
 
@@ -336,13 +339,17 @@ namespace DataModel
 				return false;
 			}
 		}
+
+		manager->RouteSave(this);
 		return true;
 	}
 
 	bool Route::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(updateMutex);
-		return ReleaseInternal(logger, locoBaseIdentifier);
+		bool ret = ReleaseInternal(logger, locoBaseIdentifier);
+		manager->RouteSave(this);
+		return ret;
 	}
 
 	bool Route::ReleaseInternal(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)

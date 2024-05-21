@@ -114,6 +114,9 @@ namespace Server { namespace Web
 		//signalTypeOptions[DataModel::SignalTypeChLDistant] = Languages::TextChLDistant;
 		signalTypeOptions[DataModel::SignalTypeChDwarf] = Languages::TextChDwarf;
 		signalTypeOptions[DataModel::SignalTypeDeCombined] = Languages::TextDeCombined;
+		signalTypeOptions[DataModel::SignalTypeDeHVMain] = Languages::TextDeHVMain;
+		//signalTypeOptions[DataModel::SignalTypeDeHVDistant] = Languages::TextDeHVDistant;
+		signalTypeOptions[DataModel::SignalTypeDeBlock] = Languages::TextDeBlock;
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");

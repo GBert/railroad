@@ -96,6 +96,7 @@ namespace DataModel
 				feedbackIdOver(FeedbackNone),
 				feedbackIdsReached(),
 				wait(0),
+				followUpRoute(RouteAuto),
 				matchKey("")
 			{
 				logger = Logger::Logger::GetLogger(GetName());
@@ -127,17 +128,17 @@ namespace DataModel
 				logger = Logger::Logger::GetLogger(name);
 			}
 
-			bool GoToAutoMode(const AutoModeType type = AutoModeTypeFull);
+			bool GoToAutoMode();
 
 			void RequestManualMode();
 
 			bool GoToManualMode();
 
-			bool AddTimeTable(const ObjectIdentifier& identifier);
+			void AddTimeTable(const Route* route, const RouteID followUpRoute);
 
 			bool SetTrack(const TrackID trackID);
 
-			TrackID GetTrackId();
+			TrackID GetTrackId() const;
 
 			bool Release();
 
@@ -260,7 +261,10 @@ namespace DataModel
 				this->propulsion = propulsion;
 			}
 
-			virtual Propulsion GetPropulsion() const;
+			inline Propulsion GetPropulsion() const
+			{
+				return propulsion;
+			}
 
 			inline void SetTrainType(const TrainType trainType)
 			{
@@ -300,6 +304,8 @@ namespace DataModel
 			Manager* manager;
 
 		private:
+			typedef std::pair<RouteID,RouteID> TimeTableEntry;
+
 			enum LocoState : unsigned char
 			{
 				LocoStateManual = 0,
@@ -308,9 +314,6 @@ namespace DataModel
 				LocoStateAutomodeGetFirst,
 				LocoStateAutomodeGetSecond,
 				LocoStateAutomodeRunning,
-				LocoStateTimetableGetFirst,
-				LocoStateTimetableGetSecond,
-				LocoStateTimetableRunning,
 				LocoStateStopping,
 				LocoStateError
 			};
@@ -319,23 +322,23 @@ namespace DataModel
 
 			void AutoMode();
 
-			void SearchDestinationFirst();
+			Route* GetNextDestination(const Track* const track, const bool allowLocoTurn);
 
 			void GetTimetableDestinationFirst();
 
-			void PrepareDestinationFirst(Route* const route, const LocoState newState);
-
-			void SearchDestinationSecond();
+			void PrepareDestinationFirst(Route* const route);
 
 			void GetTimetableDestinationSecond();
 
 			DataModel::Route* GetDestinationFromTimeTable(const Track* const track, const bool allowLocoTurn);
 
-			void PrepareDestinationSecond(Route* const route, const LocoState newState);
+			void PrepareDestinationSecond(Route* const route);
 
 			DataModel::Route* SearchDestination(const DataModel::Track* const oldToTrack, const bool allowLocoTurn);
 
 			bool ReserveRoute(const Track* const track, const bool allowLocoTurn, Route* const route);
+
+			bool ExecuteRoute(const Track* const track, const bool allowLocoTurn, Route* const route);
 
 			void FeedbackIdFirstReached();
 
@@ -379,7 +382,8 @@ namespace DataModel
 			volatile FeedbackID feedbackIdOver;
 			Utils::ThreadSafeQueue<FeedbackID> feedbackIdsReached;
 			Pause wait;
-			Utils::ThreadSafeQueue<RouteID> timeTableQueue;
+			Utils::ThreadSafeQueue<TimeTableEntry> timeTableQueue;
+			RouteID followUpRoute;
 			std::string matchKey;
 
 			LocoFunctions functions;

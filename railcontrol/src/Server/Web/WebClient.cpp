@@ -1170,16 +1170,12 @@ namespace Server { namespace Web
 
 	void WebClient::HandleLocoAddTimeTable(const map<string, string>& arguments)
 	{
-		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
-		if (!locoBaseIdentifier.IsSet())
-		{
-			TrackID trackId = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
-			locoBaseIdentifier = manager.GetLocoBaseIdentifierOfTrack(trackId);
-		}
-		ObjectIdentifier timetableIdentifier = Utils::Utils::GetStringMapEntry(arguments, "timetable");
-		bool ret = manager.LocoBaseAddTimeTable(locoBaseIdentifier, timetableIdentifier);
-		ReplyHtmlWithHeaderAndParagraph(ret ? "Timetable added" : "Timetable not added");
+		const TrackID trackID = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
+		const ObjectIdentifier locoBaseIdentifier = manager.GetLocoBaseIdentifierOfTrack(trackID);
+		const RouteID routeID = static_cast<RouteID>(Utils::Utils::GetIntegerMapEntry(arguments, "route"));
+		bool ret = manager.LocoBaseAddTimeTable(locoBaseIdentifier, routeID);
+		manager.TrackStartLocoBase(trackID);
+		ReplyHtmlWithHeaderAndParagraph(ret ? "Route added" : "Route not added");
 	}
 
 	HtmlTag WebClient::HtmlTagMatchKeyProtocolLoco(const ControlID controlId,

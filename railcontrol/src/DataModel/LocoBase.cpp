@@ -98,30 +98,22 @@ namespace DataModel
 		return true;
 	}
 
-	Propulsion LocoBase::GetPropulsion() const
-	{
-		return propulsion;
-	}
-
 	bool LocoBase::SetTrack(const TrackID trackID)
 	{
 		std::lock_guard<std::mutex> Guard(stateMutex);
 		// there must not be set a track
-		if (this->trackFrom != nullptr)
+		if (trackFrom)
 		{
 			return false;
 		}
-		this->trackFrom = manager->GetTrack(trackID);
+		trackFrom = manager->GetTrack(trackID);
+		manager->LocoBaseSave(this);
 		return true;
 	}
 
-	TrackID LocoBase::GetTrackId()
+	TrackID LocoBase::GetTrackId() const
 	{
-		if (trackFrom)
-		{
-			return trackFrom->GetID();
-		}
-		return TrackNone;
+		return (trackFrom ? trackFrom->GetID() : TrackNone);
 	}
 
 	bool LocoBase::Release()
@@ -130,27 +122,27 @@ namespace DataModel
 		ForceManualMode();
 		std::lock_guard<std::mutex> Guard(stateMutex);
 
-		if (routeFirst != nullptr)
+		if (routeFirst)
 		{
 			routeFirst->Release(logger, GetObjectIdentifier());
 			routeFirst = nullptr;
 		}
-		if (routeSecond != nullptr)
+		if (routeSecond)
 		{
 			routeSecond->Release(logger, GetObjectIdentifier());
 			routeSecond = nullptr;
 		}
-		if (trackFrom != nullptr)
+		if (trackFrom)
 		{
 			trackFrom->Release(logger, GetObjectIdentifier());
 			trackFrom = nullptr;
 		}
-		if (trackFirst != nullptr)
+		if (trackFirst)
 		{
 			trackFirst->Release(logger, GetObjectIdentifier());
 			trackFirst = nullptr;
 		}
-		if (trackSecond != nullptr)
+		if (trackSecond)
 		{
 			trackSecond->Release(logger, GetObjectIdentifier());
 			trackSecond = nullptr;
@@ -160,6 +152,7 @@ namespace DataModel
 		feedbackIdCreep = FeedbackNone;
 		feedbackIdReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
+		manager->LocoBaseSave(this);
 		return true;
 	}
 
@@ -181,10 +174,10 @@ namespace DataModel
 		return true;
 	}
 
-	bool LocoBase::GoToAutoMode(const AutoModeType type)
+	bool LocoBase::GoToAutoMode()
 	{
 		std::lock_guard<std::mutex> Guard(stateMutex);
-		if (trackFrom == nullptr)
+		if (!trackFrom)
 		{
 			logger->Warning(Languages::TextCanNotStartNotOnTrack);
 			return false;
@@ -205,7 +198,8 @@ namespace DataModel
 			return false;
 		}
 
-		state = (type == AutoModeTypeTimetable ? LocoStateTimetableGetFirst : LocoStateAutomodeGetFirst);
+		followUpRoute = RouteAuto;
+		state = LocoStateAutomodeGetFirst;
 		locoThread = std::thread(&DataModel::LocoBase::AutoMode, this);
 
 		return true;
@@ -301,7 +295,7 @@ namespace DataModel
 							--wait;
 							break;
 						}
-						SearchDestinationFirst();
+						GetTimetableDestinationFirst();
 						break;
 
 					case LocoStateAutomodeGetSecond:
@@ -319,43 +313,10 @@ namespace DataModel
 						{
 							break;
 						}
-						SearchDestinationSecond();
-						break;
-
-					case LocoStateTimetableGetFirst:
-						if (requestManualMode)
-						{
-							state = LocoStateOff;
-							break;
-						}
-						if (wait > 0)
-						{
-							--wait;
-							break;
-						}
-						GetTimetableDestinationFirst();
-						break;
-
-					case LocoStateTimetableGetSecond:
-						if (requestManualMode)
-						{
-							logger->Info(Languages::TextIsRunningWaitingUntilDestination, name);
-							state = LocoStateStopping;
-							break;
-						}
-						if (manager->GetNrOfTracksToReserve() <= 1)
-						{
-							break;
-						}
-						if (wait > 0)
-						{
-							break;
-						}
 						GetTimetableDestinationSecond();
 						break;
 
 					case LocoStateAutomodeRunning:
-					case LocoStateTimetableRunning:
 						// loco is already running, waiting until destination reached
 						if (requestManualMode)
 						{
@@ -365,8 +326,24 @@ namespace DataModel
 						break;
 
 					case LocoStateStopping:
-						logger->Info(Languages::TextHasNotReachedDestination);
+						if (requestManualMode)
+						{
+							logger->Info(Languages::TextHasNotReachedDestination);
+							break;
+						}
 
+						if (trackSecond)
+						{
+							state = LocoStateAutomodeRunning;
+						}
+						else if (trackFirst)
+						{
+							state = LocoStateAutomodeGetSecond;
+						}
+						else
+						{
+							state = LocoStateAutomodeGetFirst;
+						}
 						break;
 
 					case LocoStateTerminated:
@@ -394,17 +371,34 @@ namespace DataModel
 		}
 	}
 
-	void LocoBase::SearchDestinationFirst()
+	Route* LocoBase::GetNextDestination(const Track* const track, const bool allowLocoTurn)
 	{
-		if (routeFirst != nullptr)
+		if (timeTableQueue.IsEmpty())
 		{
-			state = LocoStateError;
-			logger->Error(Languages::TextHasAlreadyReservedRoute);
-			return;
+			if (followUpRoute == RouteStop)
+			{
+				RequestManualMode();
+				return nullptr;
+			}
+
+			const Route* route = nullptr;
+
+			if (followUpRoute != RouteAuto)
+			{
+				route = manager->GetRoute(followUpRoute);
+			}
+			else
+			{
+				route = SearchDestination(track, allowLocoTurn);
+			}
+
+			if (route)
+			{
+				AddTimeTable(route, route->GetFollowUpRoute());
+			}
 		}
 
-		Route* route = SearchDestination(trackFrom, true);
-		PrepareDestinationFirst(route, LocoStateAutomodeGetSecond);
+		return GetDestinationFromTimeTable(track, allowLocoTurn);
 	}
 
 	void LocoBase::GetTimetableDestinationFirst()
@@ -416,30 +410,39 @@ namespace DataModel
 			return;
 		}
 
-		Route* const route = GetDestinationFromTimeTable(trackFrom, true);
+		Route* route = GetNextDestination(trackFrom, true);
 		if (route == nullptr)
 		{
-			logger->Debug(Languages::TextNoValidTimetableEntryFound);
 			return;
 		}
-		PrepareDestinationFirst(route, LocoStateTimetableGetSecond);
+		PrepareDestinationFirst(route);
 	}
 
-	void LocoBase::PrepareDestinationFirst(Route* const route, const LocoState newState)
+	void LocoBase::GetTimetableDestinationSecond()
 	{
+		Route* route = GetNextDestination(trackFirst, false);
 		if (route == nullptr)
+		{
+			return;
+		}
+		PrepareDestinationSecond(route);
+	}
+
+	void LocoBase::PrepareDestinationFirst(Route* const route)
+	{
+		if (!route)
 		{
 			return;
 		}
 
 		Track* newTrack = manager->GetTrack(route->GetToTrack());
-		if (newTrack == nullptr)
+		if (!newTrack)
 		{
 			return;
 		}
 
 		bool isOrientationSet = newTrack->SetLocoOrientation(static_cast<Orientation>(route->GetToOrientation()));
-		if (isOrientationSet == false)
+		if (!isOrientationSet)
 		{
 			return;
 		}
@@ -449,7 +452,7 @@ namespace DataModel
 		if (turnLoco)
 		{
 			bool canTurnOrientation = trackFrom->SetLocoOrientation(route->GetFromOrientation());
-			if (canTurnOrientation == false)
+			if (!canTurnOrientation)
 			{
 				return;
 			}
@@ -486,23 +489,8 @@ namespace DataModel
 				break;
 		}
 		manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
-		state = newState;
-	}
-
-	void LocoBase::SearchDestinationSecond()
-	{
-		Route* route = SearchDestination(trackFirst, false);
-		PrepareDestinationSecond(route, LocoStateAutomodeRunning);
-	}
-
-	void LocoBase::GetTimetableDestinationSecond()
-	{
-		Route* route = GetDestinationFromTimeTable(trackFirst, false);
-		if (route == nullptr)
-		{
-			return;
-		}
-		PrepareDestinationSecond(route, LocoStateTimetableRunning);
+		state = LocoStateAutomodeGetSecond;
+		manager->LocoBaseSave(this);
 	}
 
 	Route* LocoBase::GetDestinationFromTimeTable(const Track* const track, const bool allowLocoTurn)
@@ -512,40 +500,32 @@ namespace DataModel
 			return nullptr;
 		}
 
-		RouteID routeId = timeTableQueue.Dequeue();
-		Route* const route = manager->GetRoute(routeId);
+		const TimeTableEntry entry = timeTableQueue.Dequeue();
+		Route* const route = manager->GetRoute(entry.first);
 		if (route->GetFromTrack() != track->GetID())
 		{
 			return nullptr;
 		}
-		bool ret = ReserveRoute(track, allowLocoTurn, route);
+		logger->Debug(Languages::TextUsingRouteFromTimetable, route->GetName());
+		bool ret = ExecuteRoute(track, allowLocoTurn, route);
 		if (!ret)
 		{
+			timeTableQueue.EnqueueFront(entry);
 			return nullptr;
 		}
-		logger->Debug(Languages::TextUsingRouteFromTimetable, route->GetID());
+		followUpRoute = entry.second;
 		return route;
 	}
 
-	bool LocoBase::AddTimeTable(const ObjectIdentifier& identifier)
+	void LocoBase::AddTimeTable(const Route* route, const RouteID followUpRoute)
 	{
-		switch (identifier.GetObjectType())
-		{
-			case ObjectTypeRoute:
-				timeTableQueue.Enqueue(identifier.GetObjectID());
-				logger->Debug(Languages::TextAddingRouteToTimetable, identifier.GetObjectID());
-				return true;
-
-			case ObjectTypeTimeTable:
-				// FIXME: TimeTable function is not yet implemented
-				return false;
-
-			default:
-				return false;
-		}
+		logger->Debug(Languages::TextAddingRouteToTimetable, route->GetName());
+		requestManualMode = false;
+		const TimeTableEntry entry(route->GetID(), followUpRoute);
+		timeTableQueue.EnqueueBack(entry);
 	}
 
-	void LocoBase::PrepareDestinationSecond(Route* const route, const LocoState newState)
+	void LocoBase::PrepareDestinationSecond(Route* const route)
 	{
 		if (route == nullptr)
 		{
@@ -578,7 +558,7 @@ namespace DataModel
 		wait = routeSecond->GetWaitAfterRelease();
 
 		manager->TrackPublishState(newTrack);
-		state = newState;
+		state = LocoStateAutomodeRunning;
 	}
 
 	Route* LocoBase::SearchDestination(const Track* const track, const bool allowLocoTurn)
@@ -626,15 +606,15 @@ namespace DataModel
 
 	bool LocoBase::ReserveRoute(const Track* const track, const bool allowLocoTurn, Route* const route)
 	{
-		logger->Debug(Languages::TextExecutingRoute, route->GetName());
+		logger->Debug(Languages::TextReservingRoute, route->GetName());
 
 		const ObjectIdentifier locoBaseIdentifier = GetObjectIdentifier();
-		if (route->Reserve(logger, locoBaseIdentifier) == false)
+		if (!route->Reserve(logger, locoBaseIdentifier))
 		{
 			return false;
 		}
 
-		if (route->Lock(logger, locoBaseIdentifier) == false)
+		if (!route->Lock(logger, locoBaseIdentifier))
 		{
 			route->Release(logger, locoBaseIdentifier);
 			return false;
@@ -649,7 +629,7 @@ namespace DataModel
 		}
 
 		bool canSetOrientation = newTrack->CanSetLocoBaseOrientation(route->GetToOrientation(), locoBaseIdentifier);
-		if (canSetOrientation == false)
+		if (!canSetOrientation)
 		{
 			route->Release(logger, locoBaseIdentifier);
 			newTrack->Release(logger, locoBaseIdentifier);
@@ -663,12 +643,34 @@ namespace DataModel
 			return false;
 		}
 
-		if (route->Execute(logger, locoBaseIdentifier) == false)
+		return true;
+	}
+
+	bool LocoBase::ExecuteRoute(const Track* const track, const bool allowLocoTurn, Route* const route)
+	{
+		if (route->GetLockState() == LockableItem::LockStateFree)
+		{
+			if (!ReserveRoute(track, allowLocoTurn, route))
+			{
+				return false;
+			}
+		}
+
+		logger->Debug(Languages::TextExecutingRoute, route->GetName());
+
+		const ObjectIdentifier locoBaseIdentifier = GetObjectIdentifier();
+		if (!route->Execute(logger, locoBaseIdentifier))
 		{
 			route->Release(logger, locoBaseIdentifier);
-			newTrack->Release(logger, locoBaseIdentifier);
+
+			Track* newTrack = manager->GetTrack(route->GetToTrack());
+			if (newTrack)
+			{
+				newTrack->Release(logger, locoBaseIdentifier);
+			}
 			return false;
 		}
+
 		return true;
 	}
 
@@ -703,11 +705,7 @@ namespace DataModel
 		if (feedbackID == feedbackIdStop)
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
-			if (feedbackIdFirst != 0)
-			{
-				feedbackIdsReached.Enqueue(feedbackIdFirst);
-			}
-			feedbackIdsReached.Enqueue(feedbackIdStop);
+			feedbackIdsReached.EnqueueBack(feedbackIdFirst != 0 ? feedbackIdFirst : feedbackIdStop);
 			return;
 		}
 
@@ -719,7 +717,7 @@ namespace DataModel
 			}
 			if (feedbackIdFirst != 0)
 			{
-				feedbackIdsReached.Enqueue(feedbackIdFirst);
+				feedbackIdsReached.EnqueueBack(feedbackIdFirst);
 			}
 			return;
 		}
@@ -732,7 +730,7 @@ namespace DataModel
 			}
 			if (feedbackIdFirst != 0)
 			{
-				feedbackIdsReached.Enqueue(feedbackIdFirst);
+				feedbackIdsReached.EnqueueBack(feedbackIdFirst);
 			}
 			return;
 		}
@@ -744,7 +742,7 @@ namespace DataModel
 			{
 				manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
 			}
-			feedbackIdsReached.Enqueue(feedbackIdFirst);
+			feedbackIdsReached.EnqueueBack(feedbackIdFirst);
 			return;
 		}
 
@@ -835,10 +833,6 @@ namespace DataModel
 				state = LocoStateAutomodeGetSecond;
 				break;
 
-			case LocoStateTimetableRunning:
-				state = LocoStateTimetableGetSecond;
-				break;
-
 			case LocoStateStopping:
 				// do nothing
 				break;
@@ -852,11 +846,12 @@ namespace DataModel
 		feedbackIdFirstCreep = FeedbackNone;
 		feedbackIdFirstReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
+		manager->LocoBaseSave(this);
 	}
 
 	void LocoBase::FeedbackIdStopReached()
 	{
-		if (routeFirst == nullptr || trackFrom == nullptr)
+		if (!routeFirst || !trackFrom)
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 			state = LocoStateError;
@@ -883,10 +878,6 @@ namespace DataModel
 				state = LocoStateAutomodeGetFirst;
 				break;
 
-			case LocoStateTimetableGetSecond:
-				state = LocoStateTimetableGetFirst;
-				break;
-
 			case LocoStateStopping:
 				state = LocoStateOff;
 				break;
@@ -900,6 +891,7 @@ namespace DataModel
 		feedbackIdStop = FeedbackNone;
 		feedbackIdCreep = FeedbackNone;
 		feedbackIdReduced = FeedbackNone;
+		manager->LocoBaseSave(this);
 	}
 
 	DataModel::LocoFunctionNr LocoBase::GetFunctionNumberFromFunctionIcon(DataModel::LocoFunctionIcon icon) const

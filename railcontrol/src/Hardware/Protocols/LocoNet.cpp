@@ -47,7 +47,7 @@ namespace Hardware
 		LocoNet::~LocoNet()
 		{
 			run = false;
-			sendingQueue.Enqueue(SendingQueueEntry());
+			sendingQueue.EnqueueBack(SendingQueueEntry());
 			senderThread.join();
 			receiverThread.join();
 			logger->Info(Languages::TextTerminatingSenderSocket);
@@ -1050,7 +1050,7 @@ namespace Hardware
 			unsigned char buffer[2];
 			buffer[0] = data;
 			CalcCheckSum(buffer, 1, buffer + 1);
-			sendingQueue.Enqueue(SendingQueueEntry(sizeof(buffer), buffer));
+			sendingQueue.EnqueueBack(SendingQueueEntry(sizeof(buffer), buffer));
 		}
 
 		void LocoNet::Send4ByteCommand(const unsigned char data0,
@@ -1062,7 +1062,7 @@ namespace Hardware
 			buffer[1] = data1;
 			buffer[2] = data2;
 			CalcCheckSum(buffer, 3, buffer + 3);
-			sendingQueue.Enqueue(SendingQueueEntry(sizeof(buffer), buffer));
+			sendingQueue.EnqueueBack(SendingQueueEntry(sizeof(buffer), buffer));
 		}
 
 		void LocoNet::Send6ByteCommand(const unsigned char data0,
@@ -1078,14 +1078,14 @@ namespace Hardware
 			buffer[3] = data3;
 			buffer[4] = data4;
 			CalcCheckSum(buffer, 5, buffer + 5);
-			sendingQueue.Enqueue(SendingQueueEntry(sizeof(buffer), buffer));
+			sendingQueue.EnqueueBack(SendingQueueEntry(sizeof(buffer), buffer));
 		}
 
 		void LocoNet::SendXByteCommand(unsigned char* data, unsigned char dataLength)
 		{
 			data[1] = dataLength;
 			CalcCheckSum(data, dataLength - 1, data + dataLength - 1);
-			sendingQueue.Enqueue(SendingQueueEntry(dataLength, data));
+			sendingQueue.EnqueueBack(SendingQueueEntry(dataLength, data));
 		}
 
 		uint8_t LocoNet::SetOrientationF0F4Bit(const unsigned char slot, const bool on, const unsigned char shift)

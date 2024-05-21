@@ -159,14 +159,13 @@ namespace Server { namespace Web
 		AddOnClickMenuEntry(Languages::TextTurnDirectionOfTravelToRight, "fireRequestAndForget('/?cmd=trackorientation&orientation=true&" + urlIdentifier + "');", "track_right");
 		AddOnClickMenuEntry(Languages::TextSetLoco, "loadPopup('/?cmd=tracksetloco&" + urlIdentifier + "');", "track_set");
 		AddOnClickMenuEntry(Languages::TextStartLocoAutomode, "fireRequestAndForget('/?cmd=trackstartloco&" + urlIdentifier + "');", "track_start_loco");
-		AddOnClickMenuEntry(Languages::TextStartLocoTimetablemode, "fireRequestAndForget('/?cmd=trackstartloco&" + urlIdentifier + "&automodetype=1');", "track_start_loco");
 
 		const std::string trackId = std::to_string(track->GetID());
 		const std::vector<const DataModel::Route*> routes = track->GetRoutes();
 		for (auto route : routes)
 		{
 			const std::string routeId = std::to_string(route->GetID());
-			AddOnClickMenuEntry(route->GetName(), "fireRequestAndForget('/?cmd=locoaddtimetable&track=" + trackId + "&timetable=route" + routeId + "&automodetype=1');", "track_start_loco");
+			AddOnClickMenuEntry(route->GetName(), "fireRequestAndForget('/?cmd=locoaddtimetable&track=" + trackId + "&route=" + routeId + "');", "track_start_loco");
 		}
 
 		AddOnClickMenuEntry(Languages::TextStopLoco, "fireRequestAndForget('/?cmd=trackstoploco&" + urlIdentifier + "');", "track_stop_loco");

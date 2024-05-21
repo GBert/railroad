@@ -29,6 +29,22 @@ using std::string;
 
 namespace DataModel
 {
+	void Signal::SetAccessoryType(AccessoryType type)
+	{
+		AccessoryBase::SetAccessoryType(type);
+		ResetStateAddressMap();
+	}
+
+	ObjectType Signal::GetObjectType() const
+	{
+		return ObjectTypeSignal;
+	}
+
+	std::string Signal::GetLayoutType() const
+	{
+		return Languages::GetText(Languages::TextSignal);
+	}
+
 	std::string Signal::Serialize() const
 	{
 		string str = "objectType=Signal;";
@@ -91,13 +107,6 @@ namespace DataModel
 		SetStateAddressOffset(SignalStateClear, 1);
 		switch(GetAccessoryType())
 		{
-			case SignalTypeDeCombined:
-				SetStateAddressOffset(SignalStateStopExpected, 2);
-				SetStateAddressOffset(SignalStateAspect4, 3);
-				SetStateAddressOffset(SignalStateAspect7, 4);
-				SetStateAddressOffset(SignalStateDark, 5);
-				break;
-
 			case SignalTypeChDwarf:
 				SetStateAddressOffset(SignalStateStopExpected, 2);
 				break;
@@ -109,8 +118,21 @@ namespace DataModel
 				SetStateAddressOffset(SignalStateAspect6, 5);
 				break;
 
+			case SignalTypeDeCombined:
+				SetStateAddressOffset(SignalStateStopExpected, 2);
+				SetStateAddressOffset(SignalStateAspect4, 3);
+				SetStateAddressOffset(SignalStateAspect7, 4);
+				SetStateAddressOffset(SignalStateDark, 5);
+				break;
+
+			case SignalTypeDeHVMain:
+				SetStateAddressOffset(SignalStateAspect2, 2);
+				SetStateAddressOffset(SignalStateAspect3, 3);
+				break;
+
 			case SignalTypeSimpleLeft:
 			case SignalTypeSimpleRight:
+			case SignalTypeDeBlock:
 			default:
 				break;
 		}
@@ -120,18 +142,20 @@ namespace DataModel
 	{
 		switch(GetAccessoryType())
 		{
-			case SignalTypeDeCombined:
 			case SignalTypeChLMain:
+			case SignalTypeDeCombined:
 				return (GetAddress() == address)
 					|| (GetAddress() + 1 == address)
 					|| (GetAddress() + 2 == address);
 
 			case SignalTypeChDwarf:
+			case SignalTypeDeHVMain:
 				return (GetAddress() == address)
 					|| (GetAddress() + 1 == address);
 
 			case SignalTypeSimpleLeft:
 			case SignalTypeSimpleRight:
+			case SignalTypeDeBlock:
 			default:
 				return (GetAddress() == address);
 		}
@@ -144,13 +168,6 @@ namespace DataModel
 		out.emplace(SignalStateClear, StateOption(Languages::TextSignalStateClear, GetStateAddressOffset(SignalStateClear)));
 		switch(GetAccessoryType())
 		{
-			case SignalTypeDeCombined:
-				out.emplace(SignalStateStopExpected, StateOption(Languages::TextSignalStateStopExpected, GetStateAddressOffset(SignalStateStopExpected)));
-				out.emplace(SignalStateAspect4, StateOption(Languages::TextSignalStateShunting, GetStateAddressOffset(SignalStateAspect4)));
-				out.emplace(SignalStateAspect7, StateOption(Languages::TextSignalStateZs7, GetStateAddressOffset(SignalStateAspect7)));
-				out.emplace(SignalStateDark, StateOption(Languages::TextSignalStateDark, GetStateAddressOffset(SignalStateDark)));
-				break;
-
 			case SignalTypeChDwarf:
 				out.emplace(SignalStateStopExpected, StateOption(Languages::TextSignalStateCaution, GetStateAddressOffset(SignalStateStopExpected)));
 				break;
@@ -162,8 +179,21 @@ namespace DataModel
 				out.emplace(SignalStateAspect6, StateOption(Languages::TextSignalStateShortClear, GetStateAddressOffset(SignalStateAspect6)));
 				break;
 
+			case SignalTypeDeCombined:
+				out.emplace(SignalStateStopExpected, StateOption(Languages::TextSignalStateStopExpected, GetStateAddressOffset(SignalStateStopExpected)));
+				out.emplace(SignalStateAspect4, StateOption(Languages::TextSignalStateShunting, GetStateAddressOffset(SignalStateAspect4)));
+				out.emplace(SignalStateAspect7, StateOption(Languages::TextSignalStateZs7, GetStateAddressOffset(SignalStateAspect7)));
+				out.emplace(SignalStateDark, StateOption(Languages::TextSignalStateDark, GetStateAddressOffset(SignalStateDark)));
+				break;
+
+			case SignalTypeDeHVMain:
+				out.emplace(SignalStateAspect2, StateOption(Languages::TextSignalStateSlow, GetStateAddressOffset(SignalStateAspect2)));
+				out.emplace(SignalStateAspect3, StateOption(Languages::TextSignalStateShunting, GetStateAddressOffset(SignalStateAspect3)));
+				break;
+
 			case SignalTypeSimpleLeft:
 			case SignalTypeSimpleRight:
+			case SignalTypeDeBlock:
 			default:
 				break;
 		}

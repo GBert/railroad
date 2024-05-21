@@ -264,6 +264,7 @@ namespace DataModel
 		{
 			PublishState();
 		}
+		manager->TrackSave(this);
 		return ret;
 	}
 
@@ -285,6 +286,7 @@ namespace DataModel
 			this->trackStateDelayed = DataModel::Feedback::FeedbackStateFree;
 		}
 		PublishState();
+		manager->TrackSave(this);
 		return true;
 	}
 
@@ -297,6 +299,7 @@ namespace DataModel
 			ret = ReleaseForceUnlocked(logger, locoBaseIdentifier);
 		}
 		PublishState();
+		manager->TrackSave(this);
 		return ret;
 	}
 
@@ -448,21 +451,21 @@ namespace DataModel
 			    static std::random_device rd;
 			    static std::mt19937 g(rd());
 				std::shuffle(validRoutes.begin(), validRoutes.end(), g);
-				break;
+				return;
 			}
 
 			case SelectRouteMinTrackLength:
 				std::sort(validRoutes.begin(), validRoutes.end(), Route::CompareShortest);
-				break;
+				return;
 
 			case SelectRouteLongestUnused:
 				std::sort(validRoutes.begin(), validRoutes.end(), Route::CompareLastUsed);
-				break;
+				return;
 
 			case SelectRouteDoNotCare:
 			default:
 				// do nothing
-				break;
+				return;
 		}
 	}
 

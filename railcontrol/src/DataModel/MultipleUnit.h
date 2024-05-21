@@ -60,7 +60,7 @@ namespace DataModel
 
 			bool Deserialize(const std::string& serialized) override;
 
-			virtual Propulsion GetPropulsion() const override;
+			void CalculatePropulsion();
 
 			void DeleteSlaves();
 

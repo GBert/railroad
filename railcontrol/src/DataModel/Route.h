@@ -329,6 +329,16 @@ namespace DataModel
 				return waitAfterRelease;
 			}
 
+			inline void SetFollowUpRoute(const RouteID followUpRoute)
+			{
+				this->followUpRoute = followUpRoute;
+			}
+
+			inline RouteID GetFollowUpRoute() const
+			{
+				return followUpRoute;
+			}
+
 			static inline bool CompareShortest(const Route* s1, const Route* s2)
 			{
 				return s1->GetMinTrainLength() < s2->GetMinTrainLength();
@@ -370,6 +380,7 @@ namespace DataModel
 			FeedbackID feedbackIdStop;
 			FeedbackID feedbackIdOver;
 			Pause waitAfterRelease;
+			RouteID followUpRoute;
 
 			time_t lastUsed;
 			unsigned int counter;

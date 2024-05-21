@@ -78,26 +78,16 @@ namespace DataModel
 				Deserialize(serialized);
 			}
 
-			inline void SetAccessoryType(AccessoryType type) override
-			{
-				AccessoryBase::SetAccessoryType(type);
-				ResetStateAddressMap();
-			}
+			virtual void SetAccessoryType(AccessoryType type) override;
 
-			inline ObjectType GetObjectType() const override
-			{
-				return ObjectTypeSignal;
-			}
+			virtual ObjectType GetObjectType() const override;
 
-			inline std::string GetLayoutType() const override
-			{
-				return Languages::GetText(Languages::TextSignal);
-			}
+			virtual std::string GetLayoutType() const override;
 
 			std::string Serialize() const override;
 
 			using HardwareHandle::Deserialize;
-			bool Deserialize(const std::string& serialized) override;
+			virtual bool Deserialize(const std::string& serialized) override;
 
 			inline Track* GetTrack() const
 			{

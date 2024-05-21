@@ -277,7 +277,7 @@ namespace Hardware
 				return;
 			}
 			AccessoryQueueEntry entry(protocol, address, state, duration);
-			accessoryQueue.Enqueue(entry);
+			accessoryQueue.EnqueueBack(entry);
 		}
 
 		void Z21::AccessoryOn(const Protocol protocol, const Address address, const DataModel::AccessoryState state)

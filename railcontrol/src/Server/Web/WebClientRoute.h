@@ -79,10 +79,11 @@ namespace Server { namespace Web
 				const std::string& onchange = "") const;
 
 			HtmlTag HtmlTagSelectFeedbacksOfTrack(const TrackID trackID,
-				const FeedbackID feedbackIdReduced,
-				const FeedbackID feedbackIdCreep,
-				const FeedbackID feedbackIdStop,
-				const FeedbackID feedbackIdOver) const;
+				const RouteID followUpRoute = RouteNone,
+				const FeedbackID feedbackIdReduced = FeedbackNone,
+				const FeedbackID feedbackIdCreep = FeedbackNone,
+				const FeedbackID feedbackIdStop = FeedbackNone,
+				const FeedbackID feedbackIdOver = FeedbackNone) const;
 
 			Manager& manager;
 			WebClient& client;

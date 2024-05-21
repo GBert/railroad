@@ -97,6 +97,7 @@ namespace Server { namespace Web
 		FeedbackID feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackstop", FeedbackNone);
 		FeedbackID feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackover", FeedbackNone);
 		Pause waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
+		RouteID followUpRoute = Utils::Utils::GetIntegerMapEntry(arguments, "followuproute", RouteNone);
 		if (routeID > RouteNone)
 		{
 			const DataModel::Route* route = manager.GetRoute(routeID);
@@ -126,6 +127,7 @@ namespace Server { namespace Web
 				feedbackIdStop = route->GetFeedbackIdStop();
 				feedbackIdOver = route->GetFeedbackIdOver();
 				waitAfterRelease = route->GetWaitAfterRelease();
+				followUpRoute = route->GetFollowUpRoute();
 			}
 		}
 
@@ -216,6 +218,7 @@ namespace Server { namespace Web
 		}
 		tracksDiv.AddChildTag(HtmlTagSelectTrack("from", Languages::TextStartTrack, fromTrack, fromOrientation));
 		tracksDiv.AddChildTag(HtmlTagSelectTrack("to", Languages::TextDestinationTrack, toTrack, toOrientation, "updateFeedbacksOfTrack(); return false;"));
+
 		map<Route::Speed,Languages::TextSelector> speedOptions;
 		speedOptions[Route::SpeedTravel] = Languages::TextTravelSpeed;
 		speedOptions[Route::SpeedReduced] = Languages::TextReducedSpeed;
@@ -223,7 +226,7 @@ namespace Server { namespace Web
 		tracksDiv.AddChildTag(HtmlTagSelectWithLabel("speed", Languages::TextSpeed, speedOptions, speed));
 		HtmlTag feedbackDiv("div");
 		feedbackDiv.AddId("feedbacks");
-		feedbackDiv.AddChildTag(HtmlTagSelectFeedbacksOfTrack(toTrack, feedbackIdReduced, feedbackIdCreep, feedbackIdStop, feedbackIdOver));
+		feedbackDiv.AddChildTag(HtmlTagSelectFeedbacksOfTrack(toTrack, followUpRoute, feedbackIdReduced, feedbackIdCreep, feedbackIdStop, feedbackIdOver));
 		tracksDiv.AddChildTag(feedbackDiv);
 
 		map<Route::PushpullType,Languages::TextSelector> pushpullOptions;
@@ -278,6 +281,7 @@ namespace Server { namespace Web
 		tracksDiv.AddChildTag(HtmlTagInputIntegerWithLabel("mintrainlength", Languages::TextMinTrainLength, minTrainLength, 0, 99999));
 		tracksDiv.AddChildTag(HtmlTagInputIntegerWithLabel("maxtrainlength", Languages::TextMaxTrainLength, maxTrainLength, 0, 99999));
 		tracksDiv.AddChildTag(HtmlTagInputIntegerWithLabel("waitafterrelease", Languages::TextWaitAfterRelease, waitAfterRelease, 0, 300));
+
 		automodeContent.AddChildTag(tracksDiv);
 		formContent.AddChildTag(automodeContent);
 
@@ -289,10 +293,10 @@ namespace Server { namespace Web
 
 	void WebClientRoute::HandleRouteSave(const map<string, string>& arguments)
 	{
-		RouteID routeID = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
-		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
-		Delay delay = static_cast<Delay>(Utils::Utils::GetIntegerMapEntry(arguments, "delay"));
-		Route::PushpullType pushpull = static_cast<Route::PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "pushpull", Route::PushpullTypeBoth));
+		const RouteID routeID = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
+		const string name = Utils::Utils::GetStringMapEntry(arguments, "name");
+		const Delay delay = static_cast<Delay>(Utils::Utils::GetIntegerMapEntry(arguments, "delay"));
+		const Route::PushpullType pushpull = static_cast<Route::PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "pushpull", Route::PushpullTypeBoth));
 		Propulsion propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", PropulsionAll));
 		if (propulsion == PropulsionUnknown)
 		{
@@ -303,23 +307,24 @@ namespace Server { namespace Web
 		{
 			trainType = TrainTypeAll;
 		}
-		Length mintrainlength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "mintrainlength", 0));
-		Length maxtrainlength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "maxtrainlength", 0));
-		Visible visible = static_cast<Visible>(Utils::Utils::GetBoolMapEntry(arguments, "visible"));
-		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
-		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
-		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
-		Automode automode = static_cast<Automode>(Utils::Utils::GetBoolMapEntry(arguments, "automode"));
-		TrackID fromTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "fromtrack", TrackNone));
-		Orientation fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
-		TrackID toTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "totrack", TrackNone));
-		Orientation toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
-		Route::Speed speed = static_cast<Route::Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", Route::SpeedTravel));
-		FeedbackID feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackreduced", FeedbackNone);
-		FeedbackID feedbackIdCreep = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackcreep", FeedbackNone);
-		FeedbackID feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackstop", FeedbackNone);
-		FeedbackID feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackover", FeedbackNone);
-		Pause waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
+		const Length mintrainlength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "mintrainlength", 0));
+		const Length maxtrainlength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "maxtrainlength", 0));
+		const Visible visible = static_cast<Visible>(Utils::Utils::GetBoolMapEntry(arguments, "visible"));
+		const LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
+		const LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
+		const LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
+		const Automode automode = static_cast<Automode>(Utils::Utils::GetBoolMapEntry(arguments, "automode"));
+		const TrackID fromTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "fromtrack", TrackNone));
+		const Orientation fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
+		const TrackID toTrack = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "totrack", TrackNone));
+		const Orientation toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
+		const Route::Speed speed = static_cast<Route::Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", Route::SpeedTravel));
+		const FeedbackID feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackreduced", FeedbackNone);
+		const FeedbackID feedbackIdCreep = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackcreep", FeedbackNone);
+		const FeedbackID feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackstop", FeedbackNone);
+		const FeedbackID feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackover", FeedbackNone);
+		const Pause waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
+		const RouteID followUpRoute = Utils::Utils::GetIntegerMapEntry(arguments, "followuproute", RouteNone);
 
 		Priority relationCountAtLock = Utils::Utils::GetIntegerMapEntry(arguments, "relationcounteratlock", 0);
 		Priority relationCountAtUnlock = Utils::Utils::GetIntegerMapEntry(arguments, "relationcounteratunlock", 0);
@@ -416,6 +421,7 @@ namespace Server { namespace Web
 			feedbackIdStop,
 			feedbackIdOver,
 			waitAfterRelease,
+			followUpRoute,
 			result))
 		{
 			client.ReplyResponse(client.ResponseError, result);
@@ -911,15 +917,22 @@ namespace Server { namespace Web
 	}
 
 	HtmlTag WebClientRoute::HtmlTagSelectFeedbacksOfTrack(const TrackID trackID,
+		const RouteID followUpRoute,
 		const FeedbackID feedbackIdReduced,
 		const FeedbackID feedbackIdCreep,
 		const FeedbackID feedbackIdStop,
 		const FeedbackID feedbackIdOver) const
 	{
 		HtmlTag tag;
+		map<RouteID,string> followUpRouteOptions = manager.RoutesOfTrack(trackID);
+		followUpRouteOptions[RouteStop] = Languages::Languages::GetText(Languages::TextNone);
+		followUpRouteOptions[RouteAuto] = Languages::Languages::GetText(Languages::TextSelectAutomatically);
+		tag.AddChildTag(HtmlTagSelectWithLabel("followuproute", Languages::TextFollowUpRoute, followUpRouteOptions, followUpRoute));
+
 		map<string,FeedbackID> feedbacks = manager.FeedbacksOfTrack(trackID);
 		map<string,FeedbackID> feedbacksWithNone = feedbacks;
 		feedbacksWithNone["-"] = FeedbackNone;
+
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackreduced", Languages::TextReducedSpeedAt, feedbacksWithNone, feedbackIdReduced).AddClass("select_feedback"));
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackcreep", Languages::TextCreepAt, feedbacksWithNone, feedbackIdCreep).AddClass("select_feedback"));
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackstop", Languages::TextStopAt, feedbacks, feedbackIdStop).AddClass("select_feedback"));
@@ -930,6 +943,6 @@ namespace Server { namespace Web
 	void WebClientRoute::HandleFeedbacksOfTrack(const map<string, string>& arguments)
 	{
 		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
-		client.ReplyHtmlWithHeader(HtmlTagSelectFeedbacksOfTrack(trackID, FeedbackNone, FeedbackNone, FeedbackNone, FeedbackNone));
+		client.ReplyHtmlWithHeader(HtmlTagSelectFeedbacksOfTrack(trackID));
 	}
 }} // namespace Server::Web

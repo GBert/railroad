@@ -111,9 +111,18 @@ class Manager
 
 		const std::map<std::string,LocoID> LocoIdsByName() const;
 
-		bool LocoSave
-		(
-			LocoID locoID,
+		void LocoBaseSave(const DataModel::LocoBase* locoBase) const;
+
+		inline void LocoSave(const DataModel::Loco* loco) const
+		{
+			if (!storage)
+			{
+				return;
+			}
+			storage->Save(*loco);
+		}
+
+		bool LocoSave(LocoID locoID,
 			const std::string& name,
 			const ControlID controlID,
 			const std::string& matchKey,
@@ -129,8 +138,7 @@ class Manager
 			const Propulsion propulsion,
 			const TrainType type,
 			const std::vector<DataModel::LocoFunctionEntry>& locoFunctions,
-			std::string& result
-		);
+			std::string& result);
 
 		bool LocoDelete(const LocoID locoID,
 			std::string& result);
@@ -217,6 +225,15 @@ class Manager
 			const std::string& matchKey) const;
 
 		const std::map<std::string,DataModel::LocoConfig> MultipleUnitConfigByName() const;
+
+		inline void MultipleUnitSave(const DataModel::MultipleUnit* multipleUnit) const
+		{
+			if (!storage)
+			{
+				return;
+			}
+			storage->Save(*multipleUnit);
+		}
 
 		bool MultipleUnitSave(MultipleUnitID multipleUnitID,
 			const std::string& name,
@@ -345,6 +362,7 @@ class Manager
 		}
 
 		const std::map<std::string,DataModel::Feedback*> FeedbackListByName() const;
+		const std::map<RouteID,std::string> RoutesOfTrack(const TrackID trackID) const;
 		const std::map<std::string,FeedbackID> FeedbacksOfTrack(const TrackID trackID) const;
 
 		const std::map<std::string,DataModel::FeedbackConfig> FeedbackConfigByName() const;
@@ -394,6 +412,15 @@ class Manager
 
 		const std::map<std::string,DataModel::Track*> TrackListByName() const;
 		const std::map<std::string,TrackID> TrackListIdByName() const;
+
+		inline void TrackSave(const DataModel::Track* track) const
+		{
+			if (!storage)
+			{
+				return;
+			}
+			storage->Save(*track);
+		}
 
 		bool TrackSave(const TrackID trackID,
 			const std::string& name,
@@ -468,6 +495,15 @@ class Manager
 
 		const std::map<std::string,DataModel::Route*> RouteListByName() const;
 
+		inline void RouteSave(const DataModel::Route* route) const
+		{
+			if (!storage)
+			{
+				return;
+			}
+			storage->Save(*route);
+		}
+
 		bool RouteSave(RouteID routeID,
 			const std::string& name,
 			const Delay delay,
@@ -493,6 +529,7 @@ class Manager
 			const FeedbackID feedbackIdStop,
 			const FeedbackID feedbackIdOver,
 			const Pause waitAfterRelease,
+			const RouteID followUpRoute,
 			std::string& result);
 
 		bool RouteDelete(const RouteID routeID,
@@ -595,8 +632,7 @@ class Manager
 		bool TrackRelease(const TrackID trackID);
 		bool LocoBaseReleaseOnTrack(const TrackID trackID);
 
-		bool TrackStartLocoBase(const TrackID trackID,
-			const DataModel::Loco::AutoModeType type);
+		bool TrackStartLocoBase(const TrackID trackID);
 
 		bool TrackStopLocoBase(const TrackID trackID);
 		void TrackBlock(const TrackID trackID, const bool blocked);
@@ -608,15 +644,14 @@ class Manager
 			const DataModel::Route* route,
 			const DataModel::Track* track);
 
-		bool LocoBaseStart(const DataModel::ObjectIdentifier& locoBaseIdentifier,
-			const DataModel::Loco::AutoModeType type);
+		bool LocoBaseStart(const DataModel::ObjectIdentifier& locoBaseIdentifier);
 		bool LocoBaseStartAll();
 
 		bool LocoBaseStop(const DataModel::ObjectIdentifier& locoBaseIdentifier);
 		bool LocoBaseStopAll();
 		void LocoBaseStopAllImmediately(const ControlType controlType);
 
-		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoIdentifier, const DataModel::ObjectIdentifier& identifier);
+		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoBaseIdentifier, const RouteID routeID);
 
 		inline DataModel::ObjectIdentifier GetLocoBaseIdentifierOfTrack(const TrackID trackId)
 		{

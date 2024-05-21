@@ -436,8 +436,7 @@ namespace Server { namespace Web
 	void WebClientTrack::HandleTrackStartLoco(const map<string, string>& arguments)
 	{
 		const TrackID trackID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone));
-		Loco::AutoModeType type = static_cast<Loco::AutoModeType>(Utils::Utils::GetIntegerMapEntry(arguments, "automodetype", Loco::AutoModeTypeFull));
-		bool ret = manager.TrackStartLocoBase(trackID, type);
+		bool ret = manager.TrackStartLocoBase(trackID);
 		client.ReplyHtmlWithHeaderAndParagraph(ret ? "Loco started" : "Loco not started");
 	}
 

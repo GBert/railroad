@@ -1,3 +1,4 @@
+- Link auf Ebenen verknüpfen mit Klick
 - Wartezeit bei Erreichen Fahrstrassen-Ende
 - Fahrstrassen mit unverschlossenen Objekten
 - Bedingungen für Fahrstrassen
@@ -15,6 +16,9 @@
 - Anbinden von uCon-Zentralen
 - Anbinden von USBtin-Märklin-CAN
 - Rückmelder für Weichenlage
+- DCC-EX Servoweichen
+- S88 Link auf separaten Ebenen
 - Ausleuchtung von Gleisen aufgrund von Nachbargleis
 - Autokonversion der Protokolle bei Zentralenwechsel
 - CS2-Server
+- Speichern bei Änderung im Automatikmodus

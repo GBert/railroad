@@ -21,7 +21,7 @@ along with RailControl; see the file LICENCE. If not see
 #pragma once
 
 #include <condition_variable>
-#include <queue>
+#include <list>
 #include <mutex>
 
 namespace Utils
@@ -31,7 +31,7 @@ namespace Utils
 	{
 		public:
 			inline ThreadSafeQueue()
-			:	queue(),
+			:	list(),
 				mutex(),
 				run(true)
 			{
@@ -42,17 +42,24 @@ namespace Utils
 				Terminate();
 			}
 
-			inline void Enqueue(T t)
+			inline void EnqueueBack(T t)
 			{
 				std::unique_lock<std::mutex> lock(mutex);
-				queue.push(t);
+				list.push_back(t);
+				cv.notify_all();
+			}
+
+			inline void EnqueueFront(T t)
+			{
+				std::unique_lock<std::mutex> lock(mutex);
+				list.push_front(t);
 				cv.notify_all();
 			}
 
 			T Dequeue()
 			{
 				std::unique_lock<std::mutex> lock(mutex);
-				while (queue.empty())
+				while (list.empty())
 				{
 					if (run == false)
 					{
@@ -60,15 +67,15 @@ namespace Utils
 					}
 					cv.wait_for(lock, std::chrono::seconds(1));
 				}
-				T val = queue.front();
-				queue.pop();
+				T val = list.front();
+				list.pop_front();
 				return val;
 			}
 
 			inline bool IsEmpty()
 			{
 				std::unique_lock<std::mutex> lock(mutex);
-				return queue.empty();
+				return list.empty();
 			}
 
 			inline void Terminate()
@@ -78,7 +85,7 @@ namespace Utils
 			}
 
 		private:
-			std::queue<T> queue;
+			std::list<T> list;
 			mutable std::mutex mutex;
 			std::condition_variable cv;
 			volatile bool run;
