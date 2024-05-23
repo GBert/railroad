@@ -22,7 +22,7 @@ define Package/$(PKG_NAME)
 endef
 
 define Package/$(PKG_NAME)/description
-  can2udp/can2lan bridge CAN frames to UDP/UDP&TCP and vice versa
+  Maerklin CAN messages analyzer
 endef
 
 define Build/Prepare
