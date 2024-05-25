@@ -22,7 +22,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Hardware/Protocols/P50x.h"
 #include "Languages.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 namespace Hardware
 {
@@ -81,9 +81,9 @@ namespace Hardware
 				return;
 			}
 
-			unsigned char s88Modules1 = Utils::Utils::StringToInteger(params->GetArg2(), 0);
-			unsigned char s88Modules2 = Utils::Utils::StringToInteger(params->GetArg3(), 0);
-			unsigned char s88Modules3 = Utils::Utils::StringToInteger(params->GetArg4(), 0);
+			unsigned char s88Modules1 = Utils::Integer::StringToInteger(params->GetArg2(), 0);
+			unsigned char s88Modules2 = Utils::Integer::StringToInteger(params->GetArg3(), 0);
+			unsigned char s88Modules3 = Utils::Integer::StringToInteger(params->GetArg4(), 0);
 			s88Modules = s88Modules1 + s88Modules2 + s88Modules3;
 
 			if (s88Modules > MaxS88Modules)
@@ -158,7 +158,7 @@ namespace Hardware
 				return;
 			}
 
-			s88Modules = Utils::Utils::StringToInteger(params->GetArg2(), 0);
+			s88Modules = Utils::Integer::StringToInteger(params->GetArg2(), 0);
 
 			if (s88Modules > MaxS88Modules)
 			{

@@ -24,7 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Network/Select.h"
 #include "Hardware/M6051.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 using std::string;
 
@@ -40,7 +40,7 @@ namespace Hardware
 	{
 		logger->Info(Languages::TextStarting, GetFullName());
 
-		s88Modules = Utils::Utils::StringToInteger(params->GetArg2(), 0, MaxS88Modules);
+		s88Modules = Utils::Integer::StringToInteger(params->GetArg2(), 0, MaxS88Modules);
 		if (s88Modules == 0)
 		{
 			logger->Info(Languages::TextNoS88Modules);

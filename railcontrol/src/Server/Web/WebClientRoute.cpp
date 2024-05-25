@@ -42,7 +42,9 @@ along with RailControl; see the file LICENCE. If not see
 #include "Server/Web/HtmlTagSelectWithLabel.h"
 #include "Server/Web/HtmlTagSpace.h"
 #include "Server/Web/WebClient.h"
+#include "Server/Web/WebClientRoute.h"
 #include "Server/Web/WebClientStatic.h"
+#include "Utils/Integer.h"
 
 using namespace DataModel;
 using LayoutPosition = DataModel::LayoutItem::LayoutPosition;
@@ -530,7 +532,7 @@ namespace Server { namespace Web
 		{
 			type = "atlock";
 		}
-		Priority priority = Utils::Utils::StringToInteger(priorityString, 1);
+		Priority priority = Utils::Integer::StringToInteger(priorityString, 1);
 		HtmlTag container;
 		container.AddChildTag(HtmlTagRelation(type, priority));
 		container.AddChildTag(HtmlTag("div").AddId("new_" + type + "_priority_" + to_string(priority + 1)));

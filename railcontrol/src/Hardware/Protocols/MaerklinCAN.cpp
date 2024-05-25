@@ -84,7 +84,7 @@ namespace Hardware
 			const CanPrio prio = 0;
 			buffer[0] = (prio << 1) | (command >> 7);
 			buffer[1] = (command << 1) | (response & 0x01);
-			Utils::Utils::ShortToDataBigEndian(hash, buffer + 2);
+			Utils::Integer::ShortToDataBigEndian(hash, buffer + 2);
 			buffer[4] = length;
 			buffer[5] = 0;
 			buffer[6] = 0;
@@ -162,10 +162,10 @@ namespace Hardware
 		void MaerklinCAN::GenerateUidHash()
 		{
 			uid = rand();
-			string uidString = Utils::Utils::IntegerToHex(uid);
+			string uidString = Utils::Integer::IntegerToHex(uid);
 			// FIXME: params->SetArg5(uidString);
 			hash = CalcHash(uid);
-			logger->Info(Languages::TextMyUidHash, uidString, Utils::Utils::IntegerToHex(hash));
+			logger->Info(Languages::TextMyUidHash, uidString, Utils::Integer::IntegerToHex(hash));
 		}
 
 		void MaerklinCAN::CreateLocalIDLoco(unsigned char* buffer,
@@ -186,7 +186,7 @@ namespace Hardware
 				localID |= 0x2000;
 			}
 			// else expect PROTOCOL_MM2: do nothing
-			Utils::Utils::IntToDataBigEndian(localID, buffer + 5);
+			Utils::Integer::IntToDataBigEndian(localID, buffer + 5);
 		}
 
 		void MaerklinCAN::CreateLocalIDAccessory(unsigned char* buffer,
@@ -202,7 +202,7 @@ namespace Hardware
 			{
 				localID |= 0x3000;
 			}
-			Utils::Utils::IntToDataBigEndian(localID, buffer + 5);
+			Utils::Integer::IntToDataBigEndian(localID, buffer + 5);
 		}
 
 		void MaerklinCAN::Booster(const BoosterState status)
@@ -220,7 +220,7 @@ namespace Hardware
 			logger->Info(Languages::TextSettingSpeedWithProtocol, Utils::Utils::ProtocolToString(protocol), address, speed);
 			CreateCommandHeader(buffer, CanCommandLocoSpeed, CanResponseCommand, 6);
 			CreateLocalIDLoco(buffer, protocol, address);
-			Utils::Utils::ShortToDataBigEndian(speed, buffer + 9);
+			Utils::Integer::ShortToDataBigEndian(speed, buffer + 9);
 			SendInternal(buffer);
 		}
 
@@ -283,7 +283,7 @@ namespace Hardware
 			unsigned char buffer[CANCommandBufferLength];
 			CreateCommandHeader(buffer, CanCommandReadConfig, CanResponseCommand, 7);
 			CreateLocalIDLoco(buffer, protocol, addressInternal);
-			Utils::Utils::ShortToDataBigEndian(cv, buffer + 9);
+			Utils::Integer::ShortToDataBigEndian(cv, buffer + 9);
 			buffer[11] = 1;
 			SendInternal(buffer);
 		}
@@ -332,7 +332,7 @@ namespace Hardware
 			unsigned char buffer[CANCommandBufferLength];
 			CreateCommandHeader(buffer, CanCommandWriteConfig, CanResponseCommand, 8);
 			CreateLocalIDLoco(buffer, protocol, addressInternal);
-			Utils::Utils::ShortToDataBigEndian(cv, buffer + 9);
+			Utils::Integer::ShortToDataBigEndian(cv, buffer + 9);
 			buffer[11] = value;
 			buffer[12] = controlFlags;
 			SendInternal(buffer);
@@ -369,7 +369,7 @@ namespace Hardware
 			const CanHash receivedHash = ParseHash(buffer);
 			if (receivedHash == hash)
 			{
-				uint16_t deviceType = Utils::Utils::DataBigEndianToShort(buffer + 11);
+				uint16_t deviceType = Utils::Integer::DataBigEndianToShort(buffer + 11);
 				if (command == CanCommandPing && response == true)
 				{
 					if (deviceType == CanDeviceCs2Master)
@@ -471,7 +471,7 @@ namespace Hardware
 			Protocol protocol;
 			LocoType type;
 			ParseAddressProtocol(buffer, address, protocol, type);
-			Speed speed = Utils::Utils::DataBigEndianToShort(buffer + 9);
+			Speed speed = Utils::Integer::DataBigEndianToShort(buffer + 9);
 			logger->Info(Languages::TextReceivedSpeedCommand, Utils::Utils::ProtocolToString(protocol), address, speed);
 			manager->LocoSpeed(ControlTypeHardware, controlID, protocol, address, speed);
 		}
@@ -528,13 +528,13 @@ namespace Hardware
 
 		void MaerklinCAN::ParseCommandPing(const unsigned char* const buffer)
 		{
-			if (buffer[4] == 8 && Utils::Utils::DataBigEndianToInt(buffer + 5) != uid)
+			if (buffer[4] == 8 && Utils::Integer::DataBigEndianToInt(buffer + 5) != uid)
 			{
 				return;
 			}
 			unsigned char sendBuffer[CANCommandBufferLength];
 			CreateCommandHeader(sendBuffer, CanCommandPing, CanResponseResponse, 8);
-			Utils::Utils::IntToDataBigEndian(uid, sendBuffer + 5);
+			Utils::Integer::IntToDataBigEndian(uid, sendBuffer + 5);
 			// version 3.8
 			sendBuffer[9] = 3;
 			sendBuffer[10] = 8;
@@ -570,8 +570,8 @@ namespace Hardware
 			{
 				free(canFileData);
 			}
-			canFileDataSize = Utils::Utils::DataBigEndianToInt(buffer + 5);
-			canFileCrc = Utils::Utils::DataBigEndianToShort(buffer + 9);
+			canFileDataSize = Utils::Integer::DataBigEndianToInt(buffer + 5);
+			canFileCrc = Utils::Integer::DataBigEndianToShort(buffer + 9);
 			canFileData = reinterpret_cast<unsigned char*>(malloc(canFileDataSize + 8));
 			canFileDataPointer = canFileData;
 		}
@@ -590,7 +590,7 @@ namespace Hardware
 				return;
 			}
 
-			size_t canFileUncompressedSize = Utils::Utils::DataBigEndianToInt(canFileData);
+			size_t canFileUncompressedSize = Utils::Integer::DataBigEndianToInt(canFileData);
 			logger->Info(Languages::TextConfigFileReceivedWithSize, canFileUncompressedSize);
 			string file = ZLib::UnCompress(reinterpret_cast<char*>(canFileData + 4), canFileDataSize,
 				canFileUncompressedSize);
@@ -637,7 +637,7 @@ namespace Hardware
 			{
 				return;
 			}
-			CvNumber cv = Utils::Utils::DataBigEndianToShort(buffer + 9);
+			CvNumber cv = Utils::Integer::DataBigEndianToShort(buffer + 9);
 			CvValue value = buffer[11];
 			logger->Info(Languages::TextProgramReadValue, cv, value);
 			manager->ProgramValue(cv, value);
@@ -645,7 +645,7 @@ namespace Hardware
 
 		void MaerklinCAN::ParseResponsePing(const unsigned char* const buffer)
 		{
-			const uint16_t deviceType = Utils::Utils::DataBigEndianToShort(buffer + 11);
+			const uint16_t deviceType = Utils::Integer::DataBigEndianToShort(buffer + 11);
 			char* deviceString = nullptr;
 			switch (deviceType)
 			{
@@ -692,7 +692,7 @@ namespace Hardware
 					deviceString = const_cast<char*>("unknown");
 					break;
 			}
-			const string hash = Utils::Utils::IntegerToHex(Utils::Utils::DataBigEndianToShort(buffer + 2));
+			const string hash = Utils::Integer::IntegerToHex(Utils::Integer::DataBigEndianToShort(buffer + 2));
 			const unsigned char deviceId = buffer[8];
 			const unsigned char majorVersion = buffer[9];
 			const unsigned char minorVersion = buffer[10];
@@ -740,18 +740,18 @@ namespace Hardware
 				}
 				if (key.compare("nr") == 0)
 				{
-					nr = Utils::Utils::StringToInteger(value);
+					nr = Utils::Integer::StringToInteger(value);
 				}
 				else if (key.compare("typ") == 0 || key.compare("typ2") == 0)
 				{
-					uint8_t valueInt = Utils::Utils::StringToInteger(value);
+					uint8_t valueInt = Utils::Integer::StringToInteger(value);
 					icon = MapLocoFunctionCs2ToRailControl(static_cast<LocoFunctionCs2Icon>(valueInt & 0x7F));
 					type = static_cast<DataModel::LocoFunctionType>((valueInt >> 7) + 1); // CS2: 1 = permanent, 2 = once
 				}
 				else if (key.compare("dauer") == 0 || key.compare("dauer2") == 0)
 				{
 					type = DataModel::LocoFunctionTypeTimer;
-					timer = Utils::Utils::StringToInteger(value);
+					timer = Utils::Integer::StringToInteger(value);
 				}
 				lines.pop_front();
 			}
@@ -791,7 +791,7 @@ namespace Hardware
 				}
 				if (key.compare("lok") == 0)
 				{
-					Address input = Utils::Utils::HexToInteger(value);
+					Address input = Utils::Integer::HexToInteger(value);
 					LocoType type;
 					ParseAddressProtocol(input, address, protocol, type);
 					logger->Info(Languages::TextCs2MasterLocoSlaveProtocolAddress, Utils::Utils::ProtocolToString(protocol), address);
@@ -841,7 +841,7 @@ namespace Hardware
 				}
 				else if (key.compare("uid") == 0)
 				{
-					Address input = Utils::Utils::HexToInteger(value);
+					Address input = Utils::Integer::HexToInteger(value);
 					Address address = AddressNone;
 					Protocol protocol = ProtocolNone;
 					LocoType type;

@@ -108,6 +108,10 @@ namespace Hardware
 						shortName),
 					run(true)
 				{
+				}
+
+				inline void Init()
+				{
 					receiverThread = std::thread(&DccPpEx::Receiver, this);
 				}
 

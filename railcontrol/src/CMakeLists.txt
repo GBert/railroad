@@ -252,6 +252,8 @@ Storage/StorageInterface.h
 Storage/StorageParams.h
 Storage/TransactionGuard.cpp
 Storage/TransactionGuard.h
+Utils/Integer.cpp
+Utils/Integer.h
 Utils/Network.cpp
 Utils/Network.h
 Utils/ThreadSafeQueue.h

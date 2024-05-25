@@ -26,7 +26,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Languages.h"
 #include "Network/Select.h"
 #include "Hardware/Hsi88.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 namespace Hardware
 {
@@ -43,9 +43,9 @@ namespace Hardware
 		memset(s88Init, 0xFF, sizeof(s88Memory));
 		memset(s88Memory, 0x00, sizeof(s88Memory));
 
-		s88Modules1 = Utils::Utils::StringToInteger(params->GetArg2(), 0);
-		s88Modules2 = Utils::Utils::StringToInteger(params->GetArg3(), 0);
-		s88Modules3 = Utils::Utils::StringToInteger(params->GetArg4(), 0);
+		s88Modules1 = Utils::Integer::StringToInteger(params->GetArg2(), 0);
+		s88Modules2 = Utils::Integer::StringToInteger(params->GetArg3(), 0);
+		s88Modules3 = Utils::Integer::StringToInteger(params->GetArg4(), 0);
 		s88Modules = s88Modules1 + s88Modules2 + s88Modules3;
 
 		if (s88Modules > MaxS88Modules)

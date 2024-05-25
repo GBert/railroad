@@ -22,7 +22,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <thread>
 #include "DataModel/LocoFunctions.h"
 #include "Hardware/Protocols/LocoNet.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 namespace Hardware
 {
@@ -714,7 +714,7 @@ namespace Hardware
 					return;
 
 				default:
-					logger->Debug(Languages::TextCommandUnknown, Utils::Utils::IntegerToHex(data[0]));
+					logger->Debug(Languages::TextCommandUnknown, Utils::Integer::IntegerToHex(data[0]));
 					return;
 			}
 		}

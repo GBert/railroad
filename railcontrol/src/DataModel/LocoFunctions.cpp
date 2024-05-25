@@ -23,6 +23,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 
 #include "DataModel/LocoFunctions.h"
+#include "Utils/Integer.h"
 #include "Utils/Utils.h"
 
 namespace DataModel
@@ -119,20 +120,20 @@ namespace DataModel
 			{
 				continue;
 			}
-			LocoFunctionNr nr = Utils::Utils::StringToInteger(functionTexts.front());
+			LocoFunctionNr nr = Utils::Integer::StringToInteger(functionTexts.front());
 			functionTexts.pop_front();
-			entries[nr].state = static_cast<LocoFunctionState>(Utils::Utils::StringToInteger(functionTexts.front(), LocoFunctionStateOff));
+			entries[nr].state = static_cast<LocoFunctionState>(Utils::Integer::StringToInteger(functionTexts.front(), LocoFunctionStateOff));
 			functionTexts.pop_front();
-			entries[nr].type = static_cast<LocoFunctionType>(Utils::Utils::StringToInteger(functionTexts.front(), LocoFunctionTypePermanent));
+			entries[nr].type = static_cast<LocoFunctionType>(Utils::Integer::StringToInteger(functionTexts.front(), LocoFunctionTypePermanent));
 			functionTexts.pop_front();
-			entries[nr].icon = static_cast<LocoFunctionIcon>(Utils::Utils::StringToInteger(functionTexts.front(), LocoFunctionIconDefault));
+			entries[nr].icon = static_cast<LocoFunctionIcon>(Utils::Integer::StringToInteger(functionTexts.front(), LocoFunctionIconDefault));
 			functionTexts.pop_front();
 			if (nrOfTexts == 4)
 			{
 				entries[nr].timer = 0;
 				continue;
 			}
-			entries[nr].timer = static_cast<LocoFunctionTimer>(Utils::Utils::StringToInteger(functionTexts.front(), 0));
+			entries[nr].timer = static_cast<LocoFunctionTimer>(Utils::Integer::StringToInteger(functionTexts.front(), 0));
 			functionTexts.pop_front();
 		}
 		return true;

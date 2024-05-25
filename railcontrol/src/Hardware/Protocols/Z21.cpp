@@ -27,6 +27,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <string>
 #include <thread>
 #include "Hardware/Protocols/Z21.h"
+#include "Utils/Integer.h"
 #include "Utils/Utils.h"
 
 namespace Hardware
@@ -228,7 +229,7 @@ namespace Hardware
 					return;
 			}
 			SendSetLocoMode(address, protocol);
-			Utils::Utils::ShortToDataBigEndian(address | 0xC000, buffer + 6);
+			Utils::Integer::ShortToDataBigEndian(address | 0xC000, buffer + 6);
 			buffer[8] |= static_cast<unsigned char>(orientation) << 7;
 			buffer[9] = buffer[4] ^ buffer[5] ^ buffer[6] ^ buffer[7] ^ buffer[8];
 			Send(buffer, sizeof(buffer));
@@ -245,7 +246,7 @@ namespace Hardware
 			}
 			locoCache.SetFunction(address, function, on);
 			unsigned char buffer[10] = { 0x0A, 0x00, 0x40, 0x00, 0xE4, 0xF8 };
-			Utils::Utils::ShortToDataBigEndian(address | 0xC000, buffer + 6);
+			Utils::Integer::ShortToDataBigEndian(address | 0xC000, buffer + 6);
 			buffer[8] = (static_cast<unsigned char>(on == DataModel::LocoFunctionStateOn) << 6) | (function & 0x3F);
 			buffer[9] = buffer[4] ^ buffer[5] ^ buffer[6] ^ buffer[7] ^ buffer[8];
 			Send(buffer, sizeof(buffer));
@@ -295,7 +296,7 @@ namespace Hardware
 		{
 			const Address zeroBasedAddress = address - 1;
 			unsigned char buffer[9] = { 0x09, 0x00, 0x40, 0x00, 0x53 };
-			Utils::Utils::ShortToDataBigEndian(zeroBasedAddress, buffer + 5);
+			Utils::Integer::ShortToDataBigEndian(zeroBasedAddress, buffer + 5);
 			buffer[7] = 0x80 | (static_cast<unsigned char>(on) << 3) | static_cast<unsigned char>(state);
 			buffer[8] = buffer[4] ^ buffer[5] ^ buffer[6] ^ buffer[7];
 			Send(buffer, sizeof(buffer));
@@ -388,7 +389,7 @@ namespace Hardware
 		{
 			const CvNumber zeroBasedCv = cv - 1;
 			unsigned char buffer[9] = { 0x09, 0x00, 0x40, 0x00, 0x23, 0x11 };
-			Utils::Utils::ShortToDataBigEndian(zeroBasedCv, buffer + 6);
+			Utils::Integer::ShortToDataBigEndian(zeroBasedCv, buffer + 6);
 			buffer[8] = buffer[4] ^ buffer[5] ^ buffer[6] ^ buffer[7];
 			Send(buffer, sizeof(buffer));
 		}
@@ -397,7 +398,7 @@ namespace Hardware
 		{
 			const CvNumber zeroBasedCv = cv - 1;
 			unsigned char buffer[10] = { 0x0A, 0x00, 0x40, 0x00, 0x24, 0x12 };
-			Utils::Utils::ShortToDataBigEndian(zeroBasedCv, buffer + 6);
+			Utils::Integer::ShortToDataBigEndian(zeroBasedCv, buffer + 6);
 			buffer[8] = value;
 			buffer[9] = buffer[4] ^ buffer[5] ^ buffer[6] ^ buffer[7] ^ buffer[8];
 			Send(buffer, sizeof(buffer));
@@ -416,8 +417,8 @@ namespace Hardware
 			}
 			const CvNumber OptionAndZeroBasedCv = option | ((cv - 1) & 0x03FF);
 			unsigned char buffer[12] = { 0x0C, 0x00, 0x40, 0x00, 0xE6, db0 };
-			Utils::Utils::ShortToDataBigEndian(internalAddress, buffer + 6);
-			Utils::Utils::ShortToDataBigEndian(OptionAndZeroBasedCv, buffer + 8);
+			Utils::Integer::ShortToDataBigEndian(internalAddress, buffer + 6);
+			Utils::Integer::ShortToDataBigEndian(OptionAndZeroBasedCv, buffer + 8);
 			buffer[10] = value;
 			buffer[11] = buffer[4] ^ buffer[5] ^ buffer[6] ^ buffer[7] ^ buffer[8] ^ buffer[9] ^ buffer[10];
 			Send(buffer, sizeof(buffer));
@@ -508,18 +509,18 @@ namespace Hardware
 
 		ssize_t Z21::ParseData(const unsigned char* buffer, size_t bufferLength)
 		{
-			unsigned short dataLength = Utils::Utils::DataLittleEndianToShort(buffer);
+			unsigned short dataLength = Utils::Integer::DataLittleEndianToShort(buffer);
 			if (dataLength < 4 || dataLength > bufferLength)
 			{
 				return -1;
 			}
 
-			Z21Enums::Header header = static_cast<Z21Enums::Header>(Utils::Utils::DataLittleEndianToShort(buffer + 2));
+			Z21Enums::Header header = static_cast<Z21Enums::Header>(Utils::Integer::DataLittleEndianToShort(buffer + 2));
 			switch (header)
 			{
 				case Z21Enums::HeaderSerialNumber:
 					{
-					unsigned int serialNumber = Utils::Utils::DataLittleEndianToInt(buffer + 4);
+					unsigned int serialNumber = Utils::Integer::DataLittleEndianToInt(buffer + 4);
 					logger->Info(Languages::TextSerialNumberIs, serialNumber);
 					break;
 				}
@@ -546,7 +547,7 @@ namespace Hardware
 
 				case Z21Enums::HeaderGetHardwareInfo:
 					{
-					unsigned int hardwareType = Utils::Utils::DataLittleEndianToInt(buffer + 4);
+					unsigned int hardwareType = Utils::Integer::DataLittleEndianToInt(buffer + 4);
 					std::string hardwareTypeText;
 					switch (hardwareType)
 					{
@@ -577,8 +578,8 @@ namespace Hardware
 
 					unsigned char firmwareVersionMajor = buffer[9];
 					unsigned char firmwareVersionMinor = buffer[8];
-					std::string firmwareVersionText = Utils::Utils::IntegerToBCD(firmwareVersionMajor) + "."
-					    + Utils::Utils::IntegerToBCD(firmwareVersionMinor);
+					std::string firmwareVersionText = Utils::Integer::IntegerToBCD(firmwareVersionMajor) + "."
+					    + Utils::Integer::IntegerToBCD(firmwareVersionMinor);
 					logger->Info(Languages::TextZ21Type, hardwareTypeText, firmwareVersionText);
 					break;
 				}
@@ -751,7 +752,7 @@ namespace Hardware
 				default:
 					return;
 			}
-			const Address zeroBasedAddress = Utils::Utils::DataBigEndianToShort(buffer + 5);
+			const Address zeroBasedAddress = Utils::Integer::DataBigEndianToShort(buffer + 5);
 			const Address address = zeroBasedAddress + 1;
 			const Protocol protocol = turnoutCache.GetProtocol(address);
 			manager->AccessoryBaseState(ControlTypeHardware, controlID, protocol, address, state);
@@ -759,7 +760,7 @@ namespace Hardware
 
 		void Z21::ParseLocoData(const unsigned char* buffer)
 		{
-			const Address address = Utils::Utils::DataBigEndianToShort(buffer + 5) & 0x3FFF;
+			const Address address = Utils::Integer::DataBigEndianToShort(buffer + 5) & 0x3FFF;
 			const unsigned char protocolType = buffer[7] & 0x07;
 			Protocol protocol;
 			const unsigned char speedData = buffer[8] & 0x7F;
@@ -881,7 +882,7 @@ namespace Hardware
 			{
 				return;
 			}
-			const CvNumber cv = Utils::Utils::DataBigEndianToShort(buffer + 6) + 1;
+			const CvNumber cv = Utils::Integer::DataBigEndianToShort(buffer + 6) + 1;
 			const CvValue value = buffer[8];
 			logger->Debug(Languages::TextProgramReadValue, cv, value);
 			manager->ProgramValue(cv, value);
@@ -923,14 +924,14 @@ namespace Hardware
 
 		void Z21::ParseDetectorData(const unsigned char* buffer)
 		{
-			FeedbackPin pin = Utils::Utils::DataLittleEndianToShort(buffer + 6);
+			FeedbackPin pin = Utils::Integer::DataLittleEndianToShort(buffer + 6);
 			uint8_t port = buffer[8];
 			--pin;
 			pin <<= 3;
 			pin += port;
 			++pin;
 			uint8_t type = buffer[9];
-			uint16_t value1 = Utils::Utils::DataLittleEndianToShort(buffer + 10);
+			uint16_t value1 = Utils::Integer::DataLittleEndianToShort(buffer + 10);
 			DataModel::Feedback::FeedbackState state;
 			switch (type)
 			{
@@ -1000,7 +1001,7 @@ namespace Hardware
 		void Z21::SendBroadcastFlags(const Z21Enums::BroadCastFlags flags)
 		{
 			unsigned char buffer[8] = { 0x08, 0x00, 0x50, 0x00 };
-			Utils::Utils::IntToDataLittleEndian(flags, buffer + 4);
+			Utils::Integer::IntToDataLittleEndian(flags, buffer + 4);
 			Send(buffer, sizeof(buffer));
 		}
 
@@ -1033,7 +1034,7 @@ namespace Hardware
 			}
 
 			unsigned char buffer[7] = { 0x07, 0x00, command, 0x00, 0x00, 0x00, mode };
-			Utils::Utils::ShortToDataBigEndian(address, buffer + 4);
+			Utils::Integer::ShortToDataBigEndian(address, buffer + 4);
 			Send(buffer, sizeof(buffer));
 		}
 

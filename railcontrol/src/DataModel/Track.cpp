@@ -28,7 +28,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/Loco.h"
 #include "DataModel/Track.h"
 #include "Manager.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 using std::deque;
 using std::map;
@@ -89,7 +89,7 @@ namespace DataModel
 		Utils::Utils::SplitString(feedbackStrings, ",", feedbackStringVector);
 		for (auto& feedbackString : feedbackStringVector)
 		{
-			const FeedbackID feedbackID = Utils::Utils::StringToInteger(feedbackString);
+			const FeedbackID feedbackID = Utils::Integer::StringToInteger(feedbackString);
 			Feedback* feedback = manager->GetFeedback(feedbackID);
 			if (!feedback)
 			{

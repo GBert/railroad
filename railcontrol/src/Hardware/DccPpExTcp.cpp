@@ -37,6 +37,7 @@ namespace Hardware
 		{
 			logger->Error(Languages::TextUnableToCreateTcpSocket, params->GetArg1(), Port);
 		}
+		Init();
 	}
 
 	bool DccPpExTcp::Send(const string& buffer)

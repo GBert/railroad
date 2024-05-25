@@ -27,7 +27,6 @@ along with RailControl; see the file LICENCE. If not see
 #include "Storage/sqlite/sqlite3.h"
 #include "Storage/StorageInterface.h"
 #include "Storage/StorageParams.h"
-#include "Utils/Utils.h"
 
 namespace Storage
 {

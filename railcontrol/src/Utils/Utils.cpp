@@ -26,10 +26,8 @@ along with RailControl; see the file LICENCE. If not see
 #include <cstring>    // memset
 #include <dirent.h>
 #include <fstream>
-#include <iomanip>
 #include <iostream>   // cout
 #include <netdb.h>
-#include <sstream>
 #include <string>
 #include <sys/time.h> // gettimeofday
 #include <vector>
@@ -37,13 +35,13 @@ along with RailControl; see the file LICENCE. If not see
 #include "Languages.h"
 #include "Logger/Logger.h"
 #include "Network/Select.h"
+#include "Utils/Integer.h"
 #include "Utils/Utils.h"
 
 using std::cout;
 using std::deque;
 using std::endl;
 using std::string;
-using std::stringstream;
 using std::to_string;
 using std::vector;
 
@@ -107,8 +105,8 @@ namespace Utils
 			{
 				break;
 			}
-			const unsigned char highNibble = HexToChar(output[pos + 1]);
-			const unsigned char lowNibble = HexToChar(output[pos + 2]);
+			const unsigned char highNibble = Integer::HexToChar(output[pos + 1]);
+			const unsigned char lowNibble = Integer::HexToChar(output[pos + 2]);
 			const unsigned char c = (highNibble << 4) + lowNibble;
 			output.replace(pos, 3, 1, c);
 			startSearch = pos + 1;
@@ -151,7 +149,7 @@ namespace Utils
 		{
 			return defaultValue;
 		}
-		return Utils::Utils::StringToInteger(map.at(key), defaultValue);
+		return Integer::StringToInteger(map.at(key), defaultValue);
 	}
 
 	bool Utils::GetBoolMapEntry(const std::map<std::string, std::string>& map, const std::string& key, const bool defaultValue)
@@ -174,189 +172,22 @@ namespace Utils
 		return out;
 	}
 
-	int Utils::StringToInteger(const std::string& value, const int defaultValue)
-	{
-		size_t valueSize = value.length();
-		if (valueSize == 0)
-		{
-			return defaultValue;
-		}
-
-		char* end;
-		const char* start = value.c_str();
-		long longValue = std::strtol(start, &end, 10);
-		if (errno == ERANGE || start == end)
-		{
-			return defaultValue;
-		}
-		if (longValue > INT_MAX || longValue < INT_MIN)
-		{
-			return defaultValue;
-		}
-		return static_cast<int>(longValue);
-	}
-
-	int Utils::StringToInteger(const std::string& value, const int min, const int max)
-	{
-		int intValue = StringToInteger(value, min);
-
-		if (intValue < min)
-		{
-			return min;
-		}
-
-		if (intValue > max)
-		{
-			return max;
-		}
-
-		return intValue;
-	}
-
-	long Utils::HexToInteger(const std::string& value, const long defaultValue)
-	{
-		size_t valueSize = value.length();
-		if (valueSize == 0)
-		{
-			return defaultValue;
-		}
-
-		char* end;
-		const char* start = value.c_str();
-		long longValue = std::strtol(start, &end, 16);
-		if (errno == ERANGE || start == end)
-		{
-			return defaultValue;
-		}
-		return longValue;
-	}
-
-	signed char Utils::HexToChar(signed char c)
-	{
-		if (c >= 'a')
-		{
-			c -= 'a' - 10;
-		}
-		else if (c >= 'A')
-		{
-			c -= 'A' - 10;
-		}
-		else if (c >= '0')
-		{
-			c -= '0';
-		}
-
-		return c > 15 ? 0 : c;
-	}
-
 	bool Utils::StringToBool(const std::string& value, const bool defaultValue)
 	{
 		if (value.size() == 0)
 		{
 			return defaultValue;
 		}
-		int intValue = StringToInteger(value);
+		int intValue = Integer::StringToInteger(value);
 		return intValue != 0;
 	}
 
-	void Utils::IntToDataBigEndian(const uint32_t i, unsigned char* buffer)
+	string Utils::StringToLower(const string& input)
 	{
-		buffer[0] = (i >> 24);
-		buffer[1] = ((i >> 16) & 0xFF);
-		buffer[2] = ((i >> 8) & 0xFF);
-		buffer[3] = (i & 0xFF);
-	}
-
-	uint32_t Utils::DataBigEndianToInt(const unsigned char* buffer)
-	{
-		uint32_t i = buffer[0];
-		i <<= 8;
-		i |= buffer[1];
-		i <<= 8;
-		i |= buffer[2];
-		i <<= 8;
-		i |= buffer[3];
-		return i;
-	}
-
-	void Utils::ShortToDataBigEndian(const uint16_t i, unsigned char* buffer)
-	{
-		buffer[0] = (i >> 8);
-		buffer[1] = (i & 0xFF);
-	}
-
-	uint16_t Utils::DataBigEndianToShort(const unsigned char* buffer)
-	{
-		uint16_t i = buffer[0];
-		i <<= 8;
-		i |= buffer[1];
-		return i;
-	}
-
-	void Utils::IntToDataLittleEndian(const uint32_t i, unsigned char* buffer)
-	{
-		buffer[0] = (i & 0xFF);
-		buffer[1] = ((i >> 8) & 0xFF);
-		buffer[2] = ((i >> 16) & 0xFF);
-		buffer[3] = (i >> 24);
-	}
-
-	uint32_t Utils::DataLittleEndianToInt(const unsigned char* buffer)
-	{
-		return buffer[0]
-			+ (buffer[1] << 8)
-			+ (buffer[2] << 16)
-			+ (buffer[3] << 24);
-	}
-
-	void Utils::ShortToDataLittleEndian(const uint16_t i, unsigned char* buffer)
-	{
-		buffer[0] = (i & 0xFF);
-		buffer[1] = (i >> 8);
-	}
-
-	uint16_t Utils::DataLittleEndianToShort(const unsigned char* buffer)
-	{
-		return buffer[0]
-			+ (buffer[1] << 8);
-	}
-
-	std::string Utils::IntegerToBCD(const unsigned int input)
-	{
-		unsigned char zero = (input >> 4);
-		zero &= 0x0000000F;
-		zero += '0';
-		unsigned char one = input;
-		one &= 0x0000000F;
-		one += '0';
-		std::string output;
-		output.append(1, zero);
-		output.append(1, one);
-		return output;
-	}
-
-	std::string Utils::IntegerToHex(const unsigned int input, const unsigned int size)
-	{
-		if (input == 0)
+		string output = input;
+		for(auto& c : output)
 		{
-			return "0";
-		}
-		std::string output;
-
-		unsigned int decimal = input;
-		unsigned int internalSize = 0;
-		while (decimal)
-		{
-			std::stringstream part;
-			part << std::setfill('0') << std::setw(1) << std::hex << (decimal & 0xF);
-			output = part.str() + output;
-			decimal >>= 4;
-			++internalSize;
-		}
-		while (internalSize < size)
-		{
-			++internalSize;
-			output = "0" + output;
+		   c = tolower(c);
 		}
 		return output;
 	}
@@ -489,46 +320,6 @@ namespace Utils
 	}
 #endif
 
-	bool Utils::HostResolves(const string& host)
-	{
-		struct addrinfo hints;
-		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = PF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_flags |= AI_CANONNAME;
-
-		struct addrinfo* res;
-		struct addrinfo* result;
-		int errcode = getaddrinfo(host.c_str(), NULL, &hints, &result);
-		if (errcode != 0)
-		{
-			return false;
-		}
-
-		res = result;
-
-		while (res)
-		{
-			char addrstr[100];
-			inet_ntop(res->ai_family, res->ai_addr->sa_data, addrstr, sizeof(addrstr));
-
-			switch (res->ai_family)
-			{
-				case AF_INET:
-				case AF_INET6:
-					freeaddrinfo(result);
-					return true;
-
-				default:
-					res = res->ai_next;
-					break;
-			}
-		}
-
-		freeaddrinfo(result);
-		return false;
-	}
-
 	uint8_t Utils::CalcXORCheckSum(const uint8_t* const buffer, size_t length)
 	{
 		uint8_t ret = 0;
@@ -537,15 +328,5 @@ namespace Utils
 			ret ^= buffer[i];
 		}
 		return ret;
-	}
-
-	string Utils::StringToLower(const string& input)
-	{
-		string output = input;
-		for(auto& c : output)
-		{
-		   c = tolower(c);
-		}
-		return output;
 	}
 }

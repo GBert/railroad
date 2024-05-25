@@ -25,7 +25,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Hardware/HardwareInterface.h"
 #include "Hardware/HardwareParams.h"
 #include "Hardware/Protocols/EsuCAN.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 using std::deque;
 using std::string;
@@ -397,7 +397,7 @@ namespace Hardware
 
 				if (option.compare("ports") == 0)
 				{
-					ports = Utils::Utils::StringToInteger(value, 16);
+					ports = Utils::Integer::StringToInteger(value, 16);
 					name = "Module " + Utils::Utils::ToStringWithLeadingZeros(moduleIdHuman, 3) + " Pin ";
 				}
 			}
@@ -442,14 +442,14 @@ namespace Hardware
 		{
 			string stringValue;
 			ParseOption(option, stringValue);
-			value = Utils::Utils::StringToInteger(stringValue, 0);
+			value = Utils::Integer::StringToInteger(stringValue, 0);
 		}
 
 		void EsuCAN::ParseOptionHex(string& option, int& value)
 		{
 			string stringValue;
 			ParseOption(option, stringValue);
-			value = Utils::Utils::HexToInteger(stringValue, 0);
+			value = Utils::Integer::HexToInteger(stringValue, 0);
 		}
 
 		void EsuCAN::ParseEvent()
@@ -531,14 +531,14 @@ namespace Hardware
 
 			if (option.compare("speed") == 0)
 			{
-				Speed speed = Utils::Utils::StringToInteger(value) << 3;
+				Speed speed = Utils::Integer::StringToInteger(value) << 3;
 				manager->LocoSpeed(ControlTypeHardware, controlID, ProtocolServer, address, speed);
 				return;
 			}
 
 			if (option.compare("dir") == 0)
 			{
-				Orientation orientation = (Utils::Utils::StringToInteger(value) == 1 ? OrientationLeft : OrientationRight);
+				Orientation orientation = (Utils::Integer::StringToInteger(value) == 1 ? OrientationLeft : OrientationRight);
 				manager->LocoOrientation(ControlTypeHardware, controlID, ProtocolServer, address, orientation);
 				return;
 			}
@@ -552,7 +552,7 @@ namespace Hardware
 					logger->Error(Languages::TextInvalidDataReceived);
 					return;
 				}
-				DataModel::LocoFunctionNr function = Utils::Utils::StringToInteger(valueList[0], 0);
+				DataModel::LocoFunctionNr function = Utils::Integer::StringToInteger(valueList[0], 0);
 				DataModel::LocoFunctionState on = Utils::Utils::StringToBool(valueList[1])
 					? DataModel::LocoFunctionStateOn : DataModel::LocoFunctionStateOff;
 				manager->LocoFunctionState(ControlTypeHardware, controlID, ProtocolServer, address, function, on);

@@ -24,6 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Languages.h"
 #include "Storage/Sqlite.h"
+#include "Utils/Integer.h"
 
 using DataModel::Accessory;
 using DataModel::Track;
@@ -281,13 +282,13 @@ namespace Storage
 			return 0;
 		}
 		TableInfo tableInfo;
-		tableInfo.cid = Utils::Utils::StringToInteger(argv[0]);
+		tableInfo.cid = Utils::Integer::StringToInteger(argv[0]);
 		tableInfo.name = argv[1];
 		tableInfo.type = argv[2];
-		tableInfo.notNull = Utils::Utils::StringToInteger(argv[3]) > 0;
+		tableInfo.notNull = Utils::Integer::StringToInteger(argv[3]) > 0;
 		tableInfo.defaultNull = argv[4] == nullptr;
 		tableInfo.defaultValue = argv[4] != nullptr ? argv[4] : "";
-		tableInfo.primaryKey = Utils::Utils::StringToInteger(argv[5]);
+		tableInfo.primaryKey = Utils::Integer::StringToInteger(argv[5]);
 		tableInfos->push_back(tableInfo);
 		return 0;
 	}
@@ -320,9 +321,9 @@ namespace Storage
 		{
 			return 0;
 		}
-		ControlID controlID = Utils::Utils::StringToInteger(argv[0]);
+		ControlID controlID = Utils::Integer::StringToInteger(argv[0]);
 
-		HardwareParams* params = new HardwareParams(controlID, static_cast<HardwareType>(Utils::Utils::StringToInteger(argv[1])), argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
+		HardwareParams* params = new HardwareParams(controlID, static_cast<HardwareType>(Utils::Integer::StringToInteger(argv[1])), argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
 		(*hardwareParams)[controlID] = params;
 		return 0;
 	}

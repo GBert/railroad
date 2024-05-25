@@ -30,6 +30,7 @@ namespace Hardware
 	 	serialLine(logger, params->GetArg1(), B115200, 8, 'N', 1, true)
 	{
 		logger->Info(Languages::TextStarting, GetFullName());
+		Init();
 	}
 
 	bool DccPpExSerial::Send(const std::string& buffer)

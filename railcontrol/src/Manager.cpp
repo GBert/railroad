@@ -30,6 +30,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Manager.h"
 #include "RailControl.h"
 #include "Storage/TransactionGuard.h"
+#include "Utils/Integer.h"
 #include "Utils/Utils.h"
 #include "Server/Web/WebServer.h"
 #include "Server/Z21/Z21Server.h"
@@ -84,14 +85,14 @@ Manager::Manager(Config& config)
 		return;
 	}
 
-	Logger::Logger::SetLogLevel(static_cast<Logger::Logger::Level>(Utils::Utils::StringToInteger(storage->GetSetting("LogLevel"), Logger::Logger::LevelInfo)));
-	Languages::SetDefaultLanguage(static_cast<Languages::Language>(Utils::Utils::StringToInteger(storage->GetSetting("Language"), Languages::EN)));
-	defaultAccessoryDuration = Utils::Utils::StringToInteger(storage->GetSetting("DefaultAccessoryDuration"), 250);
+	Logger::Logger::SetLogLevel(static_cast<Logger::Logger::Level>(Utils::Integer::StringToInteger(storage->GetSetting("LogLevel"), Logger::Logger::LevelInfo)));
+	Languages::SetDefaultLanguage(static_cast<Languages::Language>(Utils::Integer::StringToInteger(storage->GetSetting("Language"), Languages::EN)));
+	defaultAccessoryDuration = Utils::Integer::StringToInteger(storage->GetSetting("DefaultAccessoryDuration"), 250);
 	autoAddFeedback = Utils::Utils::StringToBool(storage->GetSetting("AutoAddFeedback"));
 	stopOnFeedbackInFreeTrack = Utils::Utils::StringToBool(storage->GetSetting("StopOnFeedbackInFreeTrack"), true);
 	executeAccessory = Utils::Utils::StringToBool(storage->GetSetting("ExecuteAccessory"), true);
-	selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::StringToInteger(storage->GetSetting("SelectRouteApproach")));
-	nrOfTracksToReserve = static_cast<DataModel::Loco::NrOfTracksToReserve>(Utils::Utils::StringToInteger(storage->GetSetting("NrOfTracksToReserve"), 2));
+	selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Integer::StringToInteger(storage->GetSetting("SelectRouteApproach")));
+	nrOfTracksToReserve = static_cast<DataModel::Loco::NrOfTracksToReserve>(Utils::Integer::StringToInteger(storage->GetSetting("NrOfTracksToReserve"), 2));
 
 	controls[ControlIdWebServer] = new Server::Web::WebServer(*this, config.getStringValue("webserveraddress", "any"), config.getIntValue("webserverport", 8082));
 

@@ -21,7 +21,6 @@ along with RailControl; see the file LICENCE. If not see
 #pragma once
 
 #include <chrono>
-#include <climits>
 #include <deque>
 #include <future>
 #include <map>
@@ -60,35 +59,8 @@ namespace Utils
 			static bool GetBoolMapEntry(const std::map<std::string,std::string>& map, const std::string& key, const bool defaultValue = false);
 			static std::string ToStringWithLeadingZeros(const unsigned int number, const unsigned char chars);
 
-			static inline int StringToInteger(const std::string& value)
-			{
-				return StringToInteger(value, 0, INT_MAX);
-			}
-
-			static int StringToInteger(const std::string& value, const int defaultValue);
-			static int StringToInteger(const std::string& value, const int min, const int max);
-			static long HexToInteger(const std::string& value, const long defaultValue = 0);
-			static signed char HexToChar(signed char c);
 			static bool StringToBool(const std::string& value, const bool defaultValue = false);
-
-			static void StringToUpper(std::string& s)
-			{
-				for (auto& c : s)
-				{
-					c = toupper(c);
-				}
-			}
-
-			static void IntToDataBigEndian(const uint32_t i, unsigned char* buffer);
-			static uint32_t DataBigEndianToInt(const unsigned char* buffer);
-			static void ShortToDataBigEndian(const uint16_t i, unsigned char* buffer);
-			static uint16_t DataBigEndianToShort(const unsigned char* buffer);
-			static void IntToDataLittleEndian(const uint32_t i, unsigned char* buffer);
-			static uint32_t DataLittleEndianToInt(const unsigned char* buffer);
-			static void ShortToDataLittleEndian(const uint16_t i, unsigned char* buffer);
-			static uint16_t DataLittleEndianToShort(const unsigned char* buffer);
-			static std::string IntegerToBCD(const unsigned int input);
-			static std::string IntegerToHex(const unsigned int input, const unsigned int size = 1);
+			static std::string StringToLower(const std::string& input);
 
 			static inline bool FileExists(const std::string& name)
 			{
@@ -139,11 +111,7 @@ namespace Utils
 				*(reinterpret_cast<uint64_t*>(to)) = *(reinterpret_cast<const uint64_t*>(from));
 			}
 
-			static bool HostResolves(const std::string& host);
-
 			static uint8_t CalcXORCheckSum(const uint8_t* const buffer, size_t length);
-
-			static std::string StringToLower(const std::string& input);
 
 			static inline std::string ProtocolToString(const Protocol protocol)
 			{

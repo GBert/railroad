@@ -23,7 +23,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <map>
 #include <string>
 
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 class ArgumentHandler
 {
@@ -40,7 +40,7 @@ class ArgumentHandler
 
 		inline int GetArgumentInt(const char argument, const int defaultValue = 0)
 		{
-			return Utils::Utils::StringToInteger(GetArgumentString(argument, std::to_string(defaultValue)));
+			return Utils::Integer::StringToInteger(GetArgumentString(argument, std::to_string(defaultValue)));
 		}
 
 	private:

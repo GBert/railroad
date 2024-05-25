@@ -27,7 +27,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Hardware/HardwareParams.h"
 #include "Hardware/LocoCache.h"
 #include "Logger/Logger.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 // CAN protocol specification at http://streaming.maerklin.de/public-media/cs2/cs2CAN-Protokoll-2_0.pdf
 // Very interesting is also http://www.mbernstein.de/modellbahn/can/bem.htm
@@ -132,7 +132,7 @@ namespace Hardware
 					fullName,
 					shortName),
 					run(true),
-					uid(Utils::Utils::HexToInteger(params->GetArg5(), 0)),
+					uid(Utils::Integer::HexToInteger(params->GetArg5(), 0)),
 					hasCs2Master(false),
 					canFileDataSize(0),
 					canFileData(nullptr),
@@ -146,7 +146,7 @@ namespace Hardware
 					else
 					{
 						hash = CalcHash(uid);
-						logger->Debug(Languages::TextMyUidHash, params->GetArg5(), Utils::Utils::IntegerToHex(hash));
+						logger->Debug(Languages::TextMyUidHash, params->GetArg5(), Utils::Integer::IntegerToHex(hash));
 					}
 				}
 
@@ -370,24 +370,24 @@ namespace Hardware
 
 				static inline Address ParseAddress(const unsigned char* const buffer)
 				{
-					return static_cast<Address>(Utils::Utils::DataBigEndianToInt(buffer + 5));
+					return static_cast<Address>(Utils::Integer::DataBigEndianToInt(buffer + 5));
 				}
 
 				static inline FeedbackPin ParseFeedbackPin(const unsigned char* const buffer)
 				{
-					FeedbackPin pin = static_cast<FeedbackPin>(Utils::Utils::DataBigEndianToInt(buffer + 5));
+					FeedbackPin pin = static_cast<FeedbackPin>(Utils::Integer::DataBigEndianToInt(buffer + 5));
 					pin = (pin & 0x00000FFF) | ((pin & 0x00FF0000) >> 4);
 					return pin;
 				}
 
 				static inline CanHash ParseHash(const unsigned char* const buffer)
 				{
-					return Utils::Utils::DataBigEndianToShort(buffer + 2);
+					return Utils::Integer::DataBigEndianToShort(buffer + 2);
 				}
 
 				static inline CanUid ParseUid(const unsigned char* const buffer)
 				{
-					return Utils::Utils::DataBigEndianToInt(buffer + 5);
+					return Utils::Integer::DataBigEndianToInt(buffer + 5);
 				}
 
 				void ParseCommandSystem(const unsigned char* const buffer);

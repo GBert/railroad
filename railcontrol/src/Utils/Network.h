@@ -36,5 +36,7 @@ namespace Utils
 			static std::string AddressToString(const struct sockaddr_storage *sockaddr);
 
 			static bool CompareAddresses(const struct sockaddr_storage *a1, const struct sockaddr_storage *a);
+
+			static bool HostResolves(const std::string& host);
 	};
 } // namespace Utils

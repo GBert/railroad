@@ -23,7 +23,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/DataModel.h"
 #include "DataModel/LocoConfig.h"
 #include "Hardware/HardwareHandler.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 #include "Server/Web/HtmlTagButton.h"
 #include "Server/Web/HtmlTagInputCheckboxWithLabel.h"
 #include "Server/Web/HtmlTagInputHidden.h"
@@ -74,7 +74,7 @@ namespace Server { namespace Web
 			case ArgumentTypeS88Modules:
 			{
 				argumentName = Languages::TextNrOfS88Modules;
-				const int valueInteger = Utils::Utils::StringToInteger(value, 0, 62);
+				const int valueInteger = Utils::Integer::StringToInteger(value, 0, 62);
 				return HtmlTagInputIntegerWithLabel(argumentNumber, argumentName, valueInteger, 0, 62);
 			}
 

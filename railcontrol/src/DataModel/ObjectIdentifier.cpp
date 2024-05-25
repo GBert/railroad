@@ -19,6 +19,7 @@ along with RailControl; see the file LICENCE. If not see
 */
 
 #include "DataModel/ObjectIdentifier.h"
+#include "Utils/Integer.h"
 #include "Utils/Utils.h"
 
 namespace DataModel
@@ -104,89 +105,89 @@ namespace DataModel
 		if (text.substr(0, 5).compare("track") == 0)
 		{
 			objectType = ObjectTypeTrack;
-			objectID = Utils::Utils::StringToInteger(text.substr(5), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 6).compare("signal") == 0)
 		{
 			objectType = ObjectTypeSignal;
-			objectID = Utils::Utils::StringToInteger(text.substr(6), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(6), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 5).compare("route") == 0)
 		{
 			objectType = ObjectTypeRoute;
-			objectID = Utils::Utils::StringToInteger(text.substr(5), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 4).compare("loco") == 0)
 		{
 			objectType = ObjectTypeLoco;
-			objectID = Utils::Utils::StringToInteger(text.substr(4), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(4), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 8).compare("feedback") == 0)
 		{
 			objectType = ObjectTypeFeedback;
-			objectID = Utils::Utils::StringToInteger(text.substr(8), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(8), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 9).compare("accessory") == 0)
 		{
 			objectType = ObjectTypeAccessory;
-			objectID = Utils::Utils::StringToInteger(text.substr(9), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(9), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 6).compare("switch") == 0)
 		{
 			objectType = ObjectTypeSwitch;
-			objectID = Utils::Utils::StringToInteger(text.substr(6), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(6), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 5).compare("layer") == 0)
 		{
 			objectType = ObjectTypeLayer;
-			objectID = Utils::Utils::StringToInteger(text.substr(5), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 7).compare("cluster") == 0)
 		{
 			objectType = ObjectTypeCluster;
-			objectID = Utils::Utils::StringToInteger(text.substr(7), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(7), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 9).compare("timetable") == 0)
 		{
 			objectType = ObjectTypeTimeTable;
-			objectID = Utils::Utils::StringToInteger(text.substr(9), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(9), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 4).compare("text") == 0)
 		{
 			objectType = ObjectTypeText;
-			objectID = Utils::Utils::StringToInteger(text.substr(4), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(4), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 5).compare("pause") == 0)
 		{
 			objectType = ObjectTypePause;
-			objectID = Utils::Utils::StringToInteger(text.substr(5), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 12).compare("multipleunit") == 0)
 		{
 			objectType = ObjectTypeMultipleUnit;
-			objectID = Utils::Utils::StringToInteger(text.substr(12), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(12), ObjectNone);
 			return *this;
 		}
 		if (text.substr(0, 7).compare("booster") == 0)
 		{
 			objectType = ObjectTypeBooster;
-			objectID = Utils::Utils::StringToInteger(text.substr(7), ObjectNone);
+			objectID = Utils::Integer::StringToInteger(text.substr(7), ObjectNone);
 			return *this;
 		}
 		objectType = ObjectTypeTrack;
-		objectID = Utils::Utils::StringToInteger(text, ObjectNone);
+		objectID = Utils::Integer::StringToInteger(text, ObjectNone);
 		return *this;
 	}
 

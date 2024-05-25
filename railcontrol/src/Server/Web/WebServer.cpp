@@ -36,7 +36,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/ObjectIdentifier.h"
 #include "Languages.h"
 #include "RailControl.h"
-#include "Utils/Utils.h"
+#include "Utils/Network.h"
 #include "Version.h"
 #include "Server/Web/WebClient.h"
 #include "Server/Web/WebServer.h"
@@ -68,7 +68,7 @@ namespace Server { namespace Web
 		AddUpdate(Languages::TextRailControlStarted);
 
 		LogBrowserInfo(webserveraddress, port);
-		updateAvailable = Utils::Utils::HostResolves(GetVersionInfoGitHash() + ".hash.railcontrol.org");
+		updateAvailable = Utils::Network::HostResolves(GetVersionInfoGitHash() + ".hash.railcontrol.org");
 	}
 
 	WebServer::~WebServer()

@@ -24,7 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Hardware/Protocols/Z21DataTypes.h"
 #include "Network/UdpClient.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 namespace Z21Enums = Hardware::Protocols::Z21Enums;
 
@@ -146,14 +146,14 @@ namespace Server { namespace Z21
 			inline void SendBroadcastFlags()
 			{
 				unsigned char sendBuffer[8] = { 0x08, 0x00, 0x51, 0x00 };
-				Utils::Utils::IntToDataLittleEndian(broadCastFlags, sendBuffer + 4);
+				Utils::Integer::IntToDataLittleEndian(broadCastFlags, sendBuffer + 4);
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
 
 			inline void SendLocoMode(const uint16_t address)
 			{
 				unsigned char sendBuffer[7] = { 0x07, 0x00, 0x60, 0x00 };
-				Utils::Utils::ShortToDataBigEndian(address, sendBuffer + 4);
+				Utils::Integer::ShortToDataBigEndian(address, sendBuffer + 4);
 				sendBuffer[6] = 0x00; // we always use DCC
 				Send(sendBuffer, sizeof(sendBuffer));
 			}
@@ -161,7 +161,7 @@ namespace Server { namespace Z21
 			inline void SendTurnoutMode(const uint16_t address)
 			{
 				unsigned char sendBuffer[7] = { 0x07, 0x00, 0x70, 0x00 };
-				Utils::Utils::ShortToDataBigEndian(address, sendBuffer + 4);
+				Utils::Integer::ShortToDataBigEndian(address, sendBuffer + 4);
 				sendBuffer[6] = 0x00; // we always use DCC
 				Send(sendBuffer, sizeof(sendBuffer));
 			}

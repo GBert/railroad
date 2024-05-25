@@ -24,7 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "Config.h"
 #include "Logger/Logger.h"
-#include "Utils/Utils.h"
+#include "Utils/Integer.h"
 
 using std::map;
 using std::string;
@@ -83,7 +83,7 @@ int Config::getIntValue(const string& key, const int defaultValue)
 	{
 		return defaultValue;
 	}
-	return Utils::Utils::StringToInteger(config[key], defaultValue);
+	return Utils::Integer::StringToInteger(config[key], defaultValue);
 }
 
 bool Config::getBoolValue(const string& key, const bool defaultValue)

@@ -67,13 +67,13 @@ namespace Server { namespace Z21
 
 	size_t Z21Client::ParseData(const unsigned char* buffer, const size_t bufferLength)
 	{
-		unsigned short dataLength = Utils::Utils::DataLittleEndianToShort(buffer);
+		unsigned short dataLength = Utils::Integer::DataLittleEndianToShort(buffer);
 		if (dataLength < 4 || dataLength > bufferLength)
 		{
 			return 1472; // 1472 = Max UDP data size
 		}
 
-		const uint16_t header = Utils::Utils::DataLittleEndianToShort(buffer + 2);
+		const uint16_t header = Utils::Integer::DataLittleEndianToShort(buffer + 2);
 		switch (header)
 		{
 			case Z21Enums::HeaderSerialNumber:
@@ -98,7 +98,7 @@ namespace Server { namespace Z21
 
 			case Z21Enums::HeaderSetBroadcastFlags:
 			{
-				broadCastFlags = static_cast<Z21Enums::BroadCastFlags>(Utils::Utils::DataLittleEndianToInt(buffer + 4));
+				broadCastFlags = static_cast<Z21Enums::BroadCastFlags>(Utils::Integer::DataLittleEndianToInt(buffer + 4));
 				break;
 			}
 
@@ -293,7 +293,7 @@ namespace Server { namespace Z21
 		{
 			return;
 		}
-		Utils::Utils::ShortToDataBigEndian(address, sendBuffer + 5);
+		Utils::Integer::ShortToDataBigEndian(address, sendBuffer + 5);
 		sendBuffer[8] = (locoBase->GetOrientation() << 7) | Hardware::Protocols::Z21::EncodeSpeed128(locoBase->GetSpeed());
 		sendBuffer[9] = ((locoBase->GetFunctionState(0) & 0x01) << 4)
 				| ((locoBase->GetFunctionState(4) & 0x01) << 3)
@@ -340,7 +340,7 @@ namespace Server { namespace Z21
 		{
 			return;
 		}
-		Utils::Utils::ShortToDataBigEndian(address - 1, sendBuffer + 5); // - 1 because Z21 address is 0-based
+		Utils::Integer::ShortToDataBigEndian(address - 1, sendBuffer + 5); // - 1 because Z21 address is 0-based
 		sendBuffer[7] = 1 << (accessoryBase->GetAccessoryState() & 0x01);
 		sendBuffer[sizeof(sendBuffer) - 1] = Utils::Utils::CalcXORCheckSum(sendBuffer, sizeof(sendBuffer) - 1);
 		logger->Debug(Languages::Languages::TextSendingTurnoutInfo, address);

@@ -1777,7 +1777,7 @@ function startUp()
 					return true;
 				}
 			}
-			if (event.key === " ") 
+			if (event.key === ' ')
 			{
 				let booster_button = document.getElementById('skip_booster');
 				if (!booster_button)
@@ -1788,7 +1788,35 @@ function startUp()
 				let url = '/?cmd=booster&on=' + (on ? '1' : '0') + '';
 				fireRequestAndForget(url);
 				return false; 
-			} 
+			}
+			else if ((event.keyCode == 38) || (event.key === '8')) // arrow up
+			{
+				locoSpeedChange(+8);
+			}
+			else if ((event.keyCode == 40) || (event.key === '2')) // arrow down
+			{
+				locoSpeedChange(-8);
+			}
+			else if ((event.keyCode == 33) || (event.key === '9')) // arrow page up
+			{
+				locoSpeedChange(+80);
+			}
+			else if ((event.keyCode == 34) || (event.key === '3')) // arrow page down
+			{
+				locoSpeedChange(-80);
+			}
+			else if ((event.keyCode == 45) || (event.key === '0')) // 0
+			{
+				locoSpeedChange(-1024);
+			}
+			else if ((event.keyCode == 37) || (event.key === '4')) // arrow left
+			{
+				locoOrientationChange(0);
+			}
+			else if ((event.keyCode == 39) || (event.key === '6')) // arrow right
+			{
+				locoOrientationChange(1);
+			}
 		}, true);
 	}
 	updateLocoControls();
@@ -1962,6 +1990,54 @@ function locoSpeedSliderOnChange(locoId)
 	url += slider.value;
 	fireRequestAndForget(url);
 	updateSliderAllowed = true;
+	return false;
+}
+
+function locoSpeedChange(delta)
+{
+	let loco = document.getElementById('loco');
+	if (!loco)
+	{
+		return false;
+	}
+	let locoId = loco.value;
+	let slider = document.getElementById('locospeed_' + locoId);
+	if (!slider)
+	{
+		return false;
+	}
+	let oldValue = +slider.value;
+	let newValue = 0 + oldValue;
+	newValue += delta;
+	if (newValue > 1023)
+	{
+		newValue = 1023;
+	}
+	if (newValue < 0)
+	{
+		newValue = 0;
+	}
+	let url = '/?cmd=locospeed&loco=';
+	url += locoId;
+	url += '&speed=';
+	url += newValue;
+	fireRequestAndForget(url);
+	return false;
+}
+
+function locoOrientationChange(orientation)
+{
+	let loco = document.getElementById('loco');
+	if (!loco)
+	{
+		return false;
+	}
+	let locoId = loco.value;
+	let url = '/?cmd=locoorientation&loco=';
+	url += locoId;
+	url += '&on=';
+	url += orientation;
+	fireRequestAndForget(url);
 	return false;
 }
 
