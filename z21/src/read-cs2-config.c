@@ -953,7 +953,8 @@ int read_loco_data(char *config_file, int config_type) {
 		loco->name = name;
 		/* we assume that the icon does have the same name
 		   it will be overwritten by the token .icon anyway */
-		loco->icon = strdup(name);
+		icon = strdup(name);
+		loco->icon = icon;
 		debug_print("match name:      >%s<\n", loco->name);
 		break;
 	    case L1_TYPE:

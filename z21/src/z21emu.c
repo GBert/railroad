@@ -102,7 +102,7 @@ static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
-    fprintf(stderr, "   Version 2.1\n\n");
+    fprintf(stderr, "   Version 2.2\n\n");
     fprintf(stderr, "         -a <time_out>       try to find gateway for <time_out> seconds\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -p <port>           primary UDP port for the server - default %d\n", PRIMARY_UDP_PORT);
