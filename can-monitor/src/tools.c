@@ -19,6 +19,10 @@ uint16_t be16(uint8_t *u) {
     return (u[0] << 8) | u[1];
 }
 
+uint16_t le16(uint8_t *u) {
+    return u[0] | (u[1] << 8);
+}
+
 uint32_t be32(uint8_t *u) {
     return (u[0] << 24) | (u[1] << 16) | (u[2] << 8) | u[3];
 }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "can-monitor.h"
+#include "tools.h"
 
 void z21_conf_info(unsigned char *data, int datsize) {
     int show = datsize;
@@ -28,8 +29,8 @@ void z21_conf_info(unsigned char *data, int datsize) {
 
 void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize) {
     while (datsize >= 4) {
-	int datlen = data[0] + data[1] * 256;
-	int header = data[2] + data[3] * 256;
+	int datlen = le16(&data[0]);
+	int header = le16(&data[2]);
 	int par1st = 4;
 
 	printf("%s %.3d>  UDP  Z21 L %03X, H %04X ", timestamp, source, datlen, header);

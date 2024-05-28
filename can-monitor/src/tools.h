@@ -13,6 +13,7 @@
 #include "can-monitor.h"
 
 uint16_t be16(uint8_t *u);
+uint16_t le16(uint8_t *u);
 uint32_t be32(uint8_t *u);
 uint32_t le32(uint8_t *u);
 int inflate_data(struct cs2_config_data_t *config_data);
