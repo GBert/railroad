@@ -134,9 +134,11 @@ namespace Hardware
 					run(true),
 					uid(Utils::Integer::HexToInteger(params->GetArg5(), 0)),
 					hasCs2Master(false),
-					canFileDataSize(0),
 					canFileData(nullptr),
 					canFileDataPointer(nullptr),
+					canFileDataSize(0),
+					canFileCrc(0),
+					canFileCrcSize(0),
 					locoCache(params->GetControlID(), params->GetManager())
 				{
 					if (uid == 0)
@@ -446,16 +448,29 @@ namespace Hardware
 				}
 				virtual void Send(const unsigned char* buffer) = 0;
 
+				static uint16_t CalcCrc(const unsigned char *data, const size_t length);
+
+				inline void CleanUpCanFileData()
+				{
+					free(canFileData);
+					canFileData = nullptr;
+					canFileDataPointer = nullptr;
+					canFileDataSize = 0;
+					canFileCrc = 0;
+					canFileCrcSize = 0;
+				}
+
 				CanUid uid;
 				CanHash hash;
 				bool hasCs2Master;
 				std::thread receiverThread;
 				std::thread pingThread;
 
-				size_t canFileDataSize;
-				CanFileCrc canFileCrc;
 				unsigned char* canFileData;
 				unsigned char* canFileDataPointer;
+				size_t canFileDataSize;
+				CanFileCrc canFileCrc;
+				size_t canFileCrcSize;
 
 				LocoCache locoCache;
 

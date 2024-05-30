@@ -313,7 +313,7 @@ namespace Utils
 		for (auto& file : filesFound)
 		{
 			string comPortString = file.substr(4);
-			unsigned char comPort = StringToInteger(comPortString);
+			unsigned char comPort = Integer::StringToInteger(comPortString);
 			comPorts.push_back(comPort);
 		}
 		return true;

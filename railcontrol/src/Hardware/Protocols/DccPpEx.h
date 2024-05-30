@@ -141,23 +141,13 @@ namespace Hardware
 					return Send(buffer);
 				}
 
-				inline bool ReceiveInternal(std::string& buffer)
-				{
-					const bool ret = Receive(buffer);
-					if (buffer.size())
-					{
-						logger->Hex(buffer);
-					}
-					return ret;
-				}
+				bool ReceiveInternal(std::string& buffer);
 
 				virtual bool Send(const std::string& buffer) = 0;
 
 				virtual bool Receive(std::string& buffer) = 0;
 
 				void Receiver();
-
-				bool ReceiveData(std::string& buffer);
 
 				void Parse(const std::string& buffer);
 

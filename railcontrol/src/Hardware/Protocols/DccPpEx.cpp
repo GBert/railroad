@@ -175,7 +175,7 @@ namespace Hardware
 			while (true)
 			{
 				string buffer;
-				const bool ret = ReceiveData(buffer);
+				const bool ret = ReceiveInternal(buffer);
 				if (!ret)
 				{
 					break;
@@ -185,18 +185,25 @@ namespace Hardware
 			logger->Info(Languages::TextTerminatingReceiverThread);
 		}
 
-		bool DccPpEx::ReceiveData(string& buffer)
+		bool DccPpEx::ReceiveInternal(string& buffer)
 		{
 			size_t size = 0;
-			while (size == 0 || (buffer[size - 1] != '>' && buffer[size - 1] != 0x0a))
+			while (size == 0 || ((buffer[size - 1] != '>') && (buffer[size - 1] != 0x0a)))
 			{
 				if (!run)
 				{
 					return false;
 				}
-				ReceiveInternal(buffer);
+				Receive(buffer);
 				size = buffer.size();
 			}
+
+			if (size == 0)
+			{
+				return false;
+			}
+
+			logger->Hex(buffer);
 			return true;
 		}
 

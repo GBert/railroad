@@ -120,6 +120,7 @@ class Languages
 			TextControlSaved,
 			TextControls,
 			TextCopyingFromTo,
+			TextCrcMissmatch,
 			TextCreatingTable,
 			TextCreepAt,
 			TextCreepingSpeed,
