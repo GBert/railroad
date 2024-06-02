@@ -724,7 +724,6 @@ int check_data_can(struct z21_data_t *z21_data, uint8_t * data, int verbose) {
 	    if (data[4] == 8) {
 		wert = be16(&data[11]);
 		vas_printf(verbose, &vchar, "System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, data[10]);
-		vas_printf(verbose, &vchar, "System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, data[10]);
 		c_messwert = suche_messwert(messwert_knoten, uid, data[10]);
 		if (c_messwert) {
 		    char *s = berechne_messwert(c_messwert, wert);
