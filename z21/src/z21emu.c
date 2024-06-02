@@ -102,7 +102,7 @@ static unsigned char XPN_X_VERSION[]              = { 0x09, 0x00, 0x40, 0x00, 0x
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -c config_dir -p <port> -s <port>\n", prg);
-    fprintf(stderr, "   Version 2.2\n\n");
+    fprintf(stderr, "   Version 2.3\n\n");
     fprintf(stderr, "         -a <time_out>       try to find gateway for <time_out> seconds\n");
     fprintf(stderr, "         -c <config_dir>     set the config directory - default %s\n", config_dir);
     fprintf(stderr, "         -p <port>           primary UDP port for the server - default %d\n", PRIMARY_UDP_PORT);
@@ -684,7 +684,6 @@ int check_data_can(struct z21_data_t *z21_data, uint8_t * data, int verbose) {
     uint8_t function, tport, tpower, value, state;
     char *vchar;
     struct can_frame frame;
-    struct messwert_t *c_messwert = calloc(1, sizeof(struct messwert_t));
 
     vchar = NULL;
     uid = be32(&data[5]);
@@ -724,7 +723,7 @@ int check_data_can(struct z21_data_t *z21_data, uint8_t * data, int verbose) {
 	    if (data[4] == 8) {
 		wert = be16(&data[11]);
 		vas_printf(verbose, &vchar, "System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, data[10]);
-		c_messwert = suche_messwert(messwert_knoten, uid, data[10]);
+		struct messwert_t *c_messwert = suche_messwert(messwert_knoten, uid, data[10]);
 		if (c_messwert) {
 		    char *s = berechne_messwert(c_messwert, wert);
 		    vas_printf(verbose, &vchar, " %s", s);
