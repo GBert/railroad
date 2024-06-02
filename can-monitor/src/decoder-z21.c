@@ -6,6 +6,8 @@
 #include "can-monitor.h"
 #include "tools.h"
 
+#define ADDR(x) (be16(&data[x]) & 0x3FFF)
+
 void z21_conf_info(unsigned char *data, int datsize) {
     int show = datsize;
     if (show > 16)
@@ -83,17 +85,23 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		    case 0x6321:
 			printf("LAN_X_GET_VERSION");
 			break;
+		    case 0xE344:
+			printf("LAN_X_PURGE_LOCO %4u", ADDR(6));
+			break;
 		    case 0xE3F0:
-			printf("LAN_X_GET_LOCO_INFO");
+			printf("LAN_X_GET_LOCO_INFO %4u", ADDR(6));
 			break;
 		    case 0xE410:
-			printf("LAN_X_SET_LOCO_DRIVE_14");
+			printf("LAN_X_SET_LOCO_DRIVE_14 %4u", ADDR(6));
 			break;
 		    case 0xE412:
-			printf("LAN_X_SET_LOCO_DRIVE_28");
+			printf("LAN_X_SET_LOCO_DRIVE_28 %4u", ADDR(6));
 			break;
 		    case 0xE413:
-			printf("LAN_X_SET_LOCO_DRIVE_128");
+			printf("LAN_X_SET_LOCO_DRIVE_128 %4u", ADDR(6));
+			break;
+		    case 0xE4F8:
+			printf("LAN_X_SET_LOCO_FUNCTION %4u", ADDR(6));
 			break;
 		    case 0xF10A:
 		    case 0xF30A:
@@ -119,8 +127,11 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		    case 0x81:
 			printf("LAN_X_BC_STOPPED");
 			break;
+		    case 0x92:
+			printf("LAN_X_SET_LOCO_E_STOP %4u", ADDR(5));
+			break;
 		    case 0xEF:
-			printf("LAN_X_LOCO_INFO    ");
+			printf("LAN_X_LOCO_INFO     %4u", ADDR(5));
 			break;
 		    default:
 			printf("unbekannt");
@@ -128,7 +139,7 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		}
 	    }
 	    if ((datlen - 1) > par1st) {
-		printf(":  ");
+		printf(": ");
 		for (int i = par1st; i < (datlen - 1); i++)
 		    printf(" %02X", data[i]);
 	    }
@@ -138,6 +149,18 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 	    switch (header) {
 	    case 0x10:
 		printf("LAN_GET_SERIAL_NUMBER");
+		break;
+	    case 0x12:
+		printf("LAN_GET_SETTINGS");
+		break;
+	    case 0x13:
+		printf("LAN_SET_SETTINGS");
+		break;
+	    case 0x16:
+		printf("LAN_GET_ADVANCED_SETTINGS");
+		break;
+	    case 0x17:
+		printf("LAN_SET_ADVANCED_SETTINGS");
 		break;
 	    case 0x18:
 		printf("LAN_GET_CODE");
@@ -155,10 +178,10 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		printf("LAN_GET_BROADCASTFLAGS");
 		break;
 	    case 0x60:
-		printf("LAN_GET_LOCOMODE");
+		printf("LAN_GET_LOCOMODE    %4u", ADDR(4));
 		break;
 	    case 0x61:
-		printf("LAN_SET_LOCOMODE");
+		printf("LAN_SET_LOCOMODE    %4u", ADDR(4));
 		break;
 	    case 0x70:
 		printf("LAN_GET_TURNOUTMODE");
@@ -172,6 +195,9 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 	    case 0x82:
 		printf("LAN_RMBUS_PROGRAMMODULE");
 		break;
+	    case 0x84:
+		printf("LAN_SYSTEMSTATE_DATACHANGED");
+		break;
 	    case 0x85:
 		printf("LAN_SYSTEMSTATE_GETDATA");
 		break;
@@ -179,7 +205,7 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 		printf("unbekannt");
 	    }
 	    if (datlen > 4) {
-		printf(":  ");
+		printf(": ");
 		for (int i = 4; i < datlen; i++)
 		    printf(" %02X", data[i]);
 	    }
