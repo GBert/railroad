@@ -16,7 +16,7 @@ include $(INCLUDE_DIR)/package.mk
 
 # Sart make install at build time
 
-define Package/basrcpd
+define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=basrcpd
@@ -25,11 +25,11 @@ define Package/basrcpd
   MAINTAINER:=Rainer Mueller
 endef
 
-define Package/srcpd/description
+define Package/$(PKG_NAME)/description
   SRCP is an communication protocol designed to integrate all model railroad systems.
   Further key features are full multiuser capabilities and simplified user interface
   development. IANA assigned TCP port 4303 to it.
-  Special SRCPD version from Rainer Mueller
+  Special SRCPD version from Rainer Mueller for BananaPi
 endef
 
 define Build/Configure
@@ -42,7 +42,7 @@ define Build/Compile
 		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -Dlinux -D_REENTRANT -I$(STAGING_DIR)/usr/include/libxml2 -I./ -lpthread"
 endef
 
-define Package/basrcpd/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/srcpd $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc
@@ -57,4 +57,4 @@ endif
 	$(INSTALL_BIN) files/presume-ack.init $(1)/etc/init.d/presume-ack
 endef
 
-$(eval $(call BuildPackage,basrcpd))
+$(eval $(call BuildPackage,$(PKG_NAME)))
