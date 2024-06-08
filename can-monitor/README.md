@@ -6,7 +6,7 @@ This Git (OpenWRT feed) contains a Märklin CAN frame reader to print human read
 
 ```
 Usage: can-monitor -i <can|net interface>
-   Version 5.14
+   Version 5.17
 
          -i <can|net int>  CAN or network interface - default can0
          -r <pcap file>    read PCAP file instead from CAN socket
@@ -29,7 +29,6 @@ To compile can-monitor under Debian/Ubuntu you need to install some libs and do:
 sudo apt install zlib1g-dev libpcap-dev
 git clone https://github.com/GBert/railroad.git
 cd railroad/can-monitor/src
-cd src
 make
 sudo cp can-monitor /usr/bin
 ```
