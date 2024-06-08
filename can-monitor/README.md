@@ -14,11 +14,8 @@ Usage: can-monitor -i <can|net interface>
          -l <candump file> read candump file instead from CAN socket
          -t <rocrail file> read Rocrail file instead from CAN socket
          -d                dump to candump file
-
          -v                verbose output for TCP/UDP and errorframes
-
          -x                expose config data
-
          -h                show this help
 ```
 
