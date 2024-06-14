@@ -54,18 +54,86 @@ U20 dient dazu, einen Kartenwechsel der MS2 zu signalisieren.
 Das MS2 I2C Bus Clock Signal wird zusätzlich auch noch über Q1 und ein RC Glied an den ADC
 des ESP8266 Moduls angeschlossen, um den Zeitpunkt des letzten I2C Bus Zugriffs zu messen.
 
-TODOs
------
+TODOs/Done
+----------
 
-- CP2102 Test
-- I2C intern Test
-- I2C extern Test
-- ESP Programmierung Test
-- SD Kartenanbindung Test
-- Allternative zur SD-Karte - SPI EEPROM
+- CP2102 Test  - OK
+- I2C intern Test - OK
+- I2C extern Test - OK
+- ESP Programmierung Test - OK
+- SD Kartenanbindung Test - OK
+- Allternative zur SD-Karte - SPI EEPROM - ungetestet
 
-ESP8266
+Hardware / neue Version
+- 470 nH Vdd
+
+ESP8266 - Code Segmente
+-----------------------
+
+```
+#define SPI_MISO    12
+#define SPI_MOSI    13
+#define SPI_CLK     14
+#define SPI_CS      15
+
+#define I2C_Select   2
+#define I2C_SDA      4
+#define I2C_SCL      5
+#define Card_Change 16
+
+void setup () {
+  // SD Karte initialisieren
+  SD.begin(SPI_CS)
+
+  // I2C initilisieren
+  Wire.begin(I2C_SDA, I2C_SCL);
+  Wire.setClock(100000);
+
+  pinMode(Card_Change, OUTPUT);
+  pinMode(I2C_Select, OUTPUT);
+}
+
+  // MS2 I2C FRAM Zugriff
+  digitalWrite(I2C_Select, 0);
+  ...
+  // MS2 ESP8266 FRAM Zugriff
+  digitalWrite(I2C_Select, 1);
+
+  // Kartenwechsel emulieren
+  digitalWrite(Card_Change, 0)
+  delay(500);
+  digitalWrite(Card_Change, 1)
+
+```
+
+
+
+Flashing
+--------
+```
+esptool.py --port /dev/ttyUSB1 erase_flash
+esptool.py --port /dev/ttyUSB1 --baud 460800 write_flash --flash_size=detect 0 ./build_output/firmware/tasmota.bin
+```
+
+SD-CARD
 -------
+https://github.com/arendst/Tasmota/discussions/13938
+
+https://www.mikrocontroller.net/articles/MMC-_und_SD-Karten
+
+
+
+OLD - BACKUP
+------------
+
+Raspberry Pi I2C
+----------------
+
+|Function  | GPIO   | Pin    |      |
+|----------|--------|--------|------|
+|SDA       | GPIO2  | Pin 3  |      |
+|SCL       | GPIO3  | Pin 5  |      |
+
 
 Tasmota Tests
 -------------
@@ -101,29 +169,4 @@ user_config_override.h
 ```
 
 
-Flashing
---------
-```
-esptool.py --port /dev/ttyUSB1 erase_flash 
-esptool.py --port /dev/ttyUSB1 --baud 460800 write_flash --flash_size=detect 0 ./build_output/firmware/tasmota.bin
-```
-
-SD-CARD
--------
-https://github.com/arendst/Tasmota/discussions/13938
-
-https://www.mikrocontroller.net/articles/MMC-_und_SD-Karten
-
-Pull-up D0
-SPI-Mode Pull-up ungenutzter Ports (TODO)
-470 nH Vdd (TODO)
-
-
-Raspberry Pi I2C
-----------------
-
-|Function  | GPIO   | Pin    |      |
-|----------|--------|--------|------|
-|SDA       | GPIO2  | Pin 3  |      |
-|SCL       | GPIO3  | Pin 5  |      |
 
