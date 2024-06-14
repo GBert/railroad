@@ -115,16 +115,15 @@ esptool.py --port /dev/ttyUSB1 erase_flash
 esptool.py --port /dev/ttyUSB1 --baud 460800 write_flash --flash_size=detect 0 ./build_output/firmware/tasmota.bin
 ```
 
+OLD - BACKUP
+------------
+
 SD-CARD
 -------
 https://github.com/arendst/Tasmota/discussions/13938
 
 https://www.mikrocontroller.net/articles/MMC-_und_SD-Karten
 
-
-
-OLD - BACKUP
-------------
 
 Raspberry Pi I2C
 ----------------
