@@ -96,7 +96,7 @@ void setup () {
   // MS2 I2C FRAM Zugriff
   digitalWrite(I2C_Select, 0);
   ...
-  // MS2 ESP8266 FRAM Zugriff
+  // ESP8266 I2C FRAM Zugriff
   digitalWrite(I2C_Select, 1);
 
   // Kartenwechsel emulieren
