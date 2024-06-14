@@ -371,9 +371,6 @@ namespace Hardware { namespace Protocols
 			void ParseCs2FileLocomotives(std::deque<std::string>& lines);
 			void ParseCs2File(std::deque<std::string>& lines);
 
-			#include <stdint.h>
-			#include <sys/types.h>
-
 			static uint16_t CalcCRC(const unsigned char* data, const size_t length);
 
 			static CanHash CalcHash(const CanUid uid);
