@@ -34,6 +34,8 @@ namespace Network
 
 			UdpConnection(Logger::Logger* logger, const std::string& server, const unsigned short port);
 
+			UdpConnection(Logger::Logger* logger, struct sockaddr* sockaddr);
+
 			inline ~UdpConnection()
 			{
 				Terminate();
@@ -68,10 +70,13 @@ namespace Network
 			}
 
 		private:
+			void CreateUdpSocket();
+
 			Logger::Logger* const logger;
 			int connectionSocket;
 			volatile bool connected;
 			struct sockaddr sockaddr;
-			const unsigned short port;
+			std::string server;
+			unsigned short port;
 	};
 }

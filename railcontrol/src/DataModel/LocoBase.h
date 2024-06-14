@@ -291,7 +291,17 @@ namespace DataModel
 				return matchKey;
 			}
 
-			DataModel::LocoFunctionNr GetFunctionNumberFromFunctionIcon(DataModel::LocoFunctionIcon icon) const;
+			DataModel::LocoFunctionNr GetFunctionNumberFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const;
+
+			DataModel::LocoFunctionIcon GetFunctionIcon(const DataModel::LocoFunctionNr nr) const
+			{
+				return functions.GetFunctionIcon(nr);
+			}
+
+			DataModel::LocoFunctionType GetFunctionType(const DataModel::LocoFunctionNr nr) const
+			{
+				return functions.GetFunctionType(nr);
+			}
 
 			inline LocoID GetLocoIdWithPrefix() const
 			{

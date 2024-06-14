@@ -653,6 +653,8 @@ class Manager
 
 		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoBaseIdentifier, const RouteID routeID);
 
+		std::string GetLokomotiveCs2() const;
+
 		inline DataModel::ObjectIdentifier GetLocoBaseIdentifierOfTrack(const TrackID trackId)
 		{
 			const DataModel::Track* track = GetTrack(trackId);

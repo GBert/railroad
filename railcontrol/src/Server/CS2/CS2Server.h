@@ -23,39 +23,43 @@ along with RailControl; see the file LICENCE. If not see
 #include <map>
 #include <mutex>
 #include <sstream>
+#include <thread>
 #include <vector>
+
+#include <sys/socket.h>
 
 #include "ControlInterface.h"
 #include "Logger/Logger.h"
 #include "Manager.h"
 #include "Network/UdpServer.h"
 
-namespace Server { namespace Z21
+namespace Server { namespace CS2
 {
-	class Z21Client;
+	class CS2Client;
 
-	class Z21Server : public ControlInterface, private Network::UdpServer
+	class CS2Server : public ControlInterface, private Network::TcpServer
 	{
 		public:
-			static const unsigned short Z21Port = 21105;
+			static const unsigned short CS2ReceiverPort = 15731;
+			static const unsigned short CS2SenderPort = 15730;
 
-			Z21Server() = delete;
-			Z21Server(const Z21Server&) = delete;
-			Z21Server& operator=(const Z21Server&) = delete;
+			CS2Server() = delete;
+			CS2Server(const CS2Server&) = delete;
+			CS2Server& operator=(const CS2Server&) = delete;
 
-			Z21Server(Manager& manager, const unsigned short port);
-			~Z21Server();
+			CS2Server(Manager& manager);
+			~CS2Server();
 
 			void Start() override;
 
 			void Stop() override;
 
-			bool NextUpdate(unsigned int& updateIDClient, std::string& s);
+			void Work(Network::TcpConnection* connection) override;
 
 			inline const std::string& GetName() const override
 			{
-				static const std::string Z21Name("Z21Server");
-				return Z21Name;
+				static const std::string CS2Name("CS2Server");
+				return CS2Name;
 			}
 
 			void Booster(const ControlType controlType, const BoosterState status) override;
@@ -79,23 +83,26 @@ namespace Server { namespace Z21
 
 			void SignalState(const ControlType controlType, const DataModel::Signal* signal) override;
 
-		protected:
-			Network::UdpClient* UdpClientFactory(const int serverSocket,
-				const struct sockaddr_storage* clientAddress) override;
-
 		private:
 			Logger::Logger* logger;
 			Manager& manager;
+			std::vector<CS2Client*> clients;
 			unsigned int lastClientID;
 
-			ssize_t ParseData(const unsigned char* buffer,
-				const ssize_t bufferLength,
-				const struct sockaddr_storage* clientAddress);
-
-			void ParseXHeader(const unsigned char* buffer);
-
-			void ParseDB0(const unsigned char* buffer);
+			bool runUdp;
+			std::thread udpServerThread;
+			int udpServerSocket;
 
 			void AccessoryBaseState(const DataModel::AccessoryBase* accessoryBase);
+
+			void CleanUpClients();
+
+			void StartUdpServer();
+
+			void TerminateUdpServer();
+
+			void UdpSocketCreateBindListen(int family, struct sockaddr* address);
+
+			void UdpWorker();
 	};
-}} // namespace Server::Z21
+}} // namespace Server::CS2

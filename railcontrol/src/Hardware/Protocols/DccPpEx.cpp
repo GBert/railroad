@@ -203,7 +203,7 @@ namespace Hardware
 				return false;
 			}
 
-			logger->Hex(buffer);
+			logger->HexIn(buffer);
 			return true;
 		}
 

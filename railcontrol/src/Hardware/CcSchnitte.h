@@ -39,6 +39,7 @@ namespace Hardware
 			static void GetArgumentTypesAndHint(std::map<unsigned char,ArgumentType>& argumentTypes, std::string& hint)
 			{
 				argumentTypes[1] = ArgumentTypeSerialPort;
+				argumentTypes[2] = ArgumentTypeMasterSlave;
 				hint = Languages::GetText(Languages::TextHintCcSchnitte);
 			}
 

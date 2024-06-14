@@ -32,8 +32,9 @@ namespace Network
 		const std::string& server,
 		const unsigned short port)
 	:	logger(logger),
-	 	connected(false),
-	 	port(port)
+		connected(false),
+		server(server),
+		port(port)
 	{
 		memset((char*)&sockaddr, 0, sizeof(sockaddr));
 		struct sockaddr_in* sockaddr_in = reinterpret_cast<struct sockaddr_in*>(&sockaddr);
@@ -46,6 +47,26 @@ namespace Network
 			return;
 		}
 
+		CreateUdpSocket();
+	}
+
+	UdpConnection::UdpConnection(Logger::Logger* logger,
+		struct sockaddr* sockaddr)
+	:	logger(logger),
+		connected(false),
+		sockaddr(*sockaddr)
+	{
+		const struct sockaddr_in* sockaddr_in = reinterpret_cast<const struct sockaddr_in*>(&(this->sockaddr));
+		char serverC[20];
+		inet_ntop(AF_INET, &sockaddr_in->sin_addr, serverC, sizeof(serverC));
+		server = serverC;
+		port = ntohs(sockaddr_in->sin_port);
+
+		CreateUdpSocket();
+	}
+
+	void UdpConnection::CreateUdpSocket()
+	{
 		// create socket
 		connectionSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 		if (connectionSocket == -1)
@@ -93,7 +114,7 @@ namespace Network
 			errno = ECONNRESET;
 			return -1;
 		}
-		return sendto(connectionSocket, buffer, bufferLength, 0, &sockaddr, sizeof(struct sockaddr));
+		return sendto(connectionSocket, buffer, bufferLength, 0, &sockaddr, sizeof(sockaddr));
 	}
 
 	int UdpConnection::Receive(char* buffer, const size_t bufferLength)

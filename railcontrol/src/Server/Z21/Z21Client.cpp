@@ -51,7 +51,7 @@ namespace Server { namespace Z21
 
 	void Z21Client::Work(const unsigned char* buffer, const size_t dataLength)
 	{
-		logger->Hex(buffer, dataLength);
+		logger->HexIn(buffer, dataLength);
 
 		size_t dataRead = 0;
 		while (dataRead < dataLength)

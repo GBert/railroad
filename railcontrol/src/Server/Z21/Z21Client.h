@@ -168,7 +168,7 @@ namespace Server { namespace Z21
 
 			inline void Send(const unsigned char* buffer, const size_t size)
 			{
-				logger->Hex(buffer, size);
+				logger->HexOut(buffer, size);
 				UdpClient::Send(buffer, size);
 			}
 

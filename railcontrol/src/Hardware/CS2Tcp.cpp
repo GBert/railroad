@@ -27,13 +27,13 @@ namespace Hardware
 	:	MaerklinCAN(params,
 			"Maerklin Central Station 2 (CS2) TCP / " + params->GetName() + " at IP " + params->GetArg1(),
 			params->GetName()),
-	 	connection(Network::TcpClient::GetTcpClientConnection(logger, params->GetArg1(), CS2Port))
+	 	connection(Network::TcpClient::GetTcpClientConnection(HardwareInterface::logger, params->GetArg1(), CS2Port))
 	{
-		logger->Info(Languages::TextStarting, GetFullName());
+		HardwareInterface::logger->Info(Languages::TextStarting, GetFullName());
 
 		if (connection.IsConnected() == false)
 		{
-			logger->Error(Languages::TextUnableToCreateTcpSocket, params->GetArg1(), CS2Port);
+			HardwareInterface::logger->Error(Languages::TextUnableToCreateTcpSocket, params->GetArg1(), CS2Port);
 		}
 		Init();
 	}
@@ -42,14 +42,14 @@ namespace Hardware
 	{
 		if (connection.Send(buffer, CANCommandBufferLength) == -1)
 		{
-			logger->Error(Languages::TextUnableToSendDataToControl);
+			HardwareInterface::logger->Error(Languages::TextUnableToSendDataToControl);
 		}
 	}
 
 	void CS2Tcp::Receiver()
 	{
 		Utils::Utils::SetThreadName("CS2 TCP Receiver");
-		logger->Info(Languages::TextReceiverThreadStarted);
+		HardwareInterface::logger->Info(Languages::TextReceiverThreadStarted);
 		if (connection.IsConnected() == false)
 		{
 			return;
@@ -58,30 +58,36 @@ namespace Hardware
 		unsigned char buffer[CANCommandBufferLength];
 		while(run)
 		{
-			ssize_t datalen = connection.Receive(buffer, sizeof(buffer));
+			ssize_t datalen = connection.ReceiveExact(buffer, sizeof(buffer));
 			if (run == false)
 			{
 				break;
 			}
 
-			if (datalen < 0)
+			if (datalen == -1)
 			{
 				if (errno == ETIMEDOUT)
 				{
 					continue;
 				}
-				logger->Error(Languages::TextUnableToReceiveData);
+				HardwareInterface::logger->Error(Languages::TextErrorReadingData, strerror(errno));
+
 				break;
+			}
+
+			if (datalen == 0)
+			{
+				continue;
 			}
 
 			if (datalen != 13)
 			{
-				logger->Error(Languages::TextInvalidDataReceived);
+				HardwareInterface::logger->Error(Languages::TextErrorReadingData, strerror(errno));
 				continue;
 			}
 			Parse(buffer);
 		}
 		connection.Terminate();
-		logger->Info(Languages::TextTerminatingReceiverThread);
+		HardwareInterface::logger->Info(Languages::TextTerminatingReceiverThread);
 	}
 } // namespace

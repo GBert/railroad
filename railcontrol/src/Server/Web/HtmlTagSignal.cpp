@@ -62,6 +62,36 @@ namespace Server { namespace Web
 				break;
 
 			case DataModel::SignalTypeChLDistant:
+				MenuEntry(Languages::TextSignalStateStopExpected, idText, DataModel::SignalStateStopExpected, "stopexpected");
+				MenuEntry(Languages::TextSignalStateClearExpected, idText, DataModel::SignalStateClearExpected, "clearexpected");
+				MenuEntry(Languages::TextSignalStateClear40Expected, idText, DataModel::SignalStateAspect2Expected, "aspect2expected");
+				MenuEntry(Languages::TextSignalStateClear60Expected, idText, DataModel::SignalStateAspect3Expected, "aspect3expected");
+				MenuEntry(Languages::TextSignalStateClear90Expected, idText, DataModel::SignalStateAspect5Expected, "aspect5expected");
+				break;
+
+			case DataModel::SignalTypeChNMain:
+				MenuEntry(Languages::TextSignalStateStop, idText, DataModel::SignalStateStop, "stop");
+				MenuEntry(Languages::TextSignalStateClear, idText, DataModel::SignalStateClear, "clear");
+				MenuEntry(Languages::TextSignalStateClear40, idText, DataModel::SignalStateAspect2, "aspect2");
+				MenuEntry(Languages::TextSignalStateClear50, idText, DataModel::SignalStateAspect3, "aspect3");
+				MenuEntry(Languages::TextSignalStateClear60, idText, DataModel::SignalStateAspect4, "aspect4");
+				MenuEntry(Languages::TextSignalStateClear70, idText, DataModel::SignalStateAspect5, "aspect5");
+				MenuEntry(Languages::TextSignalStateClear80, idText, DataModel::SignalStateAspect6, "aspect6");
+				MenuEntry(Languages::TextSignalStateClear90, idText, DataModel::SignalStateAspect7, "aspect7");
+				MenuEntry(Languages::TextSignalStateClear100, idText, DataModel::SignalStateAspect8, "aspect8");
+				MenuEntry(Languages::TextSignalStateClear110, idText, DataModel::SignalStateAspect9, "aspect9");
+				MenuEntry(Languages::TextSignalStateClear120, idText, DataModel::SignalStateAspect10, "aspect10");
+				MenuEntry(Languages::TextSignalStateStopExpected, idText, DataModel::SignalStateStopExpected, "stopexpected");
+				MenuEntry(Languages::TextSignalStateClear40Expected, idText, DataModel::SignalStateAspect2Expected, "aspect2expected");
+				MenuEntry(Languages::TextSignalStateClear50Expected, idText, DataModel::SignalStateAspect3Expected, "aspect3expected");
+				MenuEntry(Languages::TextSignalStateClear60Expected, idText, DataModel::SignalStateAspect4Expected, "aspect4expected");
+				MenuEntry(Languages::TextSignalStateClear70Expected, idText, DataModel::SignalStateAspect5Expected, "aspect5expected");
+				MenuEntry(Languages::TextSignalStateClear80Expected, idText, DataModel::SignalStateAspect6Expected, "aspect6expected");
+				MenuEntry(Languages::TextSignalStateClear90Expected, idText, DataModel::SignalStateAspect7Expected, "aspect7expected");
+				MenuEntry(Languages::TextSignalStateClear100Expected, idText, DataModel::SignalStateAspect8Expected, "aspect8expected");
+				MenuEntry(Languages::TextSignalStateClear110Expected, idText, DataModel::SignalStateAspect9Expected, "aspect9expected");
+				MenuEntry(Languages::TextSignalStateClear120Expected, idText, DataModel::SignalStateAspect10Expected, "aspect10expected");
+				imageDiv.AddAttribute("onclick", "return onClickWithMenu(event, '" + identifier + "');");
 				break;
 
 			case DataModel::SignalTypeChDwarf:
@@ -164,14 +194,36 @@ namespace Server { namespace Web
 					"<circle class=\"aspect5\" cx=\"7\" cy=\"26.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>";
 
 			case DataModel::SignalTypeChLDistant:
-				return "<polygon points=\"0,13.5 2.5,11 11.5,11 14,13.5 14,25.5 11.5,28 2.5,28 0,25.5\" fill=\"black\"/>"
-					"<polyline points=\"7,31 7,34\" style=\"stroke:gray;stroke-width:2\"/>"
+				return "<polygon points=\"0,13 3,10 11,10 14,13 14,21 11,24 3,24 0,21\" fill=\"white\"/>"
+					"<polygon points=\"1,13 3,11 11,11 13,13 13,21 11,23 3,23 1,20\" fill=\"black\"/>"
+					"<polyline points=\"7,24 7,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<polyline points=\"4,34 10,34\" style=\"stroke:gray;stroke-width:2\"/>"
-					"<circle class=\"stop aspect2 aspect3 aspect6\" cx=\"3.5\" cy=\"14.5\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
-					"<circle class=\"stop\" cx=\"10.5\" cy=\"14.5\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
-					"<circle class=\"clear aspect3 aspect5\" cx=\"3.5\" cy=\"24.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
-					"<circle class=\"clear aspect2 aspect3 aspect5 aspect6\" cx=\"10.5\" cy=\"18.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
-					"<circle class=\"aspect5\" cx=\"10.5\" cy=\"24.5\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>";
+					"<circle class=\"stopexpected aspect2expected aspect3expected aspect6expected\" cx=\"3.5\" cy=\"13.5\" r=\"1.5\" fill=\"orange\" opacity=\"0\"/>"
+					"<circle class=\"stopexpected\" cx=\"10.5\" cy=\"13.5\" r=\"1.5\" fill=\"orange\" opacity=\"0\"/>"
+					"<circle class=\"clearexpected aspect3expected aspect5expected\" cx=\"3.5\" cy=\"20.5\" r=\"1.5\" fill=\"lightgreen\" opacity=\"0\"/>"
+					"<circle class=\"clearexpected aspect2expected aspect3expected aspect5expected aspect6expected\" cx=\"10.5\" cy=\"17\" r=\"1.5\" fill=\"lightgreen\" opacity=\"0\"/>"
+					"<circle class=\"aspect5expected\" cx=\"10.5\" cy=\"20.5\" r=\"1.5\" fill=\"orange\" opacity=\"0\"/>";
+
+			case DataModel::SignalTypeChNMain:
+				return
+					"<circle cx=\"7\" cy=\"7\" r=\"7\" fill=\"white\"/>"
+					"<circle cx=\"7\" cy=\"7\" r=\"6\" fill=\"black\"/>"
+					"<polygon points=\"0,14 14,14 14,28 0,28\" fill=\"gray\"/>"
+					"<polygon points=\"1,15 13,15 13,27 1,27\" fill=\"black\"/>"
+					"<polyline points=\"7,28 7,32\" style=\"stroke:gray;stroke-width:2\"/>"
+					"<polyline points=\"4,32 10,32\" style=\"stroke:gray;stroke-width:2\"/>"
+					"<circle class=\"stop\" cx=\"7\" cy=\"5\" r=\"2.5\" fill=\"red\" opacity=\"0\"/>"
+					"<circle class=\"clear aspect2 aspect3 aspect4 aspect5 aspect6 aspect7 aspect8 aspect9 aspect10\" cx=\"9\" cy=\"8.5\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
+					"<circle class=\"stopexpected aspect2expected aspect3expected aspect4expected aspect5expected aspect6expected aspect7expected aspect8expected aspect9expected aspect10expected\" cx=\"5\" cy=\"8.5\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
+					"<text x=\"4\" y=\"25\" class=\"aspect2 aspect2expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">4</text>"
+					"<text x=\"4\" y=\"25\" class=\"aspect3 aspect3expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">5</text>"
+					"<text x=\"4\" y=\"25\" class=\"aspect4 aspect4expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">6</text>"
+					"<text x=\"4\" y=\"25\" class=\"aspect5 aspect5expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">7</text>"
+					"<text x=\"4\" y=\"25\" class=\"aspect6 aspect6expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">8</text>"
+					"<text x=\"4\" y=\"25\" class=\"aspect7 aspect7expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">9</text>"
+					"<text x=\"2\" y=\"25\" class=\"aspect8 aspect8expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">10</text>"
+					"<text x=\"2\" y=\"25\" class=\"aspect9 aspect9expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">11</text>"
+					"<text x=\"2\" y=\"25\" class=\"aspect10 aspect10expected\" fill=\"white\" font-size=\"10\" opacity=\"0\">12</text>";
 
 			case DataModel::SignalTypeDeCombined:
 				return "<polygon points=\"21,0 35,0 35,31 21,31\" fill=\"white\"/>"
@@ -245,8 +297,44 @@ namespace Server { namespace Web
 			case DataModel::SignalStateAspect7:
 				return "signal_aspect7";
 
+			case DataModel::SignalStateAspect8:
+				return "signal_aspect8";
+
+			case DataModel::SignalStateAspect9:
+				return "signal_aspect9";
+
+			case DataModel::SignalStateAspect10:
+				return "signal_aspect10";
+
 			case DataModel::SignalStateStopExpected:
 				return "signal_stopexpected";
+
+			case DataModel::SignalStateAspect2Expected:
+				return "signal_aspect2expected";
+
+			case DataModel::SignalStateAspect3Expected:
+				return "signal_aspect3expected";
+
+			case DataModel::SignalStateAspect4Expected:
+				return "signal_aspect4expected";
+
+			case DataModel::SignalStateAspect5Expected:
+				return "signal_aspect5expected";
+
+			case DataModel::SignalStateAspect6Expected:
+				return "signal_aspect6expected";
+
+			case DataModel::SignalStateAspect7Expected:
+				return "signal_aspect7expected";
+
+			case DataModel::SignalStateAspect8Expected:
+				return "signal_aspect8expected";
+
+			case DataModel::SignalStateAspect9Expected:
+				return "signal_aspect9expected";
+
+			case DataModel::SignalStateAspect10Expected:
+				return "signal_aspect10expected";
 
 			case DataModel::SignalStateDark:
 			default:

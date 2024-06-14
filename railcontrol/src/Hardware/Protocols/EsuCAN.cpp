@@ -195,7 +195,7 @@ namespace Hardware
 			{
 				return;
 			}
-			logger->Hex(reinterpret_cast<unsigned char*>(readBuffer), readBufferLength);
+			logger->HexIn(reinterpret_cast<unsigned char*>(readBuffer), readBufferLength);
 		}
 
 		void EsuCAN::Parser()
@@ -507,7 +507,7 @@ namespace Hardware
 			}
 
 			string event = ReadUntilLineEnd();
-			logger->Hex(event);
+			logger->HexIn(event);
 		}
 
 		void EsuCAN::ParseBoosterEvent()

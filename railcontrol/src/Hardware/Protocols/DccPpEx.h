@@ -137,7 +137,7 @@ namespace Hardware
 
 				inline bool SendInternal(const std::string& buffer)
 				{
-					logger->Hex(buffer);
+					logger->HexOut(buffer);
 					return Send(buffer);
 				}
 

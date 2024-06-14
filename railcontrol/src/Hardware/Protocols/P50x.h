@@ -186,7 +186,7 @@ namespace Hardware
 
 				inline ssize_t SendInternal(const unsigned char* data, const size_t dataLength) const
 				{
-					logger->Hex(data, dataLength);
+					logger->HexOut(data, dataLength);
 					return Send(data, dataLength);
 				}
 
@@ -195,7 +195,7 @@ namespace Hardware
 					const ssize_t ret = Receive(data, length);
 					if (ret > 0)
 					{
-						logger->Hex(data, ret);
+						logger->HexIn(data, ret);
 					}
 					return ret;
 				}
@@ -205,7 +205,7 @@ namespace Hardware
 					const ssize_t ret = ReceiveExact(data, length);
 					if (ret > 0)
 					{
-						logger->Hex(data, ret);
+						logger->HexIn(data, ret);
 					}
 					return ret;
 				}

@@ -894,7 +894,7 @@ namespace DataModel
 		manager->LocoBaseSave(this);
 	}
 
-	DataModel::LocoFunctionNr LocoBase::GetFunctionNumberFromFunctionIcon(DataModel::LocoFunctionIcon icon) const
+	DataModel::LocoFunctionNr LocoBase::GetFunctionNumberFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const
 	{
 		for (DataModel::LocoFunctionNr nr = 0; nr < NumberOfLocoFunctions; ++nr)
 		{

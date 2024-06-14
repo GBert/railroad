@@ -491,7 +491,7 @@ namespace Hardware
 					continue;
 				}
 
-				logger->Hex(buffer, dataLength);
+				logger->HexIn(buffer, dataLength);
 
 				ssize_t dataRead = 0;
 				while (dataRead < dataLength)
@@ -1112,7 +1112,7 @@ namespace Hardware
 
 		int Z21::Send(const unsigned char* buffer, const size_t bufferLength)
 		{
-			logger->Hex(buffer, bufferLength);
+			logger->HexOut(buffer, bufferLength);
 			return connection.Send(buffer, bufferLength);
 		}
 	} // namespace

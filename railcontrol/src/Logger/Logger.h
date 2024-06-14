@@ -144,13 +144,27 @@ namespace Logger
 				Log("Debug", text, args...);
 			}
 
-			void Hex(const std::string& input)
+			inline void HexIn(const std::string& input)
 			{
-				Hex(reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
+				Hex(1, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
 			}
 
-			void Hex(const unsigned char* input, const size_t size);
+			inline void HexOut(const std::string& input)
+			{
+				Hex(2, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
+			}
 
+			void Hex(const unsigned char direction, const unsigned char* input, const size_t size);
+
+			inline void HexIn(const unsigned char* input, const size_t size)
+			{
+				Hex(1, input, size);
+			}
+
+			inline void HexOut(const unsigned char* input, const size_t size)
+			{
+				Hex(2, input, size);
+			}
 
 		private:
 			static Level logLevel;

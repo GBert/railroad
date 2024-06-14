@@ -44,12 +44,13 @@ namespace Network
 				const unsigned char stopBits,
 				const bool hardwareFlowControl = false)
 			:	logger(logger),
-			 	tty(tty),
-			 	dataSpeed(dataSpeed),
-			 	dataBits(dataBits),
-			 	parity(parity),
-			 	stopBits(stopBits),
-			 	hardwareFlowControl(hardwareFlowControl)
+				tty(tty),
+				dataSpeed(dataSpeed),
+				dataBits(dataBits),
+				parity(parity),
+				stopBits(stopBits),
+				hardwareFlowControl(hardwareFlowControl),
+				fileHandle(-1)
 			{
 				Init();
 			}
@@ -87,7 +88,7 @@ namespace Network
 
 			inline ssize_t Send(const unsigned char* data, const size_t size)
 			{
-				if (IsConnected() == false)
+				if (!IsConnected())
 				{
 					return 0;
 				}

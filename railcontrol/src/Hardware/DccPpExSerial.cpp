@@ -27,7 +27,13 @@ namespace Hardware
 	:	DccPpEx(params,
 			"DCC-EX Serial / " + params->GetName() + " at serial port " + params->GetArg1(),
 			params->GetName()),
-	 	serialLine(logger, params->GetArg1(), B115200, 8, 'N', 1, true)
+	 	serialLine(logger, params->GetArg1(), B115200, 8, 'N', 1,
+#ifdef __CYGWIN__
+	 		false
+#else
+			true
+#endif
+			)
 	{
 		logger->Info(Languages::TextStarting, GetFullName());
 		Init();

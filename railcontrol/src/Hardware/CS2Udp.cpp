@@ -27,18 +27,18 @@ namespace Hardware
 	:	MaerklinCAN(params,
 			"Maerklin Central Station 2 (CS2) UDP / " + params->GetName() + " at IP " + params->GetArg1(),
 			params->GetName()),
-	 	senderConnection(logger, params->GetArg1(), CS2SenderPort),
-	 	receiverConnection(logger, "0.0.0.0", CS2ReceiverPort)
+	 	senderConnection(HardwareInterface::logger, params->GetArg1(), CS2SenderPort),
+	 	receiverConnection(HardwareInterface::logger, "0.0.0.0", CS2ReceiverPort)
 	{
-		logger->Info(Languages::TextStarting, GetFullName());
+		HardwareInterface::logger->Info(Languages::TextStarting, GetFullName());
 
 		if (senderConnection.IsConnected())
 		{
-			logger->Info(Languages::TextSenderSocketCreated);
+			HardwareInterface::logger->Info(Languages::TextSenderSocketCreated);
 		}
 		else
 		{
-			logger->Error(Languages::TextUnableToCreateUdpSocketForSendingData);
+			HardwareInterface::logger->Error(Languages::TextUnableToCreateUdpSocketForSendingData);
 		}
 
 		Init();
@@ -47,31 +47,31 @@ namespace Hardware
 	CS2Udp::~CS2Udp()
 	{
 		receiverConnection.Terminate();
-		logger->Info(Languages::TextTerminatingSenderSocket);
+		HardwareInterface::logger->Info(Languages::TextTerminatingSenderSocket);
 	}
 
 	void CS2Udp::Send(const unsigned char* buffer)
 	{
 		if (senderConnection.Send(buffer, CANCommandBufferLength) == -1)
 		{
-			logger->Error(Languages::TextUnableToSendDataToControl);
+			HardwareInterface::logger->Error(Languages::TextUnableToSendDataToControl);
 		}
 	}
 
 	void CS2Udp::Receiver()
 	{
 		Utils::Utils::SetThreadName("CS2 UDP Receiver");
-		logger->Info(Languages::TextReceiverThreadStarted);
+		HardwareInterface::logger->Info(Languages::TextReceiverThreadStarted);
 		if (!receiverConnection.IsConnected())
 		{
-			logger->Error(Languages::TextUnableToCreateUdpSocketForReceivingData);
+			HardwareInterface::logger->Error(Languages::TextUnableToCreateUdpSocketForReceivingData);
 			return;
 		}
 
 		bool ret = receiverConnection.Bind();
 		if (!ret)
 		{
-			logger->Error(Languages::TextUnableToBindUdpSocket);
+			HardwareInterface::logger->Error(Languages::TextUnableToBindUdpSocket);
 			return;
 		}
 		unsigned char buffer[CANCommandBufferLength];
@@ -85,18 +85,18 @@ namespace Hardware
 
 			if (datalen < 0)
 			{
-				logger->Error(Languages::TextUnableToReceiveData);
+				HardwareInterface::logger->Error(Languages::TextUnableToReceiveData);
 				break;
 			}
 
 			if (datalen != 13)
 			{
-				logger->Error(Languages::TextInvalidDataReceived);
+				HardwareInterface::logger->Error(Languages::TextInvalidDataReceived);
 				continue;
 			}
 			Parse(buffer);
 		}
 		receiverConnection.Terminate();
-		logger->Info(Languages::TextTerminatingReceiverThread);
+		HardwareInterface::logger->Info(Languages::TextTerminatingReceiverThread);
 	}
 } // namespace

@@ -106,9 +106,14 @@ namespace Utils
 			static bool GetComPorts(std::vector<unsigned char>& comPorts);
 #endif
 
-			static inline void Copy8Bytes(const unsigned char* const from, unsigned char* const to)
+			static inline void Copy8Bytes(const void* const from, void* const to)
 			{
 				*(reinterpret_cast<uint64_t*>(to)) = *(reinterpret_cast<const uint64_t*>(from));
+			}
+
+			static inline void Copy4Bytes(const void* const from, void* const to)
+			{
+				*(reinterpret_cast<uint32_t*>(to)) = *(reinterpret_cast<const uint32_t*>(from));
 			}
 
 			static uint8_t CalcXORCheckSum(const uint8_t* const buffer, size_t length);

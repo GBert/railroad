@@ -480,7 +480,7 @@ namespace Hardware
 
 				const unsigned char* data = temp.GetData();
 
-				logger->Hex(data, size);
+				logger->HexOut(data, size);
 				serialLine.Send(data, size);
 			}
 			logger->Info(Languages::TextTerminatingSenderThread);
@@ -588,7 +588,7 @@ namespace Hardware
 					break;
 				}
 
-				logger->Hex(buffer, commandLength);
+				logger->HexIn(buffer, commandLength);
 				Parse(buffer);
 			}
 			logger->Info(Languages::TextTerminatingReceiverThread);

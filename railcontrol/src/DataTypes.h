@@ -102,7 +102,8 @@ enum ControlType : uint8_t
 	ControlTypeHardware = 0,
 	ControlTypeInternal,
 	ControlTypeWebServer,
-	ControlTypeZ21Server
+	ControlTypeZ21Server,
+	ControlTypeCS2Server
 };
 
 enum ControlIDs : ControlID
@@ -110,6 +111,7 @@ enum ControlIDs : ControlID
 	ControlIdNone = 0,
 	ControlIdWebServer,
 	ControlIdZ21Server,
+	ControlIdCS2Server,
 	ControlIdFirstHardware = 10
 };
 
@@ -175,7 +177,8 @@ enum ArgumentType : uint8_t
 {
 	ArgumentTypeIpAddress = 1,
 	ArgumentTypeSerialPort = 2,
-	ArgumentTypeS88Modules = 3
+	ArgumentTypeS88Modules = 3,
+	ArgumentTypeMasterSlave = 4
 };
 
 enum HardwareType : uint8_t

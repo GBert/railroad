@@ -1255,8 +1255,21 @@ function updateSignalStateDiv(element, state)
 	element.classList.remove('signal_aspect5');
 	element.classList.remove('signal_aspect6');
 	element.classList.remove('signal_aspect7');
-	element.classList.remove('signal_stopexpected');
+	element.classList.remove('signal_aspect8');
+	element.classList.remove('signal_aspect9');
+	element.classList.remove('signal_aspect10');
 	element.classList.remove('signal_dark');
+	element.classList.remove('signal_stopexpected');
+	element.classList.remove('signal_clearexpected');
+	element.classList.remove('signal_aspect2expected');
+	element.classList.remove('signal_aspect3expected');
+	element.classList.remove('signal_aspect4expected');
+	element.classList.remove('signal_aspect5expected');
+	element.classList.remove('signal_aspect6expected');
+	element.classList.remove('signal_aspect7expected');
+	element.classList.remove('signal_aspect8expected');
+	element.classList.remove('signal_aspect9expected');
+	element.classList.remove('signal_aspect10expected');
 	switch (state)
 	{
 		case 'stop':
@@ -1291,12 +1304,64 @@ function updateSignalStateDiv(element, state)
 			element.classList.add('signal_aspect7');
 			break;
 
-		case 'stopexpected':
-			element.classList.add('signal_stopexpected');
+		case 'aspect8':
+			element.classList.add('signal_aspect8');
+			break;
+
+		case 'aspect9':
+			element.classList.add('signal_aspect9');
+			break;
+
+		case 'aspect10':
+			element.classList.add('signal_aspect10');
 			break;
 
 		case 'dark':
 			element.classList.add('signal_dark');
+			break;
+
+		case 'stopexpected':
+			element.classList.add('signal_stopexpected');
+			break;
+
+		case 'clearexpected':
+			element.classList.add('signal_clearexpected');
+			break;
+
+		case 'aspect2expected':
+			element.classList.add('signal_aspect2expected');
+			break;
+
+		case 'aspect3expected':
+			element.classList.add('signal_aspect3expected');
+			break;
+
+		case 'aspect4expected':
+			element.classList.add('signal_aspect4expected');
+			break;
+
+		case 'aspect5expected':
+			element.classList.add('signal_aspect5expected');
+			break;
+
+		case 'aspect6expected':
+			element.classList.add('signal_aspect6expected');
+			break;
+
+		case 'aspect7expected':
+			element.classList.add('signal_aspect7expected');
+			break;
+
+		case 'aspect8expected':
+			element.classList.add('signal_aspect8expected');
+			break;
+
+		case 'aspect9expected':
+			element.classList.add('signal_aspect9expected');
+			break;
+
+		case 'aspect10expected':
+			element.classList.add('signal_aspect10expected');
 			break;
 	}
 }

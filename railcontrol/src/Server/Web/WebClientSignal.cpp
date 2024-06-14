@@ -111,8 +111,10 @@ namespace Server { namespace Web
 		signalTypeOptions[DataModel::SignalTypeSimpleLeft] = Languages::TextSimpleLeft;
 		signalTypeOptions[DataModel::SignalTypeSimpleRight] = Languages::TextSimpleRight;
 		signalTypeOptions[DataModel::SignalTypeChLMain] = Languages::TextChLMain;
-		//signalTypeOptions[DataModel::SignalTypeChLDistant] = Languages::TextChLDistant;
+		signalTypeOptions[DataModel::SignalTypeChLDistant] = Languages::TextChLDistant;
 		signalTypeOptions[DataModel::SignalTypeChDwarf] = Languages::TextChDwarf;
+		signalTypeOptions[DataModel::SignalTypeChNMain] = Languages::TextChNMain;
+		//signalTypeOptions[DataModel::SignalTypeChNDistant] = Languages::TextChNDistant;
 		signalTypeOptions[DataModel::SignalTypeDeCombined] = Languages::TextDeCombined;
 		signalTypeOptions[DataModel::SignalTypeDeHVMain] = Languages::TextDeHVMain;
 		//signalTypeOptions[DataModel::SignalTypeDeHVDistant] = Languages::TextDeHVDistant;
@@ -213,16 +215,13 @@ namespace Server { namespace Web
 		const LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
 		const DataModel::AccessoryType signalType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "signaltype", DataModel::SignalTypeSimpleLeft));
 		std::map<AccessoryState,AddressOffset> offsets;
-		for (AddressOffset i = 0; i < SignalStateMax; ++i)
+		for (AddressOffset offset = 0; offset <= SignalStateMax; ++offset)
 		{
-			const AddressOffset address = Utils::Utils::GetIntegerMapEntry(arguments, "address" + to_string(i), -1);
-			if ((signalType == SignalTypeChDwarf || signalType == SignalTypeDeCombined) && i == SignalStateAspect2)
+			const AddressOffset address = Utils::Utils::GetIntegerMapEntry(arguments, "address" + to_string(offset), -1);
+			if (address >= 0)
 			{
-				// FIXME: Remove later: 2022-05-27
-				offsets[SignalStateStopExpected] = address;
-				continue;
+				offsets[static_cast<AccessoryState>(offset)] = address;
 			}
-			offsets[static_cast<AccessoryState>(i)] = address;
 		}
 		const DataModel::AccessoryPulseDuration duration = Utils::Utils::GetIntegerMapEntry(arguments, "duration", manager.GetDefaultAccessoryDuration());
 		const bool inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted");
@@ -297,13 +296,53 @@ namespace Server { namespace Web
 		{
 			signalState = DataModel::SignalStateAspect10;
 		}
+		else if (signalStateText.compare("dark") == 0)
+		{
+			signalState = DataModel::SignalStateDark;
+		}
 		else if (signalStateText.compare("stopexpected") == 0)
 		{
 			signalState = DataModel::SignalStateStopExpected;
 		}
-		else if (signalStateText.compare("dark") == 0)
+		else if (signalStateText.compare("clearexpected") == 0)
 		{
-			signalState = DataModel::SignalStateDark;
+			signalState = DataModel::SignalStateClearExpected;
+		}
+		else if (signalStateText.compare("aspect2expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect2Expected;
+		}
+		else if (signalStateText.compare("aspect3expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect3Expected;
+		}
+		else if (signalStateText.compare("aspect4expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect4Expected;
+		}
+		else if (signalStateText.compare("aspect5expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect5Expected;
+		}
+		else if (signalStateText.compare("aspect6expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect6Expected;
+		}
+		else if (signalStateText.compare("aspect7expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect7Expected;
+		}
+		else if (signalStateText.compare("aspect8expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect8Expected;
+		}
+		else if (signalStateText.compare("aspect9expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect9Expected;
+		}
+		else if (signalStateText.compare("aspect10expected") == 0)
+		{
+			signalState = DataModel::SignalStateAspect10Expected;
 		}
 
 		manager.SignalState(ControlTypeWebServer, signalID, signalState, false);

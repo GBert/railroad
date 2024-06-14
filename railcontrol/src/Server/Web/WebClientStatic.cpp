@@ -78,6 +78,15 @@ namespace Server { namespace Web
 				return HtmlTagInputIntegerWithLabel(argumentNumber, argumentName, valueInteger, 0, 62);
 			}
 
+			case ArgumentTypeMasterSlave:
+			{
+				argumentName = Languages::TextDeviceType;
+				map<string,string> masterSlaveOptions;
+				masterSlaveOptions["1"] = Languages::Languages::GetText(Languages::Languages::TextMaster);
+				masterSlaveOptions["0"] = Languages::Languages::GetText(Languages::Languages::TextSlave);
+				return HtmlTagSelectWithLabel(argumentNumber, argumentName, masterSlaveOptions, value);
+			}
+
 			default:
 				return HtmlTag();
 		}

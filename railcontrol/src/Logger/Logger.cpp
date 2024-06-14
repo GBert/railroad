@@ -83,7 +83,7 @@ namespace Logger
 		}
 	}
 
-	void Logger::Hex(const unsigned char* input, const size_t size)
+	void Logger::Hex(const unsigned char direction, const unsigned char* input, const size_t size)
 	{
 		std::stringstream output;
 		size_t index;
@@ -91,6 +91,14 @@ namespace Logger
 		{
 			if ((index & 0x0F) == 0)
 			{
+				if (direction == 1)
+				{
+					output << "<<   ";
+				}
+				else if (direction == 2)
+				{
+					output << "  >> ";
+				}
 				output << "0x" << std::setfill('0') << std::setw(4) << std::hex << index << "   ";
 			}
 

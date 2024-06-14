@@ -34,9 +34,9 @@ namespace Hardware
 	:	MaerklinCAN(params,
 			"CC-Schnitte / " + params->GetName() + " at serial port " + params->GetArg1(),
 			params->GetName()),
-	 	serialLine(logger, params->GetArg1(), B500000, 8, 'N', 1, true)
+	 	serialLine(HardwareInterface::logger, params->GetArg1(), B500000, 8, 'N', 1, true)
 	{
-		logger->Info(Languages::TextStarting, GetFullName());
+		HardwareInterface::logger->Info(Languages::TextStarting, GetFullName());
 
 		Init();
 	}
@@ -49,20 +49,20 @@ namespace Hardware
 		}
 		if (serialLine.Send(buffer, CANCommandBufferLength) == -1)
 		{
-			logger->Error(Languages::TextUnableToSendDataToControl);
+			HardwareInterface::logger->Error(Languages::TextUnableToSendDataToControl);
 		}
 	}
 
 	void CcSchnitte::Receiver()
 	{
 		Utils::Utils::SetThreadName("CC-Schnitte Receiver");
-		logger->Info(Languages::TextReceiverThreadStarted);
+		HardwareInterface::logger->Info(Languages::TextReceiverThreadStarted);
 
 		while (run)
 		{
 			if (!serialLine.IsConnected())
 			{
-				logger->Error(Languages::TextUnableToReceiveData);
+				HardwareInterface::logger->Error(Languages::TextUnableToReceiveData);
 				return;
 			}
 			unsigned char buffer[CANCommandBufferLength];
@@ -77,11 +77,11 @@ namespace Hardware
 			}
 			if (datalen != sizeof(buffer))
 			{
-				logger->Error(Languages::TextInvalidDataReceived);
+				HardwareInterface::logger->Error(Languages::TextInvalidDataReceived);
 				continue;
 			}
 			Parse(buffer);
 		}
-		logger->Info(Languages::TextTerminatingReceiverThread);
+		HardwareInterface::logger->Info(Languages::TextTerminatingReceiverThread);
 	}
 } // namespace

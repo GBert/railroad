@@ -72,6 +72,13 @@ namespace Hardware
 			std::string GetVersion();
 			unsigned char ConfigureS88();
 			void ReadData();
+
+			inline ssize_t SendData(const unsigned char* data, const size_t size)
+			{
+				logger->HexOut(data, size);
+				return serialLine.Send(data, size);
+			}
+
 			void CheckFeedbackByte(const unsigned char dataByte, const unsigned char module);
 
 			void CheckEventsWorker();

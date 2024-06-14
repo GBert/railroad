@@ -20,6 +20,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <cstdint>
 #include <climits>
 
 namespace Utils

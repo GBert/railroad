@@ -440,14 +440,79 @@ namespace Server { namespace Web
 				text = Languages::TextSignalStateIsAspect7;
 				break;
 
-			case DataModel::SignalStateStopExpected:
-				stateText = "stopexpected";
-				text = Languages::TextSignalStateIsStopExpected;
+			case DataModel::SignalStateAspect8:
+				stateText = "aspect8";
+				text = Languages::TextSignalStateIsAspect8;
+				break;
+
+			case DataModel::SignalStateAspect9:
+				stateText = "aspect9";
+				text = Languages::TextSignalStateIsAspect9;
+				break;
+
+			case DataModel::SignalStateAspect10:
+				stateText = "aspect10";
+				text = Languages::TextSignalStateIsAspect10;
 				break;
 
 			case DataModel::SignalStateDark:
 				stateText = "dark";
 				text = Languages::TextSignalStateIsDark;
+				break;
+
+			case DataModel::SignalStateStopExpected:
+				stateText = "stopexpected";
+				text = Languages::TextSignalStateIsStopExpected;
+				break;
+
+			case DataModel::SignalStateClearExpected:
+				stateText = "clearexpected";
+				text = Languages::TextSignalStateIsClearExpected;
+				break;
+
+			case DataModel::SignalStateAspect2Expected:
+				stateText = "aspect2expected";
+				text = Languages::TextSignalStateIsAspect2Expected;
+				break;
+
+			case DataModel::SignalStateAspect3Expected:
+				stateText = "aspect3expected";
+				text = Languages::TextSignalStateIsAspect3Expected;
+				break;
+
+			case DataModel::SignalStateAspect4Expected:
+				stateText = "aspect4expected";
+				text = Languages::TextSignalStateIsAspect4Expected;
+				break;
+
+			case DataModel::SignalStateAspect5Expected:
+				stateText = "aspect5expected";
+				text = Languages::TextSignalStateIsAspect5Expected;
+				break;
+
+			case DataModel::SignalStateAspect6Expected:
+				stateText = "aspect6expected";
+				text = Languages::TextSignalStateIsAspect6Expected;
+				break;
+
+			case DataModel::SignalStateAspect7Expected:
+				stateText = "aspect7expected";
+				text = Languages::TextSignalStateIsAspect7Expected;
+				break;
+
+			case DataModel::SignalStateAspect8Expected:
+				stateText = "aspect8expected";
+				text = Languages::TextSignalStateIsAspect8Expected;
+				break;
+
+			case DataModel::SignalStateAspect9Expected:
+				stateText = "aspect9expected";
+				text = Languages::TextSignalStateIsAspect9Expected;
+				break;
+
+			case DataModel::SignalStateAspect10Expected:
+				stateText = "aspect10expected";
+				text = Languages::TextSignalStateIsAspect10Expected;
 				break;
 		}
 		const string signalIdText(to_string(signal->GetID()));

@@ -274,6 +274,15 @@ namespace DataModel
 
 			static std::string GetLocoFunctionIcon(const LocoFunctionNr nr, const LocoFunctionIcon icon);
 
+			inline LocoFunctionType GetFunctionType(const LocoFunctionNr nr) const
+			{
+				if (nr >= NumberOfLocoFunctions)
+				{
+					return LocoFunctionTypeNone;
+				}
+				return entries[nr].type;
+			}
+
 		private:
 			LocoFunctionEntry entries[NumberOfLocoFunctions];
 	};
