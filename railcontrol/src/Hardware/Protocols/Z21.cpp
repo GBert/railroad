@@ -616,8 +616,11 @@ namespace Hardware
 				case Z21Enums::HeaderLocoNetTx:
 				case Z21Enums::HeaderLocoNetLan:
 				case Z21Enums::HeaderLocoNetDispatch:
-				case Z21Enums::HeaderLocoNetDetector:
 					// we do not parse LocoNet data
+					break;
+
+				case Z21Enums::HeaderLocoNetDetector:
+					ParseLocoNetDetector(buffer);
 					break;
 
 				case Z21Enums::HeaderDetector:
@@ -920,6 +923,19 @@ namespace Hardware
 				}
 				feedbackCache.Set(module, newData);
 			}
+		}
+
+		void Z21::ParseLocoNetDetector(const unsigned char* buffer)
+		{
+			if (buffer[4] != 0x01)
+			{
+				// we only parse simple detectors
+				return;
+			}
+			FeedbackPin pin = Utils::Integer::DataLittleEndianToShort(buffer + 5);
+			++pin;
+			DataModel::Feedback::FeedbackState state = buffer[7] > 0 ? DataModel::Feedback::FeedbackStateOccupied : DataModel::Feedback::FeedbackStateFree;
+			manager->FeedbackState(controlID, pin, state);
 		}
 
 		void Z21::ParseDetectorData(const unsigned char* buffer)

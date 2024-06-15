@@ -208,6 +208,7 @@ namespace Hardware
 				void ParseLocoData(const unsigned char* buffer);
 				void ParseCvData(const unsigned char* buffer);
 				void ParseRmBusData(const unsigned char* buffer);
+				void ParseLocoNetDetector(const unsigned char* buffer);
 				void ParseDetectorData(const unsigned char* buffer);
 
 				void StartUpConnection();
