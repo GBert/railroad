@@ -95,6 +95,12 @@
 				<div class="button" id="del_loco_confirm">Löschen</div>
 				<div class="button close_alert">Abbrechen</div>
 				</div>
+
+				<div class="alertbox" id="device_update" style="display: none">
+					<p id="device_update_p">Firmwareupdate</p>
+					<p>Noch nicht verfügbar</p>
+					<div class="button close_alert">Abbrechen</div>
+				</div>
 		
 				<!-- Dokumentation -->
 
@@ -160,6 +166,8 @@
 			const up_to_date_p = document.getElementById('up_to_date_p');
 			const update_available = document.getElementById('update_available');
 			const update_available_p = document.getElementById('update_available_p');
+
+			const firmware_dropdown = document.getElementById('firmware_dropdown');
 		
 			var loco_to_delete;
 
@@ -238,6 +246,11 @@
 				showAlertbox(del_loco);
 				loco_to_delete = index;
 				del_loco_p.innerHTML = 'Lok "' + name + '" wirklich löschen?';
+			}
+
+			function updateDevice(update_uid, update_name) {
+				showAlertbox(device_update);
+				device_update_p.innerHTML = `Update für ${update_name}`;
 			}
 
 			function showHelp(page){
