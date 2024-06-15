@@ -101,9 +101,58 @@
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/rangeslider.min.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
-<script type="text/javascript" src="js/websocket.js"></script>
+<!--script type="text/javascript" src="js/websocket.js"></script-->
+<script type="text/javascript" src="js/funcsymb.js"></script>
 
 <script type="text/javascript">
+/*
+function GetFuncSymb(nr) {
+    switch (nr) {
+    case 8:     return "<svg width=\"36\" height=\"36\">" +     // Rangiergang
+                "<polyline points=\"5,24 5.2,21.9 5.7,19.9 6.6,18 7.8,16.3 9.3,14.8 11,13.6 12.9,12.7 14.9,12.2 17,12 19.1,12.2 21.1,12.7 23,13.6 24.7,14.8 26.2,16.3 27.4,18 28.3,19.9 28.8,21.9 29,24\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<circle r=\"3\" cx=\"11\" cy=\"24\" fill=\"black\" /><circle r=\"3\" cx=\"23\" cy=\"24\" fill=\"black\" /><circle r=\"3\" cx=\"29\" cy=\"20\" fill=\"black\" /></svg>";
+	case 2:		return "<svg width=\"36\" height=\"36\">" +     // ABV
+				"<polyline points=\"8,16 16,16 16,10 20,10 20,16 28,16 28,28 8,28\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"18,7 18.9,7 19.7,7.2 20.5,7.4 21.2,7.7 21.8,8.1 22.3,8.5 22.7,9 22.9,9.5 23,10 22.9,10.5 22.7,11 22.3,11.5 21.8,11.9 21.2,12.3 20.5,12.6 19.7,12.8 18.9,13 18,13 17.1,13 16.3,12.8 15.5,12.6 14.8,12.3 14.2,11.9 13.7,11.5 13.3,11 13.1,10.5 13,10 13.1,9.5 13.3,9 13.7,8.5 14.2,8.1 14.8,7.7 15.5,7.4 16.3,7.2 17.1,7\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<text x=\"12\" y=\"25\" fill=\"white\" font-size=\"10\">kg</text></svg>";
+    case 1: 	return "<svg width=\"36\" height=\"36\">" +    // Stirnbeleuchtung
+				"<polyline points=\"15.5,22.3 14.8,21.8 14.2,21.2 13.7,20.5 13.3,19.7 13.1,18.9 13,18 13.1,17.1 13.3,16.3 13.7,15.5 14.2,14.8 14.8,14.2 15.5,13.7 16.3,13.3 17.1,13.1 18,13 18.9,13.1 19.7,13.3 20.5,13.7 21.2,14.2 21.8,14.8 22.3,15.5 22.7,16.3 22.9,17.1 23,18 22.9,18.9 22.7,19.7 22.3,20.5 21.8,21.2 21.2,21.8 20.5,22.3\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"15,23 21,23 21,30 18,32 15,30\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"10.2,22 5,25.5\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>"  +
+				"<polyline points=\"9,18 3,18\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>"   +
+				"<polyline points=\"10.2,13.5 5,10.5\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>" +
+				"<polyline points=\"13.5,10.2 10.5,5\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>" +
+				"<polyline points=\"18,9 18,3\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>"    +
+				"<polyline points=\"22.5,10.2 25.5,5\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>" +
+				"<polyline points=\"25.8,13.5 31,10.5\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>" +
+				"<polyline points=\"27,18 33,18\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>"  +
+				"<polyline points=\"25.8,22.5 31,25.5\" stroke=\"black\" stroke-width=\"2\" class=\"button_on\"/>" +
+				"</svg>";
+    case 7: 	return "<svg width=\"36\" height=\"36\">" +    // Rauch
+				"<polyline points=\"20,18 30,18 30,22 28,22 28,32 22,32 22,22 20,22 20,18\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"25,12 28.5,12.9 30,15 28.5,17.1 25,18 21.5,17.1 20,15 21.5,12.9\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" class=\"button_on smoke1\"/>" +
+				"<polyline points=\"25,12 28.5,12.9 30,15 28.5,17.1 25,18 21.5,17.1 20,15 21.5,12.9\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" class=\"button_on smoke2\"/></svg>";
+	case 9:		return "<svg width=\"36\" height=\"36\">" +    // Telexkupplung
+				"<polyline points=\"1,14 4,14 7,10 15,10 12,13 10,13 10,23 12,23 15,26 7,26 4,22 1,22 1,14\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"35,14 32,14 29,10 21,10 24,13 26,13 26,23 24,23 21,26 29,26 32,22 35,22 35,14\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/></svg>";
+    case 5:
+    case 23: 	return "<svg width=\"36\" height=\"36\">" +    // Geräusch
+				"<polyline points=\"8,15 10,15 10,21 8,21\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"11,15 18,8 18,28 11,21\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"24.9,12.2 25.8,13.5 26.5,14.9 26.9,16.4 27,18 26.9,19.6 26.5,21.1 25.8,22.5 24.9,23.8\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" class=\"button_on sound1\"/>" +
+				"<polyline points=\"28,9.6 29.3,11.5 30.2,13.6 30.8,15.7 31,18 30.8,20.3 30.2,22.4 29.3,24.5 28,26.4\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" class=\"button_on sound2\"/>" +
+				"<polyline points=\"31,7.1 32.7,9.5 34,12.2 34.7,15 35,18 34.7,21 34,23.8 32.7,26.5 31,28.9\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" class=\"button_on sound3\"/></svg>";
+	case 10:    return "<svg width=\"36\" height=\"36\">" +    // Horn
+				"<polyline points=\"1,16 3,16 3,17 10,17 14,16 16,15 19,12 19,24 16,21 14,20 10,19 3,19 3,20 1,20\" stroke=\"black\" stroke-width=\"0\" fill=\"black\"/>" +
+				"<polyline points=\"24.9,12.2 25.8,13.5 26.5,14.9 26.9,16.4 27,18 26.9,19.6 26.5,21.1 25.8,22.5 24.9,23.8\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" class=\"button_on sound1\"/>" +
+				"<polyline points=\"28,9.6 29.3,11.5 30.2,13.6 30.8,15.7 31,18 30.8,20.3 30.2,22.4 29.3,24.5 28,26.4\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" class=\"button_on sound2\"/>" +
+				"<polyline points=\"31,7.1 32.7,9.5 34,12.2 34.7,15 35,18 34.7,21 34,23.8 32.7,26.5 31,28.9\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" class=\"button_on sound3\"/></svg>";
+    default:    return "<svg width=\"36\" height=\"36\">" +    // Rest
+				"<text x=\"8\" y=\"24\" fill=\"black\" font-size=\"12\">F" + String(nr) + "</text>" + "</svg>";
+
+    }
+}
+*/
 /*
 * ----------------------------------------------------------------------------
 * "THE BEER-WARE LICENSE" (Revision 42):
@@ -234,6 +283,7 @@
 		var side = sides[j];
 		for (var i = 0; i < function_button[side].length; i++) (function(i, side){
 			function_button[side][i].onclick = function(){
+                if (loco[side]) {		
 				if (loco[side].uid >= 0x4000 || i <= 4) {
 					setFn(loco[side].uid, i, !fn_state[side][i]);
 				}
@@ -246,6 +296,7 @@
 				if (loco[side].uid < 0x4000 && 12 < i && i <= 16) {
 					setFn(loco[side].uid + 3, i - 12, !fn_state[side][i]);
 				}
+                }
 				return false;
 			};
 		})(i, side);
@@ -267,21 +318,33 @@
 
 	function setLoco(side, _loco) {
 		loco[side] = _loco;
-		loadFn(side);
+//		loadFn(side);
 		getDir(loco[side].uid);
-		getSpeed(loco[side].uid);
+//		getSpeed(loco[side].uid);
 		if (!loco[side].icon) {
 			icon_img[side].src = './loco_icons/default.png';
 		} else {
 			icon_img[side].src = './loco_icons/' + loco[side].icon;
 		}
 		lokliste_button[side].childNodes[1].textContent = loco[side].name;
+		console.log('new selection with functions: ' + loco[side].functions);
+		for (var i = 0; i < function_button[side].length; i++) {
+			if ((i < loco[side].functions.length) && (loco[side].functions[i] > 0)) {
+				function_button[side][i].style.visibility = "visible";
+                function_button[side][i].innerHTML = GetFuncSymb(loco[side].functions[i]);
+				getFn(loco[side].uid, i);
+			} else {
+				function_button[side][i].style.visibility = "hidden";
+                function_button[side][i].innerHTML = GetFuncSymb(0);
+			}
+		}
 	}
 
 	for (var side in change_direction) (function(side){
 
 		change_direction[side].onclick = function(){
-			send(`toggleDir:${loco[side].uid}`);
+            if (loco[side]) 
+				parent.send(`toggleDir:${loco[side].uid}`);
 			return false;
 		}
 
@@ -312,7 +375,7 @@
 
 	//---------------------------INITIAL-------------------------//
 
-	ws.onopen = function(){
+//	ws.onopen = function(){
 		//getLokliste(true);
 		/*
 		let locolist_request = new XMLHttpRequest();
@@ -326,12 +389,13 @@
 		};
 		locolist_request.send();
 		*/
-	};
+//	};
 
 	//---------------------------FUNKTIONEN-----------------------------------//
-
+/*
 	function loadFn(side){
-		for (var i = 0; i < function_button[side].length; i++) {
+		var f = Math.min(function_button[side].length, loco[side].functions.length);
+		for (var i = 0; i < f; i++) {
 			if (loco[side].uid >= 0x4000 || i <= 4) {
 				getFn(loco[side].uid, i);
 			}
@@ -346,6 +410,7 @@
 			}
 		}
 	}
+*/
 
 	function updateFn(value, side){
 		var fn_num = value >> 8;
@@ -355,17 +420,23 @@
 		}else{
 			function_button[side][fn_num].setAttribute('class', `button function_${side}`);
 		}
+        let myElements = function_button[side][fn_num].querySelectorAll("polyline");
+        for (let i = 0; i < myElements.length; i++) {
+            if (myElements[i].classList.contains('button_on')) {
+                myElements[i].style.visibility = fn_value ? "visible" : "hidden";
+            }
+        }
 		fn_state[side][fn_num] = fn_value;
 		
 	}
 
 	function getFn(uid, value){
-		send(`getFn:${uid}:${value}`);
+		parent.send(`getFn:${uid}:${value}`);
 	}
 
 	function setFn(uid, fn_num, fn_value){
 		var value = (fn_num << 8) + fn_value;
-		send(`setFn:${uid}:${value}`);
+		parent.send(`setFn:${uid}:${value}`);
 	}
 
 	function updateSpeed(side, value){
@@ -382,12 +453,12 @@
 	}
 
 	function getSpeed(uid){
-		send(`getSpeed:${uid}`);
+		parent.send(`getSpeed:${uid}`);
 	}
 
 	function setSpeed(side, value){
-		if (value != old_speed[side]) {
-			send(`setSpeed:${loco[side].uid}:${value}`);
+		if (loco[side] && (value != old_speed[side])) {
+			parent.send(`setSpeed:${loco[side].uid}:${value}`);
 		}
 		old_speed[side] = value;
 	}
@@ -408,11 +479,11 @@
 	}
 
 	function getDir(uid){
-		send(`getDir:${uid}`);
+		parent.send(`getDir:${uid}`);
 	}
 
 	function setDir(uid, dir){
-		send(`setDir:${uid}:${dir}`);
+		parent.send(`setDir:${uid}:${dir}`);
 	}
 
 	/*mfx_find.onclick = function() {
@@ -422,20 +493,23 @@
 
 	//------------------------------LISTENER---------------------------------//
 
-	ws.onmessage = function(dgram){
+//	ws.onmessage = function(dgram){
+	function wsmessage(dgram){
 		//console.log(`Recieved: ${dgram.data.toString()}.`);
 		var msg = dgram.data.toString().split(':');
 		var cmd = msg[0];
-		var value = parseInt(msg[2])
+		var value = parseInt(msg[2]);
+        var done = false;
 
 		for (var i = 0; i < sides.length; i++) (function(side){
 
 			if (loco[side]) {	
 				if (cmd == 'updateFn') {
+                    done = true;
 					if ((msg[1] == loco[side].uid && loco[side].uid >= 0x4000) || (msg[1] == loco[side].uid && (value >> 8) <= 4 )) {
 						updateFn(value, side);
 					}
-					if (loco[side].uid < 0x4000 && msg[1] == loco[side].uid + 1) {
+/*					if (loco[side].uid < 0x4000 && msg[1] == loco[side].uid + 1) {
 						updateFn(value + 0x400, side);
 					}
 					if (loco[side].uid < 0x4000 && msg[1] == loco[side].uid + 2) {
@@ -444,17 +518,22 @@
 					if (loco[side].uid < 0x4000 && msg[1] == loco[side].uid + 3) {
 						updateFn(value + 0xc00, side);
 					}
+*/				}
+
+				if (cmd == 'updateSpeed') { 
+                    done = true;
+                    if (loco[side].uid == msg[1])
+					   updateSpeed(side, value);
 				}
 
-				if (cmd == 'updateSpeed' && loco[side].uid == msg[1]) {
-					updateSpeed(side, value);
-				}
-
-				if (cmd == 'updateDir' && loco[side].uid == msg[1]) {
-					updateDir(side, msg[2]);
+				if (cmd == 'updateDir') {
+                    done = true;
+                    if (loco[side].uid == msg[1]) 
+					   updateDir(side, msg[2]);
 				}
 			}
 		})(sides[i]);
+        return done;
 	};
 
 </script>

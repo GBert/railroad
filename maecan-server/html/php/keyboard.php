@@ -128,9 +128,9 @@
         }
     }
 
-    function loadKeyboard() {
-        parent.ws.send('getKeyboard');
-    }
+//    function loadKeyboard() {
+//        parent.ws.send('getKeyboard');
+//    }
 
     function saveAccessorie() {
         let new_accessorie = {};
@@ -150,5 +150,5 @@
         parent.ws.send('addAccessorie:' + JSON.stringify(new_accessorie));
     }
 
-    loadKeyboard();
+//    loadKeyboard();
 </script>

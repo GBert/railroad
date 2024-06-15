@@ -500,13 +500,14 @@ function sendLocoNames(loco_index, loco_count, rec_hash){
 function buildLocoStringForCS2(loco, is_cs2_locolist){
   // Einen von einer CS2 o.Ä. lesbaren String erzeugen
 
-  let loco_string = "lokomotive\x0a .uid=0x" + loco.uid.toString(16) + "\x0a .name=" + loco.name + "\x0a .adresse=0x" + loco.adress.toString(16) + "\x0a .typ=" + loco.typ;
+  let loco_string = "lokomotive\x0a .name=" + loco.name + "\x0a .uid=0x" + loco.uid.toString(16) + "\x0a .adresse=0x" + loco.adress.toString(16) + "\x0a .typ=" + loco.typ;
     if (loco.typ == "mfx") {
-      loco_string += ("\x0a .mfxuid=" + loco.mfxuid.toString(16));
+      loco_string += ("\x0a .mfxuid=" + loco.mfxuid.toString(16) + "\x0a .sid=" + loco.sid);
     } else {
       loco_string += "\x0a .mfxuid=0xffffffff";
     }
-    loco_string += ("\x0a .av=" + loco.av + "\x0a .bv=" + loco.bv + "\x0a .volume=" + loco.volume + "\x0a .vmax=" + loco.vmax + "\x0a .vmin=" + loco.vmin);
+	let icon = loco.icon.slice(0, -4);
+    loco_string += ("\x0a .icon=" + icon + "\x0a .av=" + loco.av + "\x0a .bv=" + loco.bv + "\x0a .volume=" + loco.volume + "\x0a .tachomax=" + loco.tachomax + "\x0a .vmax=" + loco.vmax + "\x0a .vmin=" + loco.vmin);
 
     if (!is_cs2_locolist) {
       let speed = "0";
@@ -1250,7 +1251,7 @@ wsServer.on('request', function(request){
       writeCV(uid, msg[2], msg[3], msg[4]);
 
     } else if (cmd  == 'delIcon') {
-      exec('rm ../html/loco_icons/' + msg[1]);
+      exec('rm "../html/loco_icons/' + msg[1] +'"');
 
     } else if (cmd == 'delDevice') {
       for (let i = 0; i < devices.length; i++) {

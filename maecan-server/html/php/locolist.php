@@ -95,7 +95,9 @@
 			</div>
 
 			<p>Tacho:</p>
-			<input id="tacho" type="number" class="text_input"  min="0" max="300" value="120" disabled>
+			<div class="locolist_option_grid">
+				<input id="tachomax" type="number" class="text_input"  min="0" max="300" value="120">
+			</div>
 			<!--
 			<p>Funktionen:</p>
 			<div class="function_div">
@@ -268,7 +270,7 @@
 		bv.value = current_loco.bv;
 		vmax.value = current_loco.vmax;
 		vmin.value = current_loco.vmin;
-		//tacho.value = current_loco.tacho;
+		tachomax.value = current_loco.tachomax;
 		frame.children[0].innerHTML = (current_loco.name + " bearbeiten:");
 		
 		protocol_dropdown.disabled = true;
@@ -370,7 +372,7 @@
 		current_loco.bv = parseInt(bv.value);
 		current_loco.vmax = parseInt(vmax.value);
 		current_loco.vmin = parseInt(vmin.value);
-		current_loco.tacho = parseInt(tacho.value);
+		current_loco.tachomax = parseInt(tachomax.value);
 	}
 
 	function progLoco(option){
@@ -448,7 +450,7 @@
 		applyCurrentLoco();
 	}
 
-	tacho.onchange = () => {
+	tachomax.onchange = () => {
 		applyCurrentLoco();
 	}
 
@@ -483,7 +485,7 @@
 
 		if (name.value.indexOf('$') > -1 || name.value.indexOf('§') > -1) {
 			// Ungültiger Lokname
-		} else if ( av.value > 255 || bv.value > 255 || vmax.value > 255 || vmin.value > 255 || tacho.value > 255) {
+		} else if ( av.value > 255 || bv.value > 255 || vmax.value > 255 || vmin.value > 255 || tachomax.value > 255) {
 			// Ungültige Config-Werte.
 		} else {
 			applyCurrentLoco();

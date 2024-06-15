@@ -1,5 +1,25 @@
 # Changelog
 
+## [2024-02-09.1]
+- Adapt to php version 8.
+
+## Jun 2023
+- Correction of tachomax handling.
+- Missing fields icon, tachomax und sid added for CS2 export.
+- Allow deleting of loco icons with blanks in the name.
+
+## Aug 2022
+- Correction of link to logo
+
+## Feb 2021
+- Take function icons from funcsymb.js
+
+## Jan 2021
+- Modified handling of websocket: use only one and start after page loading completed.
+- Removal of functions which try to access not yet available objects.
+- Correction of calling loadKeyboard. 
+
+
 MäCAN-Sever by Maximilian Goldschmidt
 
 ## [2021-01-25.1]

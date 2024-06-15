@@ -667,7 +667,7 @@
 	}
 
 	search_updates_button.onclick = function(){
-		//local_version = <?php echo $version; ?>;
+		//local_version = <? #php echo $version; ?>;
 		//getOnlineVersion();
 	};
 
