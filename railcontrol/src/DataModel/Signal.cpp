@@ -183,7 +183,8 @@ namespace DataModel
 		const Address baseAddress = GetAddress();
 		for (auto offset : stateAddressMap)
 		{
-			if ((baseAddress + (offset.second << 1)) == address)
+			const Address addressOffset = offset.second >> 1;
+			if ((baseAddress + addressOffset) == address)
 			{
 				return true;
 			}

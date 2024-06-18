@@ -57,10 +57,10 @@ namespace DataModel
 			return true;
 		}
 
-		if (this->locoBaseIdentifier.IsSet())
+		if (this->locoBaseIdentifier.IsSet() || (lockState != LockStateFree))
 		{
 			Object *object = dynamic_cast<Object*>(this);
-			if (object == nullptr)
+			if (!object)
 			{
 				return false;
 			}
@@ -69,17 +69,6 @@ namespace DataModel
 			return false;
 		}
 
-		if (lockState != LockStateFree)
-		{
-			Object *object = dynamic_cast<Object*>(this);
-			if (object == nullptr)
-			{
-				return false;
-			}
-
-			logger->Debug(Languages::TextIsNotFree, object->GetName());
-			return false;
-		}
 		lockState = LockStateReserved;
 		this->locoBaseIdentifier = locoBaseIdentifier;
 		return true;

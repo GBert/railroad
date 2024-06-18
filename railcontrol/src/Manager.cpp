@@ -3912,17 +3912,17 @@ bool Manager::LocoBaseAddTimeTable(const ObjectIdentifier& locoBaseIdentifier, c
 	return true;
 }
 
-string Manager::GetLokomotiveCs2() const
+string Manager::GetCs2Lokomotive() const
 {
-	string out("[lokomotive]\nversion\n.major=0\n.minor=3\nsession\n.id=");
+	string out("[lokomotive]\nversion\n .major=0\n .minor=3\nsession\n .id=");
 	out += "1"; // FIXME: replace with mfx-neuanmeldezähler
 	{
 		std::lock_guard<std::mutex> guard(locoMutex);
 		for (auto& loco : locos)
 		{
 			out += "\nlokomotive";
-			out += "\n.name=" + loco.second->GetName();
-			out += "\n.typ=";
+			out += "\n .name=" + loco.second->GetName();
+			out += "\n .typ=";
 			const Address address = loco.second->GetAddress();
 			uint32_t uid;
 			switch(loco.second->GetProtocol())
@@ -3947,28 +3947,146 @@ string Manager::GetLokomotiveCs2() const
 					uid = 0;
 					break;
 			}
-			out += "\n.uid=0x" + Utils::Integer::IntegerToHex(uid);
-			out += "\n.adresse=0x" + Utils::Integer::IntegerToHex(address);
-			out += "\n.icon=";
-			out += "\n.symbol=";
-			out += "\n.av=0";
-			out += "\n.bv=0";
-			out += "\n.velocity=" + to_string(loco.second->GetSpeed());
-			out += "\n.richtung=" + to_string(loco.second->GetOrientation());
-			out += "\n.tachomax=120";
-			out += "\n.vmax=255";
-			out += "\n.vmin=1";
+			out += "\n .uid=0x" + Utils::Integer::IntegerToHex(uid);
+			out += "\n .adresse=0x" + Utils::Integer::IntegerToHex(address);
+			out += "\n .icon=";
+			out += "\n .symbol=";
+			out += "\n .av=0";
+			out += "\n .bv=0";
+			out += "\n .velocity=" + to_string(loco.second->GetSpeed());
+			out += "\n .richtung=" + to_string(loco.second->GetOrientation());
+			out += "\n .tachomax=120";
+			out += "\n .vmax=255";
+			out += "\n .vmin=1";
 			for (LocoFunctionNr nr = 0; nr < 32; ++nr)
 			{
-				out += "\n.funktionen";
+				out += "\n .funktionen";
 				if (nr >= 16)
 				{
 					out += "_2";
 				}
-				out += "\n..nr=" + to_string(nr);
-				out += "\n..typ=" + to_string(Hardware::Protocols::MaerklinCANCommon::MapLocofunctionRailControlToCs2(nr, loco.second->GetFunctionIcon(nr)));
-				out += "\n..dauer=" + to_string(loco.second->GetFunctionType(nr));
-				out += "\n..wert=" + to_string(loco.second->GetFunctionState(nr));;
+				out += "\n ..nr=" + to_string(nr);
+				out += "\n ..typ=" + to_string(Hardware::Protocols::MaerklinCANCommon::MapLocofunctionRailControlToCs2(nr, loco.second->GetFunctionIcon(nr)));
+				out += "\n ..dauer=" + to_string(loco.second->GetFunctionType(nr));
+				out += "\n ..wert=" + to_string(loco.second->GetFunctionState(nr));;
+			}
+		}
+	}
+	return out;
+}
+
+string Manager::GetCs2Magnetartikel(const AccessoryBase* accessoryBase)
+{
+	string out = "\nartikel";
+	out += "\n .id=" + to_string(accessoryBase->GetAddress());
+	out += "\n .name=";
+	const Object* object = dynamic_cast<const Object*>(accessoryBase);
+	if (object)
+	{
+		out += object->GetName();
+	}
+	else
+	{
+		out += to_string(accessoryBase->GetAddress());
+	}
+
+	out += "\n .typ=std_rot_gruen";
+	out += "\n .schaltzeit=" + to_string(accessoryBase->GetAccessoryPulseDuration());
+	out += "\n .dectyp=";
+	switch(accessoryBase->GetProtocol())
+	{
+		case ProtocolMM:
+			out += "mm2";
+			break;
+
+		case ProtocolDCC:
+			out += "dcc";
+			break;
+
+		default:
+			out += "unknown";
+			break;
+	}
+	return out;
+}
+
+string Manager::GetCs2Magnetartikel() const
+{
+	string out("[magnetartikel]\nversion\n. major=0\n. minor=1");
+
+	{
+		{
+			std::lock_guard<std::mutex> guard(accessoryMutex);
+			for (auto& accessory : accessories)
+			{
+				out += GetCs2Magnetartikel(accessory.second);
+				out += "\n .typ=std_rot_gruen";
+			}
+		}
+		{
+			std::lock_guard<std::mutex> guard(switchMutex);
+			for (auto& mySwitch : switches)
+			{
+				out += GetCs2Magnetartikel(mySwitch.second);
+				out += "\n .typ=";
+				switch (mySwitch.second->GetAccessoryType())
+				{
+					case SwitchTypeLeft:
+						out += "linksweiche";
+						break;
+
+					case SwitchTypeRight:
+						out += "rechtsweiche";
+						break;
+
+					case SwitchTypeThreeWay:
+						out += "dreiwegweiche";
+						break;
+
+					case SwitchTypeMaerklinLeft:
+					case SwitchTypeMaerklinRight:
+						out += "dkw_1antrieb";
+						break;
+
+					default:
+						out += "y_weiche";
+						break;
+				}
+			}
+		}
+		{
+			std::lock_guard<std::mutex> guard(signalMutex);
+			for (auto& signal : signals)
+			{
+				out += GetCs2Magnetartikel(signal.second);
+				out += "\n .typ=";
+				switch (signal.second->GetAccessoryType())
+				{
+					case SignalTypeChDwarf:
+					case SignalTypeDeBlock:
+						out += "lichtsignal_SH01";
+						break;
+
+					case SignalTypeChLMain:
+					case SignalTypeChLCombined:
+					case SignalTypeChNMain:
+					case SignalTypeDeCombined:
+					case SignalTypeDeHVMain:
+						out += "urc_lichtsignal_HP012_SH01";
+						break;
+
+					case SignalTypeChLDistant:
+					case SignalTypeChNDistant:
+					case SignalTypeDeHVDistant:
+						out += "lichtvorsignal_VR012";
+						break;
+
+					case SignalTypeSimpleLeft:
+					case SignalTypeSimpleRight:
+					default:
+						out += "lichtsignal_HP01";
+						break;
+				}
 			}
 		}
 	}

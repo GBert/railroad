@@ -611,7 +611,19 @@ namespace Hardware { namespace Protocols
 			&& (buffer[11] == 0x00)
 			&& (buffer[12] == 0x00))
 		{
-			const string dataPlain = manager->GetLokomotiveCs2();
+			const string dataPlain = manager->GetCs2Lokomotive();
+			SendCompressedFile(dataPlain, buffer + 5);
+		}
+		else if ((buffer[5] == 'm')
+			&& (buffer[6] == 'a')
+			&& (buffer[7] == 'g')
+			&& (buffer[8] == 's')
+			&& (buffer[9] == 0x00)
+			&& (buffer[10] == 0x00)
+			&& (buffer[11] == 0x00)
+			&& (buffer[12] == 0x00))
+		{
+			const string dataPlain = manager->GetCs2Magnetartikel();
 			SendCompressedFile(dataPlain, buffer + 5);
 		}
 	}
