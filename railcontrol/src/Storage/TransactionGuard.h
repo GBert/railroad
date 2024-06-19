@@ -38,6 +38,7 @@ namespace Storage
 		private:
 			StorageHandler* db;
 			bool otherTransactionRunning;
+			mutable std::mutex mutex;
 	};
 } // namespace Storage
 

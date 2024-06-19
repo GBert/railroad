@@ -109,8 +109,8 @@ namespace Storage
 
 			inline void CommitTransaction()
 			{
-				transactionRunning = false;
 				sqlite.CommitTransaction();
+				transactionRunning = false;
 			}
 
 			inline bool IsTransactionRunning()

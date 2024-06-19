@@ -26,6 +26,7 @@ namespace Storage
 	TransactionGuard::TransactionGuard(StorageHandler* db)
 	:	db(db)
 	{
+		std::lock_guard<std::mutex> guard(mutex);
 		if (!db)
 		{
 			otherTransactionRunning = true;
@@ -41,6 +42,7 @@ namespace Storage
 
 	TransactionGuard::~TransactionGuard()
 	{
+		std::lock_guard<std::mutex> guard(mutex);
 		if (otherTransactionRunning)
 		{
 			return;
