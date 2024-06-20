@@ -5,6 +5,13 @@ Roco WLAN Maus / Gleisbox
 
 Mit diesem kleinen Programm kann Rocos WLAN Maus 10813 zusammen mit CS2/CS3 bzw. 'Gleisbox als Zentrale' verwendet werden. Das Programm baut dazu eine Verbindung zum CAN Gateway bzw. can2lan auf. Bei vorhandener Lok-Datei (lokomotive.cs2) entfällt das aufwendige Anlegen der Loks in der WLAN Maus.
 
+z21emu zusammen mit der Z21 App ermöglichen das komfortable Steuern über Smartphone und Tablet.
+
+Optionen anzeigen
+```
+z21emu -h
+```
+
 Starten mit
 ```
 z21emu -f # Vordegrund zum Test
@@ -57,7 +64,6 @@ Todos
 -----
 
 - add .prg, .regs, .traktion and .blocks to cs2 reader
-- work on turnouts / DCC-MM scheme
 - current overload -> Z21
 - measurements -> Z21
   
