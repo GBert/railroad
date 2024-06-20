@@ -22,6 +22,15 @@ cansend can0 000C0300#000000010201
 ```
 Die Namen werden auf 10 Buchstaben/Ziffern gekürzt
 
+Compilieren unter Ubuntu-Linux
+------------------------------
+```
+sudo apt install build-essential git libcurl4-openssl-dev libpthread-stubs0-dev libsqlite3-dev uuid-dev
+git clone https://github.com/GBert/railroad.git
+cd z21/src
+make
+sudo cp z21emu /usr/bin
+```
 
 Backup
 ------
