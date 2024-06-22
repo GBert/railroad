@@ -4013,80 +4013,77 @@ string Manager::GetCs2Magnetartikel(const AccessoryBase* accessoryBase)
 string Manager::GetCs2Magnetartikel() const
 {
 	string out("[magnetartikel]\nversion\n. major=0\n. minor=1");
-
 	{
+		std::lock_guard<std::mutex> guard(accessoryMutex);
+		for (auto& accessory : accessories)
 		{
-			std::lock_guard<std::mutex> guard(accessoryMutex);
-			for (auto& accessory : accessories)
+			out += GetCs2Magnetartikel(accessory.second);
+			out += "\n .typ=std_rot_gruen";
+		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(switchMutex);
+		for (auto& mySwitch : switches)
+		{
+			out += GetCs2Magnetartikel(mySwitch.second);
+			out += "\n .typ=";
+			switch (mySwitch.second->GetAccessoryType())
 			{
-				out += GetCs2Magnetartikel(accessory.second);
-				out += "\n .typ=std_rot_gruen";
+				case SwitchTypeLeft:
+					out += "linksweiche";
+					break;
+
+				case SwitchTypeRight:
+					out += "rechtsweiche";
+					break;
+
+				case SwitchTypeThreeWay:
+					out += "dreiwegweiche";
+					break;
+
+				case SwitchTypeMaerklinLeft:
+				case SwitchTypeMaerklinRight:
+					out += "dkw_1antrieb";
+					break;
+
+				default:
+					out += "y_weiche";
+					break;
 			}
 		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(signalMutex);
+		for (auto& signal : signals)
 		{
-			std::lock_guard<std::mutex> guard(switchMutex);
-			for (auto& mySwitch : switches)
+			out += GetCs2Magnetartikel(signal.second);
+			out += "\n .typ=";
+			switch (signal.second->GetAccessoryType())
 			{
-				out += GetCs2Magnetartikel(mySwitch.second);
-				out += "\n .typ=";
-				switch (mySwitch.second->GetAccessoryType())
-				{
-					case SwitchTypeLeft:
-						out += "linksweiche";
-						break;
+				case SignalTypeChDwarf:
+				case SignalTypeDeBlock:
+					out += "lichtsignal_SH01";
+					break;
 
-					case SwitchTypeRight:
-						out += "rechtsweiche";
-						break;
+				case SignalTypeChLMain:
+				case SignalTypeChLCombined:
+				case SignalTypeChNMain:
+				case SignalTypeDeCombined:
+				case SignalTypeDeHVMain:
+					out += "urc_lichtsignal_HP012_SH01";
+					break;
 
-					case SwitchTypeThreeWay:
-						out += "dreiwegweiche";
-						break;
+				case SignalTypeChLDistant:
+				case SignalTypeChNDistant:
+				case SignalTypeDeHVDistant:
+					out += "lichtvorsignal_VR012";
+					break;
 
-					case SwitchTypeMaerklinLeft:
-					case SwitchTypeMaerklinRight:
-						out += "dkw_1antrieb";
-						break;
-
-					default:
-						out += "y_weiche";
-						break;
-				}
-			}
-		}
-		{
-			std::lock_guard<std::mutex> guard(signalMutex);
-			for (auto& signal : signals)
-			{
-				out += GetCs2Magnetartikel(signal.second);
-				out += "\n .typ=";
-				switch (signal.second->GetAccessoryType())
-				{
-					case SignalTypeChDwarf:
-					case SignalTypeDeBlock:
-						out += "lichtsignal_SH01";
-						break;
-
-					case SignalTypeChLMain:
-					case SignalTypeChLCombined:
-					case SignalTypeChNMain:
-					case SignalTypeDeCombined:
-					case SignalTypeDeHVMain:
-						out += "urc_lichtsignal_HP012_SH01";
-						break;
-
-					case SignalTypeChLDistant:
-					case SignalTypeChNDistant:
-					case SignalTypeDeHVDistant:
-						out += "lichtvorsignal_VR012";
-						break;
-
-					case SignalTypeSimpleLeft:
-					case SignalTypeSimpleRight:
-					default:
-						out += "lichtsignal_HP01";
-						break;
-				}
+				case SignalTypeSimpleLeft:
+				case SignalTypeSimpleRight:
+				default:
+					out += "lichtsignal_HP01";
+					break;
 			}
 		}
 	}

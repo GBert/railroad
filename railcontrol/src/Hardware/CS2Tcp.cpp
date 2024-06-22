@@ -48,10 +48,9 @@ namespace Hardware
 
 	void CS2Tcp::Receiver()
 	{
-		Utils::Utils::SetThreadName("CS2 TCP Receiver");
-		HardwareInterface::logger->Info(Languages::TextReceiverThreadStarted);
-		if (connection.IsConnected() == false)
+		if (!connection.IsConnected())
 		{
+			HardwareInterface::logger->Error(Languages::TextUnableToReceiveData);
 			return;
 		}
 
@@ -59,7 +58,7 @@ namespace Hardware
 		while(run)
 		{
 			ssize_t datalen = connection.ReceiveExact(buffer, sizeof(buffer));
-			if (run == false)
+			if (!run)
 			{
 				break;
 			}
@@ -88,6 +87,5 @@ namespace Hardware
 			Parse(buffer);
 		}
 		connection.Terminate();
-		HardwareInterface::logger->Info(Languages::TextTerminatingReceiverThread);
 	}
 } // namespace

@@ -164,7 +164,7 @@ namespace DataModel
 		const LocoBase* locoBase,
 		const bool allowLocoTurn)
 	{
-		if (automode == false)
+		if (!automode)
 		{
 			return false;
 		}
@@ -212,7 +212,7 @@ namespace DataModel
 			return true;
 		}
 
-		if (allowLocoTurn == true && locoPushpull == true)
+		if (allowLocoTurn && locoPushpull)
 		{
 			Track* trackBase = manager->GetTrack(fromTrack);
 			if (trackBase != nullptr)
@@ -243,7 +243,7 @@ namespace DataModel
 		for (auto relation : relationsAtLock)
 		{
 			bool retRelation = relation->Execute(logger, locoBaseIdentifier, delay);
-			if (retRelation == false)
+			if (!retRelation)
 			{
 				return false;
 			}
@@ -268,7 +268,7 @@ namespace DataModel
 
 		std::lock_guard<std::mutex> Guard(updateMutex);
 		bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
@@ -276,7 +276,7 @@ namespace DataModel
 		if (automode == AutomodeYes)
 		{
 			Track* track = manager->GetTrack(toTrack);
-			if (track == nullptr)
+			if (!track)
 			{
 				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
@@ -291,7 +291,7 @@ namespace DataModel
 		for (auto relation : relationsAtLock)
 		{
 			bool retRelation = relation->Reserve(logger, locoBaseIdentifier);
-			if (retRelation == false)
+			if (!retRelation)
 			{
 				ReleaseInternalWithToTrack(logger, locoBaseIdentifier);
 				return false;
@@ -318,12 +318,12 @@ namespace DataModel
 		if (automode == AutomodeYes)
 		{
 			Track* track = manager->GetTrack(toTrack);
-			if (track == nullptr)
+			if (!track)
 			{
 				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
 			}
-			if (track->Lock(logger, locoBaseIdentifier) == false)
+			if (!track->Lock(logger, locoBaseIdentifier))
 			{
 				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
@@ -333,23 +333,14 @@ namespace DataModel
 		for (auto relation : relationsAtLock)
 		{
 			bool retRelation = relation->Lock(logger, locoBaseIdentifier);
-			if (retRelation == false)
+			if (!retRelation)
 			{
 				ReleaseInternalWithToTrack(logger, locoBaseIdentifier);
 				return false;
 			}
 		}
 
-		manager->RouteSave(this);
 		return true;
-	}
-
-	bool Route::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
-	{
-		std::lock_guard<std::mutex> Guard(updateMutex);
-		bool ret = ReleaseInternal(logger, locoBaseIdentifier);
-		manager->RouteSave(this);
-		return ret;
 	}
 
 	bool Route::ReleaseInternal(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
@@ -374,7 +365,7 @@ namespace DataModel
 	void Route::ReleaseInternalWithToTrack(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		Track* track = manager->GetTrack(toTrack);
-		if (track != nullptr)
+		if (track)
 		{
 			track->Release(logger, locoBaseIdentifier);
 		}

@@ -33,7 +33,7 @@ namespace Hardware { namespace Protocols
 	void MaerklinCANCommon::Init()
 	{
 		run = true;
-		receiverThread = std::thread(&MaerklinCANCommon::Receiver, this);
+		receiverThread = std::thread(&MaerklinCANCommon::ReceiverInternal, this);
 		pingThread = std::thread(&MaerklinCANCommon::PingSender, this);
 	}
 
@@ -57,6 +57,14 @@ namespace Hardware { namespace Protocols
 			Utils::Utils::SleepForSeconds(1);
 			--wait;
 		}
+	}
+
+	void MaerklinCANCommon::ReceiverInternal()
+	{
+		Utils::Utils::SetThreadName("Maerklin CAN Receiver");
+		logger->Info(Languages::TextReceiverThreadStarted);
+		Receiver();
+		logger->Info(Languages::TextTerminatingReceiverThread);
 	}
 
 	void MaerklinCANCommon::PingSender()

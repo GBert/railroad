@@ -21,5 +21,4 @@
 - Ausleuchtung von Gleisen aufgrund von Nachbargleis
 - Autokonversion der Protokolle bei Zentralenwechsel
 - CS2-Server
-- Speichern bei Änderung im Automatikmodus
 - Verzögerung bei Feedback an / aus konfigurierbar

@@ -102,6 +102,8 @@ namespace Hardware { namespace Protocols
 			void Ping();
 			void RequestLoks();
 
+			void ReceiverInternal();
+
 			virtual void Receiver() = 0;
 
 			virtual void CacheSave(LocoCacheEntry& entry) = 0;

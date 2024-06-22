@@ -614,15 +614,8 @@ namespace DataModel
 			return false;
 		}
 
-		if (!route->Lock(logger, locoBaseIdentifier))
-		{
-			route->Release(logger, locoBaseIdentifier);
-			return false;
-		}
-
 		Track* newTrack = manager->GetTrack(route->GetToTrack());
-
-		if (newTrack == nullptr)
+		if (!newTrack)
 		{
 			route->Release(logger, locoBaseIdentifier);
 			return false;

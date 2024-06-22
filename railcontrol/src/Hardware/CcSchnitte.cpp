@@ -55,9 +55,6 @@ namespace Hardware
 
 	void CcSchnitte::Receiver()
 	{
-		Utils::Utils::SetThreadName("CC-Schnitte Receiver");
-		HardwareInterface::logger->Info(Languages::TextReceiverThreadStarted);
-
 		while (run)
 		{
 			if (!serialLine.IsConnected())
@@ -67,7 +64,7 @@ namespace Hardware
 			}
 			unsigned char buffer[CANCommandBufferLength];
 			ssize_t datalen = serialLine.ReceiveExact(buffer, sizeof(buffer));
-			if (run == false)
+			if (!run)
 			{
 				break;
 			}
@@ -82,6 +79,5 @@ namespace Hardware
 			}
 			Parse(buffer);
 		}
-		HardwareInterface::logger->Info(Languages::TextTerminatingReceiverThread);
 	}
 } // namespace
