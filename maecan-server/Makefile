@@ -1,4 +1,4 @@
-# Copyright (C) 2018 OpenWrt.org
+# Copyright (C) 2024 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=maecan-server
-PKG_RELEASE:=1.4
+PKG_RELEASE:=1.5
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_BUILD_PARALLEL:=1
