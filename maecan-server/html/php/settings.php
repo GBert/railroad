@@ -27,6 +27,7 @@
 		<p id="disconnect_warning" style="color: red; display: none">Gerät nicht verbunden!</p>
 		<div id="device_info" style="display: none;">
 		<div id="delete_device" class="button power_button">Aus Geräteliste löschen</div>
+		<div id="update_device" class="button">Update</div>
 			<h2>Informationen:</h2>
 			<p class="ml30"></p>
 			<p class="ml30"></p>
@@ -153,6 +154,7 @@
 	const can_dropdown_button = document.getElementById('can_dropdown_button');
 	const can_dropdown_container = document.getElementById('can_dropdown_container');
 	const search_updates_button = document.getElementById('search_updates_button');
+	const update_device = document.getElementById('update_device');
 	const restart_button = document.getElementById('restart_button');
 	const shutdown_button = document.getElementById('shutdown_button');
 	const settings_container = document.getElementById('settings_container');
@@ -227,11 +229,11 @@
 		
 		show(device_info);
 		can_dropdown_button.innerHTML = device.name + ' #' + device.serial_number;
-		device_info.children[1].innerHTML = "Name: " + device.name;
-		device_info.children[2].innerHTML = "Seriennummer: " + device.serial_number;
-		device_info.children[3].innerHTML = "Artikelnummer: " + device.product_number;
-		device_info.children[4].innerHTML = "Softwareversion: " + device.version;
-		device_info.children[5].innerHTML = "UID: 0x" + device.uid.toString(16);
+		device_info.children[2].innerHTML = "Name: " + device.name;
+		device_info.children[3].innerHTML = "Kennung: " + device.serial_number;
+		device_info.children[4].innerHTML = "Artikelnummer: " + device.product_number;
+		device_info.children[5].innerHTML = "Softwareversion: " + device.version;
+		device_info.children[6].innerHTML = "UID: 0x" + device.uid.toString(16);
 
 		if (device.status_chanels) {
 			show(readings);
@@ -665,7 +667,7 @@
 	}
 
 	search_updates_button.onclick = function(){
-		//local_version = <?php echo $version; ?>;
+		//local_version = <? #php echo $version; ?>;
 		//getOnlineVersion();
 	};
 
@@ -686,6 +688,11 @@
 		can_dropdown_button.innerHTML = 'Gerät auswählen';
 		hide(device_info);
 		hide(disconnect_warning);
+	}
+
+	update_device.onclick = () => {
+		//parent.send(`updateDevice:${visible_device.uid}`);
+		parent.updateDevice(visible_device.uid, visible_device.name + ' #' + visible_device.serial_number);
 	}
 
 	loco_icons_help.onclick = () => {

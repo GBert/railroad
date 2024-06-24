@@ -18,7 +18,7 @@
 	<body id="body">
 		<div id="wrapper">
 			<div id="header">
-				<a href="https://github.com/Ixam97/MaeCAN-Project"><img id="logo" src="./media/logo.png?1" alt="MäCAN-Server"></a>
+				<a href="https://github.com/Ixam97/SRSEII/tree/master/maecanserver" target="_blank"><img id="logo" src="./media/logo.png?1" alt="MäCAN-Server"></a>
 				<div style="display: inline-block;">
 					<div  id="left_arrow" class="arrow" style=" border-right: 7px solid white;"></div>
 				</div>
@@ -49,8 +49,8 @@
 
 
 
-		
-			
+
+
 		</div>
 
 		<div id="alertbox" style="display: none;">
@@ -95,7 +95,13 @@
 				<div class="button" id="del_loco_confirm">Löschen</div>
 				<div class="button close_alert">Abbrechen</div>
 				</div>
-		
+
+				<div class="alertbox" id="device_update" style="display: none">
+					<p id="device_update_p">Firmwareupdate</p>
+					<p>Noch nicht verfügbar</p>
+					<div class="button close_alert">Abbrechen</div>
+				</div>
+
 				<!-- Dokumentation -->
 
 				<div id="docs_container" style="display: none;">
@@ -112,7 +118,7 @@
 
 
 		<script type="text/javascript" src="./js/main.js"></script>
-		<script type="text/javascript" src="js/websocket.js"></script>
+		<!--<script type="text/javascript" src="js/websocket.js"></script-->
 		<script type="text/javascript">
 
 /*
@@ -145,7 +151,7 @@
 			const time = document.getElementById('time');
 			const content_frame = document.getElementById('content_frame');
 			const stopgo = document.getElementById('stopgo');
-			
+
 			const bookmarks = document.getElementById('bookmarks');
 
 			const alertbox = document.getElementById('alertbox');
@@ -160,7 +166,9 @@
 			const up_to_date_p = document.getElementById('up_to_date_p');
 			const update_available = document.getElementById('update_available');
 			const update_available_p = document.getElementById('update_available_p');
-		
+
+			const firmware_dropdown = document.getElementById('firmware_dropdown');
+
 			var loco_to_delete;
 
 			let power = false;
@@ -218,6 +226,7 @@
 			}
 
 			function resize(){
+				console.log('resize triggered');
 				showHideArrows();
 				locolist.contentWindow.resizeSettings();
 				settings.contentWindow.resizeSettings();
@@ -226,7 +235,7 @@
 
 			function disconnectAlert(){
 				showAlertbox(connection_lost);
-				hide(close_alert);
+//				hide(close_alert);
 			}
 
 			function mfxAlert(name){
@@ -238,6 +247,11 @@
 				showAlertbox(del_loco);
 				loco_to_delete = index;
 				del_loco_p.innerHTML = 'Lok "' + name + '" wirklich löschen?';
+			}
+
+			function updateDevice(update_uid, update_name) {
+				showAlertbox(device_update);
+				device_update_p.innerHTML = `Update für ${update_name}`;
 			}
 
 			function showHelp(page){
@@ -289,7 +303,7 @@
 					hideAlertbox();
 				};
 			}
-			
+
 			reconnect.onclick = function(){
 				location.reload();
 			};
@@ -351,7 +365,31 @@
 
 			//--- Websocket Events ---//
 
+		var ws;
+
+		function send(msg){
+			ws.send(msg);
+			//console.log('Sending: ' + msg + '.');
+		}
+
+		body.onload = function(){
+
+			var url = window.location.hostname;
+			console.log('Current Domain: ' + url);
+			ws = new WebSocket("ws://" + url + ':8080', 'maecan');
+
+			ws.onerror = function(error){
+				console.log("WebSocket-Fehler");
+			};
+
+			ws.onclose = function(){
+				console.log('WebSocket connection closed!')
+			};
+
 			ws.onmessage = function(dgram){
+				if (lococontrol.contentWindow.wsmessage(dgram)) {
+					return;
+				}
 				let msg = dgram.data.toString().split(':');
 				let cmd = msg[0];
 				if (cmd == 'go') {
@@ -387,10 +425,6 @@
 				} else if (cmd == 'updateDevicelist') {
 					settings.contentWindow.updateDevicelist(dgram.data.toString().replace('updateDevicelist:', ''));
 				} else {
-					/*let data = [];
-					for (let i = 0; i < dgram.data.length; i++) {
-						data[i] = dgram.data[i].charCodeAt(0).toString(16);
-					}*/
 					console.log('Unknown command: ' + dgram.data.toString());
 				}
 			}
@@ -407,13 +441,12 @@
 				setTimeout(() => {
 					ws.send('getKeyboard');
 					ws.send('getLocolist');
-				}, 1000)
+				}, 100)
 			}
-
+}
 			//--- Misc ---/
 
-			resize();
-
+//			resize();
 
 		</script>
 
