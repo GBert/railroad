@@ -656,6 +656,8 @@ class Manager
 		std::string GetCs2Lokomotive() const;
 		static std::string GetCs2Magnetartikel(const DataModel::AccessoryBase* base);
 		std::string GetCs2Magnetartikel() const;
+		std::string GetCs2GBS() const;
+		std::string GetCs2GBS(const signed char gbs) const;
 
 		inline DataModel::ObjectIdentifier GetLocoBaseIdentifierOfTrack(const TrackID trackId)
 		{

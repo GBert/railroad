@@ -40,7 +40,7 @@ namespace Logger
 			~LoggerClientFile()
 			{
 				Utils::Utils::RenameFile(nullptr, logFileName, logFileName + "." + std::to_string(time(0)));
-				if (logFile.is_open() == false)
+				if (!logFile.is_open())
 				{
 					return;
 				}
@@ -49,7 +49,7 @@ namespace Logger
 
 			void Send(const std::string& s) override
 			{
-				if (logFile.is_open() == false)
+				if (!logFile.is_open())
 				{
 					return;
 				}

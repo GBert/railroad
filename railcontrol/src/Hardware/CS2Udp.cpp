@@ -87,6 +87,12 @@ namespace Hardware
 				break;
 			}
 
+			if (datalen == 0)
+			{
+				// no data received
+				continue;
+			}
+
 			if (datalen != 13)
 			{
 				HardwareInterface::logger->Error(Languages::TextInvalidDataReceived);

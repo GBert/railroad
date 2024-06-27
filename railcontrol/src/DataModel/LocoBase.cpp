@@ -107,7 +107,7 @@ namespace DataModel
 			return false;
 		}
 		trackFrom = manager->GetTrack(trackID);
-		manager->LocoBaseSave(this);
+//		manager->LocoBaseSave(this);
 		return true;
 	}
 
@@ -152,7 +152,7 @@ namespace DataModel
 		feedbackIdCreep = FeedbackNone;
 		feedbackIdReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
-		manager->LocoBaseSave(this);
+//		manager->LocoBaseSave(this);
 		return true;
 	}
 
@@ -490,7 +490,7 @@ namespace DataModel
 		}
 		manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
 		state = LocoStateAutomodeGetSecond;
-		manager->LocoBaseSave(this);
+//		manager->LocoBaseSave(this);
 	}
 
 	Route* LocoBase::GetDestinationFromTimeTable(const Track* const track, const bool allowLocoTurn)
@@ -839,7 +839,7 @@ namespace DataModel
 		feedbackIdFirstCreep = FeedbackNone;
 		feedbackIdFirstReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
-		manager->LocoBaseSave(this);
+//		manager->LocoBaseSave(this);
 	}
 
 	void LocoBase::FeedbackIdStopReached()
@@ -884,7 +884,7 @@ namespace DataModel
 		feedbackIdStop = FeedbackNone;
 		feedbackIdCreep = FeedbackNone;
 		feedbackIdReduced = FeedbackNone;
-		manager->LocoBaseSave(this);
+//		manager->LocoBaseSave(this);
 	}
 
 	DataModel::LocoFunctionNr LocoBase::GetFunctionNumberFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const

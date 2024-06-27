@@ -662,18 +662,10 @@ namespace Server { namespace Web
 		AddUpdate(command.str(), Languages::TextProgramReadValue , static_cast<int>(cv), static_cast<int>(value));
 	}
 
-	void WebServer::AddUpdate(const string& command, const string& status)
+	void WebServer::AddUpdate(const string& data)
 	{
 		std::lock_guard<std::mutex> lock(updateMutex);
-		updates[updateID] = "data: command=" + command + ";status=" + status + "\r\n\r\n";
-		++updateID;
-		updates.erase(updateID - MaxUpdates);
-	}
-
-	void WebServer::AddUpdate(const Languages::TextSelector status)
-	{
-		std::lock_guard<std::mutex> lock(updateMutex);
-		updates[updateID] = std::string("data: status=") + Languages::GetText(status) + "\r\n\r\n";
+		updates[updateID] = data;
 		++updateID;
 		updates.erase(updateID - MaxUpdates);
 	}

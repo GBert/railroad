@@ -81,7 +81,7 @@ Manager::Manager(Config& config)
 	storageParams.filename = config.getStringValue("dbfilename", "railcontrol.sqlite");
 	storageParams.keepBackups = config.getIntValue("dbkeepbackups", 10);
 	storage = new StorageHandler(this, &storageParams);
-	if (storage == nullptr)
+	if (!storage)
 	{
 		logger->Info(Languages::TextUnableToCreateStorageHandler);
 		return;
@@ -126,8 +126,8 @@ Manager::Manager(Config& config)
 	if (layers.count(LayerUndeletable) != 1)
 	{
 		string result;
-		bool initLayer1 = LayerSave(0, Languages::GetText(Languages::TextLayer1), result);
-		if (initLayer1 == false)
+		const bool initLayer1 = LayerSave(0, Languages::GetText(Languages::TextLayer1), result);
+		if (!initLayer1)
 		{
 			logger->Error(Languages::TextUnableToAddLayer1);
 		}
@@ -244,14 +244,14 @@ Manager::~Manager()
 				continue;
 			}
 			HardwareParams* params = hardwareParams.at(controlID);
-			if (params == nullptr)
+			if (!params)
 			{
 				continue;
 			}
 			logger->Info(Languages::TextUnloadingControl, controlID, params->GetName());
 			delete control.second;
 			hardwareParams.erase(controlID);
-			if (storage != nullptr)
+			if (storage)
 			{
 				logger->Info(Languages::TextSaving, params->GetName());
 				storage->Save(*params);
@@ -275,7 +275,7 @@ Manager::~Manager()
 		DeleteAllMapEntries(layers, layerMutex);
 	}
 
-	if (storage == nullptr)
+	if (!storage)
 	{
 		return;
 	}
@@ -303,7 +303,7 @@ void Manager::Booster(const ControlType controlType, const BoosterState state)
 		}
 	}
 
-	if (boosterState != BoosterStateGo || initLocosDone == true)
+	if (boosterState != BoosterStateGo || initLocosDone)
 	{
 		return;
 	}
@@ -361,13 +361,13 @@ bool Manager::ControlSave(ControlID controlID,
 
 	HardwareParams* params = GetHardware(controlID);
 	bool newControl = false;
-	if (params == nullptr)
+	if (!params)
 	{
 		params = CreateAndAddControl();
 		newControl = true;
 	}
 
-	if (params == nullptr)
+	if (!params)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddControl);
 		return false;
@@ -384,16 +384,16 @@ bool Manager::ControlSave(ControlID controlID,
 	params->SetArg4(arg4);
 	params->SetArg5(arg5);
 
-	if (storage != nullptr)
+	if (storage)
 	{
 		storage->Save(*params);
 	}
 
-	if (newControl == true)
+	if (newControl)
 	{
 		std::lock_guard<std::mutex> Guard(controlMutex);
 		ControlInterface* control = new HardwareHandler(params);
-		if (control == nullptr)
+		if (!control)
 		{
 			return false;
 		}
@@ -402,7 +402,7 @@ bool Manager::ControlSave(ControlID controlID,
 	}
 
 	ControlInterface* control = GetControl(controlID);
-	if (control == nullptr)
+	if (!control)
 	{
 		return false;
 	}
@@ -421,7 +421,7 @@ bool Manager::ControlDelete(ControlID controlID)
 		}
 
 		HardwareParams* params = hardwareParams.at(controlID);
-		if (params == nullptr)
+		if (!params)
 		{
 			return false;
 		}
@@ -435,7 +435,7 @@ bool Manager::ControlDelete(ControlID controlID)
 			return false;
 		}
 		ControlInterface* control = controls.at(controlID);
-		if (control == nullptr)
+		if (!control)
 		{
 			return false;
 		}
@@ -521,7 +521,7 @@ const std::map<ControlID,std::string> Manager::ControlListNames(const Hardware::
 			continue;
 		}
 		ControlInterface* c = controls.at(hardware.second->GetControlID());
-		if (c->CanHandle(capability) == false)
+		if (!c->CanHandle(capability))
 		{
 			continue;
 		}
@@ -546,7 +546,7 @@ const std::map<std::string, Protocol> Manager::ProtocolsOfControl(const AddressT
 	std::map<std::string,Protocol> ret;
 	{
 		const ControlInterface* control = GetControl(controlID);
-		if (control == nullptr || control->GetControlType() != ControlTypeHardware)
+		if (!control || control->GetControlType() != ControlTypeHardware)
 		{
 			ret[ProtocolSymbols[ProtocolNone]] = ProtocolNone;
 			return ret;
@@ -609,7 +609,7 @@ Loco* Manager::GetLoco(const LocoID locoID) const
 LocoConfig Manager::GetLocoOfConfigByMatchKey(const ControlID controlId, const string& matchKey) const
 {
 	ControlInterface* control = GetControl(controlId);
-	if (control == nullptr)
+	if (!control)
 	{
 		return LocoConfig(LocoTypeLoco);
 	}
@@ -633,7 +633,7 @@ Loco* Manager::GetLocoByMatchKey(const ControlID controlId, const string& matchK
 void Manager::LocoRemoveMatchKey(const LocoID locoId)
 {
 	Loco* loco = GetLoco(locoId);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return;
 	}
@@ -643,7 +643,7 @@ void Manager::LocoRemoveMatchKey(const LocoID locoId)
 void Manager::LocoReplaceMatchKey(const LocoID locoId, const std::string& newMatchKey)
 {
 	Loco* loco = GetLoco(locoId);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return;
 	}
@@ -655,7 +655,7 @@ const map<string,LocoConfig> Manager::GetUnmatchedLocosOfControl(const ControlID
 {
 	ControlInterface* control = GetControl(controlId);
 	map<string,LocoConfig> out;
-	if (control == nullptr || !control->CanHandle(Hardware::CapabilityLocoDatabase))
+	if (!control || !control->CanHandle(Hardware::CapabilityLocoDatabase))
 	{
 		return out;
 	}
@@ -686,7 +686,7 @@ const map<string,LocoID> Manager::LocoBaseListFree() const
 		std::lock_guard<std::mutex> guard(locoMutex);
 		for (auto& loco : locos)
 		{
-			if (loco.second->IsInUse() == false)
+			if (!loco.second->IsInUse())
 			{
 				out[loco.second->GetName()] = loco.second->GetID();
 			}
@@ -696,7 +696,7 @@ const map<string,LocoID> Manager::LocoBaseListFree() const
 		std::lock_guard<std::mutex> guard(multipleUnitMutex);
 		for (auto& multipleUnit : multipleUnits)
 		{
-			if (multipleUnit.second->IsInUse() == false)
+			if (!multipleUnit.second->IsInUse())
 			{
 				out[multipleUnit.second->GetName()] = multipleUnit.second->GetID() + MultipleUnitIdPrefix;
 			}
@@ -776,12 +776,12 @@ bool Manager::LocoSave(LocoID locoID,
 	}
 
 	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		loco = CreateAndAddObject(locos, locoMutex);
 	}
 
-	if (loco == nullptr)
+	if (!loco)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddLoco);
 		return false;
@@ -829,7 +829,7 @@ bool Manager::LocoDelete(const LocoID locoID, string& result)
 		}
 
 		loco = locos.at(locoID);
-		if (loco == nullptr)
+		if (!loco)
 		{
 			result = Languages::GetText(Languages::TextLocoDoesNotExist);
 			return false;
@@ -870,7 +870,7 @@ bool Manager::LocoProtocolAddress(const LocoID locoID, ControlID& controlID, Pro
 		return false;
 	}
 	Loco* loco = locos.at(locoID);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return false;
 	}
@@ -884,7 +884,7 @@ bool Manager::LocoBaseSpeed(const ControlType controlType,
 	LocoBase* loco,
 	const Speed speed)
 {
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return false;
 	}
@@ -912,7 +912,7 @@ bool Manager::LocoBaseSpeed(const ControlType controlType,
 Speed Manager::LocoSpeed(const LocoID locoID) const
 {
 	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return MinSpeed;
 	}
@@ -923,7 +923,7 @@ void Manager::LocoBaseOrientation(const ControlType controlType,
 	LocoBase* loco,
 	Orientation orientation)
 {
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return;
 	}
@@ -954,7 +954,7 @@ void Manager::LocoBaseFunctionState(const ControlType controlType,
 	const DataModel::LocoFunctionState on)
 {
 	LocoBase* loco = GetLocoBase(locoBaseIdentifier);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return;
 	}
@@ -972,7 +972,7 @@ void Manager::LocoBaseFunctionState(const ControlType controlType,
 	const DataModel::LocoFunctionNr function,
 	const DataModel::LocoFunctionState on)
 {
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return;
 	}
@@ -1008,7 +1008,7 @@ MultipleUnit* Manager::GetMultipleUnit(const MultipleUnitID multipleUnitId) cons
 LocoConfig Manager::GetMultipleUnitOfConfigByMatchKey(const ControlID controlId, const string& matchKey) const
 {
 	ControlInterface* control = GetControl(controlId);
-	if (control == nullptr)
+	if (!control)
 	{
 		return LocoConfig(LocoTypeMultipleUnit);
 	}
@@ -1057,12 +1057,12 @@ bool Manager::MultipleUnitSave(MultipleUnitID multipleUnitID,
 	}
 
 	MultipleUnit* multipleUnit = GetMultipleUnit(multipleUnitID);
-	if (multipleUnit == nullptr)
+	if (!multipleUnit)
 	{
 		multipleUnit = CreateAndAddObject(multipleUnits, multipleUnitMutex);
 	}
 
-	if (multipleUnit == nullptr)
+	if (!multipleUnit)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddMultipleUnit);
 		return false;
@@ -1118,7 +1118,7 @@ bool Manager::MultipleUnitDelete(const MultipleUnitID multipleUnitID, string& re
 		}
 
 		multipleUnit = multipleUnits.at(multipleUnitID);
-		if (multipleUnit == nullptr)
+		if (!multipleUnit)
 		{
 			result = Languages::GetText(Languages::TextMultipleUnitDoesNotExist);
 			return false;
@@ -1183,21 +1183,21 @@ void Manager::AccessoryBaseState(const ControlType controlType,
 	const DataModel::AccessoryState state)
 {
 	Accessory* accessory = GetAccessory(controlID, protocol, address);
-	if (accessory != nullptr)
+	if (accessory)
 	{
 		AccessoryState(controlType, accessory, accessory->CalculateInvertedAccessoryState(state), true);
 		return;
 	}
 
 	Switch* mySwitch = GetSwitch(controlID, protocol, address);
-	if (mySwitch != nullptr)
+	if (mySwitch)
 	{
 		SwitchState(controlType, mySwitch, mySwitch->CalculateInvertedSwitchState(address, state), true);
 		return;
 	}
 
 	Signal* signal = GetSignal(controlID, protocol, address);
-	if (signal != nullptr)
+	if (signal)
 	{
 		SignalState(controlType, signal, signal->CalculateMappedSignalState(address, state), true);
 		return;
@@ -1246,12 +1246,12 @@ bool Manager::AccessoryState(const ControlType controlType, const AccessoryID ac
 
 void Manager::AccessoryState(const ControlType controlType, Accessory* accessory, const DataModel::AccessoryState state, const bool force)
 {
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		return;
 	}
 
-	if (force == false && accessory->IsInUse())
+	if (!force && accessory->IsInUse())
 	{
 		logger->Warning(Languages::TextAccessoryIsLocked, accessory->GetName());
 		return;
@@ -1279,7 +1279,7 @@ const map<string,AccessoryConfig> Manager::GetUnmatchedAccessoriesOfControl(cons
 {
 	ControlInterface* control = GetControl(controlId);
 	map<string,AccessoryConfig> out;
-	if (control == nullptr || !control->CanHandle(Hardware::CapabilityAccessoryDatabase))
+	if (!control || !control->CanHandle(Hardware::CapabilityAccessoryDatabase))
 	{
 		return out;
 	}
@@ -1350,12 +1350,12 @@ bool Manager::AccessorySave(AccessoryID accessoryID,
 		return false;
 	}
 
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		accessory = CreateAndAddObject(accessories, accessoryMutex);
 	}
 
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddAccessory);
 		return false;
@@ -1389,7 +1389,7 @@ bool Manager::AccessoryPosition(const AccessoryID accessoryID,
 	string& result)
 {
 	Accessory* accessory = GetAccessory(accessoryID);
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		result = Languages::GetText(Languages::TextAccessoryDoesNotExist);
 		return false;
@@ -1411,7 +1411,7 @@ bool Manager::AccessoryRotate(const AccessoryID accessoryID,
 	string& result)
 {
 	Accessory* accessory = GetAccessory(accessoryID);
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		result = Languages::GetText(Languages::TextAccessoryDoesNotExist);
 		return false;
@@ -1477,7 +1477,7 @@ bool Manager::AccessoryDelete(const AccessoryID accessoryID,
 		}
 
 		accessory = accessories.at(accessoryID);
-		if (accessory == nullptr)
+		if (!accessory)
 		{
 			result = Languages::GetText(Languages::TextAccessoryDoesNotExist);
 			return false;
@@ -1510,7 +1510,7 @@ bool Manager::AccessoryDelete(const AccessoryID accessoryID,
 bool Manager::AccessoryRelease(const AccessoryID accessoryID)
 {
 	Accessory* accessory = GetAccessory(accessoryID);
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		return false;
 	}
@@ -1520,7 +1520,7 @@ bool Manager::AccessoryRelease(const AccessoryID accessoryID)
 AccessoryConfig Manager::GetAccessoryOfConfigByMatchKey(const ControlID controlId, const string& matchKey) const
 {
 	ControlInterface* control = GetControl(controlId);
-	if (control == nullptr)
+	if (!control)
 	{
 		return AccessoryConfig();
 	}
@@ -1544,7 +1544,7 @@ Accessory* Manager::GetAccessoryByMatchKey(const ControlID controlId, const stri
 void Manager::AccessoryRemoveMatchKey(const AccessoryID accessoryId)
 {
 	Accessory* accessory = GetAccessory(accessoryId);
-	if (accessory == nullptr)
+	if (!accessory)
 	{
 		return;
 	}
@@ -1558,13 +1558,13 @@ void Manager::AccessoryRemoveMatchKey(const AccessoryID accessoryId)
 void Manager::FeedbackState(const ControlID controlID, const FeedbackPin pin, const DataModel::Feedback::FeedbackState state)
 {
 	Feedback* feedback = GetFeedback(controlID, pin);
-	if (feedback != nullptr)
+	if (feedback)
 	{
 		FeedbackState(feedback, state);
 		return;
 	}
 
-	if (GetAutoAddFeedback() == false)
+	if (!GetAutoAddFeedback())
 	{
 		return;
 	}
@@ -1579,7 +1579,7 @@ void Manager::FeedbackState(const ControlID controlID, const FeedbackPin pin, co
 void Manager::FeedbackState(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state)
 {
 	Feedback* feedback = GetFeedback(feedbackID);
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		return;
 	}
@@ -1588,7 +1588,7 @@ void Manager::FeedbackState(const FeedbackID feedbackID, const DataModel::Feedba
 
 void Manager::FeedbackPublishState(const Feedback* feedback)
 {
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		return;
 	}
@@ -1684,12 +1684,12 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 		return false;
 	}
 
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		feedback = CreateAndAddObject(feedbacks, feedbackMutex);
 	}
 
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddFeedback);
 		return false;
@@ -1721,7 +1721,7 @@ bool Manager::FeedbackPosition(const FeedbackID feedbackID,
 	string& result)
 {
 	Feedback* feedback = GetFeedback(feedbackID);
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		result = Languages::GetText(Languages::TextFeedbackDoesNotExist);
 		return false;
@@ -1748,7 +1748,7 @@ bool Manager::FeedbackRotate(const FeedbackID feedbackID,
 	string& result)
 {
 	Feedback* feedback = GetFeedback(feedbackID);
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		result = Languages::GetText(Languages::TextFeedbackDoesNotExist);
 		return false;
@@ -1796,7 +1796,7 @@ const map<RouteID,string> Manager::RoutesOfTrack(const TrackID trackID) const
 {
 	map<RouteID,string> out;
 	const Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return out;
 	}
@@ -1812,7 +1812,7 @@ const map<string,FeedbackID> Manager::FeedbacksOfTrack(const TrackID trackID) co
 {
 	map<string,FeedbackID> out;
 	const Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return out;
 	}
@@ -1821,7 +1821,7 @@ const map<string,FeedbackID> Manager::FeedbacksOfTrack(const TrackID trackID) co
 	{
 		const FeedbackID feedbackID = feedbackRelation->ObjectID2();
 		Feedback* feedback = GetFeedback(feedbackID);
-		if (feedback == nullptr)
+		if (!feedback)
 		{
 			continue;
 		}
@@ -1844,7 +1844,7 @@ bool Manager::FeedbackDelete(const FeedbackID feedbackID,
 
 		feedback = feedbacks.at(feedbackID);
 		Track* track = feedback->GetTrack();
-		if (track != nullptr)
+		if (track)
 		{
 			result = Logger::Logger::Format(Languages::GetText(Languages::TextFeedbackIsUsedByTrack), feedback->GetName(), track->GetName());
 			return false;
@@ -1870,7 +1870,7 @@ bool Manager::FeedbackDelete(const FeedbackID feedbackID,
 FeedbackConfig Manager::GetFeedbackOfConfigByMatchKey(const ControlID controlId, const string& matchKey) const
 {
 	ControlInterface* control = GetControl(controlId);
-	if (control == nullptr)
+	if (!control)
 	{
 		return FeedbackConfig();
 	}
@@ -1894,7 +1894,7 @@ Feedback* Manager::GetFeedbackByMatchKey(const ControlID controlId, const string
 void Manager::FeedbackRemoveMatchKey(const FeedbackID feedbackId)
 {
 	Feedback* feedback = GetFeedback(feedbackId);
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		return;
 	}
@@ -1904,7 +1904,7 @@ void Manager::FeedbackRemoveMatchKey(const FeedbackID feedbackId)
 void Manager::FeedbackReplaceMatchKey(const FeedbackID feedbackId, const std::string& newMatchKey)
 {
 	Feedback* feedback = GetFeedback(feedbackId);
-	if (feedback == nullptr)
+	if (!feedback)
 	{
 		return;
 	}
@@ -1916,7 +1916,7 @@ const map<string,FeedbackConfig> Manager::GetUnmatchedFeedbacksOfControl(const C
 {
 	ControlInterface* control = GetControl(controlId);
 	map<string,FeedbackConfig> out;
-	if (control == nullptr || !control->CanHandle(Hardware::CapabilityFeedbackDatabase))
+	if (!control || !control->CanHandle(Hardware::CapabilityFeedbackDatabase))
 	{
 		return out;
 	}
@@ -1992,12 +1992,12 @@ bool Manager::TrackSave(TrackID trackID,
 		return false;
 	}
 
-	if (track == nullptr)
+	if (!track)
 	{
 		track = CreateAndAddObject(tracks, trackMutex);
 	}
 
-	if (track == nullptr)
+	if (!track)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddTrack);
 		return false;
@@ -2042,7 +2042,7 @@ bool Manager::TrackPosition(const TrackID trackID,
 	string& result)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		result = Languages::GetText(Languages::TextTrackDoesNotExist);
 		return false;
@@ -2064,7 +2064,7 @@ bool Manager::TrackRotate(const TrackID trackID,
 	string& result)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		result = Languages::GetText(Languages::TextTrackDoesNotExist);
 		return false;
@@ -2107,7 +2107,7 @@ bool Manager::TrackDelete(const TrackID trackID,
 		}
 
 		track = tracks.at(trackID);
-		if (track == nullptr)
+		if (!track)
 		{
 			result = Languages::GetText(Languages::TextTrackDoesNotExist);
 			return false;
@@ -2120,7 +2120,7 @@ bool Manager::TrackDelete(const TrackID trackID,
 		}
 
 		Route* route = GetFirstRouteFromOrToTrack(trackID);
-		if (route != nullptr)
+		if (route)
 		{
 			result = Logger::Logger::Format(Languages::GetText(Languages::TextTrackIsUsedByRoute), track->GetName(), route->GetName());
 			return false;
@@ -2147,7 +2147,7 @@ bool Manager::TrackDelete(const TrackID trackID,
 	}
 
 	Cluster* cluster = track->GetCluster();
-	if (cluster != nullptr)
+	if (cluster)
 	{
 		cluster->DeleteTrack(track);
 	}
@@ -2174,12 +2174,12 @@ bool Manager::SwitchState(const ControlType controlType, const SwitchID switchID
 
 void Manager::SwitchState(const ControlType controlType, Switch* mySwitch, const DataModel::AccessoryState state, const bool force)
 {
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		return;
 	}
 
-	if (force == false && mySwitch->IsInUse())
+	if (!force && mySwitch->IsInUse())
 	{
 		logger->Warning(Languages::TextSwitchIsLocked, mySwitch->GetName());
 		return;
@@ -2264,12 +2264,12 @@ bool Manager::SwitchSave(SwitchID switchID,
 		return false;
 	}
 
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		mySwitch = CreateAndAddObject(switches, switchMutex);
 	}
 
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddSwitch);
 		return false;
@@ -2303,7 +2303,7 @@ bool Manager::SwitchPosition(const SwitchID switchID,
 	string& result)
 {
 	Switch* mySwitch = GetSwitch(switchID);
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		result = Languages::GetText(Languages::TextSwitchDoesNotExist);
 		return false;
@@ -2325,7 +2325,7 @@ bool Manager::SwitchRotate(const SwitchID switchID,
 	string& result)
 {
 	Switch* mySwitch = GetSwitch(switchID);
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		result = Languages::GetText(Languages::TextSwitchDoesNotExist);
 		return false;
@@ -2371,7 +2371,7 @@ bool Manager::SwitchDelete(const SwitchID switchID,
 		}
 
 		mySwitch = switches.at(switchID);
-		if (mySwitch == nullptr)
+		if (!mySwitch)
 		{
 			result = Languages::GetText(Languages::TextSwitchDoesNotExist);
 			return false;
@@ -2423,7 +2423,7 @@ const map<string,DataModel::AccessoryConfig> Manager::SwitchConfigByName() const
 bool Manager::SwitchRelease(const RouteID switchID)
 {
 	Switch* mySwitch = GetSwitch(switchID);
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		return false;
 	}
@@ -2447,7 +2447,7 @@ Switch* Manager::GetSwitchByMatchKey(const ControlID controlId, const string& ma
 void Manager::SwitchRemoveMatchKey(const SwitchID switchId)
 {
 	Switch* mySwitch = GetSwitch(switchId);
-	if (mySwitch == nullptr)
+	if (!mySwitch)
 	{
 		return;
 	}
@@ -2461,7 +2461,7 @@ void Manager::SwitchRemoveMatchKey(const SwitchID switchId)
 bool Manager::RouteExecute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier, const RouteID routeID)
 {
 	Route* route = GetRoute(routeID);
-	if (route == nullptr)
+	if (!route)
 	{
 		return false;
 	}
@@ -2471,7 +2471,7 @@ bool Manager::RouteExecute(Logger::Logger* logger, const ObjectIdentifier& locoB
 void Manager::RouteExecuteAsync(Logger::Logger* logger, const RouteID routeID)
 {
 	Route* route = GetRoute(routeID);
-	if (route == nullptr)
+	if (!route)
 	{
 		return;
 	}
@@ -2550,11 +2550,11 @@ bool Manager::RouteSave(RouteID routeID,
 		return false;
 	}
 
-	if (route == nullptr)
+	if (!route)
 	{
 		route = CreateAndAddObject(routes, routeMutex);
 	}
-	if (route == nullptr)
+	if (!route)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddRoute);
 		return false;
@@ -2562,7 +2562,7 @@ bool Manager::RouteSave(RouteID routeID,
 
 	// remove route from old track
 	Track* oldTrack = GetTrack(route->GetFromTrack());
-	if (oldTrack != nullptr)
+	if (oldTrack)
 	{
 		oldTrack->RemoveRoute(route);
 		TrackSave(oldTrack);
@@ -2633,7 +2633,7 @@ bool Manager::RouteSave(RouteID routeID,
 
 	//Add new route
 	Track* newTrack = GetTrack(route->GetFromTrack());
-	if (newTrack != nullptr)
+	if (newTrack)
 	{
 		newTrack->AddRoute(route);
 		TrackSave(newTrack);
@@ -2649,7 +2649,7 @@ bool Manager::RoutePosition(const RouteID routeID,
 	string& result)
 {
 	Route* route = GetRoute(routeID);
-	if (route == nullptr)
+	if (!route)
 	{
 		result = Languages::GetText(Languages::TextRouteDoesNotExist);
 		return false;
@@ -2708,7 +2708,7 @@ bool Manager::RouteDelete(const RouteID routeID,
 			}
 
 			route = routes.at(routeID);
-			if (route == nullptr)
+			if (!route)
 			{
 				result = Languages::GetText(Languages::TextRouteDoesNotExist);
 				return false;
@@ -2801,12 +2801,12 @@ const map<string,LayerID> Manager::LayerListByNameWithFeedback() const
 bool Manager::LayerSave(LayerID layerID, const std::string&name, std::string& result)
 {
 	Layer* layer = GetLayer(layerID);
-	if (layer == nullptr)
+	if (!layer)
 	{
 		layer = CreateAndAddObject(layers, layerMutex);
 	}
 
-	if (layer == nullptr)
+	if (!layer)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddLayer);
 		return false;
@@ -2919,7 +2919,7 @@ bool Manager::LayerDelete(const LayerID layerID,
 		}
 
 		layer = layers.at(layerID);
-		if (layer == nullptr)
+		if (!layer)
 		{
 			result = Languages::GetText(Languages::TextLayerDoesNotExist);
 			return false;
@@ -2959,7 +2959,7 @@ bool Manager::SignalState(const ControlType controlType, const SignalID signalID
 		return false;
 	}
 	Signal* signal = GetSignal(signalID);
-	if (signal == nullptr)
+	if (!signal)
 	{
 		return false;
 	}
@@ -2968,12 +2968,12 @@ bool Manager::SignalState(const ControlType controlType, const SignalID signalID
 
 bool Manager::SignalState(const ControlType controlType, Signal* signal, const DataModel::AccessoryState state, const bool force)
 {
-	if (signal == nullptr)
+	if (!signal)
 	{
 		return false;
 	}
 
-	if (force == false && signal->IsInUse())
+	if (!force && signal->IsInUse())
 	{
 		logger->Warning(Languages::TextSignalIsLocked, signal->GetName());
 		return false;
@@ -3063,12 +3063,12 @@ bool Manager::SignalSave(SignalID signalID,
 		return false;
 	}
 
-	if (signal == nullptr)
+	if (!signal)
 	{
 		signal = CreateAndAddObject(signals, signalMutex);
 	}
 
-	if (signal == nullptr)
+	if (!signal)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddSignal);
 		return false;
@@ -3103,7 +3103,7 @@ bool Manager::SignalPosition(const SignalID signalID,
 	string& result)
 {
 	Signal* signal = GetSignal(signalID);
-	if (signal == nullptr)
+	if (!signal)
 	{
 		result = Languages::GetText(Languages::TextSignalDoesNotExist);
 		return false;
@@ -3125,7 +3125,7 @@ bool Manager::SignalRotate(const SignalID signalID,
 	string& result)
 {
 	Signal* signal = GetSignal(signalID);
-	if (signal == nullptr)
+	if (!signal)
 	{
 		result = Languages::GetText(Languages::TextSignalDoesNotExist);
 		return false;
@@ -3165,7 +3165,7 @@ bool Manager::SignalDelete(const SignalID signalID,
 		}
 
 		signal = signals.at(signalID);
-		if (signal == nullptr)
+		if (!signal)
 		{
 			result = Languages::GetText(Languages::TextSignalDoesNotExist);
 			return false;
@@ -3257,7 +3257,7 @@ Signal* Manager::GetSignalByMatchKey(const ControlID controlId, const string& ma
 void Manager::SignalRemoveMatchKey(const SignalID signalId)
 {
 	Signal* signal = GetSignal(signalId);
-	if (signal == nullptr)
+	if (!signal)
 	{
 		return;
 	}
@@ -3267,7 +3267,7 @@ void Manager::SignalRemoveMatchKey(const SignalID signalId)
 bool Manager::SignalRelease(const SignalID signalID)
 {
 	Signal* signal = GetSignal(signalID);
-	if (signal == nullptr)
+	if (!signal)
 	{
 		return false;
 	}
@@ -3305,12 +3305,12 @@ bool Manager::ClusterSave(ClusterID clusterID,
 	string& result)
 {
 	Cluster* cluster = GetCluster(clusterID);
-	if (cluster == nullptr)
+	if (!cluster)
 	{
 		cluster = CreateAndAddObject(clusters, clusterMutex);
 	}
 
-	if (cluster == nullptr)
+	if (!cluster)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddCluster);
 		return false;
@@ -3413,12 +3413,12 @@ bool Manager::TextSave(TextID textID,
 		return false;
 	}
 
-	if (text == nullptr)
+	if (!text)
 	{
 		text = CreateAndAddObject(texts, textMutex);
 	}
 
-	if (text == nullptr)
+	if (!text)
 	{
 		result = Languages::GetText(Languages::TextUnableToAddText);
 		return false;
@@ -3587,7 +3587,7 @@ bool Manager::LocoBaseIntoTrack(Logger::Logger* logger, const ObjectIdentifier& 
 bool Manager::LocoRelease(const LocoID locoID)
 {
 	Loco* loco = GetLoco(locoID);
-	if (loco == nullptr)
+	if (!loco)
 	{
 		return false;
 	}
@@ -3597,7 +3597,7 @@ bool Manager::LocoRelease(const LocoID locoID)
 bool Manager::MultipleUnitRelease(const MultipleUnitID multipleUnitID)
 {
 	MultipleUnit* multipleUnit = GetMultipleUnit(multipleUnitID);
-	if (multipleUnit == nullptr)
+	if (!multipleUnit)
 	{
 		return false;
 	}
@@ -3609,7 +3609,7 @@ bool Manager::LocoBaseReleaseInternal(LocoBase* locoBase)
 	LocoBaseSpeed(ControlTypeInternal, locoBase, MinSpeed);
 
 	bool ret = locoBase->Release();
-	if (ret == false)
+	if (!ret)
 	{
 		return false;
 	}
@@ -3624,7 +3624,7 @@ bool Manager::LocoBaseReleaseInternal(LocoBase* locoBase)
 bool Manager::TrackRelease(const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return false;
 	}
@@ -3634,14 +3634,14 @@ bool Manager::TrackRelease(const TrackID trackID)
 bool Manager::LocoBaseReleaseOnTrack(const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return false;
 	}
 	ObjectIdentifier locoBaseIdentifier = track->GetLocoBase();
 	track->ReleaseForce(logger, locoBaseIdentifier);
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
-	if (locoBase == nullptr)
+	if (!locoBase)
 	{
 		return false;
 	}
@@ -3651,7 +3651,7 @@ bool Manager::LocoBaseReleaseOnTrack(const TrackID trackID)
 bool Manager::TrackStartLocoBase(const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return false;
 	}
@@ -3661,7 +3661,7 @@ bool Manager::TrackStartLocoBase(const TrackID trackID)
 bool Manager::TrackStopLocoBase(const TrackID trackID)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return false;
 	}
@@ -3671,7 +3671,7 @@ bool Manager::TrackStopLocoBase(const TrackID trackID)
 void Manager::TrackBlock(const TrackID trackID, const bool blocked)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return;
 	}
@@ -3682,7 +3682,7 @@ void Manager::TrackBlock(const TrackID trackID, const bool blocked)
 void Manager::TrackSetLocoOrientation(const TrackID trackID, const Orientation orientation)
 {
 	Track* track = GetTrack(trackID);
-	if (track == nullptr)
+	if (!track)
 	{
 		return;
 	}
@@ -3702,7 +3702,7 @@ void Manager::TrackPublishState(const DataModel::Track* track)
 bool Manager::RouteRelease(const RouteID routeID)
 {
 	Route* route = GetRoute(routeID);
-	if (route == nullptr)
+	if (!route)
 	{
 		return false;
 	}
@@ -3724,12 +3724,12 @@ bool Manager::LocoDestinationReached(const LocoBase* loco,
 bool Manager::LocoBaseStart(const ObjectIdentifier& locoBaseIdentifier)
 {
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
-	if (locoBase == nullptr)
+	if (!locoBase)
 	{
 		return false;
 	}
 	bool ret = locoBase->GoToAutoMode();
-	if (ret == false)
+	if (!ret)
 	{
 		return false;
 	}
@@ -3773,7 +3773,7 @@ bool Manager::LocoBaseStartAll()
 bool Manager::LocoBaseStop(const ObjectIdentifier& locoBaseIdentifier)
 {
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
-	if (locoBase == nullptr)
+	if (!locoBase)
 	{
 		return false;
 	}
@@ -3782,7 +3782,7 @@ bool Manager::LocoBaseStop(const ObjectIdentifier& locoBaseIdentifier)
 		return true;
 	}
 	locoBase->RequestManualMode();
-	while (locoBase->GoToManualMode() == false)
+	while (!locoBase->GoToManualMode())
 	{
 		Utils::Utils::SleepForSeconds(1);
 	}
@@ -3899,7 +3899,7 @@ void Manager::LocoBaseStopAllImmediately(const ControlType controlType)
 bool Manager::LocoBaseAddTimeTable(const ObjectIdentifier& locoBaseIdentifier, const RouteID routeID)
 {
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
-	if (locoBase == nullptr)
+	if (!locoBase)
 	{
 		return false;
 	}
@@ -3972,7 +3972,7 @@ string Manager::GetCs2Lokomotive() const
 			}
 		}
 	}
-	return out;
+	return out + "\n";
 }
 
 string Manager::GetCs2Magnetartikel(const AccessoryBase* accessoryBase)
@@ -4007,7 +4007,7 @@ string Manager::GetCs2Magnetartikel(const AccessoryBase* accessoryBase)
 			out += "unknown";
 			break;
 	}
-	return out;
+	return out + "\n";
 }
 
 string Manager::GetCs2Magnetartikel() const
@@ -4087,7 +4087,138 @@ string Manager::GetCs2Magnetartikel() const
 			}
 		}
 	}
-	return out;
+	return out + "\n";
+}
+
+string Manager::GetCs2GBS() const
+{
+	string out("[gleisbild]\nversion\n. major=1");
+	{
+		std::lock_guard<std::mutex> guard(layerMutex);
+		for (auto& layer : layers)
+		{
+			out += "\nseite";
+			if (layer.first != LayerUndeletable)
+			{
+				out += "\n .id=" + to_string(layer.first);
+			}
+			out += "\n .name=" + layer.second->GetName();
+		}
+	}
+	return out + "\n";
+}
+
+string Manager::GetCs2GBS(const signed char gbs) const
+{
+	string out("[gleisbildseite]\nversion\n. major=1");
+	unsigned int z = gbs;
+	if (gbs == LayerUndeletable)
+	{
+		// default layer Z in CS2 is 0, in RailControl 1. So we map this.
+		--z;
+	}
+	else
+	{
+		out += "\npage=" + to_string(gbs);
+	}
+	z <<= 16;
+
+	{
+		std::lock_guard<std::mutex> guard(trackMutex);
+		for (auto& track : tracks)
+		{
+			if (gbs == track.second->GetPosZ())
+			{
+				out += "\nelement";
+				const unsigned int id = z + (track.second->GetPosX() << 8) + track.second->GetPosY();
+				out += "\n .id=0x" + Utils::Integer::IntegerToHex(id);
+				out += "\n .typ=";
+				switch(track.second->GetTrackType())
+				{
+					case TrackTypeTurn:
+						out += "bogen";
+						break;
+
+					case TrackTypeEnd:
+					case TrackTypeLink:
+						out += "prellbock";
+						break;
+
+					case TrackTypeTunnelEnd:
+						out += "prellbock";
+						break;
+
+					case TrackTypeStraight:
+					case TrackTypeBridge:
+					case TrackTypeTunnel:
+					case TrackTypeCrossingLeft:
+					case TrackTypeCrossingRight:
+					case TrackTypeCrossingSymetric:
+					default:
+						out += "gerade";
+						break;
+				}
+				out += "\n .drehung=" + to_string(track.second->GetRotation() & 0x01);
+				out += "\n .artikel=-1";
+			}
+		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(accessoryMutex);
+		for (auto& accessory : accessories)
+		{
+			if (gbs == accessory.second->GetPosZ())
+			{
+				out += "\nelement";
+				const unsigned int id = z + (accessory.second->GetPosX() << 8) + accessory.second->GetPosY();
+				out += "\n .id=0x" + Utils::Integer::IntegerToHex(id);
+				out += "\n .typ=k84_einfach";
+				out += "\n .artikel=" + to_string(accessory.second->GetAddress());
+			}
+		}
+	}
+	{
+		std::lock_guard<std::mutex> guard(switchMutex);
+		for (auto& mySwitch : switches)
+		{
+			if (gbs == mySwitch.second->GetPosZ())
+			{
+				out += "\nelement";
+				const unsigned int id = z + (mySwitch.second->GetPosX() << 8) + mySwitch.second->GetPosY();
+				out += "\n .id=0x" + Utils::Integer::IntegerToHex(id);
+				out += "\n .typ=";
+				switch(mySwitch.second->GetAccessoryType())
+				{
+					case SwitchTypeLeft:
+						out += "linksweiche";
+						break;
+
+					case SwitchTypeRight:
+						out += "rechtsweiche";
+						break;
+
+					case SwitchTypeThreeWay:
+						out += "dreiwegweiche";
+						break;
+
+					case SwitchTypeMaerklinLeft:
+						out += "dkw3_li";
+						break;
+
+					case SwitchTypeMaerklinRight:
+						out += "dkw3_re";
+						break;
+
+					default:
+						break;
+				}
+				out += "\n .drehung=" + to_string(mySwitch.second->GetRotation());
+				out += "\n .artikel=" + to_string(mySwitch.second->GetAddress());
+				out += "\n .zustand=" + to_string(mySwitch.second->GetAccessoryState());
+			}
+		}
+	}
+	return out + "\n";
 }
 
 /***************************
@@ -4129,7 +4260,7 @@ bool Manager::CheckPositionFree(const LayoutPosition posX,
 	LayoutItemSize w;
 	LayoutItemSize h;
 	bool ret = DataModel::LayoutItem::MapPosition(posX, posY, width, height, rotation, x, y, w, h);
-	if (ret == false)
+	if (!ret)
 	{
 		return false;
 	}
@@ -4138,7 +4269,7 @@ bool Manager::CheckPositionFree(const LayoutPosition posX,
 		for (LayoutPosition iy = y; iy < y + h; iy++)
 		{
 			bool ret = CheckPositionFree(ix, iy, z, result);
-			if (ret == false)
+			if (!ret)
 			{
 				return false;
 			}
@@ -4179,7 +4310,7 @@ bool Manager::CheckLayoutItemPosition(const LayoutItem* item,
 	LayoutItemSize w1;
 	LayoutItemSize h1;
 	bool ret = DataModel::LayoutItem::MapPosition(posX, posY, width, height, rotation, x1, y1, w1, h1);
-	if (ret == false)
+	if (!ret)
 	{
 		result = Languages::GetText(Languages::TextUnableToCalculatePosition);
 		return false;
@@ -4191,11 +4322,11 @@ bool Manager::CheckLayoutItemPosition(const LayoutItem* item,
 	LayoutItemSize w2 = 0;
 	LayoutItemSize h2 = 0;
 
-	if (item != nullptr)
+	if (item)
 	{
 		z2 = item->GetPosZ();
 		ret = DataModel::LayoutItem::MapPosition(item->GetPosX(), item->GetPosY(), width, item->GetHeight(), item->GetRotation(), x2, y2, w2, h2);
-		if (ret == false)
+		if (!ret)
 		{
 			result = Languages::GetText(Languages::TextUnableToCalculatePosition);
 			return false;
@@ -4207,13 +4338,13 @@ bool Manager::CheckLayoutItemPosition(const LayoutItem* item,
 		for (LayoutPosition iy = y1; iy < y1 + h1; ++iy)
 		{
 			ret = (ix >= x2 && ix < x2 + w2 && iy >= y2 && iy < y2 + h2 && z1 == z2);
-			if (ret == true)
+			if (ret)
 			{
 				continue;
 			}
 
 			ret = CheckPositionFree(ix, iy, z1, result);
-			if (ret == false)
+			if (!ret)
 			{
 				return false;
 			}
@@ -4420,7 +4551,7 @@ bool Manager::SettingsSave(const Languages::Language language,
 	this->nrOfTracksToReserve = nrOfTracksToReserve;
 	Logger::Logger::SetLogLevel(logLevel);
 
-	if (storage == nullptr)
+	if (!storage)
 	{
 		return false;
 	}
@@ -4468,7 +4599,7 @@ T* Manager::CreateAndAddObject(std::map<ID,T*>& objects, std::mutex& mutex)
 	}
 	++newObjectID;
 	T* newObject = new T(this, newObjectID);
-	if (newObject == nullptr)
+	if (!newObject)
 	{
 		return nullptr;
 	}
@@ -4534,7 +4665,7 @@ void Manager::ProgramCheckBooster(const ProgramMode mode)
 void Manager::ProgramRead(const ControlID controlID, const ProgramMode mode, const Address address, const CvNumber cv)
 {
 	ControlInterface* control = GetControl(controlID);
-	if (control == nullptr)
+	if (!control)
 	{
 		return;
 	}
@@ -4545,7 +4676,7 @@ void Manager::ProgramRead(const ControlID controlID, const ProgramMode mode, con
 void Manager::ProgramWrite(const ControlID controlID, const ProgramMode mode, const Address address, const CvNumber cv, const CvValue value)
 {
 	ControlInterface* control = GetControl(controlID);
-	if (control == nullptr)
+	if (!control)
 	{
 		return;
 	}
@@ -4568,7 +4699,7 @@ bool Manager::CanHandle(const Hardware::Capabilities capability) const
 	for (auto& control : controls)
 	{
 		bool ret = control.second->CanHandle(capability);
-		if (ret == true)
+		if (ret)
 		{
 			return true;
 		}
@@ -4579,7 +4710,7 @@ bool Manager::CanHandle(const Hardware::Capabilities capability) const
 bool Manager::CanHandle(const ControlID controlId, const Hardware::Capabilities capability) const
 {
 	ControlInterface* control = GetControl(controlId);
-	if (control == nullptr)
+	if (!control)
 	{
 		return false;
 	}
@@ -4589,7 +4720,7 @@ bool Manager::CanHandle(const ControlID controlId, const Hardware::Capabilities 
 Hardware::Capabilities Manager::GetCapabilities(const ControlID controlID) const
 {
 	ControlInterface* control = GetControl(controlID);
-	if (control == nullptr)
+	if (!control)
 	{
 		return Hardware::CapabilityNone;
 	}
@@ -4740,7 +4871,7 @@ Hardware::HardwareParams* Manager::CreateAndAddControl()
 	}
 	++newObjectID;
 	Hardware::HardwareParams* newParams = new Hardware::HardwareParams(this, newObjectID);
-	if (newParams == nullptr)
+	if (!newParams)
 	{
 		return nullptr;
 	}

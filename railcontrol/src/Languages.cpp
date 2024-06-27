@@ -142,7 +142,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextCs2MasterLocoSlaveName */ { "CS2 Master has locomotive with a slave locomotive with name {0}", "CS2 Master hat eine Lokomotive mit einer Slave Lokomotive mit Namen {0}", "CS2 master tiene una locomotora con una locomotora slave con nombre {0}" },
 /* TextCs2MinorVersionIsUnknown */ { "Minor version of received file unknown", "Minor Version des erhaltenen files ist nicht bekannt", "La versión menor del archivo recibido no está conocido" },
 /* TextDcc */ { "DCC", "DCC", "DCC" },
-/* TextDeBlock */ { "German Block", "Deutsches Blocksignal", "Alemania bloqueo" },
+/* TextDeBlock */ { "German Block", "Deutsches Sperrsignal", "Alemania bloqueo" },
 /* TextDeCombined */ { "German Ks", "Deutsches Ks", "Alemania Ks" },
 /* TextDeHVMain */ { "German H/V Main", "Deutsches H/V Hauptsignal", "Alemania H/V principal" },
 /* TextDebounceThreadStarted */ { "Debounce thread started", "Entprellthread gestartet", "Antirebote thread encendido" },

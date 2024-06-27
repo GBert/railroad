@@ -78,7 +78,6 @@ namespace Hardware { namespace Protocols
 		{
 			Ping();
 			Wait(10);
-
 		}
 
 		if (run && hasCs2Master && !isCs2Master)
@@ -634,17 +633,55 @@ namespace Hardware { namespace Protocols
 			const string dataPlain = manager->GetCs2Magnetartikel();
 			SendCompressedFile(dataPlain, buffer + 5);
 		}
+		else if ((buffer[5] == 'g')
+			&& (buffer[6] == 'b')
+			&& (buffer[7] == 's')
+			&& (buffer[12] == 0x00)) // we need a null here to prevent parsing errors
+		{
+			if ((buffer[8] == 0x00)
+				&& (buffer[9] == 0x00)
+				&& (buffer[10] == 0x00)
+				&& (buffer[11] == 0x00))
+			{
+				const string dataPlain = manager->GetCs2GBS();
+				SendCompressedFile(dataPlain, buffer + 5);
+			}
+			else if (buffer[8] == '-')
+			{
+				const string gbsAsString(reinterpret_cast<const char*>(buffer + 9));
+				const unsigned int gbs = Utils::Integer::StringToInteger(gbsAsString);
+				const string dataPlain = manager->GetCs2GBS(gbs);
+				SendCompressedFile(dataPlain, buffer + 5);
+			}
+		}
+		else if ((buffer[5] == 'f')
+			&& (buffer[6] == 's')
+			&& (buffer[7] == 0x00)
+			&& (buffer[8] == 0x00)
+			&& (buffer[9] == 0x00)
+			&& (buffer[10] == 0x00)
+			&& (buffer[11] == 0x00)
+			&& (buffer[12] == 0x00))
+		{
+			// we send an empty configuration
+			const string dataPlain = "[fahrstrassen]\nversion\n .minor=4\n";
+			SendCompressedFile(dataPlain, buffer + 5);
+		}
 	}
 
 	void MaerklinCANCommon::SendCompressedFile(const string& dataPlain, const unsigned char* fileName)
 	{
+		logger->Debug(dataPlain);
 		const uint32_t dataPlainSize = dataPlain.size();
 
-		// send filename as response
 		unsigned char sendBuffer[CANCommandBufferLength];
-		CreateCommandHeader(sendBuffer, CanCommandRequestConfigData, CanResponseResponse, 8);
-		Utils::Utils::Copy8Bytes(fileName, sendBuffer + 5);
-		SendInternal(sendBuffer);
+		if (fileName)
+		{
+			// send filename as response
+			CreateCommandHeader(sendBuffer, CanCommandRequestConfigData, CanResponseResponse, 8);
+			Utils::Utils::Copy8Bytes(fileName, sendBuffer + 5);
+			SendInternal(sendBuffer);
+		}
 
 		const string dataCompressed = ZLib::Compress(dataPlain);
 		const unsigned char* const dataCompressedPtr = reinterpret_cast<const unsigned char*>(dataCompressed.c_str());
@@ -677,7 +714,7 @@ namespace Hardware { namespace Protocols
 		for(size_t sent = 0; sent < dataToSendSize; sent += 8)
 		{
 			Utils::Utils::Copy8Bytes(dataToSend + sent, sendBuffer + 5);
-			Utils::Utils::SleepForMilliseconds(1); // do not overload CS2 with to much data
+			Utils::Utils::SleepForMilliseconds(2); // do not overload CS2 with too much data
 			SendInternal(sendBuffer);
 		}
 
@@ -1059,7 +1096,7 @@ namespace Hardware { namespace Protocols
 			{
 				return;
 			}
-			if (key.compare("minor") == 0 && value.compare("3") != 0 && value.compare("4"))
+			if ((key.compare("minor") == 0) && (value.compare("3") != 0) && (value.compare("4") != 0))
 			{
 				logger->Warning(Languages::TextCs2MinorVersionIsUnknown);
 			}

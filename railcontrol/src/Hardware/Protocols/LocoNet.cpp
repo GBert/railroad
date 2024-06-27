@@ -500,6 +500,7 @@ namespace Hardware
 				if (!serialLine.IsConnected())
 				{
 					logger->Error(Languages::TextUnableToReceiveData);
+					logger->Info(Languages::TextTerminatingReceiverThread);
 					return;
 				}
 				ssize_t dataLength = serialLine.ReceiveExact(buffer, 1);

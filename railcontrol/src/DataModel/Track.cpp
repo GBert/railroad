@@ -264,7 +264,7 @@ namespace DataModel
 		{
 			PublishState();
 		}
-		manager->TrackSave(this);
+//		manager->TrackSave(this);
 		return ret;
 	}
 
@@ -286,7 +286,7 @@ namespace DataModel
 			this->trackStateDelayed = DataModel::Feedback::FeedbackStateFree;
 		}
 		PublishState();
-		manager->TrackSave(this);
+//		manager->TrackSave(this);
 		return true;
 	}
 
@@ -299,7 +299,7 @@ namespace DataModel
 			ret = ReleaseForceUnlocked(logger, locoBaseIdentifier);
 		}
 		PublishState();
-		manager->TrackSave(this);
+//		manager->TrackSave(this);
 		return ret;
 	}
 
@@ -319,7 +319,7 @@ namespace DataModel
 			const DataModel::Feedback::FeedbackState oldTrackState = this->trackState;
 			const bool oldBlocked = blocked;
 			const bool ret = FeedbackStateInternal(feedbackID, newTrackState);
-			if (ret == false)
+			if (!ret)
 			{
 				return false;
 			}
@@ -339,7 +339,7 @@ namespace DataModel
 			LocoBase* locoBase = manager->GetLocoBase(GetLocoBaseDelayed());
 			if (!locoBase)
 			{
-				if ((blocked == false) && manager->GetStopOnFeedbackInFreeTrack())
+				if ((!blocked) && manager->GetStopOnFeedbackInFreeTrack())
 				{
 					manager->Booster(ControlTypeInternal, BoosterStateStop);
 					blocked = true;
@@ -350,8 +350,8 @@ namespace DataModel
 				locoBase->LocationReached(feedbackID);
 			}
 
-			this->trackState = newTrackState;
-			this->trackStateDelayed = newTrackState;
+			this->trackState = DataModel::Feedback::FeedbackStateOccupied;
+			this->trackStateDelayed = DataModel::Feedback::FeedbackStateOccupied;
 			return true;
 		}
 
@@ -364,6 +364,7 @@ namespace DataModel
 			}
 			if (feedback->GetState() != DataModel::Feedback::FeedbackStateFree)
 			{
+				// if another feedback is still occupied
 				return false;
 			}
 		}
@@ -376,7 +377,7 @@ namespace DataModel
 			if (locoBase && locoBase->CheckFreeingTrack(GetID()))
 			{
 				StopAllSignals(locoBaseIdentifier);
-				bool ret = ReleaseForceUnlocked(locoBase->GetLogger(), locoBaseIdentifier);
+				const bool ret = ReleaseForceUnlocked(locoBase->GetLogger(), locoBaseIdentifier);
 				PublishState();
 				return ret;
 			}

@@ -355,7 +355,7 @@ namespace Hardware { namespace Protocols
 			void ParseResponseAccessory(const unsigned char* const buffer);
 			void ParseCommandPing(const unsigned char* const buffer);
 			void ParseCommandRequestConfigData(const unsigned char* const buffer);
-			void SendCompressedFile(const std::string& dataPlain, const unsigned char* fileName);
+			void SendCompressedFile(const std::string& dataPlain, const unsigned char* fileName = nullptr);
 			void ParseCommandConfigData(const unsigned char* const buffer);
 			void ParseCommandConfigDataFirst(const unsigned char* const buffer);
 			void ParseCommandConfigDataNext(const unsigned char* const buffer);

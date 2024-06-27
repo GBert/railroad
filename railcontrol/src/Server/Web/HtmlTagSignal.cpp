@@ -246,7 +246,7 @@ namespace Server { namespace Web
 					"<polyline points=\"25,34 31,34\" style=\"stroke:gray;stroke-width:2\"/>"
 					"<circle class=\"stop\" cx=\"25\" cy=\"13\" r=\"2.5\" fill=\"red\" opacity=\"0\"/>"
 					"<circle class=\"stop aspect3\" cx=\"31\" cy=\"13\" r=\"2.5\" fill=\"red\" opacity=\"0\"/>"
-					"<circle class=\"clear\" cx=\"25\" cy=\"6\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
+					"<circle class=\"clear aspect2\" cx=\"25\" cy=\"6\" r=\"2.5\" fill=\"lightgreen\" opacity=\"0\"/>"
 					"<circle class=\"aspect2\" cx=\"25\" cy=\"25\" r=\"2.5\" fill=\"orange\" opacity=\"0\"/>"
 					"<circle class=\"aspect3\" cx=\"30\" cy=\"18\" r=\"1.5\" fill=\"white\" opacity=\"0\"/>"
 					"<circle class=\"aspect3\" cx=\"26\" cy=\"22\" r=\"1.5\" fill=\"white\" opacity=\"0\"/>";

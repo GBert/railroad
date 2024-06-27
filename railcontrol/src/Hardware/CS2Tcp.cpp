@@ -76,6 +76,7 @@ namespace Hardware
 
 			if (datalen == 0)
 			{
+				// no data received
 				continue;
 			}
 
