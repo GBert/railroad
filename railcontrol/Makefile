@@ -1,4 +1,4 @@
-# Copyright (C) 2020 OpenWrt.org
+# Copyright (C) 2024 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -11,7 +11,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=railcontrol
-PKG_VERSION:=20240626
+PKG_VERSION:=20240627
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_BUILD_PARALLEL:=1
@@ -20,7 +20,7 @@ include $(INCLUDE_DIR)/package.mk
 
 # Sart make install at build time
 
-define Package/railcontrol
+define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=railcontrol
@@ -29,7 +29,7 @@ define Package/railcontrol
   MAINTAINER:=Gerhard Bertelsmann
 endef
 
-define Package/srcpd/description
+define Package/$(PKG_NAME)/description
   Railcontrol is a software to control model railroad by
   Dominik (Teddy) Mahrer
 endef
@@ -45,7 +45,11 @@ define Build/Compile
 		CPPFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -I. -I.. -fPIC -Dlinux -D_REENTRANT -lpthread -ldl" 
 endef
 
-define Package/railcontrol/install
+define Package/$(PKG_NAME)/conffiles
+/opt/railcontrol/railcontrol.sqlite
+endef
+
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/opt/railcontrol
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/railcontrol $(1)/opt/railcontrol
 	$(INSTALL_BIN) ./files/railcontrol.sqlite $(1)/opt/railcontrol
@@ -57,4 +61,4 @@ define Package/railcontrol/install
 endef
 
 
-$(eval $(call BuildPackage,railcontrol))
+$(eval $(call BuildPackage,$(PKG_NAME)))
