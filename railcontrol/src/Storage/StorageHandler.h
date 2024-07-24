@@ -38,8 +38,7 @@ namespace Storage
 		public:
 			inline StorageHandler(Manager* manager, const StorageParams* params)
 			:	manager(manager),
-				sqlite(params),
-				transactionRunning(false)
+				sqlite(params)
 			{
 			}
 
@@ -52,30 +51,68 @@ namespace Storage
 				sqlite.AllHardwareParams(hardwareParams);
 			}
 
-			void DeleteHardwareParams(const ControlID controlID);
+			inline void DeleteHardwareParams(const ControlID controlID)
+			{
+				sqlite.DeleteHardwareParams(controlID);
+			}
+
 			void AllLocos(std::map<LocoID,DataModel::Loco*>& locos);
 			void DeleteLoco(LocoID locoID);
 			void AllMultipleUnits(std::map<LocoID,DataModel::MultipleUnit*>& multipleUnits);
 			void DeleteMultipleUnit(MultipleUnitID multipleUnitID);
 			void AllAccessories(std::map<AccessoryID,DataModel::Accessory*>& accessories);
-			void DeleteAccessory(AccessoryID accessoryID);
+
+			inline void DeleteAccessory(AccessoryID accessoryID)
+			{
+				sqlite.DeleteObject(ObjectTypeAccessory, accessoryID);
+			}
+
 			void AllFeedbacks(std::map<FeedbackID,DataModel::Feedback*>& feedbacks);
-			void DeleteFeedback(FeedbackID feedbackID);
+
+			inline void DeleteFeedback(FeedbackID feedbackID)
+			{
+				sqlite.DeleteObject(ObjectTypeFeedback, feedbackID);
+			}
+
 			void AllTracks(std::map<TrackID,DataModel::Track*>& tracks);
 			void DeleteTrack(TrackID trackID);
 			void AllSwitches(std::map<SwitchID,DataModel::Switch*>& switches);
-			void DeleteSwitch(SwitchID switchID);
+
+			inline void DeleteSwitch(SwitchID switchID)
+			{
+				sqlite.DeleteObject(ObjectTypeSwitch, switchID);
+			}
+
 			void AllRoutes(std::map<RouteID,DataModel::Route*>& routes);
 			void DeleteRoute(RouteID routeID);
 			void AllLayers(std::map<LayerID,DataModel::Layer*>& layers);
-			void DeleteLayer(LayerID layerID);
+
+			inline void DeleteLayer(LayerID layerID)
+			{
+				sqlite.DeleteObject(ObjectTypeLayer, layerID);
+			}
+
 			void AllSignals(std::map<SignalID,DataModel::Signal*>& signals);
 			void DeleteSignal(SignalID signalID);
 			void AllClusters(std::map<ClusterID,DataModel::Cluster*>& clusters);
-			void DeleteCluster(ClusterID clusterID);
+
+			inline void DeleteCluster(ClusterID clusterID)
+			{
+				sqlite.DeleteObject(ObjectTypeCluster, clusterID);
+			}
+
 			void AllTexts(std::map<TextID,DataModel::Text*>& texts);
-			void DeleteText(TextID textID);
-			void Save(const Hardware::HardwareParams& hardwareParams);
+
+			inline void DeleteText(TextID textID)
+			{
+				sqlite.DeleteObject(ObjectTypeText, textID);
+			}
+
+			inline void Save(const Hardware::HardwareParams& hardwareParams)
+			{
+				sqlite.SaveHardwareParams(hardwareParams);
+			}
+
 			void Save(const DataModel::Route& route);
 			void Save(const DataModel::Loco& loco);
 			void Save(const DataModel::MultipleUnit& multipleUnit);
@@ -85,7 +122,6 @@ namespace Storage
 			template<class T> void Save(const T& t)
 			{
 				const std::string serialized = t.Serialize();
-				TransactionGuard guard(this);
 				sqlite.SaveObject(t.GetObjectType(), t.GetID(), t.GetName(), serialized);
 			}
 
@@ -94,7 +130,11 @@ namespace Storage
 				storageHandler->Save(*t);
 			}
 
-			void SaveSetting(const std::string& key, const std::string& value);
+			inline void SaveSetting(const std::string& key, const std::string& value)
+			{
+				sqlite.SaveSetting(key, value);
+			}
+
 
 			inline std::string GetSetting(const std::string& key)
 			{
@@ -103,19 +143,14 @@ namespace Storage
 
 			inline void StartTransaction()
 			{
-				transactionRunning = true;
+				transactionMutex.lock();
 				sqlite.StartTransaction();
 			}
 
 			inline void CommitTransaction()
 			{
 				sqlite.CommitTransaction();
-				transactionRunning = false;
-			}
-
-			inline bool IsTransactionRunning()
-			{
-				return transactionRunning;
+				transactionMutex.unlock();
 			}
 
 		private:
@@ -124,7 +159,7 @@ namespace Storage
 
 			Manager* manager;
 			Storage::SQLite sqlite;
-			bool transactionRunning;
+			std::mutex transactionMutex;
 	};
 } // namespace Storage
 

@@ -289,7 +289,7 @@ namespace Server { namespace CS2
 
 	void CS2Server::Work(Network::TcpConnection* connection)
 	{
-		clients.push_back(new CS2Client(++lastClientID, connection, *this, manager));
+		clients.push_back(new CS2Client(++lastClientID, connection, manager));
 		CleanUpClients();
 	}
 

@@ -62,7 +62,7 @@ namespace DataModel
 				return objectID;
 			}
 
-			inline ObjectIdentifier GetObjectIdentifier() const
+			inline const ObjectIdentifier GetObjectIdentifier() const
 			{
 				return ObjectIdentifier(GetObjectType(), GetID());
 			}

@@ -49,6 +49,7 @@ using std::to_string;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Storage::TransactionGuard;
 using Storage::StorageHandler;
 using Storage::StorageParams;
 
@@ -254,6 +255,7 @@ Manager::~Manager()
 			if (storage)
 			{
 				logger->Info(Languages::TextSaving, params->GetName());
+				TransactionGuard guard(storage);
 				storage->Save(*params);
 			}
 			delete params;
@@ -386,6 +388,7 @@ bool Manager::ControlSave(ControlID controlID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*params);
 	}
 
@@ -445,6 +448,7 @@ bool Manager::ControlDelete(ControlID controlID)
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteHardwareParams(controlID);
 	}
 	return true;
@@ -738,20 +742,6 @@ const map<string,LocoID> Manager::LocoIdsByName() const
 	return out;
 }
 
-void Manager::LocoBaseSave(const DataModel::LocoBase* locoBase) const
-{
-	const DataModel::Loco* loco = dynamic_cast<const DataModel::Loco*>(locoBase);
-	if (loco)
-	{
-		LocoSave(loco);
-	}
-	const DataModel::MultipleUnit* multipleUnit = dynamic_cast<const DataModel::MultipleUnit*>(locoBase);
-	if (multipleUnit)
-	{
-		MultipleUnitSave(multipleUnit);
-	}
-}
-
 bool Manager::LocoSave(LocoID locoID,
 	const string& name,
 	const ControlID controlID,
@@ -846,6 +836,7 @@ bool Manager::LocoDelete(const LocoID locoID, string& result)
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteLoco(locoID);
 	}
 	const string& name = loco->GetName();
@@ -1135,6 +1126,7 @@ bool Manager::MultipleUnitDelete(const MultipleUnitID multipleUnitID, string& re
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteMultipleUnit(multipleUnitID);
 	}
 	const string& name = multipleUnit->GetName();
@@ -1435,6 +1427,7 @@ void Manager::AccessorySaveAndPublishSettings(const Accessory* const accessory)
 	// save in db
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*accessory);
 	}
 
@@ -1494,6 +1487,7 @@ bool Manager::AccessoryDelete(const AccessoryID accessoryID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteAccessory(accessoryID);
 	}
 	const string& name = accessory->GetName();
@@ -1772,6 +1766,7 @@ void Manager::FeedbackSaveAndPublishSettings(const Feedback* const feedback)
 	// save in db
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*feedback);
 	}
 	std::lock_guard<std::mutex> guard(controlMutex);
@@ -1855,6 +1850,7 @@ bool Manager::FeedbackDelete(const FeedbackID feedbackID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteFeedback(feedbackID);
 	}
 	const string& name = feedback->GetName();
@@ -2137,6 +2133,7 @@ bool Manager::TrackDelete(const TrackID trackID,
 
 	if (storage)
 	{
+		Storage::TransactionGuard guard(storage);
 		storage->DeleteTrack(trackID);
 	}
 	const string& name = track->GetName();
@@ -2348,6 +2345,7 @@ void Manager::SwitchSaveAndPublishSettings(const Switch* const mySwitch)
 {
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*mySwitch);
 	}
 
@@ -2387,6 +2385,7 @@ bool Manager::SwitchDelete(const SwitchID switchID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteSwitch(switchID);
 	}
 
@@ -2736,6 +2735,7 @@ bool Manager::RouteDelete(const RouteID routeID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteRoute(routeID);
 	}
 
@@ -2821,6 +2821,7 @@ bool Manager::LayerSave(LayerID layerID, const std::string&name, std::string& re
 	// save in db
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*layer);
 	}
 	std::lock_guard<std::mutex> guard(controlMutex);
@@ -2935,6 +2936,7 @@ bool Manager::LayerDelete(const LayerID layerID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteLayer(layerID);
 	}
 
@@ -3142,6 +3144,7 @@ void Manager::SignalSaveAndPublishSettings(const Signal* const signal)
 	// save in db
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*signal);
 	}
 
@@ -3195,6 +3198,7 @@ bool Manager::SignalDelete(const SignalID signalID,
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteSignal(signalID);
 	}
 
@@ -3333,6 +3337,7 @@ bool Manager::ClusterSave(ClusterID clusterID,
 	// save in db
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*cluster);
 	}
 	return true;
@@ -3360,6 +3365,7 @@ bool Manager::ClusterDelete(const ClusterID clusterID)
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteCluster(clusterID);
 	}
 
@@ -3492,6 +3498,7 @@ void Manager::TextSaveAndPublishSettings(const Text* const text)
 	// save in db
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->Save(*text);
 	}
 
@@ -3524,6 +3531,7 @@ bool Manager::TextDelete(const TextID textID, string& result)
 
 	if (storage)
 	{
+		TransactionGuard guard(storage);
 		storage->DeleteText(textID);
 	}
 

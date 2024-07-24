@@ -51,7 +51,7 @@ namespace DataModel
 			bool Deserialize(const std::map<std::string,std::string> arguments);
 
 
-			inline ObjectIdentifier GetLocoBase() const
+			inline const ObjectIdentifier& GetLocoBase() const
 			{
 				return locoBaseIdentifier;
 			}

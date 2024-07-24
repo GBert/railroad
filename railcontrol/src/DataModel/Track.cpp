@@ -107,7 +107,7 @@ namespace DataModel
 		trackStateDelayed = static_cast<DataModel::Feedback::FeedbackState>(Utils::Utils::GetBoolMapEntry(arguments, "trackstatedelayed", trackState));
 		locoOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "locoorientation", OrientationRight));
 		blocked = Utils::Utils::GetBoolMapEntry(arguments, "blocked", false);
-		const ObjectIdentifier locoBaseDelayedIdentifier = GetLocoBase();
+		const ObjectIdentifier& locoBaseDelayedIdentifier = GetLocoBase();
 		locoBaseDelayed.SetObjectID(Utils::Utils::GetIntegerMapEntry(arguments, "locodelayed", locoBaseDelayedIdentifier.GetObjectID()));
 		locoBaseDelayed.SetObjectType(static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "locotypedelayed", locoBaseDelayedIdentifier.GetObjectType())));
 		allowLocoTurn = Utils::Utils::GetBoolMapEntry(arguments, "allowlocoturn", true);
@@ -202,7 +202,7 @@ namespace DataModel
 			{
 				continue;
 			}
-			ObjectIdentifier locoBaseOfSignal = signal->GetLocoBase();
+			const ObjectIdentifier& locoBaseOfSignal = signal->GetLocoBase();
 			if (locoBaseOfSignal.IsSet() && (locoBaseIdentifier != locoBaseOfSignal))
 			{
 				continue;
@@ -264,7 +264,6 @@ namespace DataModel
 		{
 			PublishState();
 		}
-//		manager->TrackSave(this);
 		return ret;
 	}
 
@@ -286,7 +285,6 @@ namespace DataModel
 			this->trackStateDelayed = DataModel::Feedback::FeedbackStateFree;
 		}
 		PublishState();
-//		manager->TrackSave(this);
 		return true;
 	}
 
@@ -299,7 +297,6 @@ namespace DataModel
 			ret = ReleaseForceUnlocked(logger, locoBaseIdentifier);
 		}
 		PublishState();
-//		manager->TrackSave(this);
 		return ret;
 	}
 
@@ -370,7 +367,7 @@ namespace DataModel
 		}
 		this->trackState = DataModel::Feedback::FeedbackStateFree;
 
-		const ObjectIdentifier locoBaseIdentifier = GetLocoBase();
+		const ObjectIdentifier& locoBaseIdentifier = GetLocoBase();
 		if (releaseWhenFree)
 		{
 			const LocoBase* locoBase = manager->GetLocoBase(locoBaseIdentifier);

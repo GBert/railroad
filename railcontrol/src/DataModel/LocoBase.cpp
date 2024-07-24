@@ -107,7 +107,6 @@ namespace DataModel
 			return false;
 		}
 		trackFrom = manager->GetTrack(trackID);
-//		manager->LocoBaseSave(this);
 		return true;
 	}
 
@@ -120,40 +119,57 @@ namespace DataModel
 	{
 		manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 		ForceManualMode();
-		std::lock_guard<std::mutex> Guard(stateMutex);
+		{
+			std::lock_guard<std::mutex> Guard(stateMutex);
 
-		if (routeFirst)
-		{
-			routeFirst->Release(logger, GetObjectIdentifier());
-			routeFirst = nullptr;
-		}
-		if (routeSecond)
-		{
-			routeSecond->Release(logger, GetObjectIdentifier());
-			routeSecond = nullptr;
-		}
-		if (trackFrom)
-		{
-			trackFrom->Release(logger, GetObjectIdentifier());
-			trackFrom = nullptr;
-		}
-		if (trackFirst)
-		{
-			trackFirst->Release(logger, GetObjectIdentifier());
-			trackFirst = nullptr;
-		}
-		if (trackSecond)
-		{
-			trackSecond->Release(logger, GetObjectIdentifier());
-			trackSecond = nullptr;
+			if (routeFirst)
+			{
+				releaseRouteQueue.EnqueueBack(routeFirst);
+				routeFirst = nullptr;
+			}
+			if (routeSecond)
+			{
+				releaseRouteQueue.EnqueueBack(routeSecond);
+				routeSecond = nullptr;
+			}
+			if (trackFrom)
+			{
+				releaseTrackQueue.EnqueueBack(trackFrom);
+				trackFrom = nullptr;
+			}
+			if (trackFirst)
+			{
+				releaseTrackQueue.EnqueueBack(trackFirst);
+				trackFirst = nullptr;
+			}
+			if (trackSecond)
+			{
+				releaseTrackQueue.EnqueueBack(trackSecond);
+				trackSecond = nullptr;
+			}
 		}
 		feedbackIdOver = FeedbackNone;
 		feedbackIdStop = FeedbackNone;
 		feedbackIdCreep = FeedbackNone;
 		feedbackIdReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
-//		manager->LocoBaseSave(this);
+		ReleaseRouteAndTrack();
 		return true;
+	}
+
+	void LocoBase::ReleaseRouteAndTrack()
+	{
+		const ObjectIdentifier identifier = GetObjectIdentifier();
+		while(!releaseTrackQueue.IsEmpty())
+		{
+			Track* track = releaseTrackQueue.Dequeue();
+			track->Release(logger, identifier);
+		}
+		while(!releaseRouteQueue.IsEmpty())
+		{
+			Route* route = releaseRouteQueue.Dequeue();
+			route->Release(logger, identifier);
+		}
 	}
 
 	bool LocoBase::CheckFreeingTrack(const TrackID trackID) const
@@ -366,6 +382,9 @@ namespace DataModel
 						break;
 				}
 			}
+
+			ReleaseRouteAndTrack();
+
 			// FIXME: make configurable
 			Utils::Utils::SleepForSeconds(1);
 		}
@@ -490,7 +509,6 @@ namespace DataModel
 		}
 		manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
 		state = LocoStateAutomodeGetSecond;
-//		manager->LocoBaseSave(this);
 	}
 
 	Route* LocoBase::GetDestinationFromTimeTable(const Track* const track, const bool allowLocoTurn)
@@ -582,7 +600,7 @@ namespace DataModel
 			return nullptr;
 		}
 
-		const ObjectIdentifier locoBaseOfTrack = track->GetLocoBase();
+		const ObjectIdentifier& locoBaseOfTrack = track->GetLocoBase();
 		if (locoBaseOfTrack != GetObjectIdentifier())
 		{
 			state = LocoStateError;
@@ -651,7 +669,7 @@ namespace DataModel
 
 		logger->Debug(Languages::TextExecutingRoute, route->GetName());
 
-		const ObjectIdentifier locoBaseIdentifier = GetObjectIdentifier();
+		const ObjectIdentifier& locoBaseIdentifier = GetObjectIdentifier();
 		if (!route->Execute(logger, locoBaseIdentifier))
 		{
 			route->Release(logger, locoBaseIdentifier);
@@ -698,7 +716,7 @@ namespace DataModel
 		if (feedbackID == feedbackIdStop)
 		{
 			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
-			feedbackIdsReached.EnqueueBack(feedbackIdFirst != 0 ? feedbackIdFirst : feedbackIdStop);
+			feedbackIdsReached.EnqueueBack(feedbackIdStop);
 			return;
 		}
 
@@ -809,15 +827,7 @@ namespace DataModel
 			manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
 		}
 
-
-		routeFirst->Release(logger, GetObjectIdentifier());
-		routeFirst = routeSecond;
-		routeSecond = nullptr;
-
-		trackFrom->Release(logger, GetObjectIdentifier());
-		trackFrom = trackFirst;
-		trackFirst = trackSecond;
-		trackSecond = nullptr;
+		ShiftRoute();
 
 		// set state
 		switch (state)
@@ -839,7 +849,6 @@ namespace DataModel
 		feedbackIdFirstCreep = FeedbackNone;
 		feedbackIdFirstReduced = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
-//		manager->LocoBaseSave(this);
 	}
 
 	void LocoBase::FeedbackIdStopReached()
@@ -856,17 +865,17 @@ namespace DataModel
 		manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
 
 		manager->LocoDestinationReached(this, routeFirst, trackFrom);
-		routeFirst->Release(logger, GetObjectIdentifier());
-		routeFirst = nullptr;
-
-		trackFrom->Release(logger, GetObjectIdentifier());
-		trackFrom = trackFirst;
-		trackFirst = nullptr;
 		logger->Info(Languages::TextReachedItsDestination);
+
+		while (routeFirst)
+		{
+			ShiftRoute();
+		}
 
 		// set state
 		switch (state)
 		{
+			case LocoStateAutomodeRunning:
 			case LocoStateAutomodeGetSecond:
 				state = LocoStateAutomodeGetFirst;
 				break;
@@ -884,7 +893,19 @@ namespace DataModel
 		feedbackIdStop = FeedbackNone;
 		feedbackIdCreep = FeedbackNone;
 		feedbackIdReduced = FeedbackNone;
-//		manager->LocoBaseSave(this);
+	}
+
+	void LocoBase::ShiftRoute()
+	{
+		releaseRouteQueue.EnqueueBack(routeFirst);
+		releaseTrackQueue.EnqueueBack(trackFrom);
+
+		routeFirst = routeSecond;
+		routeSecond = nullptr;
+
+		trackFrom = trackFirst;
+		trackFirst = trackSecond;
+		trackSecond = nullptr;
 	}
 
 	DataModel::LocoFunctionNr LocoBase::GetFunctionNumberFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const

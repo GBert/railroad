@@ -41,7 +41,7 @@ namespace DataModel
 	{
 		Deserialize(serialized);
 		Track* track = manager->GetTrack(fromTrack);
-		if (track == nullptr)
+		if (!track)
 		{
 			return;
 		}
@@ -276,12 +276,7 @@ namespace DataModel
 		if (automode == AutomodeYes)
 		{
 			Track* track = manager->GetTrack(toTrack);
-			if (!track)
-			{
-				ReleaseInternal(logger, locoBaseIdentifier);
-				return false;
-			}
-			if (track->Reserve(logger, locoBaseIdentifier) == false)
+			if (!track || !track->Reserve(logger, locoBaseIdentifier))
 			{
 				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
@@ -310,7 +305,7 @@ namespace DataModel
 
 		std::lock_guard<std::mutex> Guard(updateMutex);
 		bool ret = LockableItem::Lock(logger, locoBaseIdentifier);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
@@ -318,12 +313,7 @@ namespace DataModel
 		if (automode == AutomodeYes)
 		{
 			Track* track = manager->GetTrack(toTrack);
-			if (!track)
-			{
-				ReleaseInternal(logger, locoBaseIdentifier);
-				return false;
-			}
-			if (!track->Lock(logger, locoBaseIdentifier))
+			if (!track || !track->Lock(logger, locoBaseIdentifier))
 			{
 				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;

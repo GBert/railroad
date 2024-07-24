@@ -32,13 +32,10 @@ namespace Storage
 			TransactionGuard& operator=(TransactionGuard&) = delete;
 
 			TransactionGuard(StorageHandler* db);
-
 			~TransactionGuard();
 
 		private:
-			StorageHandler* db;
-			bool otherTransactionRunning;
-			mutable std::mutex mutex;
+			Storage::StorageHandler* db;
 	};
 } // namespace Storage
 

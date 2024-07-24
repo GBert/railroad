@@ -73,16 +73,18 @@ namespace Hardware
 			SendInternal(buffer);
 		}
 
-		void DccPpEx::AccessoryOnOrOff(__attribute__((unused)) const Protocol protocol,
+		void DccPpEx::Accessory(__attribute__((unused)) const Protocol protocol,
 			const Address address,
 			const DataModel::AccessoryState state,
-			__attribute__((unused)) const bool on)
+			__attribute((unused)) const DataModel::AccessoryPulseDuration duration)
 		{
 			string buffer("<a ");
 			buffer += to_string(address);
 			buffer += " ";
-			buffer += state == DataModel::AccessoryStateOff ? "0" : "1";
+			buffer += state == DataModel::AccessoryStateOn ? "1" : "0";
 			buffer += ">";
+			SendInternal(buffer);
+			buffer[1] = 'T';
 			SendInternal(buffer);
 		}
 

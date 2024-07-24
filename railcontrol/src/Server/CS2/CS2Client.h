@@ -38,9 +38,8 @@ namespace Server { namespace CS2
 			CS2Client(const CS2Client&) = delete;
 			CS2Client& operator=(const CS2Client&) = delete;
 
-			CS2Client(const unsigned int id,
+			inline CS2Client(const unsigned int id,
 				Network::TcpConnection* connection, // connection must be deleted after using!
-				CS2Server& cs2Server,
 				Manager& manager)
 			:	MaerklinCANCommon("affeaffe",
 					ControlIdCS2Server,
@@ -49,8 +48,7 @@ namespace Server { namespace CS2
 					Logger::Logger::GetLogger("CS2Client # " + std::to_string(id))),
 				id(id),
 				connection(connection),
-				terminated(false),
-				cs2Server(cs2Server)
+				terminated(false)
 			{
 				Init();
 			}
@@ -99,7 +97,6 @@ namespace Server { namespace CS2
 			unsigned int id;
 			Network::TcpConnection* connection;
 			bool terminated;
-			CS2Server& cs2Server;
 	};
 }} // namespace Server::CS2
 

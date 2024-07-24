@@ -111,14 +111,13 @@ class Manager
 
 		const std::map<std::string,LocoID> LocoIdsByName() const;
 
-		void LocoBaseSave(const DataModel::LocoBase* locoBase) const;
-
 		inline void LocoSave(const DataModel::Loco* loco) const
 		{
 			if (!storage)
 			{
 				return;
 			}
+			Storage::TransactionGuard guard(storage);
 			storage->Save(*loco);
 		}
 
@@ -232,6 +231,7 @@ class Manager
 			{
 				return;
 			}
+			Storage::TransactionGuard guard(storage);
 			storage->Save(*multipleUnit);
 		}
 
@@ -419,6 +419,7 @@ class Manager
 			{
 				return;
 			}
+			Storage::TransactionGuard guard(storage);
 			storage->Save(*track);
 		}
 
@@ -501,6 +502,7 @@ class Manager
 			{
 				return;
 			}
+			Storage::TransactionGuard guard(storage);
 			storage->Save(*route);
 		}
 

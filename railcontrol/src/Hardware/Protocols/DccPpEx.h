@@ -84,10 +84,10 @@ namespace Hardware
 				    const DataModel::LocoFunctionNr function,
 				    const DataModel::LocoFunctionState on) override;
 
-				void AccessoryOnOrOff(const Protocol protocol,
+				void Accessory(const Protocol protocol,
 					const Address address,
 				    const DataModel::AccessoryState state,
-				    const bool on) override;
+				    const DataModel::AccessoryPulseDuration duration) override;
 
 				void ProgramWrite(const ProgramMode mode,
 					const Address address,

@@ -151,13 +151,14 @@ namespace DataModel
 			}
 
 			bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+
 			bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+
 			bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override
 			{
 				std::lock_guard<std::mutex> Guard(updateMutex);
 				return ReleaseInternal(logger, locoBaseIdentifier);
 			}
-
 
 			inline Delay GetDelay() const
 			{

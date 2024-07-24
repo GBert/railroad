@@ -142,6 +142,8 @@ namespace DataModel
 
 			bool Release();
 
+			void ReleaseRouteAndTrack();
+
 			bool CheckFreeingTrack(const TrackID trackID) const;
 
 			void LocationReached(const FeedbackID feedbackID);
@@ -354,6 +356,8 @@ namespace DataModel
 
 			void FeedbackIdStopReached();
 
+			void ShiftRoute();
+
 			void ForceManualMode();
 
 			bool GoToAutoModeInternal(const LocoState newState);
@@ -383,6 +387,8 @@ namespace DataModel
 			Track* trackSecond;
 			Route* routeFirst;
 			Route* routeSecond;
+			Utils::ThreadSafeQueue<Track*> releaseTrackQueue;
+			Utils::ThreadSafeQueue<Route*> releaseRouteQueue;
 			volatile FeedbackID feedbackIdFirstReduced;
 			volatile FeedbackID feedbackIdFirstCreep;
 			volatile FeedbackID feedbackIdFirst;

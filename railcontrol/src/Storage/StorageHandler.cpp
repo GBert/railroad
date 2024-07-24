@@ -44,18 +44,6 @@ using std::vector;
 
 namespace Storage
 {
-	void StorageHandler::Save(const Hardware::HardwareParams& hardwareParams)
-	{
-		TransactionGuard guard(this);
-		sqlite.SaveHardwareParams(hardwareParams);
-	}
-
-	void StorageHandler::DeleteHardwareParams(const ControlID controlID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteHardwareParams(controlID);
-	}
-
 	void StorageHandler::AllLocos(map<LocoID,DataModel::Loco*>& locos)
 	{
 		vector<string> serializedObjects;
@@ -69,7 +57,6 @@ namespace Storage
 
 	void StorageHandler::DeleteLoco(const LocoID locoID)
 	{
-		TransactionGuard guard(this);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeLocoSlave, locoID);
 		sqlite.DeleteRelationsTo(ObjectTypeLoco, locoID);
 		sqlite.DeleteObject(ObjectTypeLoco, locoID);
@@ -90,7 +77,6 @@ namespace Storage
 
 	void StorageHandler::DeleteMultipleUnit(const MultipleUnitID multipleUnitID)
 	{
-		TransactionGuard guard(this);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeMultipleUnitSlave, multipleUnitID);
 		sqlite.DeleteRelationsTo(ObjectTypeMultipleUnit, multipleUnitID);
 		sqlite.DeleteObject(ObjectTypeMultipleUnit, multipleUnitID);
@@ -111,12 +97,6 @@ namespace Storage
 		}
 	}
 
-	void StorageHandler::DeleteAccessory(const AccessoryID accessoryID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteObject(ObjectTypeAccessory, accessoryID);
-	}
-
 	void StorageHandler::AllFeedbacks(std::map<FeedbackID,DataModel::Feedback*>& feedbacks)
 	{
 		vector<string> serializedObjects;
@@ -130,12 +110,6 @@ namespace Storage
 			}
 			feedbacks[feedback->GetID()] = feedback;
 		}
-	}
-
-	void StorageHandler::DeleteFeedback(const FeedbackID feedbackID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteObject(ObjectTypeFeedback, feedbackID);
 	}
 
 	void StorageHandler::AllTracks(std::map<TrackID,DataModel::Track*>& tracks)
@@ -166,7 +140,6 @@ namespace Storage
 
 	void StorageHandler::DeleteTrack(const TrackID trackID)
 	{
-		Storage::TransactionGuard guard(this);
 		sqlite.DeleteRelationsTo(ObjectTypeTrack, trackID);
 		sqlite.DeleteObject(ObjectTypeTrack, trackID);
 	}
@@ -186,16 +159,9 @@ namespace Storage
 		}
 	}
 
-	void StorageHandler::DeleteSwitch(const SwitchID switchID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteObject(ObjectTypeSwitch, switchID);
-	}
-
 	void StorageHandler::Save(const DataModel::Route& route)
 	{
 		const string serialized = route.Serialize();
-		TransactionGuard guard(this);
 		const RouteID routeID = route.GetID();
 		sqlite.SaveObject(ObjectTypeRoute, routeID, route.GetName(), serialized);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeRouteAtLock, routeID);
@@ -207,7 +173,6 @@ namespace Storage
 	void StorageHandler::Save(const DataModel::Loco& loco)
 	{
 		const string serialized = loco.Serialize();
-		TransactionGuard guard(this);
 		const LocoID locoID = loco.GetID();
 		sqlite.SaveObject(ObjectTypeLoco, locoID, loco.GetName(), serialized);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeLocoSlave, locoID);
@@ -216,7 +181,6 @@ namespace Storage
 	void StorageHandler::Save(const DataModel::MultipleUnit& multipleUnit)
 	{
 		const string serialized = multipleUnit.Serialize();
-		TransactionGuard guard(this);
 		const MultipleUnitID multipleUnitID = multipleUnit.GetID();
 		sqlite.SaveObject(ObjectTypeMultipleUnit, multipleUnitID, multipleUnit.GetName(), serialized);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeMultipleUnitSlave, multipleUnitID);
@@ -226,7 +190,6 @@ namespace Storage
 	void StorageHandler::Save(const DataModel::Cluster& cluster)
 	{
 		const string serialized = cluster.Serialize();
-		TransactionGuard guard(this);
 		const ClusterID clusterID = cluster.GetID();
 		sqlite.SaveObject(ObjectTypeCluster, clusterID, cluster.GetName(), serialized);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeClusterTrack, clusterID);
@@ -236,7 +199,6 @@ namespace Storage
 	void StorageHandler::Save(const DataModel::Track& track)
 	{
 		const string serialized = track.Serialize();
-		TransactionGuard guard(this);
 		const TrackID trackId = track.GetID();
 		sqlite.SaveObject(ObjectTypeTrack, trackId, track.GetName(), serialized);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeTrackFeedback, trackId);
@@ -265,7 +227,6 @@ namespace Storage
 
 	void StorageHandler::DeleteRoute(const RouteID routeID)
 	{
-		TransactionGuard guard(this);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeRouteAtLock, routeID);
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeRouteAtUnlock, routeID);
 		sqlite.DeleteObject(ObjectTypeRoute, routeID);
@@ -286,12 +247,6 @@ namespace Storage
 		}
 	}
 
-	void StorageHandler::DeleteLayer(const LayerID layerID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteObject(ObjectTypeLayer, layerID);
-	}
-
 	void StorageHandler::AllSignals(std::map<SignalID,DataModel::Signal*>& signals)
 	{
 		vector<string> serializedObjects;
@@ -309,7 +264,6 @@ namespace Storage
 
 	void StorageHandler::DeleteSignal(const SignalID signalID)
 	{
-		TransactionGuard guard(this);
 		sqlite.DeleteRelationsTo(ObjectTypeSignal, signalID);
 		sqlite.DeleteObject(ObjectTypeSignal, signalID);
 	}
@@ -331,12 +285,6 @@ namespace Storage
 		}
 	}
 
-	void StorageHandler::DeleteCluster(const ClusterID clusterID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteObject(ObjectTypeCluster, clusterID);
-	}
-
 	void StorageHandler::AllTexts(std::map<TextID,DataModel::Text*>& texts)
 	{
 		vector<string> serializedObjects;
@@ -352,21 +300,8 @@ namespace Storage
 		}
 	}
 
-	void StorageHandler::DeleteText(const TextID textID)
-	{
-		TransactionGuard guard(this);
-		sqlite.DeleteObject(ObjectTypeText, textID);
-	}
-
-	void StorageHandler::SaveSetting(const std::string& key, const std::string& value)
-	{
-		TransactionGuard guard(this);
-		sqlite.SaveSetting(key, value);
-	}
-
 	void StorageHandler::SaveRelations(const vector<DataModel::Relation*> relations)
 	{
-		Storage::TransactionGuard guard(this);
 		for (auto relation : relations)
 		{
 			string serializedRelation = relation->Serialize();
