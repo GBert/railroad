@@ -201,6 +201,9 @@ void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize)
 	    case 0x85:
 		printf("LAN_SYSTEMSTATE_GETDATA");
 		break;
+	    case 0xA4:
+		printf("LAN_LOCONET_DETECTOR");
+		break;
 	    default:
 		printf("unbekannt");
 	    }

@@ -556,6 +556,9 @@ void decode_frame(struct can_frame *frame) {
 	    uid = be32(frame->data);
 	    kenner = be16(&frame->data[4]);
 	    printf("Connect6021 UID 0x%08X mit Kenner 0x%04X\n", uid, kenner);
+	} else if (frame->can_dlc == 5) {
+	    printf("Connect6021 Config: Lok %s gesteuert via Adresse %02u\n",
+			getLoco(frame->data, s), frame->data[4]);
 	} else {
 	    cdb_extension_wc(frame);
 	}
@@ -886,8 +889,8 @@ int main(int argc, char **argv) {
 		myudp = (struct udphdr *)(pkt_ptr + sizeof(struct ip));
 		dport = ntohs(myudp->uh_dport);
 		sport = ntohs(myudp->uh_sport);
-		if ((dport != 15730) && (dport != 15731) && (dport != 15732)
-			&& (dport != 5728) && (dport != 21105) && (dport != 21106))
+		if ((dport != 15730) && (dport != 15731) && (dport != 15732) && (dport != 5728)
+			&& (dport != 21105) && (dport != 21106) && (sport != 21105) && (sport != 21106))
 		    continue;
 		printf(RESET);
 		int size_payload = packet_length - (IPHDR_LEN + sizeof(struct udphdr));
@@ -902,7 +905,7 @@ int main(int argc, char **argv) {
 		    printf("%s %.3d>  UDP  Z21-CONF", timestamp, (ip_hdr->ip_src.s_addr) >> 24);
 		    z21_conf_info(dump, size_payload);
 		    continue;
-		} else if ((dport == 21105) || (dport == 21106)) {
+		} else if ((dport == 21105) || (dport == 21106) || (sport == 21105) || (sport == 21106)) {
 		    z21_comm_ext(timestamp, (ip_hdr->ip_src.s_addr) >> 24, dump, size_payload);
 		    continue;
 		}
@@ -1002,6 +1005,7 @@ int main(int argc, char **argv) {
 	    printf(RESET);
 	}
 	pcap_close(handle);
+	printf(RESET);
 	return (EXIT_SUCCESS);
     /* reading from CAN socket */
     } else {
