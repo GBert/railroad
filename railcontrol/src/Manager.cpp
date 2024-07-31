@@ -3646,7 +3646,7 @@ bool Manager::LocoBaseReleaseOnTrack(const TrackID trackID)
 	{
 		return false;
 	}
-	ObjectIdentifier locoBaseIdentifier = track->GetLocoBase();
+	const ObjectIdentifier& locoBaseIdentifier = track->GetLocoBase();
 	track->ReleaseForce(logger, locoBaseIdentifier);
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
 	if (!locoBase)

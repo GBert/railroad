@@ -218,7 +218,7 @@ namespace DataModel
 			return true;
 		}
 		locoOrientation = orientation;
-		if (cluster == nullptr)
+		if (!cluster)
 		{
 			return true;
 		}
@@ -233,7 +233,7 @@ namespace DataModel
 			logger->Debug(Languages::TextTrackIsUsedByLoco, GetName(), manager->GetLocoBaseName(locoBaseDelayed));
 			return false;
 		}
-		if (blocked == true)
+		if (blocked)
 		{
 			logger->Debug(Languages::TextTrackStatusIsBlocked, GetName());
 			return false;
@@ -249,7 +249,7 @@ namespace DataModel
 	bool Track::ReserveForce(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
 		bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
@@ -273,7 +273,7 @@ namespace DataModel
 		{
 			std::lock_guard<std::mutex> Guard(updateMutex);
 			bool ret = LockableItem::Release(logger, locoBaseIdentifier);
-			if (ret == false)
+			if (!ret)
 			{
 				return false;
 			}

@@ -1,3 +1,4 @@
+- Counter Objekt (Max Anzahl Züge in eine Richtung)
 - Link auf Ebenen verknüpfen mit Klick
 - Wartezeit bei Erreichen Fahrstrassen-Ende
 - Fahrstrassen mit unverschlossenen Objekten
@@ -7,16 +8,14 @@
 - Automatisches Umfahren des Zuges an der Endstation
 - Trotz freier Fahrt anhalten an Bahnsteigen
 - Lokbilder
-- Fahren nach Fahrplan bzw. Vorgabe des Zielortes
+- Fahren nach Fahrplan
 - Formulare als POST-Request senden um maximale URL-Länge zu umgehen
-- Synchronisieren der CS2 Lok-Datenbank (RailControl->CS2)
 - Anbinden von SPROG DCC
 - Anbinden von Zimo-Zentralen
 - Anbinden von BidiB-Zentralen
 - Anbinden von uCon-Zentralen
 - Anbinden von USBtin-Märklin-CAN
 - Rückmelder für Weichenlage
-- DCC-EX Servoweichen
 - S88 Link auf separaten Ebenen
 - Ausleuchtung von Gleisen aufgrund von Nachbargleis
 - Autokonversion der Protokolle bei Zentralenwechsel
