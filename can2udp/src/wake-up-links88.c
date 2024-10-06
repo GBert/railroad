@@ -57,7 +57,7 @@ unsigned char netframe[MAXDG];
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can interface>\n", prg);
-    fprintf(stderr, "   Version 1.21\n\n");
+    fprintf(stderr, "   Version 1.3\n\n");
     fprintf(stderr, "         -c <config_string>  config string like \"B1=1,T1=10,B2=3\"\n");
     fprintf(stderr, "                             means: B1=1  -> bus 1 length one module\n");
     fprintf(stderr, "                                    T1=10 -> bus 1 cycle time 10ms\n");
@@ -65,8 +65,11 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -i <can int>        can interface - default can0\n");
     fprintf(stderr, "         -d                  daemonize\n");
     fprintf(stderr, "         -e #no_of_links88   exit after no of LinkS88 responded - default 1\n\n");
-    fprintf(stderr, "         -r  UIDXXXX=DDDD [:UIDXXXX=DDDD] (XXXX hex number, DDDD decimal number)  assign L88 identifiers\n             e.g. \"-r UID5330AC0B=7:UID5330AD10=23\" assigns identifier 7 to L88 with uid 0x5330AC0B and identifer 23 to L88 with uid 0x5330AD10\n");
-    fprintf(stderr, "         -s  assign L88 identifier (option -r) on response of first L88 ping reply too\n             (i.e. in addition to get identifier request)\n\n"); 
+    fprintf(stderr, "         -r  UIDXXXX=DDDD [:UIDXXXX=DDDD] (XXXX hex number, DDDD decimal number)  assign L88 identifiers\n");
+    fprintf(stderr, "             e.g. \"-r UID5330AC0B=7:UID5330AD10=23\" assigns identifier 7 to L88 with uid 0x5330AC0B and\n");
+    fprintf(stderr, "             identifer 23 to L88 with uid 0x5330AD10\n");
+    fprintf(stderr, "         -s  assign L88 identifier (option -r) on response of first L88 ping reply too\n");
+    fprintf(stderr, "             (i.e. in addition to get identifier request)\n\n");
 }
 
 struct s88_bus_t {
@@ -209,7 +212,6 @@ int main(int argc, char **argv) {
     uint32_t kennung_provided = 0;
     int provide_kennung_on_ping = 0;
 
-
     while ((opt = getopt(argc, argv, "c:i:de:r:sh?")) != -1) {
 	switch (opt) {
 	case 'c':
@@ -229,27 +231,29 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	    }
 	    break;
-         case 'r':
-            next_token = strtok(optarg, ":");
-            while (next_token != NULL){
-                if (next_token_id >= MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS){
-                   fprintf(stderr, "maximum assignments (%d) exceeded\n",MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS);
-                   exit(EXIT_FAILURE);
-                }
+	case 'r':
+	    next_token = strtok(optarg, ":");
+	    while (next_token != NULL) {
+		if (next_token_id >= MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS) {
+		    fprintf(stderr, "maximum assignments (%d) exceeded\n", MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS);
+		    exit(EXIT_FAILURE);
+		}
 
-                if (sscanf(next_token, "UID%x=%hu", &uid[next_token_id],&kennung[next_token_id]) !=2 ) {
-                   fprintf(stderr, "irregular assignment format, UIDXXXX=DDDD (XXXX hex number, DDDD decimal number):%s\n",next_token);
-                   exit(EXIT_FAILURE);
-                }
+		if (sscanf(next_token, "UID%x=%hu", &uid[next_token_id], &kennung[next_token_id]) != 2) {
+		    fprintf(stderr,
+			    "irregular assignment format, UIDXXXX=DDDD (XXXX hex number, DDDD decimal number):%s\n",
+			    next_token);
+		    exit(EXIT_FAILURE);
+		}
 
-                next_token = strtok(NULL, ":");
-                ++next_token_id;
-              }
+		next_token = strtok(NULL, ":");
+		++next_token_id;
+	    }
 
-              for (int i = 0;i < next_token_id  ;++i){
-                        printf("UID:%X (%d)  Kennung:%d\n",uid[i],uid[i],kennung[i]);
-              }
-            break;
+	    for (int i = 0; i < next_token_id; ++i) {
+		printf("UID:%X (%d)  Kennung:%d\n", uid[i], uid[i], kennung[i]);
+	    }
+	    break;
 	case 's':
 	    provide_kennung_on_ping = 1;
 	    break;
@@ -396,69 +400,68 @@ int main(int argc, char **argv) {
 			}
 		    }
 
-                    if (provide_kennung_on_ping && (kennung[0] != 0)){ /* unequals 0 in case there are identifiers provided with -r option*/
-                        if (frame.data[7] == 0x40){ 
-			   uint32_t ping_uid = (frame.data[0] << 24) + (frame.data[1] << 16) + (frame.data[2] << 8) + frame.data[3];
-			   if (verbose) {
-                                printf("received PING reply for UID0x%X\n",ping_uid);
-			   }
-			   for (int i=0; i<MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS;++i){
-                           	if (uid[i] == ping_uid){
-                                   //check if assignment did take place already:
-                                   if((kennung_provided & (1<<i)) == 0){
-				       if (verbose){
-                                           printf("send CAN 'set kennung' %d  to UID0x%X\n",kennung[i], uid[i]);
-                                       } 
-                                       kennung_provided |= (1<<i);
-                                       //send to CAN:
-                                       unsigned char set_kennung_frame [20];
-                                       memcpy(set_kennung_frame, M_CAN_SET_KENNUNG,13);
-                                       set_kennung_frame[5] = (uid[i] >> 24) & 0xFF;
-                                       set_kennung_frame[6] = (uid[i] >> 16) & 0xFF;
-                                       set_kennung_frame[7] = (uid[i] >> 8) & 0xFF;
-                                       set_kennung_frame[8] = uid[i] & 0xFF;
-                                       set_kennung_frame[10] = (kennung[i] >> 8) & 0xFF;
-                                       set_kennung_frame[11] = kennung[i] & 0xFF;
-                                       if (send_defined_can_frame(sc, set_kennung_frame,verbose) < 0) {
-                                          printf("Error: can't send CAN set kennung\n");
-                                       } 
-				   }
-                                   break;
-                                }
-                           }
+		    if (provide_kennung_on_ping && (kennung[0] != 0)) {	/* unequals 0 in case there are identifiers provided with -r option */
+			if (frame.data[7] == 0x40) {
+			    uint32_t ping_uid =
+				(frame.data[0] << 24) + (frame.data[1] << 16) + (frame.data[2] << 8) + frame.data[3];
+			    if (verbose) {
+				printf("received PING reply for UID0x%X\n", ping_uid);
+			    }
+			    for (int i = 0; i < MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS; ++i) {
+				if (uid[i] == ping_uid) {
+				    /* check if assignment did take place already: */
+				    if ((kennung_provided & (1 << i)) == 0) {
+					if (verbose) {
+					    printf("send CAN 'set kennung' %d  to UID0x%X\n", kennung[i], uid[i]);
+					}
+					kennung_provided |= (1 << i);
+					/* send to CAN: */
+					unsigned char set_kennung_frame[20];
+					memcpy(set_kennung_frame, M_CAN_SET_KENNUNG, 13);
+					set_kennung_frame[5] = (uid[i] >> 24) & 0xFF;
+					set_kennung_frame[6] = (uid[i] >> 16) & 0xFF;
+					set_kennung_frame[7] = (uid[i] >> 8) & 0xFF;
+					set_kennung_frame[8] = uid[i] & 0xFF;
+					set_kennung_frame[10] = (kennung[i] >> 8) & 0xFF;
+					set_kennung_frame[11] = kennung[i] & 0xFF;
+					if (send_defined_can_frame(sc, set_kennung_frame, verbose) < 0) {
+					    printf("Error: can't send CAN set kennung\n");
+					}
+				    }
+				    break;
+				}
+			    }
 			}
 		    }
 		    break;
 
 		case 0:
-                    if ((kennung[0] != 0) && (frame.data[4] == 0x0C) && (frame.can_dlc==5)){ /* -r option specyfied and Geraetekennung query received*/
-			   uint32_t query_uid = (frame.data[0] << 24) + (frame.data[1] << 16) + (frame.data[2] << 8) + frame.data[3];
-			   if (verbose) {
-                               printf("received query for UID0x%X\n",query_uid);
-			   }
-			   for (int i=0; i<MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS;++i){
-                           	if (uid[i] == query_uid){
-                                       //send to CAN:
-                                       printf("send CAN 'set kennung' %d  to UID0x%X\n",kennung[i], uid[i]);
-                                       unsigned char set_kennung_frame [20];
-                                       memcpy(set_kennung_frame, M_CAN_SET_KENNUNG,13);
-                                       set_kennung_frame[5] = (uid[i] >> 24) & 0xFF;
-                                       set_kennung_frame[6] = (uid[i] >> 16) & 0xFF;
-                                       set_kennung_frame[7] = (uid[i] >> 8) & 0xFF;
-                                       set_kennung_frame[8] = uid[i] & 0xFF;
-                                       set_kennung_frame[10] = (kennung[i] >> 8) & 0xFF;
-                                       set_kennung_frame[11] = kennung[i] & 0xFF;
-                                       if (send_defined_can_frame(sc, set_kennung_frame,verbose) < 0) {
-                                          printf("Error: can't send CAN set kennung\n");
-                                       } 
-				       break;
+		    if ((kennung[0] != 0) && (frame.data[4] == 0x0C) && (frame.can_dlc == 5)) {	/* -r option specyfied and Geraetekennung query received */
+			uint32_t query_uid =
+			    (frame.data[0] << 24) + (frame.data[1] << 16) + (frame.data[2] << 8) + frame.data[3];
+			if (verbose) {
+			    printf("received query for UID0x%X\n", query_uid);
+			}
+			for (int i = 0; i < MAX_NUMBER_OF_IDENTIFIER_ASSIGNMENTS; ++i) {
+			    if (uid[i] == query_uid) {
+				/* send to CAN: */
+				printf("send CAN 'set kennung' %d  to UID0x%X\n", kennung[i], uid[i]);
+				unsigned char set_kennung_frame[20];
+				memcpy(set_kennung_frame, M_CAN_SET_KENNUNG, 13);
+				set_kennung_frame[5] = (uid[i] >> 24) & 0xFF;
+				set_kennung_frame[6] = (uid[i] >> 16) & 0xFF;
+				set_kennung_frame[7] = (uid[i] >> 8) & 0xFF;
+				set_kennung_frame[8] = uid[i] & 0xFF;
+				set_kennung_frame[10] = (kennung[i] >> 8) & 0xFF;
+				set_kennung_frame[11] = kennung[i] & 0xFF;
+				if (send_defined_can_frame(sc, set_kennung_frame, verbose) < 0) {
+				    printf("Error: can't send CAN set kennung\n");
 				}
-			   }
+				break;
+			    }
+			}
 		    }
 		    break;
- 
-
-
 
 		case 0x37:
 		    if (frame.can_dlc == 8) {
