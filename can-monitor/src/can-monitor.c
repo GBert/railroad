@@ -75,7 +75,7 @@ void INThandler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.19\n\n");
+    fprintf(stderr, "   Version 5.20\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -409,15 +409,27 @@ void decode_frame(struct can_frame *frame) {
 	break;
     /* S88 Event */
     case 0x22:
-	/* TODO: Parameter */
 	kenner = be16(frame->data);
 	kontakt = be16(&frame->data[2]);
 	if (frame->can_dlc == 4)
 	    printf("S88 Event Kennung %d Kontakt %d", kenner, kontakt);
 	else if (frame->can_dlc == 5)
 	    printf("S88 Event Kennung %d Kontakt %d Parameter %d", kenner, kontakt, frame->data[4]);
-	else if (frame->can_dlc == 7)
-	    printf("S88 Event Blockmodus Kennung %d Kontakt Start %d Parameter %d", kenner, kontakt, frame->data[6]);
+	else if (frame->can_dlc == 7) {
+	    printf("S88 Event Blockmodus Kennung %d Kontakt Start %d Kontakt Ende %d ", kenner, kontakt, be16(&frame->data[4]));
+	    /* TODO: Parameter */
+	    switch(frame->data[6]) {
+	    case 0x00:
+		printf("Pin zurück setzen");
+		break;
+	    case 0x01:
+		printf("Pin lesen");
+		break;
+	    default:
+		printf("Parameter %d", frame->data[6]);
+		break;
+	    }
+	}
 	printf("\n");
 	break;
     case 0x23:
