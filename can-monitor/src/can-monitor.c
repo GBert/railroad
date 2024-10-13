@@ -222,7 +222,7 @@ void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame
 
 void decode_frame(struct can_frame *frame) {
     uint32_t function, uid, cv_number, cv_index;
-    uint16_t kenner, kontakt;
+    uint16_t kenner;
     char s[32];
     float v;
 
@@ -409,36 +409,10 @@ void decode_frame(struct can_frame *frame) {
 	break;
     /* S88 Event */
     case 0x22:
-	kenner = be16(frame->data);
-	kontakt = be16(&frame->data[2]);
-	if (frame->can_dlc == 4)
-	    printf("S88 Event Kennung %d Kontakt %d", kenner, kontakt);
-	else if (frame->can_dlc == 5)
-	    printf("S88 Event Kennung %d Kontakt %d Parameter %d", kenner, kontakt, frame->data[4]);
-	else if (frame->can_dlc == 7) {
-	    printf("S88 Event Blockmodus Kennung %d Kontakt Start %d Kontakt Ende %d ", kenner, kontakt, be16(&frame->data[4]));
-	    /* TODO: Parameter */
-	    switch(frame->data[6]) {
-	    case 0x00:
-		printf("Pin zurück setzen");
-		break;
-	    case 0x01:
-		printf("Pin lesen");
-		break;
-	    default:
-		printf("Parameter %d", frame->data[6]);
-		break;
-	    }
-	}
-	printf("\n");
+	decode_cs2_s88(frame);
 	break;
     case 0x23:
-	kenner = be16(frame->data);
-	kontakt = be16(&frame->data[2]);
-	if (frame->can_dlc == 8)
-	    printf("S88 Event Kennung %d Kontakt %d Zustand alt %d Zustand neu %d Zeit %d",
-		   kenner, kontakt, frame->data[4], frame->data[5], be16(&frame->data[6]));
-	printf("\n");
+	decode_cs2_s88(frame);
 	break;
     /* SX1 Event */
     case 0x24:

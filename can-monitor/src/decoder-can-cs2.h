@@ -18,6 +18,7 @@ void decode_cs2_can_channels(struct can_frame *frame);
 void decode_cs2_can_identifier(struct can_frame *frame);
 void decode_cs2_config_data(struct can_frame *frame, int expconf);
 void decode_cs2_system(struct can_frame *frame);
+void decode_cs2_s88(struct can_frame *frame);
 void print_loc_proto(uint8_t proto);
 
 #endif /* _DECODE_CAN_CS2_H_ */

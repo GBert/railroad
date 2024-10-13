@@ -387,6 +387,41 @@ void decode_cs2_config_data(struct can_frame *frame, int expconf) {
     }
 }
 
+void decode_cs2_s88(struct can_frame *frame) {
+    uint16_t kenner, kontakt;
+
+    kenner = be16(frame->data);
+    kontakt = be16(&frame->data[2]);
+
+    if (frame->can_id & 0x00010000) {
+	if (frame->can_dlc == 8)
+	    printf("S88 Event Kennung %d Kontakt %d Zustand alt %d Zustand neu %d Zeit %d",
+		    kenner, kontakt, frame->data[4], frame->data[5], be16(&frame->data[6]));
+	printf("\n");
+    } else {
+	if (frame->can_dlc == 4)
+	    printf("S88 Event Kennung %d Kontakt %d", kenner, kontakt);
+	else if (frame->can_dlc == 5)
+	    printf("S88 Event Kennung %d Kontakt %d Parameter %d", kenner, kontakt, frame->data[4]);
+	else if (frame->can_dlc == 7) {
+	    printf("S88 Event Blockmodus Kennung %d Kontakt Start %d Kontakt Ende %d ", kenner, kontakt, be16(&frame->data[4]));
+	    /* TODO: Parameter */
+	    switch(frame->data[6]) {
+	    case 0x00:
+		printf("Pin zurück setzen");
+		break;
+	    case 0x01:
+		printf("Pin lesen");
+		break;
+	    default:
+		printf("Parameter %d", frame->data[6]);
+		break;
+	    }
+	}
+	printf("\n");
+    }
+}
+
 void decode_cs2_system(struct can_frame *frame) {
     uint32_t uid, response;
     uint16_t sid, wert;
