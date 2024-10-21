@@ -26,9 +26,8 @@ static char *pcsc_stringify_error(LONG rv) {
 
 void printbuffer(BYTE *buffer, BYTE length) {
     int i;
-    for (i = 0; i < length; i++) {
+    for (i = 0; i < length; i++)
 	printf("%02X ", buffer[i]);
-    }
     printf("\n");
 }
 
@@ -53,7 +52,7 @@ int main(void) {
     BYTE cmd1[] = { 0xFF, 0xA4, 0x00, 0x00, 0x01, 0x02 };
     BYTE cmd2[] = { 0xFF, 0xB0, 0x00, 0x00, 0x10 };
 
-    unsigned int i, j;
+    unsigned int i;
 
     rv = SCardEstablishContext(SCARD_SCOPE_USER, NULL, NULL, &hContext);
     CHECK("SCardEstablishContext", rv)
@@ -86,19 +85,17 @@ int main(void) {
     rv = SCardTransmit(hCard, &pioSendPci, cmd1, sizeof(cmd1), NULL, pbRecvBuffer, &dwRecvLength);
     CHECK("SCardTransmit", rv)
 	printf("response: ");
-    for (i = 0; i < dwRecvLength; i++)
-	printf("%02X ", pbRecvBuffer[i]);
-    printf("\n");
+    printbuffer(pbRecvBuffer,dwRecvLength);
 
     dwRecvLength = sizeof(pbRecvBuffer);
-    for (j = 0; j < 8192; j += CHUNK) {
+    for (i = 0; i < 8192; i += CHUNK) {
 
-	cmd2[2] = j >> 8;
-	cmd2[3] = j & 255;
+	cmd2[2] = i >> 8;
+	cmd2[3] = i & 255;
 
 	rv = SCardTransmit(hCard, &pioSendPci, cmd2, sizeof(cmd2), NULL, pbRecvBuffer, &dwRecvLength);
 	CHECK("SCardTransmit", rv);
-	memcpy(&MS2_BIN[j], pbRecvBuffer, 6);
+	memcpy(&MS2_BIN[i], pbRecvBuffer, 6);
 
 	printf("response: ");
 	printbuffer(pbRecvBuffer, dwRecvLength);
