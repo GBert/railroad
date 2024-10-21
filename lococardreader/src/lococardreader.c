@@ -89,13 +89,11 @@ int main(void) {
 
     dwRecvLength = sizeof(pbRecvBuffer);
     for (i = 0; i < 8192; i += CHUNK) {
-
 	cmd2[2] = i >> 8;
 	cmd2[3] = i & 255;
-
 	rv = SCardTransmit(hCard, &pioSendPci, cmd2, sizeof(cmd2), NULL, pbRecvBuffer, &dwRecvLength);
 	CHECK("SCardTransmit", rv);
-	memcpy(&MS2_BIN[i], pbRecvBuffer, 6);
+	memcpy(&MS2_BIN[i], pbRecvBuffer, CHUNK);
 
 	printf("response: ");
 	printbuffer(pbRecvBuffer, dwRecvLength);
