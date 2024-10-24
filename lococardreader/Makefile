@@ -18,7 +18,7 @@ define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Loco Card Reader
-  DEPENDS:=+pcscd +lpcsclite
+  DEPENDS:=+pcscd +libpcsclite
 endef
 
 define Package/$(PKG_NAME)/description
