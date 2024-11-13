@@ -371,8 +371,10 @@ void decode_cs2_config_data(struct can_frame *frame, int expconf) {
 		    }
 		} else {
 		    printf("unkomprimiert\n");
-		    if (expconf)
-			printf(RESET "%s", config_data.deflated_data);
+		    if (expconf) {
+			config_data.deflated_data[config_data.deflated_size] = 0;
+			printf(RESET "%s\n", config_data.deflated_data);
+		    }
 		}
 	    } else {
 		printf(RED "Config Data %s mit ungültigem CRC 0x%04X, erwartet 0x%04X\n",
