@@ -1310,23 +1310,43 @@ int read_loco_names(char *config_file) {
     return (EXIT_SUCCESS);
 }
 
-void show_loco_names(FILE *file, int low, int high) {
-    int i;
+int show_loco_list(FILE *file, int maxnmbr) {
+    int i = 0;
     struct loco_data_t *l;
 
-    i = 0;
+    fprintf(file, "[lokliste]\n .dv=0\n");
+    for (l = loco_data; l != NULL; l = l->hh.next) {
+    fprintf(file, " .idx=%i\n .llindex=%i\n", i, i);
+	fprintf(file, " .name=%s\n", l->name);
+//	fprintf(file, " .crc=%u\n", ...		TODO: where comes the CRC from?
+	if (++i >= maxnmbr) break;
+    }
+	return i;
+/*
+[lokliste]
+ .dv=0
+ .idx=0
+ .llindex=0
+ .name=DB AG 245 006
+ .crc=15244
+*/
+}
+
+void show_loco_names(FILE *file, int low, int nmbr) {
+    int i = 0;
+    struct loco_data_t *l;
+
+    int high = low + nmbr -1;
     fprintf(file, "[lokomotive]\n");
     for (l = loco_data; l != NULL; l = l->hh.next) {
-	if (i < low)
-	    continue;
-	if (i > high)
-	    break;
+	if ((i >= low) && (i <= high)) {
 	fprintf(file, "lok\n");
 	if (l->number)
 	    fprintf(file, " .nr=%u\n", l->number);
 	else if (i)
 	    fprintf(file, " .nr=%u\n", i);
 	fprintf(file, " .name=%s\n", l->name);
+	}
 	i++;
     }
     fprintf(file, "numloks\n");

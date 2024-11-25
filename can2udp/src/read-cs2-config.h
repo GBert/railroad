@@ -58,7 +58,8 @@ int read_track_config(char *config_file);
 void read_track_pages(char *dir);
 int read_loco_data(char *config_file, int config_type);
 int read_loco_names(char *config_file);
-void show_loco_names(FILE *file, int low, int high);
+int show_loco_list(FILE *file, int maxnmbr);
+void show_loco_names(FILE *file, int low, int nmbr);
 int get_loco_max(void);
 int get_loco_uid(char *name);
 
