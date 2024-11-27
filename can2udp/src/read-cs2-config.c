@@ -552,7 +552,7 @@ void print_tracks(void) {
     }
 }
 
-void print_loco(FILE * file, struct loco_data_t *l, unsigned int mask) {
+void print_loco(FILE *file, struct loco_data_t *l, unsigned int mask) {
     int extended_present, functions, i;
 
     if (mask & MS2FKT)
@@ -564,7 +564,7 @@ void print_loco(FILE * file, struct loco_data_t *l, unsigned int mask) {
     fprintf(file, " .uid=0x%x\n", l->uid);
     if (mask & MFXDEC)
 	fprintf(file, " .adresse=%u\n", l->uid & 0xff);
-    else if(mask & MFXHEX)
+    else if (mask & MFXHEX)
 	fprintf(file, " .adresse=0x%x\n", l->uid & 0xff);
     else
 	fprintf(file, " .adresse=0x%x\n", l->address);
@@ -641,7 +641,7 @@ void print_all_locos(FILE *file, unsigned int mask) {
 	print_loco(file, l, mask);
 }
 
-void print_loco_by_name(FILE * file, char *name, unsigned int mask) {
+void print_loco_by_name(FILE *file, char *name, unsigned int mask) {
     struct loco_data_t *l;
     HASH_FIND_STR(loco_data, name, l);
     if (l) {
@@ -1316,12 +1316,13 @@ int show_loco_list(FILE *file, int maxnmbr) {
 
     fprintf(file, "[lokliste]\n .dv=0\n");
     for (l = loco_data; l != NULL; l = l->hh.next) {
-    fprintf(file, " .idx=%i\n .llindex=%i\n", i, i);
+	fprintf(file, " .idx=%i\n .llindex=%i\n", i, i);
 	fprintf(file, " .name=%s\n", l->name);
-//	fprintf(file, " .crc=%u\n", ...		TODO: where comes the CRC from?
-	if (++i >= maxnmbr) break;
+/*      fprintf(file, " .crc=%u\n", ...         TODO: where comes the CRC from? */
+	if (++i >= maxnmbr)
+	    break;
     }
-	return i;
+    return i;
 /*
 [lokliste]
  .dv=0
@@ -1336,16 +1337,16 @@ void show_loco_names(FILE *file, int low, int nmbr) {
     int i = 0;
     struct loco_data_t *l;
 
-    int high = low + nmbr -1;
+    int high = low + nmbr - 1;
     fprintf(file, "[lokomotive]\n");
     for (l = loco_data; l != NULL; l = l->hh.next) {
 	if ((i >= low) && (i <= high)) {
-	fprintf(file, "lok\n");
-	if (l->number)
-	    fprintf(file, " .nr=%u\n", l->number);
-	else if (i)
-	    fprintf(file, " .nr=%u\n", i);
-	fprintf(file, " .name=%s\n", l->name);
+	    fprintf(file, "lok\n");
+	    if (l->number)
+		fprintf(file, " .nr=%u\n", l->number);
+	    else if (i)
+		fprintf(file, " .nr=%u\n", i);
+	    fprintf(file, " .name=%s\n", l->name);
 	}
 	i++;
     }

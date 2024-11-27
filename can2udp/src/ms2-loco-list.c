@@ -25,9 +25,9 @@
 #include "cs2-config.h"
 #include "read-cs2-config.h"
 
-#define MAX_LINE		1024
-#define MAX_BUFFER		4096
-#define MAXLOLILOCOS	40		// max nmbr of locos in MS2
+#define MAX_LINE	1024
+#define MAX_BUFFER	4096
+#define MAXLOLILOCOS	40	/* max nmbr of locos in MS2 */
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
 
 struct ms2_data_t {
@@ -98,13 +98,17 @@ void toc16(uint8_t *data, uint16_t x) {
 
 unsigned int read_pipe(FILE *input, char *d, size_t n) {
     unsigned int i = 0;
-	int g;
+    int g;
 
     while (((g = fgetc(input)) != EOF) && (i < n)) {
+	i++;
+	*d++ = g;
+	if (g == 0x0a)
+	    while (i % 8) {
 		i++;
-		*d++ = g;
-		if (g == 0x0a) while (i % 8) { i++; *d++ = ' '; }	// fill spaces
-	}
+		*d++ = ' ';
+	    }			/* fill spaces */
+    }
 
     memset(d, 0, (i % 8));
     return i;
@@ -185,18 +189,18 @@ int get_loco_list(struct ms2_data_t *ms2_data) {
     input_fd = fdopen(fdp[1], "w");
     output_fd = fdopen(fdp[0], "r");
 
-	if (ms2_data->loco_list_low < 0) {
-		int lle = show_loco_list(input_fd, MAXLOLILOCOS);
-		if (ms2_data->verbose)
-		printf("Locolist filled with %d entries\n", lle);
-	}
-    else show_loco_names(input_fd, ms2_data->loco_list_low, ms2_data->loco_list_len);
+    if (ms2_data->loco_list_low < 0) {
+	int lle = show_loco_list(input_fd, MAXLOLILOCOS);
+	if (ms2_data->verbose)
+	    printf("Locolist filled with %d entries\n", lle);
+    } else
+	show_loco_names(input_fd, ms2_data->loco_list_low, ms2_data->loco_list_len);
     fclose(input_fd);
 
     ms2_data->size = read_pipe(output_fd, ms2_data->config_data, MAX_BUFFER);
 
     nframes = (ms2_data->size + 7) / 8;
-//	ms2_data->size = nframes * 8;
+/*  ms2_data->size = nframes * 8; */
     ms2_data->crc = CRCCCITT((unsigned char *)ms2_data->config_data, nframes * 8, 0xffff);
 
     if (ms2_data->verbose)
@@ -223,7 +227,7 @@ int get_loco_by_name(struct ms2_data_t *ms2_data) {
     ms2_data->size = read_pipe(output_fd, ms2_data->config_data, MAX_BUFFER);
 
     nframes = (ms2_data->size + 7) / 8;
-//	ms2_data->size = nframes * 8;
+/*  ms2_data->size = nframes * 8; */
     ms2_data->crc = CRCCCITT((unsigned char *)ms2_data->config_data, nframes * 8, 0xffff);
 
     if (ms2_data->verbose)
@@ -251,10 +255,10 @@ int main(int argc, char **argv) {
     socklen_t caddrlen = sizeof(caddr);
     fd_set read_fds;
     struct ms2_data_t ms2_data;
-	enum {W_IDLE, W_NAME1, W_NAME2, W_NAMEV} waitstate = W_IDLE;
+    enum { W_IDLE, W_NAME1, W_NAME2, W_NAMEV } waitstate = W_IDLE;
 
     int background = 0, simgui = 0, simmms = 0;
-	uint16_t dev;
+    uint16_t dev;
     strcpy(ifr.ifr_name, "can0");
     strcpy(loco_dir, "/www/config");
 
@@ -352,75 +356,74 @@ int main(int argc, char **argv) {
 		}
 
 		switch ((frame.can_id & 0x00FF0000UL) >> 16) {
-		case 0x31:  // Ping response
-			dev = frame.data[6] << 8 | frame.data[7];
-			frame.can_id = 0x00314711;
-			if ((dev & 0xFFF0) == 0x0030) {			// MS2 active
-				if (simgui) {
+		/* Ping response */
+		case 0x31:
+		    dev = frame.data[6] << 8 | frame.data[7];
+		    frame.can_id = 0x00314711;
+		    if ((dev & 0xFFF0) == 0x0030) {	// MS2 active
+			if (simgui) {
 			    memcpy(frame.data, M_SIMU_GUI, 8);
 			    send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
-				}
-				else if (simmms) {
+			} else if (simmms) {
 			    memcpy(frame.data, M_SIMU_MAS, 4);
 			    send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
-				}
 			}
-			break;
+		    }
+		    break;
 		case 0x40:
-			if (frame.can_dlc != 8) continue;
-			if ((frame.can_id & 0xFFFF) != ms2_data.hash) waitstate = W_IDLE;
-			ms2_data.hash = frame.can_id & 0XFFFF;	// must be from same source
+		    if (frame.can_dlc != 8)
+			continue;
+		    if ((frame.can_id & 0xFFFF) != ms2_data.hash)
+			waitstate = W_IDLE;
+		    ms2_data.hash = frame.can_id & 0XFFFF;	// must be from same source
 
-			switch (waitstate) {
-			case W_NAME1:
-			    memcpy(ms2_data.loco_name, frame.data, 8);
-				waitstate = W_NAME2;
-				break;
-			case W_NAME2:
-			    memcpy(&ms2_data.loco_name[8], frame.data, 8);
+		    switch (waitstate) {
+		    case W_NAME1:
+			memcpy(ms2_data.loco_name, frame.data, 8);
+			waitstate = W_NAME2;
+			break;
+		    case W_NAME2:
+			memcpy(&ms2_data.loco_name[8], frame.data, 8);
+			if (ms2_data.verbose)
+			    printf("sending lokinfo >%s<\n", ms2_data.loco_name);
+			frame.can_id = 0x00410300;
+			send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
+			get_loco_by_name(&ms2_data);
+			send_config_data(&ms2_data);
+			waitstate = W_IDLE;
+			break;
+		    case W_NAMEV:
+			sscanf((char *)frame.data, "%d %d", &ms2_data.loco_list_low, &ms2_data.loco_list_len);
+			if (ms2_data.verbose)
+			    printf("requesting loco names from %d len %d\n", ms2_data.loco_list_low, ms2_data.loco_list_len);
+			frame.can_id = 0x00410300;
+			send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
+			get_loco_list(&ms2_data);
+			send_config_data(&ms2_data);
+			waitstate = W_IDLE;
+			break;
+		    default:
+			if (memcmp(&frame.data[0], M_GET_LOCO_LIST, 8) == 0) {
 			    if (ms2_data.verbose)
-					printf("sending lokinfo >%s<\n", ms2_data.loco_name);
+				printf("requesting loco name list\n");
 			    frame.can_id = 0x00410300;
 			    send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
-			    get_loco_by_name(&ms2_data);
+			    ms2_data.loco_list_low = -1;
+			    get_loco_list(&ms2_data);
 			    send_config_data(&ms2_data);
-				waitstate = W_IDLE;
-				break;
-			case W_NAMEV:
-				sscanf((char *)frame.data, "%d %d", &ms2_data.loco_list_low, &ms2_data.loco_list_len);
-				if (ms2_data.verbose)
-					printf("requesting loco names from %d len %d\n", ms2_data.loco_list_low, ms2_data.loco_list_len);
-				frame.can_id = 0x00410300;
-				send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
-				get_loco_list(&ms2_data);
-				send_config_data(&ms2_data);
-				waitstate = W_IDLE;
-				break;
-			default:
-				if (memcmp(&frame.data[0], M_GET_LOCO_LIST, 8) == 0) {
-					if (ms2_data.verbose)
-						printf("requesting loco name list\n");
-					frame.can_id = 0x00410300;
-					send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
-					ms2_data.loco_list_low = -1;
-					get_loco_list(&ms2_data);
-					send_config_data(&ms2_data);
-				}
-				else if (memcmp(&frame.data[0], M_GET_LOCO_NAME, 8) == 0) {
-					waitstate = W_NAMEV;
-				}
-				else if (memcmp(&frame.data[0], M_GET_LOCO_INFO, 7) == 0) {
-					waitstate = W_NAME1;
-					memset(ms2_data.loco_name, 0, sizeof(ms2_data.loco_name));
-				}
-				else if (memcmp(&frame.data[0], M_GET_MS_CONFIG, 8) == 0) {
-					if (ms2_data.verbose)
-						printf("requesting MS2 config\n");
-					frame.can_id = 0x00410300;
-					send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
-					get_msconfig_data(&ms2_data);
-					send_config_data(&ms2_data);
-				}
+			} else if (memcmp(&frame.data[0], M_GET_LOCO_NAME, 8) == 0) {
+			    waitstate = W_NAMEV;
+			} else if (memcmp(&frame.data[0], M_GET_LOCO_INFO, 7) == 0) {
+			    waitstate = W_NAME1;
+			    memset(ms2_data.loco_name, 0, sizeof(ms2_data.loco_name));
+			} else if (memcmp(&frame.data[0], M_GET_MS_CONFIG, 8) == 0) {
+			    if (ms2_data.verbose)
+				printf("requesting MS2 config\n");
+			    frame.can_id = 0x00410300;
+			    send_can_frame(ms2_data.sc, &frame, ms2_data.verbose);
+			    get_msconfig_data(&ms2_data);
+			    send_config_data(&ms2_data);
+			}
 		    }
 		    break;
 		}
