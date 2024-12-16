@@ -680,6 +680,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextStartLocoAutomode */ { "Start locomotive in automode", "Starte Lokomotive im Automodus", "Poner locomotora en marcha en autómodo" },
 /* TextStartTrack */ { "Start track", "Startgleis", "Vía de inicio" },
 /* TextStarting */ { "Starting {0}", "Starte {0}", "Encendiendo {0}" },
+/* TextStop */ { "stop", "anhalten", "parar" },
 /* TextStopAllLocos */ { "Stop all locomotives", "Stoppe alle Lokomotiven", "Detener todas las locomotoras" },
 /* TextStopAt */ { "Stop at", "Anhalten bei", "Parar a" },
 /* TextStopLoco */ { "Stop locomotive", "Stoppe Lokomotive", "Parar locomotora" },

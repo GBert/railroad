@@ -164,8 +164,9 @@ namespace Server { namespace Web
 		const std::vector<const DataModel::Route*> routes = track->GetRoutes();
 		for (auto route : routes)
 		{
-			const std::string routeId = std::to_string(route->GetID());
-			AddOnClickMenuEntry(route->GetName(), "fireRequestAndForget('/?cmd=locoaddtimetable&track=" + trackId + "&route=" + routeId + "');", "track_start_loco");
+			const std::string cmd = "fireRequestAndForget('/?cmd=locoaddtimetable&track=" + trackId + "&route=" + std::to_string(route->GetID()) + "&followup=";
+			AddOnClickMenuEntry(route->GetName() + " & " + Languages::GetText(Languages::TextStop), cmd + "manual');", "track_start_loco");
+			AddOnClickMenuEntry(route->GetName() + " & " + Languages::GetText(Languages::TextAutomode), cmd + "automode');", "track_start_loco");
 		}
 
 		AddOnClickMenuEntry(Languages::TextStopLoco, "fireRequestAndForget('/?cmd=trackstoploco&" + urlIdentifier + "');", "track_stop_loco");

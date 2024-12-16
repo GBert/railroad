@@ -3904,7 +3904,9 @@ void Manager::LocoBaseStopAllImmediately(const ControlType controlType)
 	}
 }
 
-bool Manager::LocoBaseAddTimeTable(const ObjectIdentifier& locoBaseIdentifier, const RouteID routeID)
+bool Manager::LocoBaseAddTimeTable(const ObjectIdentifier& locoBaseIdentifier,
+	const RouteID routeID,
+	const bool automode)
 {
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
 	if (!locoBase)
@@ -3916,7 +3918,7 @@ bool Manager::LocoBaseAddTimeTable(const ObjectIdentifier& locoBaseIdentifier, c
 	{
 		return false;
 	}
-	locoBase->AddTimeTable(route, RouteStop);
+	locoBase->AddTimeTable(route, automode ? RouteAuto : RouteStop);
 	return true;
 }
 

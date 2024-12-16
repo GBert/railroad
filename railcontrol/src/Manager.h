@@ -653,7 +653,9 @@ class Manager
 		bool LocoBaseStopAll();
 		void LocoBaseStopAllImmediately(const ControlType controlType);
 
-		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoBaseIdentifier, const RouteID routeID);
+		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoBaseIdentifier,
+			const RouteID routeID,
+			const bool automode);
 
 		std::string GetCs2Lokomotive() const;
 		static std::string GetCs2Magnetartikel(const DataModel::AccessoryBase* base);
@@ -754,7 +756,7 @@ class Manager
 		void AccessoryState(const ControlType controlType, DataModel::Accessory* accessory, const DataModel::AccessoryState state, const bool force);
 		void SwitchState(const ControlType controlType, DataModel::Switch* mySwitch, const DataModel::AccessoryState state, const bool force);
 
-		inline void FeedbackState(DataModel::Feedback* feedback, const DataModel::Feedback::FeedbackState state)
+		static inline void FeedbackState(DataModel::Feedback* feedback, const DataModel::Feedback::FeedbackState state)
 		{
 			feedback->SetState(state);
 		}

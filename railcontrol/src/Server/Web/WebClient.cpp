@@ -1174,7 +1174,8 @@ namespace Server { namespace Web
 		const TrackID trackID = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
 		const ObjectIdentifier locoBaseIdentifier = manager.GetLocoBaseIdentifierOfTrack(trackID);
 		const RouteID routeID = static_cast<RouteID>(Utils::Utils::GetIntegerMapEntry(arguments, "route"));
-		bool ret = manager.LocoBaseAddTimeTable(locoBaseIdentifier, routeID);
+		const bool automode = Utils::Utils::GetStringMapEntry(arguments, "followup", "manual").compare("automode") == 0;
+		bool ret = manager.LocoBaseAddTimeTable(locoBaseIdentifier, routeID, automode);
 		manager.TrackStartLocoBase(trackID);
 		ReplyHtmlWithHeaderAndParagraph(ret ? "Route added" : "Route not added");
 	}

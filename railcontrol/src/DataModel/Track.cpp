@@ -427,12 +427,14 @@ namespace DataModel
 		const bool allowLocoTurn,
 		std::vector<Route*>& validRoutes) const
 	{
-		std::lock_guard<std::mutex> Guard(updateMutex);
-		for (auto route : routes)
 		{
-			if (route->FromTrackOrientation(logger, GetID(), locoOrientation, loco, allowLocoTurn))
+			std::lock_guard<std::mutex> Guard(updateMutex);
+			for (auto route : routes)
 			{
-				validRoutes.push_back(route);
+				if (route->FromTrackOrientation(logger, GetID(), locoOrientation, loco, allowLocoTurn))
+				{
+					validRoutes.push_back(route);
+				}
 			}
 		}
 		OrderValidRoutes(validRoutes);

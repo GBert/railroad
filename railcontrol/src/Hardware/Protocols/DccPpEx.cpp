@@ -86,6 +86,8 @@ namespace Hardware
 			SendInternal(buffer);
 			buffer[1] = 'T';
 			SendInternal(buffer);
+			buffer[1] = 'Z';
+			SendInternal(buffer);
 		}
 
 		void DccPpEx::ProgramWrite(const ProgramMode mode,

@@ -680,6 +680,7 @@ class Languages
 			TextStartLocoAutomode,
 			TextStartTrack,
 			TextStarting,
+			TextStop,
 			TextStopAllLocos,
 			TextStopAt,
 			TextStopLoco,
@@ -857,17 +858,17 @@ class Languages
 			MaxLanguages
 		};
 
-		static void SetDefaultLanguage(Language language)
+		static inline void SetDefaultLanguage(Language language)
 		{
 			defaultLanguage = language >= MaxLanguages ? EN : language;
 		}
 
-		static Language GetDefaultLanguage()
+		static inline Language GetDefaultLanguage()
 		{
 			return defaultLanguage;
 		}
 
-		static const char* GetText(const TextSelector selector)
+		static inline const char* GetText(const TextSelector selector)
 		{
 			return GetText(defaultLanguage, selector);
 		}
@@ -883,17 +884,17 @@ class Languages
 			return languages[selector][language];
 		}
 
-		static const char* GetOnOff(const bool on)
+		static inline const char* GetOnOff(const bool on)
 		{
 			return GetText(on ? TextOn : TextOff);
 		}
 
-		static const char* GetLeftRight(const Orientation direction)
+		static inline const char* GetLeftRight(const Orientation direction)
 		{
 			return GetText(direction == OrientationRight ? TextRight : TextLeft);
 		}
 
-		static const char* GetGreenRed(const DataModel::AccessoryState state)
+		static inline const char* GetGreenRed(const DataModel::AccessoryState state)
 		{
 			return GetText(state == DataModel::AccessoryStateOn ? TextGreen : TextRed);
 		}
