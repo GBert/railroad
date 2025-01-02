@@ -1969,6 +1969,7 @@ const map<string,TrackID> Manager::TrackListIdByName() const
 bool Manager::TrackSave(TrackID trackID,
 	const std::string& name,
 	const bool showName,
+	const std::string& displayName,
 	const LayoutPosition posX,
 	const LayoutPosition posY,
 	const LayoutPosition posZ,
@@ -2016,6 +2017,7 @@ bool Manager::TrackSave(TrackID trackID,
 	// update existing track
 	track->SetName(CheckObjectName(tracks, trackMutex, trackID, name.size() == 0 ? "T" : name));
 	track->SetShowName(showName);
+	track->SetDisplayName(displayName);
 	track->SetHeight(height);
 	track->SetRotation(rotation);
 	track->SetPosX(posX);
@@ -3646,7 +3648,7 @@ bool Manager::LocoBaseReleaseOnTrack(const TrackID trackID)
 	{
 		return false;
 	}
-	const ObjectIdentifier& locoBaseIdentifier = track->GetLocoBase();
+	const ObjectIdentifier locoBaseIdentifier = track->GetLocoBase();
 	track->ReleaseForce(logger, locoBaseIdentifier);
 	LocoBase* locoBase = GetLocoBase(locoBaseIdentifier);
 	if (!locoBase)

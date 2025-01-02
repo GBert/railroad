@@ -62,6 +62,8 @@ namespace DataModel
 		str += to_string(releaseWhenFree);
 		str += ";showname=";
 		str += to_string(showName);
+		str += ";displayname=";
+		str += displayName;
 		str += ";";
 		str += LayoutItem::Serialize();
 		str += ";";
@@ -113,6 +115,7 @@ namespace DataModel
 		allowLocoTurn = Utils::Utils::GetBoolMapEntry(arguments, "allowlocoturn", true);
 		releaseWhenFree = Utils::Utils::GetBoolMapEntry(arguments, "releasewhenfree", false);
 		showName = Utils::Utils::GetBoolMapEntry(arguments, "showname", true);
+		displayName = Utils::Utils::GetStringMapEntry(arguments, "displayname", GetName());
 		SetWidth(Width1);
 		SetVisible(VisibleYes);
 		trackType = static_cast<TrackType>(Utils::Utils::GetIntegerMapEntry(arguments, "tracktype", TrackTypeStraight));

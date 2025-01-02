@@ -204,6 +204,16 @@ namespace DataModel
 				this->showName = showName;
 			}
 
+			inline const std::string& GetDisplayName() const
+			{
+				return this->displayName;
+			}
+
+			inline void SetDisplayName(const std::string& displayName)
+			{
+				this->displayName = displayName;
+			}
+
 			inline DataModel::Cluster* GetCluster() const
 			{
 				return cluster;
@@ -274,5 +284,6 @@ namespace DataModel
 			bool allowLocoTurn;
 			bool releaseWhenFree;
 			bool showName;
+			std::string displayName;
 	};
 } // namespace DataModel

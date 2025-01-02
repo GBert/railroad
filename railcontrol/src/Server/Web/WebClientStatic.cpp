@@ -82,8 +82,8 @@ namespace Server { namespace Web
 			{
 				argumentName = Languages::TextDeviceType;
 				map<string,string> masterSlaveOptions;
-				masterSlaveOptions["1"] = Languages::Languages::GetText(Languages::Languages::TextMaster);
-				masterSlaveOptions["0"] = Languages::Languages::GetText(Languages::Languages::TextSlave);
+				masterSlaveOptions["1"] = Languages::Languages::GetText(Languages::Languages::TextSlave);
+				masterSlaveOptions["0"] = Languages::Languages::GetText(Languages::Languages::TextMaster);
 				return HtmlTagSelectWithLabel(argumentNumber, argumentName, masterSlaveOptions, value);
 			}
 

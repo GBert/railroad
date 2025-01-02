@@ -172,6 +172,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextDifferentPushpullTypes */ { "Locomotive and route {0} have different push-pull types", "Lokomotive und Fahrstrasse {0} haben verschiedene Wendezugeinstellungen", "Tren e itinerario {0} tienen ajustes de push-pull differentes" },
 /* TextDifferentTrainTypes */ { "Locomotive and route {0} have different train types", "Lokomotive und Fahrstrasse {0} haben verschiedene Zugtypen", "Tren e itinerario {0} tienen ajustes de tipos de trenes differentes" },
 /* TextDirect */ { "Direct", "Direkt", "Directo" },
+/* TextDisplayName */ { "Display name", "Angezeigter Name", "Nombre mostrado" },
 /* TextDoNotCare */ { "Do not care", "Egal", "No importa" },
 /* TextDroppingTable */ { "Dropping table {0}", "Lösche Tabelle {0}", "Eliminando tabla {0}" },
 /* TextDuration */ { "Switching duration (ms)", "Schaltzeit (ms)", "Duración de conmutación (ms)" },

@@ -91,6 +91,7 @@ namespace Server { namespace Web
 		TrackID trackID = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
 		string name = Languages::GetText(Languages::TextNew);
 		bool showName = true;
+		string displayName;
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
@@ -110,6 +111,7 @@ namespace Server { namespace Web
 			{
 				name = track->GetName();
 				showName = track->GetShowName();
+				displayName = track->GetDisplayName();
 				posx = track->GetPosX();
 				posy = track->GetPosY();
 				posz = track->GetPosZ();
@@ -184,6 +186,7 @@ namespace Server { namespace Web
 				break;
 		}
 		mainContent.AddChildTag(i_showName);
+		mainContent.AddChildTag(HtmlTagInputTextWithLabel("displayname", Languages::TextDisplayName, displayName));
 		mainContent.AddChildTag(HtmlTagSelectWithLabel("tracktype", Languages::TextType, typeOptions, type).AddAttribute("onchange", "onChangeTrackType();return false;"));
 		HtmlTag i_length("div");
 		i_length.AddId("i_length");
@@ -220,6 +223,7 @@ namespace Server { namespace Web
 		const TrackID trackId = Utils::Utils::GetIntegerMapEntry(arguments, "track", TrackNone);
 		const string name = Utils::Utils::GetStringMapEntry(arguments, "name");
 		const bool showName = Utils::Utils::GetBoolMapEntry(arguments, "showname", true);
+		const string displayName = Utils::Utils::GetStringMapEntry(arguments, "displayname");
 		const LayoutPosition posX = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		const LayoutPosition posY = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		const LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
@@ -276,6 +280,7 @@ namespace Server { namespace Web
 		if (!manager.TrackSave(trackId,
 			name,
 			showName,
+			displayName,
 			posX,
 			posY,
 			posZ,

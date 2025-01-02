@@ -172,6 +172,7 @@ class Languages
 			TextDifferentPushpullTypes,
 			TextDifferentTrainTypes,
 			TextDirect,
+			TextDisplayName,
 			TextDoNotCare,
 			TextDroppingTable,
 			TextDuration,

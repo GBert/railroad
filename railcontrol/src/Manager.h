@@ -426,6 +426,7 @@ class Manager
 		bool TrackSave(const TrackID trackID,
 			const std::string& name,
 			const bool showName,
+			const std::string& displayName,
 			const DataModel::LayoutItem::LayoutPosition posX,
 			const DataModel::LayoutItem::LayoutPosition posY,
 			const DataModel::LayoutItem::LayoutPosition posZ,
