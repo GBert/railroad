@@ -495,8 +495,11 @@ namespace DataModel
 		feedbackIdFirstCreep = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
 		feedbackIdReduced = routeFirst->GetFeedbackIdReduced();
+		reducedDelay = routeFirst->GetReducedDelay();
 		feedbackIdCreep = routeFirst->GetFeedbackIdCreep();
+		creepDelay = routeFirst->GetCreepDelay();
 		feedbackIdStop = routeFirst->GetFeedbackIdStop();
+		stopDelay = routeFirst->GetStopDelay();
 		feedbackIdOver = routeFirst->GetFeedbackIdOver();
 
 		wait = routeFirst->GetWaitAfterRelease();
@@ -723,6 +726,66 @@ namespace DataModel
 		}
 	}
 
+	void LocoBase::LocationStopReached(const FeedbackID feedbackID, const Delay stopDelay)
+	{
+		Utils::Utils::SleepForMilliseconds(stopDelay * 100);
+		if (feedbackID != feedbackIdStop)
+		{
+			return;
+		}
+		LocationStopReached();
+	}
+
+	void LocoBase::LocationStopReached()
+	{
+		manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
+		feedbackIdsReached.EnqueueBack(feedbackIdStop);
+	}
+
+	void LocoBase::LocationCreepReached(const FeedbackID feedbackID, const Delay creepDelay)
+	{
+		Utils::Utils::SleepForMilliseconds(creepDelay * 100);
+		if (feedbackID != feedbackIdCreep)
+		{
+			return;
+		}
+		LocationCreepReached();
+	}
+
+	void LocoBase::LocationCreepReached()
+	{
+		if (speed > creepingSpeed)
+		{
+			manager->LocoBaseSpeed(ControlTypeInternal, this, creepingSpeed);
+		}
+		if (feedbackIdFirst != FeedbackNone)
+		{
+			feedbackIdsReached.EnqueueBack(feedbackIdFirst);
+		}
+	}
+
+	void LocoBase::LocationReducedReached(const FeedbackID feedbackID, const Delay reducedDelay)
+	{
+		Utils::Utils::SleepForMilliseconds(reducedDelay * 100);
+		if (feedbackID != feedbackIdReduced)
+		{
+			return;
+		}
+		LocationReducedReached();
+	}
+
+	void LocoBase::LocationReducedReached()
+	{
+		if (speed > reducedSpeed)
+		{
+			manager->LocoBaseSpeed(ControlTypeInternal, this, reducedSpeed);
+		}
+		if (feedbackIdFirst != 0)
+		{
+			feedbackIdsReached.EnqueueBack(feedbackIdFirst);
+		}
+	}
+
 	void LocoBase::LocationReached(const FeedbackID feedbackID)
 	{
 		if (feedbackID == feedbackIdOver)
@@ -735,33 +798,39 @@ namespace DataModel
 
 		if (feedbackID == feedbackIdStop)
 		{
-			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
-			feedbackIdsReached.EnqueueBack(feedbackIdStop);
+			if (stopDelay)
+			{
+				__attribute((unused)) auto r = std::async(std::launch::async, LocationStopReachedStatic, this, feedbackID, stopDelay);
+			}
+			else
+			{
+				LocationStopReached();
+			}
 			return;
 		}
 
 		if (feedbackID == feedbackIdCreep)
 		{
-			if (speed > creepingSpeed)
+			if (creepDelay)
 			{
-				manager->LocoBaseSpeed(ControlTypeInternal, this, creepingSpeed);
+				__attribute((unused)) auto r = std::async(std::launch::async, LocationCreepReachedStatic, this, feedbackID, creepDelay);
 			}
-			if (feedbackIdFirst != 0)
+			else
 			{
-				feedbackIdsReached.EnqueueBack(feedbackIdFirst);
+				LocationCreepReached();
 			}
 			return;
 		}
 
 		if (feedbackID == feedbackIdReduced)
 		{
-			if (speed > reducedSpeed)
+			if (reducedDelay)
 			{
-				manager->LocoBaseSpeed(ControlTypeInternal, this, reducedSpeed);
+				__attribute((unused)) auto r = std::async(std::launch::async, LocationReducedReachedStatic, this, feedbackID, reducedDelay);
 			}
-			if (feedbackIdFirst != 0)
+			else
 			{
-				feedbackIdsReached.EnqueueBack(feedbackIdFirst);
+				LocationReducedReached();
 			}
 			return;
 		}

@@ -509,11 +509,15 @@ input {
 	width: calc(100% - 10px);
 }
 
+.select_feedback,
+.select_feedback .dropdown,
 .select_track,
 .select_track .dropdown {
 	width: 160px;
 }
 
+.select_delay,
+.select_delay .dropdown,
 .select_orientation,
 .select_orientation .dropdown {
 	width: 80px;

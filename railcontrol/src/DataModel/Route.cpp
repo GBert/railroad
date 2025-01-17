@@ -68,8 +68,11 @@ namespace DataModel
 		str += ";toorientation=" + to_string(toOrientation);
 		str += ";speed=" + to_string(speed);
 		str += ";feedbackIdReduced=" + to_string(feedbackIdReduced);
+		str += ";reduceddelay=" + to_string(reducedDelay);
 		str += ";feedbackIdCreep=" + to_string(feedbackIdCreep);
+		str += ";creepdelay=" + to_string(creepDelay);
 		str += ";feedbackIdStop=" + to_string(feedbackIdStop);
+		str += ";stopdelay=" + to_string(stopDelay);
 		str += ";feedbackIdOver=" + to_string(feedbackIdOver);
 		str += ";pushpull=" + to_string(pushpull);
 		str += ";propulsion=" + to_string(propulsion);
@@ -106,8 +109,11 @@ namespace DataModel
 			toOrientation = OrientationRight;
 			speed = SpeedTravel;
 			feedbackIdReduced = FeedbackNone;
+			reducedDelay = 0;
 			feedbackIdCreep = FeedbackNone;
+			creepDelay = 0;
 			feedbackIdStop = FeedbackNone;
+			stopDelay = 0;
 			feedbackIdOver = FeedbackNone;
 			pushpull = PushpullTypeBoth;
 			propulsion = PropulsionAll;
@@ -124,8 +130,11 @@ namespace DataModel
 		toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		speed = static_cast<Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", SpeedTravel));
 		feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdReduced", FeedbackNone);
+		reducedDelay = Utils::Utils::GetIntegerMapEntry(arguments, "reduceddelay", 0);
 		feedbackIdCreep = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdCreep", FeedbackNone);
+		creepDelay = Utils::Utils::GetIntegerMapEntry(arguments, "creepdelay", 0);
 		feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdStop", FeedbackNone);
+		stopDelay = Utils::Utils::GetIntegerMapEntry(arguments, "stopdelay", 0);
 		feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackIdOver", FeedbackNone);
 		pushpull = static_cast<PushpullType>(Utils::Utils::GetIntegerMapEntry(arguments, "pushpull", PushpullTypeBoth));
 		propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", propulsion));

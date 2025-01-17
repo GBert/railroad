@@ -21,3 +21,4 @@
 - Autokonversion der Protokolle bei Zentralenwechsel
 - CS2-Server
 - Verzögerung bei Feedback an / aus konfigurierbar
+- SocketCAN (für Märklin CAN)

@@ -95,8 +95,11 @@ namespace Server { namespace Web
 		Orientation toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		Route::Speed speed = static_cast<Route::Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", Route::SpeedTravel));
 		FeedbackID feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackreduced", FeedbackNone);
+		Delay reducedDelay = Utils::Utils::GetIntegerMapEntry(arguments, "reduceddelay", 0);
 		FeedbackID feedbackIdCreep = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackcreep", FeedbackNone);
+		Delay creepDelay = Utils::Utils::GetIntegerMapEntry(arguments, "creepdelay", 0);
 		FeedbackID feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackstop", FeedbackNone);
+		Delay stopDelay = Utils::Utils::GetIntegerMapEntry(arguments, "stopdelay", 0);
 		FeedbackID feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackover", FeedbackNone);
 		Pause waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
 		RouteID followUpRoute = Utils::Utils::GetIntegerMapEntry(arguments, "followuproute", RouteNone);
@@ -125,8 +128,11 @@ namespace Server { namespace Web
 				toOrientation = route->GetToOrientation();
 				speed = route->GetSpeed();
 				feedbackIdReduced = route->GetFeedbackIdReduced();
+				reducedDelay = route->GetReducedDelay();
 				feedbackIdCreep = route->GetFeedbackIdCreep();
+				creepDelay = route->GetCreepDelay();
 				feedbackIdStop = route->GetFeedbackIdStop();
+				stopDelay = route->GetStopDelay();
 				feedbackIdOver = route->GetFeedbackIdOver();
 				waitAfterRelease = route->GetWaitAfterRelease();
 				followUpRoute = route->GetFollowUpRoute();
@@ -228,7 +234,7 @@ namespace Server { namespace Web
 		tracksDiv.AddChildTag(HtmlTagSelectWithLabel("speed", Languages::TextSpeed, speedOptions, speed));
 		HtmlTag feedbackDiv("div");
 		feedbackDiv.AddId("feedbacks");
-		feedbackDiv.AddChildTag(HtmlTagSelectFeedbacksOfTrack(toTrack, followUpRoute, feedbackIdReduced, feedbackIdCreep, feedbackIdStop, feedbackIdOver));
+		feedbackDiv.AddChildTag(HtmlTagSelectFeedbacksOfTrack(toTrack, followUpRoute, feedbackIdReduced, reducedDelay, feedbackIdCreep, creepDelay, feedbackIdStop, stopDelay, feedbackIdOver));
 		tracksDiv.AddChildTag(feedbackDiv);
 
 		map<Route::PushpullType,Languages::TextSelector> pushpullOptions;
@@ -322,8 +328,11 @@ namespace Server { namespace Web
 		const Orientation toOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "toorientation", OrientationRight));
 		const Route::Speed speed = static_cast<Route::Speed>(Utils::Utils::GetIntegerMapEntry(arguments, "speed", Route::SpeedTravel));
 		const FeedbackID feedbackIdReduced = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackreduced", FeedbackNone);
+		const Delay reducedDelay = Utils::Utils::GetIntegerMapEntry(arguments, "reduceddelay", 0);
 		const FeedbackID feedbackIdCreep = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackcreep", FeedbackNone);
+		const Delay creepDelay = Utils::Utils::GetIntegerMapEntry(arguments, "creepdelay", 0);
 		const FeedbackID feedbackIdStop = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackstop", FeedbackNone);
+		const Delay stopDelay = Utils::Utils::GetIntegerMapEntry(arguments, "stopdelay", 0);
 		const FeedbackID feedbackIdOver = Utils::Utils::GetIntegerMapEntry(arguments, "feedbackover", FeedbackNone);
 		const Pause waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
 		const RouteID followUpRoute = Utils::Utils::GetIntegerMapEntry(arguments, "followuproute", RouteNone);
@@ -419,8 +428,11 @@ namespace Server { namespace Web
 			toOrientation,
 			speed,
 			feedbackIdReduced,
+			reducedDelay,
 			feedbackIdCreep,
+			creepDelay,
 			feedbackIdStop,
+			stopDelay,
 			feedbackIdOver,
 			waitAfterRelease,
 			followUpRoute,
@@ -921,8 +933,11 @@ namespace Server { namespace Web
 	HtmlTag WebClientRoute::HtmlTagSelectFeedbacksOfTrack(const TrackID trackID,
 		const RouteID followUpRoute,
 		const FeedbackID feedbackIdReduced,
+		const Delay reducedDelay,
 		const FeedbackID feedbackIdCreep,
+		const Delay creepDelay,
 		const FeedbackID feedbackIdStop,
+		const Delay stopDelay,
 		const FeedbackID feedbackIdOver) const
 	{
 		HtmlTag tag;
@@ -934,10 +949,37 @@ namespace Server { namespace Web
 		map<string,FeedbackID> feedbacks = manager.FeedbacksOfTrack(trackID);
 		map<string,FeedbackID> feedbacksWithNone = feedbacks;
 		feedbacksWithNone["-"] = FeedbackNone;
+		map<string,Delay> delayOptions;
+		delayOptions["0.0s"] = 0;
+		delayOptions["0.1s"] = 1;
+		delayOptions["0.2s"] = 2;
+		delayOptions["0.3s"] = 3;
+		delayOptions["0.4s"] = 4;
+		delayOptions["0.5s"] = 5;
+		delayOptions["0.6s"] = 6;
+		delayOptions["0.7s"] = 7;
+		delayOptions["0.8s"] = 8;
+		delayOptions["0.9s"] = 9;
+		delayOptions["1.0s"] = 10;
+		delayOptions["1.5s"] = 15;
+		delayOptions["2.0s"] = 20;
+		delayOptions["2.5s"] = 25;
+		delayOptions["3.0s"] = 30;
+		delayOptions["3.5s"] = 35;
+		delayOptions["4.0s"] = 40;
+		delayOptions["4.5s"] = 45;
+		delayOptions["5.0s"] = 50;
+		delayOptions["6.0s"] = 60;
+		delayOptions["7.0s"] = 70;
+		delayOptions["8.0s"] = 80;
+		delayOptions["9.0s"] = 90;
 
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackreduced", Languages::TextReducedSpeedAt, feedbacksWithNone, feedbackIdReduced).AddClass("select_feedback"));
+		tag.AddChildTag(HtmlTagSelect("reduceddelay", delayOptions, reducedDelay).AddClass("select_delay"));
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackcreep", Languages::TextCreepAt, feedbacksWithNone, feedbackIdCreep).AddClass("select_feedback"));
+		tag.AddChildTag(HtmlTagSelect("creepdelay", delayOptions, creepDelay).AddClass("select_delay"));
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackstop", Languages::TextStopAt, feedbacks, feedbackIdStop).AddClass("select_feedback"));
+		tag.AddChildTag(HtmlTagSelect("stopdelay", delayOptions, stopDelay).AddClass("select_delay"));
 		tag.AddChildTag(HtmlTagSelectWithLabel("feedbackover", Languages::TextOverrunAt, feedbacksWithNone, feedbackIdOver).AddClass("select_feedback"));
 		return tag;
 	}

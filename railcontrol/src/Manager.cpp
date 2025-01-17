@@ -2537,8 +2537,11 @@ bool Manager::RouteSave(RouteID routeID,
 	const Orientation toOrientation,
 	const Route::Speed speed,
 	const FeedbackID feedbackIdReduced,
+	const Delay reducedDelay,
 	const FeedbackID feedbackIdCreep,
+	const Delay creepDelay,
 	const FeedbackID feedbackIdStop,
+	const Delay stopDelay,
 	const FeedbackID feedbackIdOver,
 	const Pause waitAfterRelease,
 	const RouteID followUpRoute,
@@ -2601,8 +2604,11 @@ bool Manager::RouteSave(RouteID routeID,
 		route->SetToOrientation(toOrientation);
 		route->SetSpeed(speed);
 		route->SetFeedbackIdReduced(feedbackIdReduced);
+		route->SetReducedDelay(reducedDelay);
 		route->SetFeedbackIdCreep(feedbackIdCreep);
+		route->SetCreepDelay(creepDelay);
 		route->SetFeedbackIdStop(feedbackIdStop);
+		route->SetStopDelay(stopDelay);
 		route->SetFeedbackIdOver(feedbackIdOver);
 		route->SetPushpull(pushpull);
 		route->SetPropulsion(propulsion);
@@ -2620,8 +2626,11 @@ bool Manager::RouteSave(RouteID routeID,
 		route->SetToOrientation(OrientationLeft);
 		route->SetSpeed(Route::SpeedTravel);
 		route->SetFeedbackIdReduced(FeedbackNone);
+		route->SetReducedDelay(0);
 		route->SetFeedbackIdCreep(FeedbackNone);
+		route->SetCreepDelay(0);
 		route->SetFeedbackIdStop(FeedbackNone);
+		route->SetStopDelay(0);
 		route->SetFeedbackIdOver(FeedbackNone);
 		route->SetPushpull(Route::PushpullTypeBoth);
 		route->SetPropulsion(PropulsionAll);

@@ -364,6 +364,33 @@ namespace DataModel
 
 			Speed GetRouteSpeed(const Route::Speed routeSpeed);
 
+			void LocationStopReached(const FeedbackID feedbackID, const Delay stopDelay);
+
+			void LocationStopReached();
+
+			static inline void LocationStopReachedStatic(LocoBase* locoBase, const FeedbackID feedbackID, const Delay stopDelay)
+			{
+				locoBase->LocationStopReached(feedbackID, stopDelay);
+			}
+
+			void LocationCreepReached(const FeedbackID feedbackID, const Delay creepDelay);
+
+			void LocationCreepReached();
+
+			static inline void LocationCreepReachedStatic(LocoBase* locoBase, const FeedbackID feedbackID, const Delay creepDelay)
+			{
+				locoBase->LocationCreepReached(feedbackID, creepDelay);
+			}
+
+			void LocationReducedReached(const FeedbackID feedbackID, const Delay reducedDelay);
+
+			void LocationReducedReached();
+
+			static inline void LocationReducedReachedStatic(LocoBase* locoBase, const FeedbackID feedbackID, const Delay reducedDelay)
+			{
+				locoBase->LocationReducedReached(feedbackID, reducedDelay);
+			}
+
 			mutable std::mutex stateMutex;
 			std::thread locoThread;
 
@@ -393,8 +420,11 @@ namespace DataModel
 			volatile FeedbackID feedbackIdFirstCreep;
 			volatile FeedbackID feedbackIdFirst;
 			volatile FeedbackID feedbackIdReduced;
+			volatile Delay reducedDelay;
 			volatile FeedbackID feedbackIdCreep;
+			volatile Delay creepDelay;
 			volatile FeedbackID feedbackIdStop;
+			volatile Delay stopDelay;
 			volatile FeedbackID feedbackIdOver;
 			Utils::ThreadSafeQueue<FeedbackID> feedbackIdsReached;
 			Pause wait;

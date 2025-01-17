@@ -176,6 +176,7 @@ namespace Server { namespace Web
 		HtmlTag i_showName("div");
 		i_showName.AddId("i_showname");
 		i_showName.AddChildTag(HtmlTagInputCheckboxWithLabel("showname", Languages::TextShowName, "true", showName));
+		i_showName.AddChildTag(HtmlTagInputTextWithLabel("displayname", Languages::TextDisplayName, displayName));
 		switch (type)
 		{
 			case DataModel::TrackTypeStraight:
@@ -186,7 +187,6 @@ namespace Server { namespace Web
 				break;
 		}
 		mainContent.AddChildTag(i_showName);
-		mainContent.AddChildTag(HtmlTagInputTextWithLabel("displayname", Languages::TextDisplayName, displayName));
 		mainContent.AddChildTag(HtmlTagSelectWithLabel("tracktype", Languages::TextType, typeOptions, type).AddAttribute("onchange", "onChangeTrackType();return false;"));
 		HtmlTag i_length("div");
 		i_length.AddId("i_length");

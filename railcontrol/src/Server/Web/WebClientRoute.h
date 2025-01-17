@@ -81,8 +81,11 @@ namespace Server { namespace Web
 			HtmlTag HtmlTagSelectFeedbacksOfTrack(const TrackID trackID,
 				const RouteID followUpRoute = RouteNone,
 				const FeedbackID feedbackIdReduced = FeedbackNone,
+				const Delay reducedDelay = 0,
 				const FeedbackID feedbackIdCreep = FeedbackNone,
+				const Delay creepDelay = 0,
 				const FeedbackID feedbackIdStop = FeedbackNone,
+				const Delay stopDelay = 0,
 				const FeedbackID feedbackIdOver = FeedbackNone) const;
 
 			Manager& manager;

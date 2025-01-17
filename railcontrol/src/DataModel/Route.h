@@ -77,8 +77,11 @@ namespace DataModel
 				toOrientation(OrientationRight),
 				speed(SpeedTravel),
 				feedbackIdReduced(FeedbackNone),
+				reducedDelay(0),
 				feedbackIdCreep(FeedbackNone),
+				creepDelay(0),
 				feedbackIdStop(FeedbackNone),
+				stopDelay(0),
 				feedbackIdOver(FeedbackNone),
 				waitAfterRelease(0),
 				lastUsed(0),
@@ -295,6 +298,16 @@ namespace DataModel
 				return feedbackIdReduced;
 			}
 
+			inline void SetReducedDelay(const Delay reducedDelay)
+			{
+				this->reducedDelay = reducedDelay;
+			}
+
+			inline Delay GetReducedDelay() const
+			{
+				return reducedDelay;
+			}
+
 			inline void SetFeedbackIdCreep(const FeedbackID feedbackIdCreep)
 			{
 				this->feedbackIdCreep = feedbackIdCreep;
@@ -305,6 +318,16 @@ namespace DataModel
 				return feedbackIdCreep;
 			}
 
+			inline void SetCreepDelay(const Delay creepDelay)
+			{
+				this->creepDelay = creepDelay;
+			}
+
+			inline Delay GetCreepDelay() const
+			{
+				return creepDelay;
+			}
+
 			inline void SetFeedbackIdStop(const FeedbackID feedbackIdStop)
 			{
 				this->feedbackIdStop = feedbackIdStop;
@@ -313,6 +336,16 @@ namespace DataModel
 			inline FeedbackID GetFeedbackIdStop() const
 			{
 				return feedbackIdStop;
+			}
+
+			inline void SetStopDelay(const Delay stopDelay)
+			{
+				this->stopDelay = stopDelay;
+			}
+
+			inline Delay GetStopDelay() const
+			{
+				return stopDelay;
 			}
 
 			inline void SetFeedbackIdOver(const FeedbackID feedbackIdOver)
@@ -382,8 +415,11 @@ namespace DataModel
 
 			Speed speed;
 			FeedbackID feedbackIdReduced;
+			Delay reducedDelay;
 			FeedbackID feedbackIdCreep;
+			Delay creepDelay;
 			FeedbackID feedbackIdStop;
+			Delay stopDelay;
 			FeedbackID feedbackIdOver;
 			Pause waitAfterRelease;
 			RouteID followUpRoute;
