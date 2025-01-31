@@ -308,7 +308,7 @@ class ControlInterface
 		{
 		}
 
-		virtual void LocoSpeedOrientationFunctions(const DataModel::LocoBase* loco,
+		virtual void LocoBaseSpeedOrientationFunctions(const DataModel::LocoBase* loco,
 			const Speed speed,
 			const Orientation orientation,
 			std::vector<DataModel::LocoFunctionEntry>& functions)

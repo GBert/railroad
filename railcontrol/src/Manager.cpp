@@ -57,6 +57,7 @@ Manager::Manager(Config& config)
 :	logger(Logger::Logger::GetLogger(Languages::GetText(Languages::TextManager))),
  	boosterState(BoosterStateStop),
 	storage(nullptr),
+	startupInitLocos(StartupInitLocosAll),
 	defaultAccessoryDuration(DataModel::DefaultAccessoryPulseDuration),
 	autoAddFeedback(false),
 	stopOnFeedbackInFreeTrack(true),
@@ -90,6 +91,7 @@ Manager::Manager(Config& config)
 
 	Logger::Logger::SetLogLevel(static_cast<Logger::Logger::Level>(Utils::Integer::StringToInteger(storage->GetSetting("LogLevel"), Logger::Logger::LevelInfo)));
 	Languages::SetDefaultLanguage(static_cast<Languages::Language>(Utils::Integer::StringToInteger(storage->GetSetting("Language"), Languages::EN)));
+	startupInitLocos = static_cast<StartupInitLocos>(Utils::Integer::StringToInteger(storage->GetSetting("StartupInitLocos"), StartupInitLocosAll));
 	defaultAccessoryDuration = Utils::Integer::StringToInteger(storage->GetSetting("DefaultAccessoryDuration"), 250);
 	autoAddFeedback = Utils::Utils::StringToBool(storage->GetSetting("AutoAddFeedback"));
 	stopOnFeedbackInFreeTrack = Utils::Utils::StringToBool(storage->GetSetting("StopOnFeedbackInFreeTrack"), true);
@@ -316,6 +318,10 @@ void Manager::Booster(const ControlType controlType, const BoosterState state)
 
 void Manager::InitLocos()
 {
+	if (GetStartupInitLocos() == StartupInitLocosNone)
+	{
+		return;
+	}
 	Utils::Utils::SleepForSeconds(1);
 	map<string,LocoID> locoIds = LocoIdsByName();
 	for (auto locoId : locoIds)
@@ -329,12 +335,23 @@ void Manager::InitLocos()
 		{
 			continue;
 		}
+
+		if (GetStartupInitLocos() == StartupInitLocosSpeed)
+		{
+			std::lock_guard<std::mutex> guard(controlMutex);
+			for (auto& control : controls)
+			{
+				control.second->LocoBaseSpeed(ControlTypeInternal, loco, loco->GetSpeed());
+				control.second->LocoBaseOrientation(ControlTypeInternal, loco, loco->GetOrientation());
+			}
+		}
+		else
 		{
 			std::vector<DataModel::LocoFunctionEntry> functions = loco->GetFunctionStates();
 			std::lock_guard<std::mutex> guard(controlMutex);
 			for (auto& control : controls)
 			{
-				control.second->LocoSpeedOrientationFunctions(loco, loco->GetSpeed(), loco->GetOrientation(), functions);
+				control.second->LocoBaseSpeedOrientationFunctions(loco, loco->GetSpeed(), loco->GetOrientation(), functions);
 			}
 		}
 		Utils::Utils::SleepForMilliseconds(10);
@@ -4554,6 +4571,7 @@ bool Manager::CheckControlProtocolAddress(const AddressType type, const ControlI
 }
 
 bool Manager::SettingsSave(const Languages::Language language,
+	const StartupInitLocos startupInitLocos,
 	const DataModel::AccessoryPulseDuration duration,
 	const bool autoAddFeedback,
 	const bool stopOnFeedbackInFreeTrack,
@@ -4564,6 +4582,7 @@ bool Manager::SettingsSave(const Languages::Language language,
 	)
 {
 	Languages::SetDefaultLanguage(language);
+	this->startupInitLocos = startupInitLocos;
 	this->defaultAccessoryDuration = duration;
 	this->autoAddFeedback = autoAddFeedback;
 	this->stopOnFeedbackInFreeTrack = stopOnFeedbackInFreeTrack;
@@ -4578,6 +4597,7 @@ bool Manager::SettingsSave(const Languages::Language language,
 	}
 	Storage::TransactionGuard guard(storage);
 	storage->SaveSetting("Language", std::to_string(static_cast<int>(language)));
+	storage->SaveSetting("StartupInitLocos", std::to_string(static_cast<int>(startupInitLocos)));
 	storage->SaveSetting("DefaultAccessoryDuration", std::to_string(duration));
 	storage->SaveSetting("AutoAddFeedback", std::to_string(autoAddFeedback));
 	storage->SaveSetting("StopOnFeedbackInFreeTrack", std::to_string(stopOnFeedbackInFreeTrack));

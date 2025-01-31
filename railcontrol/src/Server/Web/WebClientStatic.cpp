@@ -269,6 +269,15 @@ namespace Server { namespace Web
 		return HtmlTagSelectWithLabel("language", Languages::TextLanguage, options, Languages::GetDefaultLanguage());
 	}
 
+	HtmlTag WebClientStatic::HtmlTagStartupLocos(const StartupInitLocos startupInitLocos)
+	{
+		map<StartupInitLocos,Languages::TextSelector> options;
+		options[StartupInitLocosNone] = Languages::TextStartupInitLocosNone;
+		options[StartupInitLocosSpeed] = Languages::TextStartupInitLocosSpeed;
+		options[StartupInitLocosAll] = Languages::TextStartupInitLocosAll;
+		return HtmlTagSelectWithLabel("startupinitlocos", Languages::TextStartupInitLocos, options, startupInitLocos);
+	}
+
 	HtmlTag WebClientStatic::HtmlTagControl(const std::map<ControlID,string>& controls, ControlID& controlId, const string& objectType, const ObjectID objectID)
 	{
 		if (controls.size() == 0)

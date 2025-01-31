@@ -101,7 +101,7 @@ namespace Hardware
 				const DataModel::LocoBase* loco,
 				const Speed speed) override;
 
-			void LocoSpeedOrientationFunctions(const DataModel::LocoBase* loco,
+			void LocoBaseSpeedOrientationFunctions(const DataModel::LocoBase* loco,
 				const Speed speed,
 				const Orientation orientation,
 				std::vector<DataModel::LocoFunctionEntry>& functions) override;

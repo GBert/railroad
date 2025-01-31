@@ -242,6 +242,13 @@ enum Orientation : uint8_t
 	OrientationChange = 2
 };
 
+enum StartupInitLocos : uint8_t
+{
+	StartupInitLocosNone  = 0,
+	StartupInitLocosSpeed = 1,
+	StartupInitLocosAll   = 2,
+};
+
 enum ProgramMode : uint8_t
 {
 	ProgramModeNone,

@@ -277,7 +277,7 @@ namespace Hardware
 		instance->LocoFunction(loco->GetProtocol(), loco->GetAddress(), function, on);
 	}
 
-	void HardwareHandler::LocoSpeedOrientationFunctions(const DataModel::LocoBase* loco,
+	void HardwareHandler::LocoBaseSpeedOrientationFunctions(const DataModel::LocoBase* loco,
 		const Speed speed,
 		const Orientation orientation,
 		std::vector<DataModel::LocoFunctionEntry>& functions)

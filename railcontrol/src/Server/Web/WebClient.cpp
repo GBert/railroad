@@ -2926,17 +2926,19 @@ namespace Server { namespace Web
 
 	void WebClient::HandleSettingsEdit()
 	{
+		const StartupInitLocos startupInitLocos = manager.GetStartupInitLocos();
 		const DataModel::AccessoryPulseDuration defaultAccessoryDuration = manager.GetDefaultAccessoryDuration();
 		const bool executeAccessory = manager.GetExecuteAccessory();
 		const bool autoAddFeedback = manager.GetAutoAddFeedback();
 		const bool stopOnFeedbackInFreeTrack = manager.GetStopOnFeedbackInFreeTrack();
 		const DataModel::SelectRouteApproach selectRouteApproach = manager.GetSelectRouteApproach();
-		const DataModel::Loco::NrOfTracksToReserve nrOfTracksToReserve = manager.GetNrOfTracksToReserve();
+		const DataModel::LocoBase::NrOfTracksToReserve nrOfTracksToReserve = manager.GetNrOfTracksToReserve();
 
 		HtmlTag content;
 		content.AddChildTag(HtmlTag("h1").AddContent(Languages::TextSettings).AddId("popup_title"));
 		HtmlTag tabMenu("div");
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("startup", Languages::TextStartup));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedback", Languages::TextFeedback));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("accessory", Languages::TextAccessory));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
@@ -2952,6 +2954,13 @@ namespace Server { namespace Web
 		basicContent.AddChildTag(WebClientStatic::HtmlTagLanguage());
 		basicContent.AddChildTag(WebClientStatic::HtmlTagLogLevel());
 		formContent.AddChildTag(basicContent);
+
+		HtmlTag startupContent("div");
+		startupContent.AddId("tab_startup");
+		startupContent.AddClass("tab_content");
+		startupContent.AddClass("hidden");
+		startupContent.AddChildTag(WebClientStatic::HtmlTagStartupLocos(startupInitLocos));
+		formContent.AddChildTag(startupContent);
 
 		HtmlTag accessoryContent("div");
 		accessoryContent.AddId("tab_accessory");
@@ -2987,6 +2996,7 @@ namespace Server { namespace Web
 	{
 		const Languages::Language language = static_cast<Languages::Language>(Utils::Utils::GetIntegerMapEntry(arguments, "language", Languages::EN));
 		const Logger::Logger::Level logLevel = static_cast<Logger::Logger::Level>(Utils::Utils::GetIntegerMapEntry(arguments, "loglevel", Logger::Logger::LevelInfo));
+		const StartupInitLocos startupInitLocos = static_cast<StartupInitLocos>(Utils::Utils::GetIntegerMapEntry(arguments, "startupinitlocos", StartupInitLocosAll));
 		const DataModel::AccessoryPulseDuration defaultAccessoryDuration = Utils::Utils::GetIntegerMapEntry(arguments, "duration", manager.GetDefaultAccessoryDuration());
 		const bool executeAccessory = Utils::Utils::GetBoolMapEntry(arguments, "executeaccessory", manager.GetExecuteAccessory());
 		const bool autoAddFeedback = Utils::Utils::GetBoolMapEntry(arguments, "autoaddfeedback", manager.GetAutoAddFeedback());
@@ -2994,6 +3004,7 @@ namespace Server { namespace Web
 		const DataModel::SelectRouteApproach selectRouteApproach = static_cast<DataModel::SelectRouteApproach>(Utils::Utils::GetIntegerMapEntry(arguments, "selectrouteapproach", DataModel::SelectRouteRandom));
 		const DataModel::Loco::NrOfTracksToReserve nrOfTracksToReserve = static_cast<DataModel::Loco::NrOfTracksToReserve>(Utils::Utils::GetIntegerMapEntry(arguments, "nroftrackstoreserve", DataModel::Loco::ReserveOne));
 		manager.SettingsSave(language,
+			startupInitLocos,
 			defaultAccessoryDuration,
 			autoAddFeedback,
 			stopOnFeedbackInFreeTrack,

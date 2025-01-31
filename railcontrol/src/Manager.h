@@ -674,6 +674,11 @@ class Manager
 		}
 
 		// settings
+		inline StartupInitLocos GetStartupInitLocos() const
+		{
+			return startupInitLocos;
+		}
+
 		inline DataModel::AccessoryPulseDuration GetDefaultAccessoryDuration() const
 		{
 			return defaultAccessoryDuration;
@@ -705,6 +710,7 @@ class Manager
 		}
 
 		bool SettingsSave(const Languages::Language language,
+			const StartupInitLocos startupInitLocos,
 			const DataModel::AccessoryPulseDuration duration,
 			const bool autoAddFeedback,
 			const bool stopOnFeedbackInFreeTrack,
@@ -1059,6 +1065,7 @@ class Manager
 		// storage
 		Storage::StorageHandler* storage;
 
+		StartupInitLocos startupInitLocos;
 		DataModel::AccessoryPulseDuration defaultAccessoryDuration;
 		bool autoAddFeedback;
 		bool stopOnFeedbackInFreeTrack;

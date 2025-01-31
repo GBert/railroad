@@ -788,62 +788,22 @@ namespace DataModel
 
 	void LocoBase::LocationReached(const FeedbackID feedbackID)
 	{
-		if (feedbackID == feedbackIdOver)
+		if (feedbackID == feedbackIdFirstReduced)
 		{
-			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
-			manager->Booster(ControlTypeInternal, BoosterStateStop);
-			logger->Error(Languages::TextHitOverrun, manager->GetFeedbackName(feedbackID));
-			return;
-		}
+			Route::Speed routeSpeed = routeSecond->GetSpeed();
+			switch (routeSpeed)
+			{
+				case Route::SpeedReduced:
+				case Route::SpeedCreeping:
+					if (speed > reducedSpeed)
+					{
+						manager->LocoBaseSpeed(ControlTypeInternal, this, reducedSpeed);
+					}
+					break;
 
-		if (feedbackID == feedbackIdStop)
-		{
-			if (stopDelay)
-			{
-				__attribute((unused)) auto r = std::async(std::launch::async, LocationStopReachedStatic, this, feedbackID, stopDelay);
+				default:
+					break;
 			}
-			else
-			{
-				LocationStopReached();
-			}
-			return;
-		}
-
-		if (feedbackID == feedbackIdCreep)
-		{
-			if (creepDelay)
-			{
-				__attribute((unused)) auto r = std::async(std::launch::async, LocationCreepReachedStatic, this, feedbackID, creepDelay);
-			}
-			else
-			{
-				LocationCreepReached();
-			}
-			return;
-		}
-
-		if (feedbackID == feedbackIdReduced)
-		{
-			if (reducedDelay)
-			{
-				__attribute((unused)) auto r = std::async(std::launch::async, LocationReducedReachedStatic, this, feedbackID, reducedDelay);
-			}
-			else
-			{
-				LocationReducedReached();
-			}
-			return;
-		}
-
-		if (feedbackID == feedbackIdFirst)
-		{
-			Speed newSpeed = GetRouteSpeed(routeSecond->GetSpeed());
-			if (speed > newSpeed)
-			{
-				manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
-			}
-			feedbackIdsReached.EnqueueBack(feedbackIdFirst);
-			return;
 		}
 
 		if (feedbackID == feedbackIdFirstCreep)
@@ -861,26 +821,59 @@ namespace DataModel
 				default:
 					break;
 			}
-			return;
 		}
 
-		if (feedbackID == feedbackIdFirstReduced)
+		if (feedbackID == feedbackIdFirst)
 		{
-			Route::Speed routeSpeed = routeSecond->GetSpeed();
-			switch (routeSpeed)
+			Speed newSpeed = GetRouteSpeed(routeSecond->GetSpeed());
+			if (speed > newSpeed)
 			{
-				case Route::SpeedReduced:
-				case Route::SpeedCreeping:
-					if (speed > reducedSpeed)
-					{
-						manager->LocoBaseSpeed(ControlTypeInternal, this, reducedSpeed);
-					}
-					break;
-
-				default:
-					break;
+				manager->LocoBaseSpeed(ControlTypeInternal, this, newSpeed);
 			}
-			return;
+			feedbackIdsReached.EnqueueBack(feedbackIdFirst);
+		}
+
+		if (feedbackID == feedbackIdReduced)
+		{
+			if (reducedDelay)
+			{
+				__attribute((unused)) auto r = std::async(std::launch::async, LocationReducedReachedStatic, this, feedbackID, reducedDelay);
+			}
+			else
+			{
+				LocationReducedReached();
+			}
+		}
+
+		if (feedbackID == feedbackIdCreep)
+		{
+			if (creepDelay)
+			{
+				__attribute((unused)) auto r = std::async(std::launch::async, LocationCreepReachedStatic, this, feedbackID, creepDelay);
+			}
+			else
+			{
+				LocationCreepReached();
+			}
+		}
+
+		if (feedbackID == feedbackIdStop)
+		{
+			if (stopDelay)
+			{
+				__attribute((unused)) auto r = std::async(std::launch::async, LocationStopReachedStatic, this, feedbackID, stopDelay);
+			}
+			else
+			{
+				LocationStopReached();
+			}
+		}
+
+		if (feedbackID == feedbackIdOver)
+		{
+			manager->LocoBaseSpeed(ControlTypeInternal, this, MinSpeed);
+			manager->Booster(ControlTypeInternal, BoosterStateStop);
+			logger->Error(Languages::TextHitOverrun, manager->GetFeedbackName(feedbackID));
 		}
 	}
 
