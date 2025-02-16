@@ -1,7 +1,7 @@
 body {
 	background-color: black;
 	color: white;
-	font-family: verdana, sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 	font-size: 15px;
 	margin: 0px;
 }
@@ -258,7 +258,21 @@ body {
 	left: 32px;
 }
 
+.help {
+	background-color: yellow;
+	border: solid 1px black;
+	border-radius: 1em;
+	font-size: 12px;
+	display: inline-block;
+}
+
+.help .tooltip {
+	display: block;
+	font-size: 15px;
+}
+
 .button .tooltip,
+.help .tooltip,
 .layout_item .tooltip {
 	line-height: 1;
 	white-space: nowrap;
@@ -273,6 +287,7 @@ body {
 }
 
 .button:hover .tooltip,
+.help:hover .tooltip,
 .layout_item:hover .tooltip {
 	visibility: visible;
 }
@@ -509,6 +524,11 @@ input {
 	width: calc(100% - 10px);
 }
 
+.select_relation_id,
+.select_relation_id .dropdown {
+	width: 250px;
+}
+
 .select_feedback,
 .select_feedback .dropdown,
 .select_track,
@@ -516,23 +536,17 @@ input {
 	width: 160px;
 }
 
-.select_delay,
-.select_delay .dropdown,
-.select_orientation,
-.select_orientation .dropdown {
-	width: 80px;
-}
-
 .select_relation_objecttype,
 .select_relation_objecttype .dropdown {
 	width: 100px;
 }
 
-.select_relation_id,
-.select_relation_id .dropdown {
-	width: 250px;
-}
-
+.select_delay,
+.select_delay .dropdown,
+.select_orientation,
+.select_orientation .dropdown,
+.select_port,
+.select_port .dropdown,
 .select_relation_state,
 .select_relation_state .dropdown {
 	width: 80px;

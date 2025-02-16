@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -246,6 +246,7 @@ namespace Server { namespace Web
 			void HandleMultipleUnitDelete(const std::map<std::string, std::string>& arguments);
 			void HandleMultipleUnitRelease(const std::map<std::string, std::string>& arguments);
 			void HandleProtocol(const std::map<std::string, std::string>& arguments);
+			void HandleAccessoryAddress(const std::map<std::string, std::string>& arguments);
 			void HandleLayout(const std::map<std::string,std::string>& arguments);
 			void HandleAccessoryEdit(const std::map<std::string,std::string>& arguments);
 			void HandleAccessorySave(const std::map<std::string,std::string>& arguments);

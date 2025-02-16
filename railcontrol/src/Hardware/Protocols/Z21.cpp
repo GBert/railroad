@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -270,29 +270,19 @@ namespace Hardware
 			}
 		}
 
-		void Z21::Accessory(const Protocol protocol, const Address address, const DataModel::AccessoryState state,
-		    const DataModel::AccessoryPulseDuration duration)
+		void Z21::Accessory(const Protocol protocol,
+			const Address address,
+			const DataModel::AccessoryState state,
+			__attribute__((unused)) const bool on,
+			const DataModel::AccessoryPulseDuration duration)
 		{
-			if (!AccessoryProtocolSupported(protocol))
-			{
-				return;
-			}
 			AccessoryQueueEntry entry(protocol, address, state, duration);
 			accessoryQueue.EnqueueBack(entry);
 		}
 
-		void Z21::AccessoryOn(const Protocol protocol, const Address address, const DataModel::AccessoryState state)
-		{
-			AccessoryOnOrOff(protocol, address, state, true);
-		}
-
-		void Z21::AccessoryOff(const Protocol protocol, const Address address, const DataModel::AccessoryState state)
-		{
-			AccessoryOnOrOff(protocol, address, state, false);
-		}
-
-		void Z21::AccessoryOnOrOff(__attribute__((unused))  const Protocol protocol, const Address address,
-		    const DataModel::AccessoryState state, const bool on)
+		void Z21::AccessoryOnOrOff(const Address address,
+			const DataModel::AccessoryState state,
+			const bool on)
 		{
 			const Address zeroBasedAddress = address - 1;
 			unsigned char buffer[9] = { 0x09, 0x00, 0x40, 0x00, 0x53 };
@@ -315,9 +305,9 @@ namespace Hardware
 					continue;
 				}
 				SendSetTurnoutMode(entry.address, entry.protocol);
-				AccessoryOn(entry.protocol, entry.address, entry.state);
+				AccessoryOnOrOff(entry.address, entry.state, true);
 				Utils::Utils::SleepForMilliseconds(entry.duration);
-				AccessoryOff(entry.protocol, entry.address, entry.state);
+				AccessoryOnOrOff(entry.address, entry.state, false);
 			}
 			logger->Info(Languages::TextTerminatingAccessorySenderThread);
 		}

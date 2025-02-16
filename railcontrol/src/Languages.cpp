@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -47,6 +47,16 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextAccessorySenderThreadStarted */ { "Accessory sender thread started", "Zubehörartikel Sender Thread gestartet", "Thread enviador accesorio creado" },
 /* TextAccessoryStateIsGreen */ { "Accessory state of {0} is now green", "Der Status des Zubehörartikels ist nun grün", "El estado del accessorio está verde" },
 /* TextAccessoryStateIsRed */ { "Accessory state of {0} is now red", "Der Status des Zubehörartikels ist nun rot", "El estado del accessorio está rojo" },
+/* TextAccessoryTypeHint */ { "on-on:<br>Each decoder has a red and a green port. While clicking on the accessory, one or the other of the ports is activated and deactivated.<br><br>on push:<br>While clicking on the accessory, the selected port is activated and while releasing again the port is deactivated.<br><br>on-off:<br>While clicking on the accessory, the selected port is activated and while clicking the second time it is deactivated.<br>Some controls and some decoders can not handle this on-off mode, especially Z21, EcOS and DCC-EX.", "ein-ein:<br>Jeder Decoder hat einen roten und einen grünen Anschluss. Beim Anklicken des Zubehörartikels wird der eine oder der andere Anschluss aktiviert und deaktiviert.<br><br>beim Drücken:<br>Beim Anklicken des Zubehörartikels wird ein Anschluss aktiviert und beim Loslassen wird der Anschluss wieder deaktiviert.<br><br>ein-aus:<br>Beim Anklicken des Zubehörartikels wird der ausgewählte Anschluss aktiviert und beim zweiten Anklicken deaktiviert.<br>Einige Zentralen und Decoder können diesen ein-aus-Modus nicht verarbeiten, insbesondere Z21, EcOS und DCC-EX.", "on-on:<br>Cada decoder tiene un puerto rojo y otro verde. Al hacer click en el accesorio, se activa y desactiva uno u otro de los puertos.<br><br>al pulsar:<br>Al hacer clic en el accesorio, se activa el puerto seleccionado y al volver a soltar se desactiva el puerto.<br><br>on-off:<br>Al hacer clic en el accesorio se activa el puerto seleccionado y al pulsar por segunda vez se desactiva.<br>Algunos controls y decoders no pueden manejar esto, especialmente Z21, EcOS y DCC-EX." },
+/* TextAccessoryTypeOnOffDefault */ { "default (on-off)", "standard (ein-aus)", "predeterminado (on-off)" },
+/* TextAccessoryTypeOnOffStraight */ { "straight (on-off)", "gerade (ein-aus)", "recto (on-off)" },
+/* TextAccessoryTypeOnOffTurn */ { "turn (on-off)", "gebogen (ein-aus)", "curvo (on-off" },
+/* TextAccessoryTypeOnOnDefault */ { "default (on-on)", "standard (ein-ein)", "predeterminado (on-on)" },
+/* TextAccessoryTypeOnOnStraight */ { "straight (on-on)", "gerade (ein-ein)", "recto (on-on)" },
+/* TextAccessoryTypeOnOnTurn */ { "turn (on-on)", "gebogen (ein-ein)", "curvo (on-on)" },
+/* TextAccessoryTypeOnPushDefault */ { "default (on push)", "standard (beim Drücken)", "predeterminado (al pulsar)" },
+/* TextAccessoryTypeOnPushStraight */ { "straight (on push)", "gerade (beim Drücken)", "recto (al pulsar)" },
+/* TextAccessoryTypeOnPushTurn */ { "turn (on push)", "gebogen (beim drücken)", "curvo (al pulsar)" },
 /* TextAccessoryUpdated */ { "Accessory {0} updated", "Zubehörartikel {0} aktualisiert", "Accessorio {0} actualizado" },
 /* TextActualAndStoredProtocolsDiffer */ { "Actual ({0}) and stored ({1}) protocols differ", "Aktuelles ({0}) und gespeichertes ({1}) Protokoll unterscheiden sich", "protocolo reciente y guardado son diferentes" },
 /* TextAddAccessory */ { "Add accessory", "Zubehörartikel hinzufügen", "Añadir accesorio" },
@@ -475,6 +485,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextObjectIsUsedByRoute */ { "Object {0} is used by route {1}", "Objekt {0} wird von Fahrstrasse {1} benutzt", "Objeto {0} está utilizado por itinerario {1}" },
 /* TextOff */ { "off", "aus", "apagado" },
 /* TextOn */ { "on", "ein", "encendido" },
+/* TextOnPush */ { "on push", "beim Drücken", "al presionar" },
 /* TextOpeningSQLite */ { "Opening SQLite database with filename {0}", "Öffne SQLite Datenbank mit Dateiname {0}", "Abriendo base de datos SQLite con nombre {0}" },
 /* TextOrientation */ { "Orientation", "Ausrichtung", "Orientación" },
 /* TextOverrunAt */ { "Overrun at", "Überfahrt bei", "Pasar a" },
@@ -683,9 +694,9 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextStarting */ { "Starting {0}", "Starte {0}", "Iniciendo {0}" },
 /* TextStartup */ { "Startup", "Start", "Iniciar" },
 /* TextStartupInitLocos */ { "Initialisation of locos", "Initialisierung der Lokomotiven", "Inicialicación de las locomotoras" },
+/* TextStartupInitLocosAll */ { "Speed and functions", "Geschwindigkeit und Funktionen", "Velocidad y funciones" },
 /* TextStartupInitLocosNone */ { "No init", "Keine Initialisierung", "Sin inicialicación" },
 /* TextStartupInitLocosSpeed */ { "Speed only", "Nur Geschwindigkeit", "Solo velocidad" },
-/* TextStartupInitLocosAll */ { "Speed and functions", "Geschwindigkeit und Funktionen", "Velocidad y funciones" },
 /* TextStop */ { "stop", "anhalten", "parar" },
 /* TextStopAllLocos */ { "Stop all locomotives", "Stoppe alle Lokomotiven", "Detener todas las locomotoras" },
 /* TextStopAt */ { "Stop at", "Anhalten bei", "Parar a" },
@@ -857,3 +868,23 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 };
 
 Languages::Language Languages::defaultLanguage = Languages::EN;
+
+const char* Languages::GetText(const Language language, const TextSelector selector)
+{
+	if (language >= MaxLanguages || selector >= MaxTexts)
+	{
+		static const char* unknownText = "";
+		return unknownText;
+	}
+
+	return languages[selector][language];
+}
+
+const std::string Languages::GetText(const TextSelector label, const TextSelector tooltip)
+{
+	std::string out(GetText(label));
+	out += "&nbsp;<div class=\"help\">&nbsp;?&nbsp;<div class=\"tooltip\">";
+	out += GetText(tooltip);
+	out += "</div></div>";
+	return out;
+}

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -175,13 +175,45 @@ namespace Server { namespace Web
 		}
 	}
 
+	HtmlTag WebClientStatic::HtmlTagAccessoryAddress(const AccessoryType type,
+		const Address address,
+		const AddressPort port)
+	{
+		HtmlTag content;
+		content.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextAddress, address, 1, 2044));
+		switch (type & DataModel::AccessoryTypeSubtypeMask)
+		{
+			case DataModel::AccessoryTypeOnPush:
+			case DataModel::AccessoryTypeOnOff:
+			{
+				map<AddressPort,Languages::TextSelector> portMap;
+				portMap[AddressPortRed] = Languages::TextRed;
+				portMap[AddressPortGreen] = Languages::TextGreen;
+				content.AddChildTag(HtmlTagSelect("port", portMap, port).AddClass("select_port"));
+				break;
+			}
+
+			case DataModel::AccessoryTypeOnOn:
+			default:
+				content.AddChildTag(HtmlTagInputHidden("port", std::to_string(port)));
+				break;
+		}
+		return content;
+	}
+
 	HtmlTag WebClientStatic::HtmlTagDuration(const DataModel::AccessoryPulseDuration duration, const Languages::TextSelector label)
 	{
 		std::map<string,string> durationOptions;
 		durationOptions["0000"] = "0";
 		durationOptions["0100"] = "100";
 		durationOptions["0250"] = "250";
+		durationOptions["0500"] = "500";
 		durationOptions["1000"] = "1000";
+		durationOptions["1500"] = "1500";
+		durationOptions["2000"] = "2000";
+		durationOptions["3000"] = "3000";
+		durationOptions["4000"] = "4000";
+		durationOptions["5000"] = "5000";
 		return HtmlTagSelectWithLabel("duration", label, durationOptions, Utils::Utils::ToStringWithLeadingZeros(duration, 4));
 	}
 

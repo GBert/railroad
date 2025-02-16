@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -84,25 +84,25 @@ namespace Hardware { namespace Protocols
 					|| (protocol == ProtocolDCC));
 			}
 
-			virtual void Booster(const BoosterState status) override
+			void Booster(const BoosterState status) override
 			{
 				MaerklinCANCommon::Booster(status);
 			}
 
-			virtual void LocoSpeed(const Protocol protocol,
+			void LocoSpeed(const Protocol protocol,
 				const Address address,
 				const Speed speed) override
 			{
 				MaerklinCANCommon::LocoSpeed(protocol, address, speed);
 			}
-			virtual void LocoOrientation(const Protocol protocol,
+			void LocoOrientation(const Protocol protocol,
 				const Address address,
 				const Orientation orientation) override
 			{
 				MaerklinCANCommon::LocoOrientation(protocol, address, orientation);
 			}
 
-			virtual void LocoFunction(const Protocol protocol,
+			void LocoFunction(const Protocol protocol,
 				const Address address,
 				const DataModel::LocoFunctionNr function,
 				const DataModel::LocoFunctionState on) override
@@ -110,12 +110,13 @@ namespace Hardware { namespace Protocols
 				MaerklinCANCommon::LocoFunction(protocol, address, function, on);
 			}
 
-			void AccessoryOnOrOff(const Protocol protocol,
+			void Accessory(const Protocol protocol,
 				const Address address,
 				const DataModel::AccessoryState state,
-				const bool on) override
+				const bool on,
+				__attribute__((unused)) const DataModel::AccessoryPulseDuration duration) override
 			{
-				MaerklinCANCommon::AccessoryOnOrOff(protocol, address, state, on);
+				MaerklinCANCommon::Accessory(protocol, address, state, on);
 			}
 
 			void ProgramRead(const ProgramMode mode,
@@ -133,27 +134,27 @@ namespace Hardware { namespace Protocols
 				MaerklinCANCommon::ProgramWrite(mode, address, cv, value);
 			}
 
-			virtual const std::map<std::string, Hardware::LocoCacheEntry>& GetLocoDatabase() const override
+			const std::map<std::string, Hardware::LocoCacheEntry>& GetLocoDatabase() const override
 			{
 				return locoCache.GetAll();
 			}
 
-			virtual DataModel::LocoConfig GetLocoByMatchKey(const std::string& matchKey) const override
+			DataModel::LocoConfig GetLocoByMatchKey(const std::string& matchKey) const override
 			{
 				return DataModel::LocoConfig(locoCache.Get(matchKey));
 			}
 
-			virtual DataModel::LocoConfig GetMultipleUnitByMatchKey(const std::string& matchKey) const override
+			DataModel::LocoConfig GetMultipleUnitByMatchKey(const std::string& matchKey) const override
 			{
 				return DataModel::LocoConfig(locoCache.Get(matchKey));
 			}
 
-			virtual void SetLocoIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
+			void SetLocoIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
 			{
 				locoCache.SetLocoId(locoId, matchKey);
 			}
 
-			virtual void SetMultipleUnitIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
+			void SetMultipleUnitIdOfMatchKey(const LocoID locoId, const std::string& matchKey) override
 			{
 				locoCache.SetLocoId(locoId, matchKey);
 			}

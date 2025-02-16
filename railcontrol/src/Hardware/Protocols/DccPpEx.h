@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -86,8 +86,9 @@ namespace Hardware
 
 				void Accessory(const Protocol protocol,
 					const Address address,
-				    const DataModel::AccessoryState state,
-				    const DataModel::AccessoryPulseDuration duration) override;
+					const DataModel::AccessoryState state,
+					const bool on,
+					const DataModel::AccessoryPulseDuration duration) override;
 
 				void ProgramWrite(const ProgramMode mode,
 					const Address address,

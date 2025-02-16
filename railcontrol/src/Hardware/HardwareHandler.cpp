@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -168,7 +168,7 @@ namespace Hardware
 
 	const std::string& HardwareHandler::GetName() const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return Unknown;
 		}
@@ -177,7 +177,7 @@ namespace Hardware
 
 	const std::string& HardwareHandler::GetShortName() const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return Unknown;
 		}
@@ -186,7 +186,7 @@ namespace Hardware
 
 	Hardware::Capabilities HardwareHandler::GetCapabilities() const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return Hardware::CapabilityNone;
 		}
@@ -196,7 +196,7 @@ namespace Hardware
 
 	void HardwareHandler::LocoProtocols(std::vector<Protocol>& protocols) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			protocols.push_back(ProtocolNone);
 			return;
@@ -207,7 +207,7 @@ namespace Hardware
 
 	bool HardwareHandler::LocoProtocolSupported(Protocol protocol) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return false;
 		}
@@ -216,7 +216,7 @@ namespace Hardware
 
 	void HardwareHandler::AccessoryProtocols(std::vector<Protocol>& protocols) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			protocols.push_back(ProtocolNone);
 			return;
@@ -227,7 +227,7 @@ namespace Hardware
 
 	bool HardwareHandler::AccessoryProtocolSupported(Protocol protocol) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return false;
 		}
@@ -236,7 +236,7 @@ namespace Hardware
 
 	void HardwareHandler::Booster(const ControlType controlType, const BoosterState status)
 	{
-		if (controlType == ControlTypeHardware || instance == nullptr)
+		if (controlType == ControlTypeHardware || !instance)
 		{
 			return;
 		}
@@ -247,7 +247,7 @@ namespace Hardware
 		const DataModel::LocoBase* loco,
 		const Speed speed)
 	{
-		if (controlType == ControlTypeHardware || instance == nullptr || loco->GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || loco->GetControlID() != GetControlID())
 		{
 			return;
 		}
@@ -258,7 +258,7 @@ namespace Hardware
 		const DataModel::LocoBase* loco,
 		const Orientation orientation)
 	{
-		if (controlType == ControlTypeHardware || instance == nullptr || loco->GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || loco->GetControlID() != GetControlID())
 		{
 			return;
 		}
@@ -270,7 +270,7 @@ namespace Hardware
 		const DataModel::LocoFunctionNr function,
 		const DataModel::LocoFunctionState on)
 	{
-		if (controlType == ControlTypeHardware || instance == nullptr || loco->GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || loco->GetControlID() != GetControlID())
 		{
 			return;
 		}
@@ -282,7 +282,7 @@ namespace Hardware
 		const Orientation orientation,
 		std::vector<DataModel::LocoFunctionEntry>& functions)
 	{
-		if (instance == nullptr || loco->GetControlID() != GetControlID())
+		if (!instance || loco->GetControlID() != GetControlID())
 		{
 			return;
 		}
@@ -293,7 +293,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -304,7 +304,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -315,7 +315,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -326,7 +326,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -336,20 +336,59 @@ namespace Hardware
 	void HardwareHandler::AccessoryState(const ControlType controlType, const DataModel::Accessory* accessory)
 	{
 		if (controlType == ControlTypeHardware
-			|| instance == nullptr
-			|| accessory == nullptr
+			|| !instance
+			|| !accessory
 			|| accessory->GetControlID() != this->GetControlID())
 		{
 			return;
 		}
-		instance->Accessory(accessory->GetProtocol(), accessory->GetAddress(), accessory->GetInvertedAccessoryState(), accessory->GetAccessoryPulseDuration());
+		const Protocol protocol = accessory->GetProtocol();
+		const Address address = accessory->GetAddress();
+		const DataModel::AccessoryState state = accessory->GetInvertedAccessoryState();
+		const DataModel::AccessoryPulseDuration duration = accessory->GetAccessoryPulseDuration();
+		switch (accessory->GetAccessoryType() & DataModel::AccessoryTypeSubtypeMask)
+		{
+			case DataModel::AccessoryTypeOnOn:
+			{
+				AccessoryBaseState(protocol, address, state, duration);
+				break;
+			}
+
+			case DataModel::AccessoryTypeOnPush:
+			case DataModel::AccessoryTypeOnOff:
+			{
+				const AddressPort port = accessory->GetPort();
+				const DataModel::AccessoryState portAsState = static_cast<DataModel::AccessoryState>(port);
+				if (state == DataModel::AccessoryStateOn)
+				{
+					instance->Accessory(protocol, address, portAsState, true, duration);
+				}
+				else
+				{
+					instance->Accessory(protocol, address, portAsState, false, 0);
+				}
+				break;
+			}
+
+			default:
+				break;
+		}
+	}
+
+	void HardwareHandler::AccessoryBaseState(const Protocol protocol,
+		const Address address,
+		const DataModel::AccessoryState state,
+		const DataModel::AccessoryPulseDuration duration)
+	{
+		instance->Accessory(protocol, address, state, true, duration);
+		__attribute((unused)) auto r = std::async(std::launch::async, AccessoryBaseStateStatic, instance, protocol, address, state, duration);
 	}
 
 	void HardwareHandler::SwitchSettings(const SwitchID switchId,
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -360,7 +399,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -370,37 +409,37 @@ namespace Hardware
 	void HardwareHandler::SwitchState(const ControlType controlType, const DataModel::Switch* mySwitch)
 	{
 		if (controlType == ControlTypeHardware
-			|| instance == nullptr
-			|| mySwitch == nullptr
+			|| !instance
+			|| !mySwitch
 			|| mySwitch->GetControlID() != this->GetControlID())
 		{
 			return;
 		}
 
-		Protocol protocol =  mySwitch->GetProtocol();
-		Address address =  mySwitch->GetAddress();
-		DataModel::AccessoryPulseDuration duration = mySwitch->GetAccessoryPulseDuration();
+		const Protocol protocol =  mySwitch->GetProtocol();
+		const Address address =  mySwitch->GetAddress();
+		const DataModel::AccessoryPulseDuration duration = mySwitch->GetAccessoryPulseDuration();
 		if (mySwitch->GetAccessoryType() != DataModel::SwitchTypeThreeWay)
 		{
-			instance->Accessory(protocol, address, mySwitch->GetInvertedAccessoryState(), duration);
+			AccessoryBaseState(protocol, address, mySwitch->GetInvertedAccessoryState(), duration);
 			return;
 		}
 
 		switch (mySwitch->GetAccessoryState())
 		{
 			case DataModel::SwitchStateTurnout:
-				instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
-				instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateTurnout), duration);
+				AccessoryBaseState(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				AccessoryBaseState(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateTurnout), duration);
 				break;
 
 			case DataModel::SwitchStateStraight:
-				instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
-				instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				AccessoryBaseState(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				AccessoryBaseState(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
 				break;
 
 			case DataModel::SwitchStateThird:
-				instance->Accessory(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
-				instance->Accessory(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateTurnout), duration);
+				AccessoryBaseState(protocol, address, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateStraight), duration);
+				AccessoryBaseState(protocol, address + 1, mySwitch->CalculateInvertedAccessoryState(DataModel::SwitchStateTurnout), duration);
 				break;
 
 			default:
@@ -412,7 +451,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -423,7 +462,7 @@ namespace Hardware
 		__attribute__((unused)) const std::string& name,
 		const std::string& matchKey)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -433,8 +472,8 @@ namespace Hardware
 	void HardwareHandler::SignalState(const ControlType controlType, const DataModel::Signal* signal)
 	{
 		if (controlType == ControlTypeHardware
-			|| instance == nullptr
-			|| signal == nullptr
+			|| !instance
+			|| !signal
 			|| signal->GetControlID() != this->GetControlID())
 		{
 			return;
@@ -445,7 +484,7 @@ namespace Hardware
 			return;
 		}
 		const DataModel::AccessoryState state = signal->GetMappedAccessoryState();
-		instance->Accessory(signal->GetProtocol(), address, state, signal->GetAccessoryPulseDuration());
+		AccessoryBaseState(signal->GetProtocol(), address, state, signal->GetAccessoryPulseDuration());
 	}
 
 	bool HardwareHandler::ProgramCheckValues(const ProgramMode mode, const CvNumber cv, const CvValue value)
@@ -489,11 +528,11 @@ namespace Hardware
 
 	void HardwareHandler::ProgramRead(const ProgramMode mode, const Address address, const CvNumber cv)
 	{
-		if (ProgramCheckValues(mode, cv) == false)
+		if (!ProgramCheckValues(mode, cv))
 		{
 			return;
 		}
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -503,11 +542,11 @@ namespace Hardware
 
 	void HardwareHandler::ProgramWrite(const ProgramMode mode, const Address address, const CvNumber cv, const CvValue value)
 	{
-		if (ProgramCheckValues(mode, cv, value) == false)
+		if (!ProgramCheckValues(mode, cv, value))
 		{
 			return;
 		}
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -516,7 +555,7 @@ namespace Hardware
 
 	void HardwareHandler::FeedbackDelete(const FeedbackID feedbackID, const std::string& name)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -525,7 +564,7 @@ namespace Hardware
 
 	void HardwareHandler::FeedbackSettings(const FeedbackID feedbackID, const std::string& name)
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -534,7 +573,7 @@ namespace Hardware
 
 	void HardwareHandler::AddUnmatchedLocos(std::map<std::string,DataModel::LocoConfig>& list) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -558,7 +597,7 @@ namespace Hardware
 	std::map<std::string,DataModel::LocoConfig> HardwareHandler::GetUnmatchedLocos(const std::string& matchKey) const
 	{
 		std::map<std::string,DataModel::LocoConfig> out;
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return out;
 		}
@@ -581,7 +620,7 @@ namespace Hardware
 
 	DataModel::LocoConfig HardwareHandler::GetLocoByMatchKey(const std::string& match) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return DataModel::LocoConfig(LocoTypeLoco);
 		}
@@ -590,7 +629,7 @@ namespace Hardware
 
 	void HardwareHandler::AddUnmatchedMultipleUnits(std::map<std::string,DataModel::LocoConfig>& list) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -614,7 +653,7 @@ namespace Hardware
 	std::map<std::string,DataModel::LocoConfig> HardwareHandler::GetUnmatchedMultipleUnits(const std::string& matchKey) const
 	{
 		std::map<std::string,DataModel::LocoConfig> out;
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return out;
 		}
@@ -637,7 +676,7 @@ namespace Hardware
 
 	DataModel::LocoConfig HardwareHandler::GetMultipleUnitByMatchKey(const std::string& match) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return DataModel::LocoConfig(LocoTypeMultipleUnit);
 		}
@@ -646,7 +685,7 @@ namespace Hardware
 
 	void HardwareHandler::AddUnmatchedAccessories(std::map<std::string,DataModel::AccessoryConfig>& list) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -667,7 +706,7 @@ namespace Hardware
 	std::map<std::string,DataModel::AccessoryConfig> HardwareHandler::GetUnmatchedAccessories(const std::string& matchKey) const
 	{
 		std::map<std::string,DataModel::AccessoryConfig> out;
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return out;
 		}
@@ -689,7 +728,7 @@ namespace Hardware
 
 	DataModel::AccessoryConfig HardwareHandler::GetAccessoryByMatchKey(const std::string& match) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return DataModel::AccessoryConfig();
 		}
@@ -698,7 +737,7 @@ namespace Hardware
 
 	void HardwareHandler::AddUnmatchedFeedbacks(std::map<std::string,DataModel::FeedbackConfig>& list) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return;
 		}
@@ -718,7 +757,7 @@ namespace Hardware
 	std::map<std::string,DataModel::FeedbackConfig> HardwareHandler::GetUnmatchedFeedbacks(const std::string& matchKey) const
 	{
 		std::map<std::string,DataModel::FeedbackConfig> out;
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return out;
 		}
@@ -738,7 +777,7 @@ namespace Hardware
 
 	DataModel::FeedbackConfig HardwareHandler::GetFeedbackByMatchKey(const std::string& match) const
 	{
-		if (instance == nullptr)
+		if (!instance)
 		{
 			return DataModel::FeedbackConfig();
 		}

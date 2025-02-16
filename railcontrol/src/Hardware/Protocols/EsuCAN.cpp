@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -105,14 +105,17 @@ namespace Hardware
 			Send(command.c_str());
 		}
 
-		void EsuCAN::AccessoryOnOrOff(__attribute__((unused))  const Protocol protocol, const Address address,
-		    const DataModel::AccessoryState state, const bool on)
+		void EsuCAN::Accessory(__attribute__((unused))  const Protocol protocol,
+			const Address address,
+			const DataModel::AccessoryState state,
+			const bool on,
+			__attribute__((unused)) const DataModel::AccessoryPulseDuration duration)
 		{
-			const unsigned int accessoryId = address + OffsetAccessoryAddress;
-			if (on == false)
+			if (!on)
 			{
 				return;
 			}
+			const unsigned int accessoryId = address + OffsetAccessoryAddress;
 			SendGetHandle(accessoryId);
 			const string command = "set(" + to_string(accessoryId) + ",state[" + (state ? "0" : "1") + "])\n";
 			Send(command.c_str());

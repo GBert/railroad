@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -260,8 +260,10 @@ namespace Hardware { namespace Protocols
 		SendInternal(buffer);
 	}
 
-	void MaerklinCANCommon::AccessoryOnOrOff(const Protocol protocol, const Address address,
-		const DataModel::AccessoryState state, const bool on)
+	void MaerklinCANCommon::Accessory(const Protocol protocol,
+		const Address address,
+		const DataModel::AccessoryState state,
+		const bool on)
 	{
 		unsigned char buffer[CANCommandBufferLength];
 		logger->Info(Languages::TextSettingAccessoryWithProtocol, Utils::Utils::ProtocolToString(protocol), address, Languages::GetGreenRed(state), Languages::GetOnOff(on));

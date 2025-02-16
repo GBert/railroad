@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -67,6 +67,10 @@ namespace Server { namespace Web
 
 			static HtmlTag HtmlTagProtocol(const std::map<std::string,Protocol>& protocolMap,
 				const Protocol selectedProtocol);
+
+			static HtmlTag HtmlTagAccessoryAddress(const DataModel::AccessoryType type,
+				const Address address,
+				const AddressPort port);
 
 			static inline HtmlTag HtmlTagDuration(const DataModel::AccessoryPulseDuration duration)
 			{

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -150,13 +150,12 @@ namespace Hardware
 			}
 
 			// accessory command
-			virtual void Accessory(const Protocol protocol,
-				const Address address,
-				const DataModel::AccessoryState state,
-				const DataModel::AccessoryPulseDuration duration)
+			virtual void Accessory(__attribute__((unused)) const Protocol protocol,
+				__attribute__((unused)) const Address address,
+				__attribute__((unused)) const DataModel::AccessoryState state,
+				__attribute__((unused)) const bool on,
+				__attribute__((unused)) const DataModel::AccessoryPulseDuration duration)
 			{
-				AccessoryOnOrOff(protocol, address, state, true);
-				__attribute((unused)) auto r = std::async(std::launch::async, AccessoryOnOrOffStatic, this, protocol, address, state, duration);
 			}
 
 			// read CV value
@@ -240,28 +239,11 @@ namespace Hardware
 			}
 
 		protected:
-			virtual void AccessoryOnOrOff(__attribute__((unused)) const Protocol protocol,
-				__attribute__((unused)) const Address address,
-				__attribute__((unused)) const DataModel::AccessoryState state,
-				__attribute__((unused)) const bool on)
-			{
-			}
-
 			Manager* const manager;
 			const ControlID controlID;
 			Logger::Logger* const logger;
 
 		private:
-			static void AccessoryOnOrOffStatic(HardwareInterface* hardware,
-				const Protocol protocol,
-				const Address address,
-				const DataModel::AccessoryState state,
-				const DataModel::AccessoryPulseDuration duration)
-			{
-				Utils::Utils::SleepForMilliseconds(duration);
-				hardware->AccessoryOnOrOff(protocol, address, state, false);
-			}
-
 			const std::string fullName;
 			const std::string shortName;
 			std::map<std::string,Hardware::LocoCacheEntry> emptyLocoDatabase;

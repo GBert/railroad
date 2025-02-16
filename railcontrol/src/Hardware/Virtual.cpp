@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -64,7 +64,11 @@ namespace Hardware
 	}
 
 	// accessory command
-	void Virtual::AccessoryOnOrOff(const Protocol protocol, const Address address, const DataModel::AccessoryState state, const bool on)
+	void Virtual::Accessory(const Protocol protocol,
+		const Address address,
+		const DataModel::AccessoryState state,
+		const bool on,
+		__attribute__((unused)) const DataModel::AccessoryPulseDuration duration)
 	{
 		logger->Info(Languages::TextSettingAccessoryWithProtocol, Utils::Utils::ProtocolToString(protocol), address, Languages::GetGreenRed(state), Languages::GetOnOff(on));
 	}

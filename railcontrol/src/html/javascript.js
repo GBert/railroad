@@ -760,6 +760,45 @@ function onClickAccessory(accessoryID)
 	return false;
 }
 
+function onMousePressAccessory(accessoryID)
+{
+	var identifier = 'a_' + accessoryID;
+	if (modifierKeyPressed(event))
+	{
+		return;
+	}
+	if (event.button != 0)
+	{
+		return;
+	}
+	var element = document.getElementById(identifier);
+	var url = '/?cmd=accessorystate';
+	url += '&state=on';
+	url += '&accessory=' + accessoryID;
+	fireRequestAndForget(url);
+	return false;
+}
+
+function onMouseReleaseAccessory(accessoryID)
+{
+	var identifier = 'a_' + accessoryID;
+	if (modifierKeyPressed(event))
+	{
+		rotateObject(identifier);
+		return;
+	}
+	if (event.button != 0)
+	{
+		return;
+	}
+	var element = document.getElementById(identifier);
+	var url = '/?cmd=accessorystate';
+	url += '&state=off';
+	url += '&accessory=' + accessoryID;
+	fireRequestAndForget(url);
+	return false;
+}
+
 function onClickRoute(routeID)
 {
 	var element = document.getElementById('r_' + routeID);
@@ -1681,15 +1720,52 @@ function loadProtocol(type, ID)
 		return;
 	}
 	var controlID = selectControl.value;
-	var selectProtocol = document.getElementById('select_protocol');
+	var elementName = 'select_protocol';
+	var selectProtocol = document.getElementById(elementName);
 	if (!selectProtocol)
 	{
 		return;
 	}
-	var elementName = 'select_protocol';
 	var url = '/?cmd=protocol';
 	url += '&control=' + controlID;
 	url += '&' + type + '=' + ID;
+	requestUpdateItem(elementName, url);
+}
+
+function loadAccessoryAddress()
+{
+	var selectAccessoryType = document.getElementById('s_accessorytype');
+	if (!selectAccessoryType)
+	{
+		return;
+	}
+	var type = selectAccessoryType.value;
+	var elementName = 'select_address';
+	var selectAddress = document.getElementById(elementName);
+	if (!selectAddress)
+	{
+		return;
+	}
+	var intAddress = document.getElementById('address');
+	if (!intAddress)
+	{
+		return;
+	}
+	var address = intAddress.value;
+	var selectPort = document.getElementById('s_port');
+	if (!selectPort)
+	{
+		selectPort = document.getElementById('port');
+		if (!selectPort)
+		{
+			return;
+		}
+	}
+	var port = selectPort.value;
+	var url = '/?cmd=accessoryaddress';
+	url += '&type=' + type;
+	url += '&address=' + address;
+	url += '&port=' + port;
 	requestUpdateItem(elementName, url);
 }
 

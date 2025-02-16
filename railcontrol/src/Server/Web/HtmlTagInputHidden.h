@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2024 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -36,15 +36,15 @@ namespace Server { namespace Web
 
 			inline HtmlTagInputHidden(const DataModel::ObjectIdentifier& identifier)
 			:	HtmlTagInputHidden(identifier.GetObjectTypeAsString(),
-					identifier.GetObjectIdAsString())
+				identifier.GetObjectIdAsString())
 			{
 			}
 
 			inline HtmlTagInputHidden(const std::string& name,
 				const std::string& value = "")
 			:	HtmlTagInput("hidden",
-					name,
-					value)
+				name,
+				value)
 			{
 				AddClass("hidden");
 			}
