@@ -36,25 +36,17 @@ namespace DataModel
 		AccessoryTypeOnOn            = 0x00,
 		AccessoryTypeOnPush          = 0x40,
 		AccessoryTypeOnOff           = 0x80,
-		AccessoryTypeSubtypeMask     = 0xC0,
+		AccessoryTypeConnectionMask  = 0xC0,
 
 		// 6 LSB are display type (default, straight, turn, ...)
 		AccessoryTypeDefault         = 0x00,
 		AccessoryTypeStraight        = 0x01,
 		AccessoryTypeTurn            = 0x02,
+		AccessoryTypeDecoupler       = 0x03,
+		AccessoryTypeLight           = 0x04,
+		AccessoryTypeLightInhouse    = 0x05,
+		AccessoryTypeLightStreet     = 0x06,
 		AccessoryTypeMask            = 0x3F,
-
-		AccessoryTypeOnOnDefault     = AccessoryTypeOnOn + AccessoryTypeDefault,
-		AccessoryTypeOnOnStraight    = AccessoryTypeOnOn + AccessoryTypeStraight,
-		AccessoryTypeOnOnTurn        = AccessoryTypeOnOn + AccessoryTypeTurn,
-
-		AccessoryTypeOnPushDefault   = AccessoryTypeOnPush + AccessoryTypeDefault,
-		AccessoryTypeOnPushStraight  = AccessoryTypeOnPush + AccessoryTypeStraight,
-		AccessoryTypeOnPushTurn      = AccessoryTypeOnPush + AccessoryTypeTurn,
-
-		AccessoryTypeOnOffDefault    = AccessoryTypeOnOff + AccessoryTypeDefault,
-		AccessoryTypeOnOffStraight   = AccessoryTypeOnOff + AccessoryTypeStraight,
-		AccessoryTypeOnOffTurn       = AccessoryTypeOnOff + AccessoryTypeTurn,
 
 		SignalTypeSimpleLeft  =  0,
 		SignalTypeSimpleRight =  1,
@@ -125,7 +117,7 @@ namespace DataModel
 		public:
 			AccessoryBase()
 			:	HardwareHandle(),
-				accessoryType(AccessoryTypeOnOnDefault),
+				accessoryType(AccessoryTypeDefault),
 				accessoryState(AccessoryStateOff),
 				duration(0),
 				inverted(false),

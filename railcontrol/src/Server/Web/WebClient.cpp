@@ -171,10 +171,14 @@ namespace Server { namespace Web
 					server.AddUpdate("warning", Languages::TextRailControlUpdateAvailable);
 				}
 			}
-			else if (arguments["cmd"].compare("quit") == 0)
+			else if (arguments["cmd"].compare("askshutdown") == 0)
 			{
-				ReplyHtmlWithHeaderAndParagraph(Languages::TextStoppingRailControl);
-				stopRailControlWebserver();
+				HandleAskShutdown();
+			}
+			else if (arguments["cmd"].compare("shutdown") == 0)
+			{
+				ReplyResponse(ResponseInfo, Languages::TextShutdownRailControl);
+				shutdownRailControlWebserver();
 			}
 			else if (arguments["cmd"].compare("booster") == 0)
 			{
@@ -822,6 +826,17 @@ namespace Server { namespace Web
 		free(buffer);
 	}
 
+	void WebClient::HandleAskShutdown()
+	{
+		HtmlTag content;
+		content.AddContent(HtmlTag("h1").AddContent(Languages::TextShutdown));
+		content.AddContent(HtmlTag("p").AddContent(Languages::TextAreYouSureToShutdown));
+		content.AddContent(HtmlTag("form").AddId("editform").AddContent(HtmlTagInputHidden("cmd", "shutdown")));
+		content.AddContent(HtmlTagButtonCancel());
+		content.AddContent(HtmlTagButtonOK());
+		ReplyHtmlWithHeader(content);
+	}
+
 	void WebClient::HandleLayerEdit(const map<string, string>& arguments)
 	{
 		HtmlTag content;
@@ -1273,7 +1288,7 @@ namespace Server { namespace Web
 
 	void WebClient::HandleAccessoryAddress(const map<string, string>& arguments)
 	{
-		const AccessoryType type = static_cast<AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", AccessoryTypeOnOnDefault));
+		const AccessoryType type = static_cast<AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", AccessoryTypeDefault));
 		const Address address = static_cast<Address>(Utils::Utils::GetIntegerMapEntry(arguments, "address", AddressDefault));
 		const AddressPort port = static_cast<AddressPort>(Utils::Utils::GetIntegerMapEntry(arguments, "port", AddressPortRed));
 		ReplyHtmlWithHeader(WebClientStatic::HtmlTagAccessoryAddress(type, address, port));
@@ -2115,7 +2130,8 @@ namespace Server { namespace Web
 		Address address = AddressDefault;
 		AddressPort port = AddressPortRed;
 		Address serverAddress = AddressNone;
-		DataModel::AccessoryType accessoryType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "accessorytype", AccessoryTypeOnOnDefault));
+		DataModel::AccessoryType accessoryType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "accessorytype", AccessoryTypeDefault));
+		DataModel::AccessoryType connectionType;
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", LayerUndeletable);
@@ -2156,6 +2172,9 @@ namespace Server { namespace Web
 		}
 		// else new accessory
 
+		connectionType = static_cast<DataModel::AccessoryType>(accessoryType & DataModel::AccessoryTypeConnectionMask);
+		accessoryType = static_cast<DataModel::AccessoryType>(accessoryType & DataModel::AccessoryTypeMask);
+
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 		HtmlTag tabMenu("div");
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
@@ -2167,24 +2186,28 @@ namespace Server { namespace Web
 		formContent.AddChildTag(HtmlTagInputHidden("accessory", to_string(accessoryID)));
 
 		std::map<DataModel::AccessoryType, Languages::TextSelector> typeOptions;
-		typeOptions[DataModel::AccessoryTypeOnOnDefault] = Languages::TextAccessoryTypeOnOnDefault;
-		typeOptions[DataModel::AccessoryTypeOnOnStraight] = Languages::TextAccessoryTypeOnOnStraight;
-		typeOptions[DataModel::AccessoryTypeOnOnTurn] = Languages::TextAccessoryTypeOnOnTurn;
-		typeOptions[DataModel::AccessoryTypeOnPushDefault] = Languages::TextAccessoryTypeOnPushDefault;
-		typeOptions[DataModel::AccessoryTypeOnPushStraight] = Languages::TextAccessoryTypeOnPushStraight;
-		typeOptions[DataModel::AccessoryTypeOnPushTurn] = Languages::TextAccessoryTypeOnPushTurn;
-		typeOptions[DataModel::AccessoryTypeOnOffDefault] = Languages::TextAccessoryTypeOnOffDefault;
-		typeOptions[DataModel::AccessoryTypeOnOffStraight] = Languages::TextAccessoryTypeOnOffStraight;
-		typeOptions[DataModel::AccessoryTypeOnOffTurn] = Languages::TextAccessoryTypeOnOffTurn;
+		typeOptions[DataModel::AccessoryTypeDefault] = Languages::TextDefault;
+		typeOptions[DataModel::AccessoryTypeStraight] = Languages::TextStraight;
+		typeOptions[DataModel::AccessoryTypeTurn] = Languages::TextTurn;
+		typeOptions[DataModel::AccessoryTypeDecoupler] = Languages::TextAccessoryTypeDecoupler;
+		typeOptions[DataModel::AccessoryTypeLight] = Languages::TextAccessoryTypeLight;
+		typeOptions[DataModel::AccessoryTypeLightInhouse] = Languages::TextAccessoryTypeLightInhouse;
+		typeOptions[DataModel::AccessoryTypeLightStreet] = Languages::TextAccessoryTypeLightStreet;
+
+		std::map<DataModel::AccessoryType, Languages::TextSelector> connectionOptions;
+		connectionOptions[DataModel::AccessoryTypeOnOn] = Languages::TextAccessoryTypeOnOn;
+		connectionOptions[DataModel::AccessoryTypeOnPush] = Languages::TextAccessoryTypeOnPush;
+		connectionOptions[DataModel::AccessoryTypeOnOff] = Languages::TextAccessoryTypeOnOff;
 
 		HtmlTag mainContent("div");
 		mainContent.AddId("tab_main");
 		mainContent.AddClass("tab_content");
 		mainContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		mainContent.AddChildTag(HtmlTagSelectWithLabel("accessorytype", Languages::TextType, Languages::TextAccessoryTypeHint, typeOptions, accessoryType).AddAttribute("onchange", "loadAccessoryAddress('" + to_string(accessoryID) + "')"));
+		mainContent.AddChildTag(HtmlTagSelectWithLabel("accessorytype", Languages::TextType, typeOptions, static_cast<DataModel::AccessoryType>(accessoryType & DataModel::AccessoryTypeMask)));
+		mainContent.AddChildTag(HtmlTagSelectWithLabel("connectiontype", Languages::TextConnection, Languages::TextConnectionHint, connectionOptions, connectionType).AddAttribute("onchange", "loadAccessoryAddress('" + to_string(accessoryID) + "')"));
 		mainContent.AddChildTag(HtmlTagControlAccessory(controlId, "accessory", accessoryID));
 		mainContent.AddChildTag(HtmlTag("div").AddId("select_protocol").AddChildTag(HtmlTagMatchKeyProtocolAccessory(controlId, matchKey, protocol)));
-		mainContent.AddChildTag(HtmlTag("div").AddId("select_address").AddChildTag(WebClientStatic::HtmlTagAccessoryAddress(accessoryType, address, port)));
+		mainContent.AddChildTag(HtmlTag("div").AddId("select_address").AddChildTag(WebClientStatic::HtmlTagAccessoryAddress(connectionType, address, port)));
 		mainContent.AddChildTag(WebClientStatic::HtmlTagDuration(duration));
 		mainContent.AddChildTag(HtmlTagInputCheckboxWithLabel("inverted", Languages::TextInverted, "true", inverted));
 		if (manager.IsServerEnabled())
@@ -2223,7 +2246,8 @@ namespace Server { namespace Web
 		const Address address = Utils::Utils::GetIntegerMapEntry(arguments, "address", AddressDefault);
 		const AddressPort port = static_cast<AddressPort>(Utils::Utils::GetIntegerMapEntry(arguments, "port", AddressPortRed));
 		const Address serverAddress = Utils::Utils::GetIntegerMapEntry(arguments, "serveraddress", AddressNone);
-		const DataModel::AccessoryType accessoryType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "accessorytype", AccessoryTypeOnOnDefault));
+		const DataModel::AccessoryType connectionType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "connectiontype", AccessoryTypeOnOn));
+		const DataModel::AccessoryType accessoryType = static_cast<DataModel::AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "accessorytype", AccessoryTypeDefault) + connectionType);
 		const LayoutPosition posX = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		const LayoutPosition posY = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		const LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
@@ -3577,7 +3601,7 @@ namespace Server { namespace Web
 		menu.AddClass("menu");
 		HtmlTag menuMain("div");
 		menuMain.AddClass("menu_main");
-		menuMain.AddChildTag(HtmlTagButtonCommand("<svg width=\"36\" height=\"36\"><polygon points=\"16,1.5 31,1.5 31,25.5 16,25.5\" fill=\"white\" style=\"stroke:black;stroke-width:1;\"/><polygon points=\"21,11.5 31,1.5 31,25.5 21,35.5\" fill=\"black\" style=\"stroke:black;stroke-width:1;\"/><polygon points=\"1,11 8.5,11 8.5,6 16,13.5 8.5,21 8.5,16 1,16\"/></svg>", "quit", Languages::TextExitRailControl));
+		menuMain.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polygon points=\"16,1.5 31,1.5 31,25.5 16,25.5\" fill=\"white\" style=\"stroke:black;stroke-width:1;\"/><polygon points=\"21,11.5 31,1.5 31,25.5 21,35.5\" fill=\"black\" style=\"stroke:black;stroke-width:1;\"/><polygon points=\"1,11 8.5,11 8.5,6 16,13.5 8.5,21 8.5,16 1,16\"/></svg>", "askshutdown", Languages::TextExitRailControl));
 		menuMain.AddChildTag(HtmlTagButtonCommandToggle("<svg width=\"36\" height=\"36\"><polyline points=\"13.5,9.8 12.1,10.8 10.8,12.1 9.8,13.5 9.1,15.1 8.7,16.8 8.5,18.5 8.7,20.2 9.1,21.9 9.8,23.5 10.8,24.9 12.1,26.2 13.5,27.2 15.1,27.9 16.8,28.3 18.5,28.5 20.2,28.3 21.9,27.9 23.5,27.2 24.9,26.2 26.2,24.9 27.2,23.5 27.9,21.9 28.3,20.2 28.5,18.5 28.3,16.8 27.9,15.1 27.2,13.5 26.2,12.1 24.9,10.8 23.5,9.8\" stroke=\"black\" stroke-width=\"3\" fill=\"none\"/><polyline points=\"18.5,3.5 18.5,16\" stroke=\"black\" stroke-width=\"3\" fill=\"none\"/></svg>", "booster", manager.Booster(), Languages::TextTurningBoosterOnOrOff).AddClass("button_booster"));
 		menuMain.AddChildTag(HtmlTagButtonCommand("<svg width=\"36\" height=\"36\"><polyline points=\"2,12 2,11 11,2 26,2 35,11 35,26 26,35 11,35 2,26 2,12\" stroke=\"black\" stroke-width=\"1\" fill=\"red\"/><text x=\"4\" y=\"22\" fill=\"white\" font-size=\"11\">STOP</text></svg>", "stopallimmediately", Languages::TextStopAllLocos));
 		menuMain.AddChildTag(HtmlTagButtonCommand("<svg width=\"36\" height=\"36\"><polygon points=\"17,36 17,28 15,28 10,23 10,5 15,0 21,0 26,5 26,23 21,28 19,28 19,36\" fill=\"black\" /><circle cx=\"18\" cy=\"8\" r=\"4\" fill=\"red\" /><circle cx=\"18\" cy=\"20\" r=\"4\" fill=\"darkgray\" /></svg>", "stopall", Languages::TextSetAllLocosToManualMode));

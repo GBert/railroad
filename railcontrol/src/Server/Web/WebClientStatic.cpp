@@ -181,7 +181,7 @@ namespace Server { namespace Web
 	{
 		HtmlTag content;
 		content.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextAddress, address, 1, 2044));
-		switch (type & DataModel::AccessoryTypeSubtypeMask)
+		switch (type & DataModel::AccessoryTypeConnectionMask)
 		{
 			case DataModel::AccessoryTypeOnPush:
 			case DataModel::AccessoryTypeOnOff:

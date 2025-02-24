@@ -377,7 +377,7 @@ namespace Hardware { namespace Protocols
 			void ParseCs2FileLocomotives(std::deque<std::string>& lines);
 			void ParseCs2File(std::deque<std::string>& lines);
 
-			static uint16_t CalcCRC(const unsigned char* data, const size_t length);
+			static CanFileCrc CalcCrc(const unsigned char *data, const size_t length);
 
 			static CanHash CalcHash(const CanUid uid);
 			void GenerateUidHash();
@@ -394,8 +394,6 @@ namespace Hardware { namespace Protocols
 				Send(buffer);
 			}
 			virtual void Send(const unsigned char* buffer) = 0;
-
-			static uint16_t CalcCrc(const unsigned char *data, const size_t length);
 
 			inline void CleanUpCanFileData()
 			{

@@ -91,7 +91,7 @@ namespace Server { namespace Web
 
 	void WebServer::Stop()
 	{
-		AddUpdate(Languages::TextStoppingRailControl);
+		AddUpdate(Languages::TextShutdownRailControl);
 		TerminateTcpServer();
 		// stopping all clients
 		for (auto client : clients)

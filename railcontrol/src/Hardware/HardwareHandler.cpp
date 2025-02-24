@@ -346,7 +346,7 @@ namespace Hardware
 		const Address address = accessory->GetAddress();
 		const DataModel::AccessoryState state = accessory->GetInvertedAccessoryState();
 		const DataModel::AccessoryPulseDuration duration = accessory->GetAccessoryPulseDuration();
-		switch (accessory->GetAccessoryType() & DataModel::AccessoryTypeSubtypeMask)
+		switch (accessory->GetAccessoryType() & DataModel::AccessoryTypeConnectionMask)
 		{
 			case DataModel::AccessoryTypeOnOn:
 			{

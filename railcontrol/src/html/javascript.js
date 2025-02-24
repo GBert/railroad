@@ -760,7 +760,7 @@ function onClickAccessory(accessoryID)
 	return false;
 }
 
-function onMousePressAccessory(accessoryID)
+function onPointerDownAccessory(accessoryID)
 {
 	var identifier = 'a_' + accessoryID;
 	if (modifierKeyPressed(event))
@@ -779,7 +779,7 @@ function onMousePressAccessory(accessoryID)
 	return false;
 }
 
-function onMouseReleaseAccessory(accessoryID)
+function onPointerUpAccessory(accessoryID)
 {
 	var identifier = 'a_' + accessoryID;
 	if (modifierKeyPressed(event))
@@ -1734,7 +1734,7 @@ function loadProtocol(type, ID)
 
 function loadAccessoryAddress()
 {
-	var selectAccessoryType = document.getElementById('s_accessorytype');
+	var selectAccessoryType = document.getElementById('s_connectiontype');
 	if (!selectAccessoryType)
 	{
 		return;

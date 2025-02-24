@@ -218,6 +218,7 @@ namespace Server { namespace Web
 
 			std::map<std::string,ObjectID> GetMultipleUnitSlaveOptions() const;
 
+			void HandleAskShutdown();
 			void HandleSelectLoco(const std::map<std::string, std::string>& arguments);
 			void HandleLayerEdit(const std::map<std::string, std::string>& arguments);
 			void HandleLayerSave(const std::map<std::string, std::string>& arguments);

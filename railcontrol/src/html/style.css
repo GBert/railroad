@@ -734,7 +734,9 @@ button:active {
 .button_off .orientation_right,
 .button_on .orientation_left,
 .button_off .button_on,
-.button_on .button_off {
+.button_on .button_off,
+.accessory_off .accessory_on,
+.accessory_on .accessory_off {
 	display: none;
 	visibility: hidden;
 }
