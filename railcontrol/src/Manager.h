@@ -412,7 +412,10 @@ class Manager
 		}
 
 		const std::map<std::string,DataModel::Track*> TrackListByName() const;
-		const std::map<std::string,TrackID> TrackListIdByName() const;
+
+		const std::map<std::string,DataModel::Track*> TrackListMasterByName() const;
+
+		const std::map<std::string,TrackID> TrackListIdByName(const TrackID excludeTrackID = TrackNone) const;
 
 		inline void TrackSave(const DataModel::Track* track) const
 		{
@@ -434,6 +437,7 @@ class Manager
 			const DataModel::LayoutItem::LayoutItemSize width,
 			const DataModel::LayoutItem::LayoutRotation rotation,
 			const DataModel::TrackType trackType,
+			const TrackID main,
 			const std::vector<DataModel::Relation*>& newFeedbacks,
 			const std::vector<DataModel::Relation*>& newSignals,
 			const DataModel::SelectRouteApproach selectRouteApproach,
@@ -758,13 +762,24 @@ class Manager
 		bool ControlIsOfHardwareType(const ControlID controlID, const HardwareType hardwareType);
 
 		ControlInterface* GetControl(const ControlID controlID) const;
-		DataModel::Loco* GetLoco(const ControlID controlID, const Protocol protocol, const Address address) const;
-		DataModel::Accessory* GetAccessory(const ControlID controlID, const Protocol protocol, const Address address) const;
+
+		DataModel::Loco* GetLoco(const ControlID controlID,
+			const Protocol protocol,
+			const Address address) const;
+
+		DataModel::Accessory* GetAccessory(const ControlID controlID,
+			const Protocol protocol,
+			const Address address,
+			const AddressPort port) const;
+
 		DataModel::Switch* GetSwitch(const ControlID controlID, const Protocol protocol, const Address address) const;
+
 		DataModel::Feedback* GetFeedback(const ControlID controlID, const FeedbackPin pin) const;
+
 		DataModel::Signal* GetSignal(const ControlID controlID, const Protocol protocol, const Address address) const;
 
 		void AccessoryState(const ControlType controlType, DataModel::Accessory* accessory, const DataModel::AccessoryState state, const bool force);
+
 		void SwitchState(const ControlType controlType, DataModel::Switch* mySwitch, const DataModel::AccessoryState state, const bool force);
 
 		static inline void FeedbackState(DataModel::Feedback* feedback, const DataModel::Feedback::FeedbackState state)

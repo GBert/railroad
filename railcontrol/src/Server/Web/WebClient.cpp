@@ -1300,11 +1300,10 @@ namespace Server { namespace Web
 	{
 		HtmlTag content("div");
 		content.AddId("position");;
-		content.AddChildTag(HtmlTagInputIntegerWithLabel("posx", Languages::TextPosX, posx, 0, 255));
-		content.AddChildTag(HtmlTagInputIntegerWithLabel("posy", Languages::TextPosY, posy, 0, 255));
+		content.AddChildTag(HtmlTagInputIntegerWithLabel("posx", Languages::TextPosX, Languages::TextHintPositionMove, posx, 0, 255));
+		content.AddChildTag(HtmlTagInputIntegerWithLabel("posy", Languages::TextPosY, Languages::TextHintPositionMove, posy, 0, 255));
 		map<string,LayerID> layerList = manager.LayerListByName();
 		content.AddChildTag(HtmlTagSelectWithLabel("posz", Languages::TextPosZ, layerList, posz));
-		content.AddChildTag(HtmlTag("p").AddContent(Languages::GetText(Languages::TextHint)).AddContent(HtmlTag("br")).AddContent(Languages::GetText(Languages::TextHintPositionMove)));
 		return content;
 	}
 
@@ -1327,7 +1326,7 @@ namespace Server { namespace Web
 		return content;
 	}
 
-	HtmlTag WebClient::HtmlTagSlaveSelect(const string& prefix,
+	HtmlTag WebClient::HtmlTagSelectSlave(const string& prefix,
 		const vector<Relation*>& relations,
 		const map<string,ObjectID>& options,
 		const bool allowNew) const
@@ -1620,7 +1619,7 @@ namespace Server { namespace Web
 
 		formContent.AddChildTag(WebClientStatic::HtmlTagTabFunctions(locoFunctions));
 
-		formContent.AddChildTag(HtmlTagSlaveSelect("slave", slaves, GetMultipleUnitSlaveOptions()));
+		formContent.AddChildTag(HtmlTagSelectSlave("slave", slaves, GetMultipleUnitSlaveOptions()));
 
 		formContent.AddChildTag(WebClientStatic::HtmlTagTabAutomode(pushpull, maxSpeed, travelSpeed, reducedSpeed, creepingSpeed));
 

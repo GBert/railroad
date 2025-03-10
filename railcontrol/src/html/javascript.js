@@ -948,27 +948,101 @@ function onChangeCheckboxShowHide(checkboxId, divId, tabId)
 	}
 }
 
-function onChangeTrackType()
+function onChangeTrackTypeMainTrack()
 {
-	var trackType = document.getElementById('s_tracktype');
+	let feedbacks = document.getElementById('tab_button_feedbacks');
+	if (!feedbacks)
+	{
+		return;
+	}
+	let signals = document.getElementById('tab_button_signals');
+	if (!signals)
+	{
+		return;
+	}
+	let automode = document.getElementById('tab_button_automode');
+	if (!automode)
+	{
+		return;
+	}
+	let trackType = document.getElementById('s_tracktype');
 	if (!trackType)
 	{
 		return;
 	}
-	var trackTypeValue = trackType.value;
-	var showname = document.getElementById('i_showname');
+	let main = document.getElementById('s_main');
+	if (!main)
+	{
+		return;
+	}
+	let name = document.getElementById('i_name');
+	if (!name)
+	{
+		return;
+	}
+	let showname = document.getElementById('i_showname');
 	if (!showname)
 	{
 		return;
 	}
-	showname.hidden = (trackTypeValue != 0)
-	var length = document.getElementById('i_length');
+	let shownamecb = document.getElementById('showname');
+	if (!shownamecb)
+	{
+		return;
+	}
+	let displayname = document.getElementById('i_displayname');
+	if (!displayname)
+	{
+		return;
+	}
+	let length = document.getElementById('i_length');
 	if (!length)
 	{
 		return;
 	}
-	var trackTypeValue = trackType.value;
-	length.hidden = (trackTypeValue == 1 || trackTypeValue == 5 || trackTypeValue == 7 || trackTypeValue == 8 || trackTypeValue == 9)
+
+	if (main.value != 0)
+	{
+		feedbacks.classList.add('hidden');
+		signals.classList.add('hidden');
+		automode.classList.add('hidden');
+		name.classList.add('hidden');
+	}
+	else
+	{
+		feedbacks.classList.remove('hidden');
+		signals.classList.remove('hidden');
+		automode.classList.remove('hidden');
+		name.classList.remove('hidden');
+	}
+
+	let trackTypeValue = trackType.value;
+	if ((trackTypeValue != 0) && (main.value != 0))
+	{
+		showname.classList.add('hidden');
+	}
+	else
+	{
+		showname.classList.remove('hidden');
+	}
+
+	if ((main.value != 0) || (trackTypeValue != 0) || (shownamecb.checked == false))
+	{
+		displayname.classList.add('hidden');
+	}
+	else
+	{
+		displayname.classList.remove('hidden');
+	}
+
+	if (trackTypeValue == 1 || trackTypeValue == 5 || trackTypeValue == 7 || trackTypeValue == 8 || trackTypeValue == 9)
+	{
+		length.classList.add('hidden');
+	}
+	else
+	{
+		length.classList.remove('hidden');
+	}
 }
 
 function updateLayoutItem(elementName, data)

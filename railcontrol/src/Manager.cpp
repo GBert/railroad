@@ -161,9 +161,16 @@ Manager::Manager(Config& config)
 	}
 
 	storage->AllTracks(tracks);
-	for (auto& track : tracks)
+	for (auto& t : tracks)
 	{
-		logger->Info(Languages::TextLoadedTrack, track.second->GetID(), track.second->GetName());
+		Track* track = t.second;
+		track->UpdateMain();
+		Track* main = track->GetMain();
+		if (main)
+		{
+			main->AddExtension(track);
+		}
+		logger->Info(Languages::TextLoadedTrack, track->GetID(), track->GetName());
 	}
 
 	storage->AllSwitches(switches);
@@ -1191,7 +1198,7 @@ void Manager::AccessoryBaseState(const ControlType controlType,
 	const Address address,
 	const DataModel::AccessoryState state)
 {
-	Accessory* accessory = GetAccessory(controlID, protocol, address);
+	Accessory* accessory = GetAccessory(controlID, protocol, address, static_cast<AddressPort>(state));
 	if (accessory)
 	{
 		AccessoryState(controlType, accessory, accessory->CalculateInvertedAccessoryState(state), true);
@@ -1307,16 +1314,35 @@ Accessory* Manager::GetAccessory(const AccessoryID accessoryID) const
 	return accessories.at(accessoryID);
 }
 
-Accessory* Manager::GetAccessory(const ControlID controlID, const Protocol protocol, const Address address) const
+Accessory* Manager::GetAccessory(const ControlID controlID,
+	const Protocol protocol,
+	const Address address,
+	const AddressPort port) const
 {
 	std::lock_guard<std::mutex> guard(accessoryMutex);
-	for (auto& accessory : accessories)
+	for (auto& a : accessories)
 	{
-		if (accessory.second->GetControlID() == controlID
-			&& accessory.second->GetProtocol() == protocol
-			&& accessory.second->GetAddress() == address)
+		Accessory* accessory = a.second;
+		if (accessory->GetControlID() == controlID
+			&& accessory->GetProtocol() == protocol
+			&& accessory->GetAddress() == address)
 		{
-			return accessory.second;
+			switch (accessory->GetAccessoryType() & DataModel::AccessoryTypeConnectionMask)
+			{
+				case AccessoryTypeOnOn:
+					return accessory;
+
+				case AccessoryTypeOnPush:
+				case AccessoryTypeOnOff:
+					if (accessory->GetPort() == port)
+					{
+						return accessory;
+					}
+					break;
+
+				default:
+					break;
+			}
 		}
 	}
 	return nullptr;
@@ -1974,13 +2000,40 @@ const map<string,DataModel::Track*> Manager::TrackListByName() const
 	return out;
 }
 
-const map<string,TrackID> Manager::TrackListIdByName() const
+const map<string,DataModel::Track*> Manager::TrackListMasterByName() const
+{
+	map<string,DataModel::Track*> out;
+	std::lock_guard<std::mutex> guard(trackMutex);
+	for (auto& t : tracks)
+	{
+		Track* track = t.second;
+		if (track && !track->GetMain())
+		{
+			out[track->GetName()] = track;
+		}
+	}
+	return out;
+}
+
+const map<string,TrackID> Manager::TrackListIdByName(const TrackID excludeTrackID) const
 {
 	map<string,TrackID> out;
 	std::lock_guard<std::mutex> guard(trackMutex);
-	for (auto& track : tracks)
+	for (auto& t : tracks)
 	{
-		out[track.second->GetName()] = track.second->GetID();
+		Track* track = t.second;
+		const TrackID trackID = track->GetID();
+		if (trackID == excludeTrackID)
+		{
+			continue;
+		}
+
+		// exclude extension tracks
+		if (track->GetMain())
+		{
+			continue;
+		}
+		out[track->GetName()] = trackID;
 	}
 	return out;
 }
@@ -1995,6 +2048,7 @@ bool Manager::TrackSave(TrackID trackID,
 	const LayoutItemSize height,
 	const LayoutRotation rotation,
 	const DataModel::TrackType trackType,
+	const TrackID main,
 	const vector<Relation*>& newFeedbacks,
 	const vector<Relation*>& newSignals,
 	const DataModel::SelectRouteApproach selectRouteApproach,
@@ -2043,6 +2097,17 @@ bool Manager::TrackSave(TrackID trackID,
 	track->SetPosY(posY);
 	track->SetPosZ(posZ);
 	track->SetTrackType(trackType);
+	Track* oldMain = track->GetMain();
+	if (oldMain)
+	{
+		oldMain->DeleteExtension(track);
+	}
+	Track* newMain = GetTrack(main);
+	if (newMain && !newMain->GetMain() && newMain->AddExtension(track))
+	{
+		track->SetMain(newMain);
+		track->SetName(newMain->GetName() + "_ext_" + to_string(trackID));
+	}
 	track->AssignFeedbacks(newFeedbacks);
 	track->AssignSignals(newSignals);
 	track->SetSelectRouteApproach(selectRouteApproach);
@@ -2587,7 +2652,7 @@ bool Manager::RouteSave(RouteID routeID,
 	Track* oldTrack = GetTrack(route->GetFromTrack());
 	if (oldTrack)
 	{
-		oldTrack->RemoveRoute(route);
+		oldTrack->DeleteRoute(route);
 		TrackSave(oldTrack);
 	}
 
@@ -2660,7 +2725,7 @@ bool Manager::RouteSave(RouteID routeID,
 		route->SetFollowUpRoute(RouteNone);
 	}
 
-	//Add new route
+	// Add new route
 	Track* newTrack = GetTrack(route->GetFromTrack());
 	if (newTrack)
 	{
@@ -3724,16 +3789,23 @@ void Manager::TrackSetLocoOrientation(const TrackID trackID, const Orientation o
 	{
 		return;
 	}
-	track->SetLocoOrientation(orientation);
+	track->SetLocoBaseOrientation(orientation);
 	TrackPublishState(track);
 }
 
 void Manager::TrackPublishState(const DataModel::Track* track)
 {
-	std::lock_guard<std::mutex> guard(controlMutex);
-	for (auto& control : controls)
 	{
-		control.second->TrackState(track);
+		std::lock_guard<std::mutex> guard(controlMutex);
+		for (auto& control : controls)
+		{
+			control.second->TrackState(track);
+		}
+	}
+	vector<Track*> extensions = track->GetExtensions();
+	for (Track* extension : extensions)
+	{
+		TrackPublishState(extension);
 	}
 }
 

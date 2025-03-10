@@ -85,6 +85,25 @@ namespace Server { namespace Web
 		return signalOptions;
 	}
 
+	HtmlTag WebClientTrack::HtmlTagSelectTrack(const std::string& name,
+		const Languages::TextSelector label,
+		const Languages::TextSelector hint,
+		const TrackID trackID,
+		const TrackID excludeTrackID,
+		const string& onchange) const
+	{
+		HtmlTag tag;
+		map<string,TrackID> tracks = manager.TrackListIdByName(excludeTrackID);
+		tracks["-"] = TrackNone;
+		HtmlTagSelectWithLabel selectTrack(name, label, hint, tracks, trackID);
+		if (onchange.size() > 0)
+		{
+			selectTrack.AddAttribute("onchange", onchange);
+		}
+		tag.AddChildTag(selectTrack);
+		return tag;
+	}
+
 	void WebClientTrack::HandleTrackEdit(const map<string, string>& arguments)
 	{
 		HtmlTag content;
@@ -98,6 +117,7 @@ namespace Server { namespace Web
 		LayoutItemSize height = Utils::Utils::GetIntegerMapEntry(arguments, "length", DataModel::LayoutItem::Height1);
 		LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
 		DataModel::TrackType type = DataModel::TrackTypeStraight;
+		TrackID main = TrackNone;
 		vector<Relation*> feedbacks;
 		vector<Relation*> signals;
 		Cluster* cluster = nullptr;
@@ -118,6 +138,7 @@ namespace Server { namespace Web
 				height = track->GetHeight();
 				rotation = track->GetRotation();
 				type = track->GetTrackType();
+				main = track->GetOwnMainID();
 				feedbacks = track->GetFeedbacks();
 				signals = track->GetSignals();
 				cluster = track->GetCluster();
@@ -147,9 +168,18 @@ namespace Server { namespace Web
 		HtmlTag tabMenu("div");
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("main", Languages::TextBasic, true));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
-		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedbacks", Languages::TextFeedbacks));
-		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("signals", Languages::TextSignals));
-		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
+		if (main != TrackNone)
+		{
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedbacks", Languages::TextFeedbacks).AddClass("hidden"));
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("signals", Languages::TextSignals).AddClass("hidden"));
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode).AddClass("hidden"));
+		}
+		else
+		{
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("feedbacks", Languages::TextFeedbacks));
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("signals", Languages::TextSignals));
+			tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
+		}
 		content.AddChildTag(tabMenu);
 
 		HtmlTag formContent("form");
@@ -172,22 +202,36 @@ namespace Server { namespace Web
 		HtmlTag mainContent("div");
 		mainContent.AddId("tab_main");
 		mainContent.AddClass("tab_content");
-		mainContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
+		mainContent.AddChildTag(HtmlTagSelectWithLabel("tracktype", Languages::TextType, typeOptions, type).AddAttribute("onchange", "onChangeTrackTypeMainTrack();return false;"));
+		mainContent.AddChildTag(HtmlTagSelectTrack("main", Languages::TextMainTrack, Languages::TextMainTrackHint, main, trackID, "onChangeTrackTypeMainTrack();return false;"));
+
+		HtmlTag i_name("div");
+		i_name.AddId("i_name");
+		i_name.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
+		if (main != TrackNone)
+		{
+			i_name.AddClass("hidden");
+		}
+		mainContent.AddChildTag(i_name);
+
 		HtmlTag i_showName("div");
 		i_showName.AddId("i_showname");
-		i_showName.AddChildTag(HtmlTagInputCheckboxWithLabel("showname", Languages::TextShowName, "true", showName));
-		i_showName.AddChildTag(HtmlTagInputTextWithLabel("displayname", Languages::TextDisplayName, displayName));
-		switch (type)
+		i_showName.AddChildTag(HtmlTagInputCheckboxWithLabel("showname", Languages::TextShowName, "true", showName).AddAttribute("onchange", "onChangeTrackTypeMainTrack();return false;"));
+		if ((type != DataModel::TrackTypeStraight) && (main != TrackNone))
 		{
-			case DataModel::TrackTypeStraight:
-				break;
-
-			default:
-				i_showName.AddAttribute("hidden");
-				break;
+			i_showName.AddClass("hidden");
 		}
 		mainContent.AddChildTag(i_showName);
-		mainContent.AddChildTag(HtmlTagSelectWithLabel("tracktype", Languages::TextType, typeOptions, type).AddAttribute("onchange", "onChangeTrackType();return false;"));
+
+		HtmlTag i_displayName("div");
+		i_displayName.AddId("i_displayname");
+		i_displayName.AddChildTag(HtmlTagInputTextWithLabel("displayname", Languages::TextDisplayName, displayName));
+		if ((main != TrackNone) || (type != DataModel::TrackTypeStraight) || (!showName))
+		{
+			i_displayName.AddClass("hidden");
+		}
+		mainContent.AddChildTag(i_displayName);
+
 		HtmlTag i_length("div");
 		i_length.AddId("i_length");
 		i_length.AddChildTag(HtmlTagInputIntegerWithLabel("length", Languages::TextLength, height, DataModel::Track::MinLength, DataModel::Track::MaxLength));
@@ -195,20 +239,24 @@ namespace Server { namespace Web
 		{
 			case DataModel::TrackTypeTurn:
 			case DataModel::TrackTypeTunnelEnd:
-				i_length.AddAttribute("hidden");
+			case DataModel::TrackTypeCrossingLeft:
+			case DataModel::TrackTypeCrossingRight:
+			case DataModel::TrackTypeCrossingSymetric:
+				i_length.AddClass("hidden");
 				break;
 
 			default:
 				break;
 		}
 		mainContent.AddChildTag(i_length);
+
 		formContent.AddChildTag(mainContent);
 
 		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, rotation));
 
-		formContent.AddChildTag(client.HtmlTagSlaveSelect("feedback", feedbacks, GetFeedbackOptions(trackID)));
+		formContent.AddChildTag(client.HtmlTagSelectSlave("feedback", feedbacks, GetFeedbackOptions(trackID)));
 
-		formContent.AddChildTag(client.HtmlTagSlaveSelect("signal", signals, GetSignalOptions(trackID)));
+		formContent.AddChildTag(client.HtmlTagSelectSlave("signal", signals, GetSignalOptions(trackID)));
 
 		formContent.AddChildTag(HtmlTagTabTrackAutomode(selectRouteApproach, allowLocoTurn, releaseWhenFree, cluster));
 
@@ -227,14 +275,15 @@ namespace Server { namespace Web
 		const LayoutPosition posX = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		const LayoutPosition posY = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		const LayoutPosition posZ = Utils::Utils::GetIntegerMapEntry(arguments, "posz", 0);
-		LayoutItemSize height = DataModel::LayoutItem::Height1;
+		LayoutItemSize height;
 		const LayoutRotation rotation = Utils::Utils::GetIntegerMapEntry(arguments, "rotation", DataModel::LayoutItem::Rotation0);
 		const DataModel::TrackType type = static_cast<DataModel::TrackType>(Utils::Utils::GetIntegerMapEntry(arguments, "tracktype", DataModel::TrackTypeStraight));
+		const TrackID main = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "main", TrackNone));
 		switch (type)
 		{
 			case DataModel::TrackTypeTurn:
 			case DataModel::TrackTypeTunnelEnd:
-				// height is already 1
+				height = DataModel::LayoutItem::Height1;
 				break;
 
 			case DataModel::TrackTypeCrossingLeft:
@@ -287,6 +336,7 @@ namespace Server { namespace Web
 			height,
 			rotation,
 			type,
+			main,
 			feedbacks,
 			signals,
 			selectRouteApproach,

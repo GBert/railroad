@@ -52,7 +52,7 @@ namespace Hardware { namespace Protocols
 	void MaerklinCANCommon::Wait(const unsigned int duration) const
 	{
 		unsigned int wait = duration;
-		while (run && (!hasCs2Master || isCs2Master) && wait)
+		while (run && (!hasCs2Main || isCs2Main) && wait)
 		{
 			Utils::Utils::SleepForSeconds(1);
 			--wait;
@@ -74,13 +74,13 @@ namespace Hardware { namespace Protocols
 
 		Wait(1);
 
-		while (run && (!hasCs2Master || isCs2Master))
+		while (run && (!hasCs2Main || isCs2Main))
 		{
 			Ping();
 			Wait(10);
 		}
 
-		if (run && hasCs2Master && !isCs2Master)
+		if (run && hasCs2Main && !isCs2Main)
 		{
 			RequestLoks();
 		}
@@ -433,10 +433,10 @@ namespace Hardware { namespace Protocols
 			uint16_t deviceType = Utils::Integer::DataBigEndianToShort(buffer + 11);
 			if (command == CanCommandPing && response == true)
 			{
-				if (deviceType == CanDeviceCs2Master)
+				if (deviceType == CanDeviceCs2Main)
 				{
-					hasCs2Master = true;
-					logger->Info(Languages::TextCs2MasterFound);
+					hasCs2Main = true;
+					logger->Info(Languages::TextCs2MainFound);
 				}
 			}
 			else if (command != CanCommandConfigData)
@@ -603,9 +603,9 @@ namespace Hardware { namespace Protocols
 		// version 4.3
 		sendBuffer[9] = 4;
 		sendBuffer[10] = 3;
-		// CS2 device type: Master = 0xffff, Slave = 0xfff0
+		// CS2 device type: Main = 0xffff, Secondary = 0xfff0
 		sendBuffer[11] = 0xff;
-		sendBuffer[12] = isCs2Master ? 0xff : 0xf0;
+		sendBuffer[12] = isCs2Main ? 0xff : 0xf0;
 		SendInternal(sendBuffer);
 	}
 
@@ -838,7 +838,7 @@ namespace Hardware { namespace Protocols
 				break;
 
 			case CanDeviceGleisbox:
-				case CanDeviceGleisbox_2:
+			case CanDeviceGleisbox_2:
 				deviceString = const_cast<char*>("Gleisbox");
 				break;
 
@@ -847,9 +847,9 @@ namespace Hardware { namespace Protocols
 				break;
 
 			case CanDeviceMs2:
-				case CanDeviceMs2_2:
-				case CanDeviceMs2_3:
-				case CanDeviceMs2_4:
+			case CanDeviceMs2_2:
+			case CanDeviceMs2_3:
+			case CanDeviceMs2_4:
 				deviceString = const_cast<char*>("MS2");
 				break;
 
@@ -857,19 +857,19 @@ namespace Hardware { namespace Protocols
 				deviceString = const_cast<char*>("Wireless");
 				break;
 
-			case CanDeviceCs2Master:
-				deviceString = const_cast<char*>("CS2 Master");
-				hasCs2Master = true;
+			case CanDeviceCs2Main:
+				deviceString = const_cast<char*>("CS2 Main");
+				hasCs2Main = true;
 				break;
 
-			case CanDeviceCs2Slave:
-				case CanDeviceCs2Slave_2:
-				deviceString = const_cast<char*>("CS2 Slave");
+			case CanDeviceCs2Secondary:
+			case CanDeviceCs2Secondary_2:
+				deviceString = const_cast<char*>("CS2 Secondary");
 				break;
 
 			case CanDeviceLinkS88:
 				deviceString = const_cast<char*>("Link S88");
-				hasCs2Master = true;
+				hasCs2Main = true;
 				break;
 
 			default:
@@ -949,11 +949,11 @@ namespace Hardware { namespace Protocols
 		cacheEntry.SetFunction(nr, type, icon, timer);
 		if (type == DataModel::LocoFunctionTypeTimer)
 		{
-			logger->Info(Languages::TextCs2MasterLocoFunctionIconTypeTimer, nr, icon, timer);
+			logger->Info(Languages::TextCs2MainLocoFunctionIconTypeTimer, nr, icon, timer);
 		}
 		else
 		{
-			logger->Info(Languages::TextCs2MasterLocoFunctionIconType, nr, icon, type);
+			logger->Info(Languages::TextCs2MainLocoFunctionIconType, nr, icon, type);
 		}
 	}
 
@@ -978,12 +978,12 @@ namespace Hardware { namespace Protocols
 				Address input = Utils::Integer::HexToInteger(value);
 				LocoType type;
 				ParseAddressProtocol(input, address, protocol, type);
-				logger->Info(Languages::TextCs2MasterLocoSlaveProtocolAddress, Utils::Utils::ProtocolToString(protocol), address);
+				logger->Info(Languages::TextCs2MainLocoSlaveProtocolAddress, Utils::Utils::ProtocolToString(protocol), address);
 			}
 			else if (key.compare("lokname") == 0)
 			{
 				name = value;
-				logger->Info(Languages::TextCs2MasterLocoSlaveName, name);
+				logger->Info(Languages::TextCs2MainLocoSlaveName, name);
 			}
 			lines.pop_front();
 		}
@@ -1012,12 +1012,12 @@ namespace Hardware { namespace Protocols
 				name = value;
 				cacheEntry.SetName(value);
 				cacheEntry.SetMatchKey(value);
-				logger->Info(Languages::TextCs2MasterLocoName, value);
+				logger->Info(Languages::TextCs2MainLocoName, value);
 			}
 			else if (key.compare("vorname") == 0)
 			{
 				oldName = value;
-				logger->Info(Languages::TextCs2MasterLocoOldName, value);
+				logger->Info(Languages::TextCs2MainLocoOldName, value);
 			}
 			else if (key.compare("toRemove") == 0)
 			{
@@ -1033,7 +1033,7 @@ namespace Hardware { namespace Protocols
 				cacheEntry.SetAddress(address);
 				cacheEntry.SetProtocol(protocol);
 				cacheEntry.SetType(type);
-				logger->Info(Languages::TextCs2MasterLocoProtocolAddress, Utils::Utils::ProtocolToString(protocol), address);
+				logger->Info(Languages::TextCs2MainLocoProtocolAddress, Utils::Utils::ProtocolToString(protocol), address);
 			}
 			else if ((key.compare("funktionen") == 0)
 				|| (key.compare("funktionen_2") == 0)
@@ -1053,7 +1053,7 @@ namespace Hardware { namespace Protocols
 
 		if (remove)
 		{
-			logger->Info(Languages::TextCs2MasterLocoRemove, name);
+			logger->Info(Languages::TextCs2MainLocoRemove, name);
 			LocoID locoId = CacheDelete(name);
 			manager->LocoDelete(locoId);
 		}

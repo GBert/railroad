@@ -24,7 +24,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include "DataModel/Cluster.h"
 #include "DataModel/ObjectIdentifier.h"
-#include "DataModel/Relation.h"
 #include "DataModel/Signal.h"
 #include "DataModel/Track.h"
 #include "Server/Web/HtmlTag.h"
@@ -73,6 +72,66 @@ namespace Server { namespace Web
 		client.ReplyHtmlWithHeader(content);
 	}
 
+	HtmlTag WebClientCluster::HtmlTagSelectTrackEntry(const string& priority,
+		const TrackID trackID,
+		const map<string,ObjectID>& trackOptions,
+		const Relation::Data inverted,
+		const map<string,ObjectID>& invertedOptions)
+	{
+		HtmlTag content("div");
+		content.AddId("track_priority_" + priority);
+
+		HtmlTagButton deleteButton(Languages::TextDelete, "track_delete_" + priority);
+		deleteButton.AddAttribute("onclick", "deleteElement('track_priority_" + priority + "');return false;");
+		deleteButton.AddClass("wide_button");
+		content.AddChildTag(deleteButton);
+
+		HtmlTag contentObject("div");
+		contentObject.AddId("track_object_" + priority);
+		contentObject.AddClass("inline-block");
+
+		contentObject.AddChildTag(HtmlTagSelect("track_id_" + priority, trackOptions, trackID).AddClass("select_relation_id"));
+		contentObject.AddChildTag(HtmlTagSelect("track_inverted_" + priority, invertedOptions, inverted).AddClass("select_relation_data"));
+		content.AddChildTag(contentObject);
+		return content;
+	}
+
+	HtmlTag WebClientCluster::HtmlTagSelectTrack(const vector<Relation*>& relations,
+		const ClusterID clusterID) const
+	{
+		HtmlTag content("div");
+		content.AddId("tab_tracks");
+		content.AddClass("tab_content");
+		content.AddClass("hidden");
+
+		HtmlTag div("div");
+		div.AddChildTag(HtmlTagInputHidden("trackcounter", to_string(relations.size())));
+		div.AddId("tracks");
+
+		const map<string,ObjectID> trackOptions = GetTrackOptions(clusterID);
+		map<string,Relation::Data> invertedOptions;
+		invertedOptions[Languages::GetText(Languages::TextDefault)] = 0;
+		invertedOptions[Languages::GetText(Languages::TextInverted2)] = 1;
+		unsigned int counter = 1;
+		for (auto relation : relations)
+		{
+			const TrackID trackID = relation->ObjectID2();
+			const Relation::Data inverted = relation->GetData();
+			div.AddChildTag(HtmlTagSelectTrackEntry(to_string(counter), trackID, trackOptions, inverted, invertedOptions));
+			++counter;
+		}
+		div.AddChildTag(HtmlTag("div").AddId("track_new_" + to_string(counter)));
+
+		content.AddChildTag(div);
+		HtmlTagButton newTrackButton(Languages::TextNew, "newtrack");
+		newTrackButton.AddAttribute("onclick", "addSlave('track');return false;");
+		newTrackButton.AddClass("wide_button");
+		content.AddChildTag(newTrackButton);
+
+		content.AddChildTag(HtmlTag("br"));
+		return content;
+	}
+
 	void WebClientCluster::HandleClusterEdit(const map<string, string>& arguments)
 	{
 		HtmlTag content;
@@ -83,7 +142,7 @@ namespace Server { namespace Web
 		if (clusterID != ClusterNone)
 		{
 			Cluster* cluster = manager.GetCluster(clusterID);
-			if (cluster != nullptr)
+			if (cluster)
 			{
 				name = cluster->GetName();
 				tracks = cluster->GetTracks();
@@ -107,7 +166,7 @@ namespace Server { namespace Web
 		basicContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
 		formContent.AddChildTag(basicContent);
 
-		formContent.AddChildTag(client.HtmlTagSlaveSelect("track", tracks, GetTrackOptions(clusterID)));
+		formContent.AddChildTag(HtmlTagSelectTrack(tracks, clusterID));
 
 		content.AddChildTag(HtmlTag("div").AddClass("popup_content").AddChildTag(formContent));
 		content.AddChildTag(HtmlTagButtonCancel());
@@ -119,16 +178,26 @@ namespace Server { namespace Web
 	{
 		ClusterID clusterID = Utils::Utils::GetIntegerMapEntry(arguments, "cluster", ClusterNone);
 		string name = Utils::Utils::GetStringMapEntry(arguments, "name");
+		const unsigned int count = Utils::Utils::GetIntegerMapEntry(arguments, "trackcounter", 0);
 
 		vector<Relation*> tracks;
 		{
-			vector<TrackID> trackIds = WebClientStatic::InterpretSlaveData("track", arguments);
-			for (auto trackId : trackIds)
+			for (unsigned int index = 1; index <= count; ++index)
 			{
+				const string indexAsString = to_string(index);
+				const TrackID trackID = Utils::Utils::GetIntegerMapEntry(arguments, "track_id_" + indexAsString, TrackNone);
+				if (trackID == TrackNone)
+				{
+					continue;
+				}
+				const bool inverted = Utils::Utils::GetBoolMapEntry(arguments, "track_inverted_" + indexAsString, false);
+
 				tracks.push_back(new Relation(&manager,
 					ObjectIdentifier(ObjectTypeCluster, clusterID),
-					ObjectIdentifier(ObjectTypeTrack, trackId),
-					Relation::RelationTypeClusterTrack));
+					ObjectIdentifier(ObjectTypeTrack, trackID),
+					Relation::RelationTypeClusterTrack,
+					0,
+					static_cast<Relation::Data>(inverted)));
 			}
 		}
 
@@ -139,7 +208,7 @@ namespace Server { namespace Web
 			return;
 		}
 
-		client.ReplyResponse(WebClient::ResponseInfo, Languages::TextControlSaved, name);
+		client.ReplyResponse(WebClient::ResponseInfo, Languages::TextClusterSaved, name);
 	}
 
 	void WebClientCluster::HandleClusterAskDelete(const map<string, string>& arguments)
@@ -153,7 +222,7 @@ namespace Server { namespace Web
 		}
 
 		const Cluster* cluster = manager.GetCluster(clusterID);
-		if (cluster == nullptr)
+		if (!cluster)
 		{
 			client.ReplyHtmlWithHeaderAndParagraph(Languages::TextClusterDoesNotExist);
 			return;
@@ -175,7 +244,7 @@ namespace Server { namespace Web
 	{
 		ClusterID clusterID = Utils::Utils::GetIntegerMapEntry(arguments, "cluster", ClusterNone);
 		const Cluster* cluster = manager.GetCluster(clusterID);
-		if (cluster == nullptr)
+		if (!cluster)
 		{
 			client.ReplyResponse(WebClient::ResponseError, Languages::TextClusterDoesNotExist);
 			return;
@@ -196,11 +265,11 @@ namespace Server { namespace Web
 	{
 		map<string, ObjectID> trackOptions;
 
-		map<string, Track*> allTracks = manager.TrackListByName();
-		for (auto& track : allTracks)
+		map<string, Track*> tracks = manager.TrackListMasterByName();
+		for (auto& track : tracks)
 		{
 			Cluster* clusterOfTrack = track.second->GetCluster();
-			if (clusterOfTrack != nullptr && clusterOfTrack->GetID() != clusterId)
+			if (clusterOfTrack && clusterOfTrack->GetID() != clusterId)
 			{
 				continue;
 			}

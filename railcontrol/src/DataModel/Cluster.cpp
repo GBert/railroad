@@ -58,9 +58,8 @@ namespace DataModel
 		return true;
 	}
 
-	bool Cluster::CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
+	bool Cluster::CanSetLocoBaseOrientationUnlocked(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		std::lock_guard<std::mutex> Guard(orientationMutex);
 		if (this->orientation == orientation)
 		{
 			return true;
@@ -68,48 +67,55 @@ namespace DataModel
 		for (auto relation : tracks)
 		{
 			Track* track = dynamic_cast<Track*>(relation->GetObject2());
-			if (track == nullptr)
+			if (!track)
 			{
 				return false;
 			}
-			if (track->GetLockState() == DataModel::LockableItem::LockStateFree)
+
+			// invert track orientation if needed (XOR) and check with desired orientation value
+			const Relation::Data invert = relation->GetData();
+			if ((track->GetLocoBaseOrientation() ^ invert) == orientation)
 			{
 				continue;
 			}
-			if (track->GetLocoBase() == locoBaseIdentifier)
+
+			const DataModel::LockableItem::LockState lockState = track->GetLockState();
+			if (lockState == DataModel::LockableItem::LockStateFree)
 			{
 				continue;
 			}
+
+			const ObjectIdentifier& locoBaseOfTrack = track->GetLocoBase();
+			if ((lockState == DataModel::LockableItem::LockStateReserved) && locoBaseOfTrack.IsSet() && (locoBaseOfTrack == locoBaseIdentifier))
+			{
+				continue;
+			}
+
 			return false;
 		}
 		return true;
 	}
 
-	bool Cluster::SetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
+	bool Cluster::SetLocoBaseOrientation(const Orientation orientation,
+		const ObjectIdentifier& locoBaseIdentifier)
 	{
 		std::lock_guard<std::mutex> Guard(orientationMutex);
-		if (this->orientation == orientation)
+		if (!CanSetLocoBaseOrientationUnlocked(orientation, locoBaseIdentifier))
 		{
-			return true;
-		}
-		for (auto relation : tracks)
-		{
-			Track* track = dynamic_cast<Track*>(relation->GetObject2());
-			if (track == nullptr)
-			{
-				return false;
-			}
-			if (track->GetLockState() == DataModel::LockableItem::LockStateFree)
-			{
-				continue;
-			}
-			if (track->GetLocoBase() == locoBaseIdentifier)
-			{
-				continue;
-			}
 			return false;
 		}
 		this->orientation = orientation;
+		for (auto relation : tracks)
+		{
+			Track* track = dynamic_cast<Track*>(relation->GetObject2());
+			if (!track)
+			{
+				continue;
+			}
+			// invert orientation if needed (XOR) and set track orientation
+			const Relation::Data invert = relation->GetData();
+			track->SetLocoBaseOrientationForce(static_cast<Orientation>(orientation ^ invert));
+		}
 		return true;
 	}
 
@@ -119,9 +125,9 @@ namespace DataModel
 		{
 			Relation* trackRelation = tracks.back();
 			Track* track = dynamic_cast<Track*>(trackRelation->GetObject2());
-			if (track != nullptr)
+			if (track)
 			{
-				track->SetCluster(nullptr);
+				track->DeleteCluster();
 			}
 			tracks.pop_back();
 			delete trackRelation;
@@ -138,7 +144,7 @@ namespace DataModel
 			}
 			delete tracks[index];
 			tracks.erase(tracks.begin() + index);
-			trackToDelete->SetCluster(nullptr);
+			trackToDelete->DeleteCluster();
 			return;
 		}
 	}
@@ -150,9 +156,9 @@ namespace DataModel
 		for (auto trackRelation : tracks)
 		{
 			Track* track = dynamic_cast<Track*>(trackRelation->GetObject2());
-			if (track != nullptr)
+			if (track)
 			{
-				track->SetCluster(this);
+				track->SetCluster(this, static_cast<bool>(trackRelation->GetData()));
 			}
 		}
 	}

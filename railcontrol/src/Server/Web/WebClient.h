@@ -141,7 +141,7 @@ namespace Server { namespace Web
 				ReplyHtmlWithHeaderAndParagraph(Logger::Logger::Format(Languages::GetText(text), args...));
 			}
 
-			HtmlTag HtmlTagSlaveSelect(const std::string& prefix,
+			HtmlTag HtmlTagSelectSlave(const std::string& prefix,
 				const std::vector<DataModel::Relation*>& relations,
 				const std::map<std::string,ObjectID>& options,
 				const bool allowNew = true) const;

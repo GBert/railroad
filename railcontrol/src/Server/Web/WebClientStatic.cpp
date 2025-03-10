@@ -78,13 +78,13 @@ namespace Server { namespace Web
 				return HtmlTagInputIntegerWithLabel(argumentNumber, argumentName, valueInteger, 0, 62);
 			}
 
-			case ArgumentTypeMasterSlave:
+			case ArgumentTypeMainSecundary:
 			{
 				argumentName = Languages::TextDeviceType;
-				map<string,string> masterSlaveOptions;
-				masterSlaveOptions["1"] = Languages::Languages::GetText(Languages::Languages::TextSlave);
-				masterSlaveOptions["0"] = Languages::Languages::GetText(Languages::Languages::TextMaster);
-				return HtmlTagSelectWithLabel(argumentNumber, argumentName, masterSlaveOptions, value);
+				map<string,string> mainSecondaryOptions;
+				mainSecondaryOptions["1"] = Languages::Languages::GetText(Languages::Languages::TextSecondaryDevice);
+				mainSecondaryOptions["0"] = Languages::Languages::GetText(Languages::Languages::TextMainDevice);
+				return HtmlTagSelectWithLabel(argumentNumber, argumentName, mainSecondaryOptions, value);
 			}
 
 			default:
@@ -246,8 +246,7 @@ namespace Server { namespace Web
 		rotationOptions[DataModel::LayoutItem::Rotation90] = Languages::Text90DegClockwise;
 		rotationOptions[DataModel::LayoutItem::Rotation180] = Languages::Text180Deg;
 		rotationOptions[DataModel::LayoutItem::Rotation270] = Languages::Text90DegAntiClockwise;
-		content.AddChildTag(HtmlTagSelectWithLabel("rotation", Languages::TextRotation, rotationOptions, rotation));
-		content.AddChildTag(HtmlTag("p").AddContent(Languages::GetText(Languages::TextHint)).AddContent(HtmlTag("br")).AddContent(Languages::GetText(Languages::TextHintPositionRotate)));
+		content.AddChildTag(HtmlTagSelectWithLabel("rotation", Languages::TextRotation, Languages::TextHintPositionRotate, rotationOptions, rotation));
 		return content;
 	}
 
@@ -358,12 +357,12 @@ namespace Server { namespace Web
 	vector<ObjectID> WebClientStatic::InterpretSlaveData(const string& prefix, const map<string, string>& arguments)
 	{
 		vector<ObjectID> ids;
-		unsigned int count = Utils::Utils::GetIntegerMapEntry(arguments, prefix + "counter", 0);
+		const unsigned int count = Utils::Utils::GetIntegerMapEntry(arguments, prefix + "counter", 0);
 		for (unsigned int index = 1; index <= count; ++index)
 		{
-			string indexAsString = to_string(index);
-			ObjectID id = Utils::Utils::GetIntegerMapEntry(arguments, prefix + "_id_" + indexAsString, TrackNone);
-			if (id == TrackNone)
+			const string indexAsString = to_string(index);
+			const ObjectID id = Utils::Utils::GetIntegerMapEntry(arguments, prefix + "_id_" + indexAsString, ObjectNone);
+			if (id == ObjectNone)
 			{
 				continue;
 			}
@@ -616,7 +615,7 @@ namespace Server { namespace Web
 			slaves.push_back(new Relation(&manager,
 				ObjectIdentifier(ObjectTypeMultipleUnit, multipleUnitID),
 				ObjectIdentifier(ObjectTypeLoco, slaveID),
-				Relation::RelationTypeMultipleUnitSlave));
+				Relation::RelationTypeMultipleUnitLoco));
 		}
 		return slaves;
 	}

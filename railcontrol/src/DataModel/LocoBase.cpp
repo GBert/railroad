@@ -469,17 +469,17 @@ namespace DataModel
 			return;
 		}
 
-		bool isOrientationSet = newTrack->SetLocoOrientation(static_cast<Orientation>(route->GetToOrientation()));
+		bool isOrientationSet = newTrack->SetLocoBaseOrientation(route->GetToOrientation());
 		if (!isOrientationSet)
 		{
 			return;
 		}
 
-		bool turnLoco = (trackFrom->GetLocoOrientation() != route->GetFromOrientation());
+		bool turnLoco = (trackFrom->GetLocoBaseOrientation() != route->GetFromOrientation());
 		Orientation newLocoOrientation = static_cast<Orientation>(orientation != turnLoco);
 		if (turnLoco)
 		{
-			bool canTurnOrientation = trackFrom->SetLocoOrientation(route->GetFromOrientation());
+			bool canTurnOrientation = trackFrom->SetLocoBaseOrientation(route->GetFromOrientation());
 			if (!canTurnOrientation)
 			{
 				return;
@@ -571,8 +571,8 @@ namespace DataModel
 			return;
 		}
 
-		const bool isOrientationSet = newTrack->SetLocoOrientation(static_cast<Orientation>(route->GetToOrientation()));
-		if (isOrientationSet == false)
+		const bool isOrientationSet = newTrack->SetLocoBaseOrientation(route->GetToOrientation());
+		if (!isOrientationSet)
 		{
 			return;
 		}
@@ -639,8 +639,6 @@ namespace DataModel
 
 	bool LocoBase::ReserveRoute(const Track* const track, const bool allowLocoTurn, Route* const route)
 	{
-		logger->Debug(Languages::TextReservingRoute, route->GetName());
-
 		const ObjectIdentifier locoBaseIdentifier = GetObjectIdentifier();
 		if (!route->Reserve(logger, locoBaseIdentifier))
 		{
@@ -662,19 +660,21 @@ namespace DataModel
 			return false;
 		}
 
-		if (!allowLocoTurn && track->GetLocoOrientation() != route->GetFromOrientation())
+		if (!allowLocoTurn && track->GetLocoBaseOrientation() != route->GetFromOrientation())
 		{
 			route->Release(logger, locoBaseIdentifier);
 			newTrack->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
+		logger->Debug(Languages::TextReservingRoute, route->GetName());
 		return true;
 	}
 
 	bool LocoBase::ExecuteRoute(const Track* const track, const bool allowLocoTurn, Route* const route)
 	{
-		if (route->GetLockState() == LockableItem::LockStateFree)
+		const LockableItem::LockState lockState = route->GetLockState();
+		if (lockState == LockableItem::LockStateFree)
 		{
 			if (!ReserveRoute(track, allowLocoTurn, route))
 			{
@@ -682,7 +682,7 @@ namespace DataModel
 			}
 		}
 
-		if (route->GetLockState() == LockableItem::LockStateReserved)
+		if (lockState == LockableItem::LockStateReserved)
 		{
 			if (!route->Lock(logger, GetObjectIdentifier()))
 			{

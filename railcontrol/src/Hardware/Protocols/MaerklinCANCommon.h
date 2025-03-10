@@ -78,15 +78,15 @@ namespace Hardware { namespace Protocols
 			inline MaerklinCANCommon(const std::string& uid,
 				ControlID controlID,
 				Manager* manager,
-				const bool isCs2Master,
+				const bool isCs2Main,
 				Logger::Logger* logger)
 			:	run(true),
 				manager(manager),
 				logger(logger),
 				uid(Utils::Integer::HexToInteger(uid, 0)),
 				hash(CalcHash(this->uid)),
-				hasCs2Master(false),
-				isCs2Master(isCs2Master),
+				hasCs2Main(false),
+				isCs2Main(isCs2Main),
 				canFileData(nullptr),
 				canFileDataPointer(nullptr),
 				canFileDataSize(0),
@@ -158,19 +158,19 @@ namespace Hardware { namespace Protocols
 
 			enum CanDeviceType : uint16_t
 			{
-				CanDeviceGfp         = 0x0000,
-				CanDeviceGleisbox    = 0x0010,
-				CanDeviceGleisbox_2  = 0x0011, // undocumented
-				CanDeviceConnect6021 = 0x0020,
-				CanDeviceMs2         = 0x0030,
-				CanDeviceMs2_2       = 0x0032, // undocumented
-				CanDeviceMs2_3       = 0x0033, // undocumented
-				CanDeviceMs2_4       = 0x0034, // undocumented
-				CanDeviceLinkS88     = 0x0040, // undocumented
-				CanDeviceCs2Slave_2  = 0xeeee, // undocumented
-				CanDeviceWireless    = 0xffe0,
-				CanDeviceCs2Slave    = 0xfff0, // undocumented
-				CanDeviceCs2Master   = 0xffff
+				CanDeviceGfp            = 0x0000,
+				CanDeviceGleisbox       = 0x0010,
+				CanDeviceGleisbox_2     = 0x0011, // undocumented
+				CanDeviceConnect6021    = 0x0020,
+				CanDeviceMs2            = 0x0030,
+				CanDeviceMs2_2          = 0x0032, // undocumented
+				CanDeviceMs2_3          = 0x0033, // undocumented
+				CanDeviceMs2_4          = 0x0034, // undocumented
+				CanDeviceLinkS88        = 0x0040, // undocumented
+				CanDeviceCs2Secondary_2 = 0xeeee, // undocumented
+				CanDeviceWireless       = 0xffe0,
+				CanDeviceCs2Secondary   = 0xfff0, // undocumented
+				CanDeviceCs2Main        = 0xffff
 			};
 
 //				enum CanFileType : uint8_t
@@ -406,8 +406,8 @@ namespace Hardware { namespace Protocols
 			}
 			CanUid uid;
 			CanHash hash;
-			volatile bool hasCs2Master;
-			const bool isCs2Master;
+			volatile bool hasCs2Main;
+			const bool isCs2Main;
 			std::thread receiverThread;
 			std::thread pingThread;
 

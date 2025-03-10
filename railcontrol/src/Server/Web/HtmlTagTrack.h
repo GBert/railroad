@@ -52,9 +52,6 @@ namespace Server { namespace Web
 			{
 				return childTags[0].IsAttributeSet(name);
 			}
-
-		private:
-			std::string urlIdentifier;
 	};
 }} // namespace Server::Web
 

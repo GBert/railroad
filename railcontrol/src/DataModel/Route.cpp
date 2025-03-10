@@ -285,8 +285,12 @@ namespace DataModel
 		if (automode == AutomodeYes)
 		{
 			Track* track = manager->GetTrack(toTrack);
-			if (!track || !track->Reserve(logger, locoBaseIdentifier))
+			if (!track
+				|| !track->CanSetLocoBaseOrientation(toOrientation)
+				|| !track->Reserve(logger, locoBaseIdentifier)
+				|| !track->SetLocoBaseOrientation(toOrientation))
 			{
+				logger->Debug(Languages::TextUnableToReserveRouteToTrack, GetName(), track->GetName());
 				ReleaseInternal(logger, locoBaseIdentifier);
 				return false;
 			}
@@ -297,10 +301,15 @@ namespace DataModel
 			bool retRelation = relation->Reserve(logger, locoBaseIdentifier);
 			if (!retRelation)
 			{
+				const LockableItem* item = relation->GetObject2();
+				const Object* object = dynamic_cast<const Object*>(item);
+				const string objectName = object ? object->GetName() : Languages::GetText(Languages::TextUnknownElement);
+				logger->Debug(Languages::TextUnableToReserveRouteElement, GetName(), objectName);
 				ReleaseInternalWithToTrack(logger, locoBaseIdentifier);
 				return false;
 			}
 		}
+
 		return true;
 	}
 

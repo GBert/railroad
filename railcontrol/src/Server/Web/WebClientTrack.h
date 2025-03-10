@@ -59,6 +59,13 @@ namespace Server { namespace Web
 			std::map<std::string,ObjectID> GetSignalOptions(const TrackID trackId = TrackNone) const;
 
 		private:
+			HtmlTag HtmlTagSelectTrack(const std::string& name,
+				const Languages::TextSelector label,
+				const Languages::TextSelector hint,
+				const TrackID trackID,
+				const TrackID excludeTrackID,
+				const std::string& onchange = "") const;
+
 			static HtmlTag HtmlTagTabTrackAutomode(DataModel::SelectRouteApproach selectRouteApproach,
 				const bool allowLocoTurn,
 				const bool releaseWhenFree,

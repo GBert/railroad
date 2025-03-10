@@ -64,8 +64,15 @@ namespace DataModel
 			std::string Serialize() const override;
 			bool Deserialize(const std::string& serialized) override;
 
-			bool CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier);
-			bool SetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier);
+			inline bool CanSetLocoBaseOrientation(const Orientation orientation,
+				const ObjectIdentifier& locoBaseIdentifier)
+			{
+				std::lock_guard<std::mutex> Guard(orientationMutex);
+				return CanSetLocoBaseOrientationUnlocked(orientation, locoBaseIdentifier);
+			}
+
+			bool SetLocoBaseOrientation(const Orientation orientation,
+				const ObjectIdentifier& locoBaseIdentifier);
 
 			inline Orientation GetLocoOrientation() const
 			{
@@ -82,6 +89,9 @@ namespace DataModel
 			void AssignTracks(const std::vector<DataModel::Relation*>& newTracks);
 
 		private:
+			bool CanSetLocoBaseOrientationUnlocked(const Orientation orientation,
+				const ObjectIdentifier& locoBaseIdentifier);
+
 			Orientation orientation;
 			mutable std::mutex orientationMutex;
 			std::vector<DataModel::Relation*> tracks;

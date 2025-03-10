@@ -256,6 +256,7 @@ body {
 .layout_item .tooltip {
 	top: 32px;
 	left: 32px;
+	white-space: nowrap;
 }
 
 .help {
@@ -275,7 +276,6 @@ body {
 .help .tooltip,
 .layout_item .tooltip {
 	line-height: 1;
-	white-space: nowrap;
 	visibility: hidden;
 	background-color: yellow;
 	color: black;

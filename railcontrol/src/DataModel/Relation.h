@@ -48,7 +48,7 @@ namespace DataModel
 				RelationTypeRouteAtLock       = (ObjectTypeRoute << 3),
 				RelationTypeRouteAtUnlock     = (ObjectTypeRoute << 3) + 1,
 				RelationTypeClusterTrack      = (ObjectTypeCluster << 3),
-				RelationTypeMultipleUnitSlave = (ObjectTypeMultipleUnit << 3),
+				RelationTypeMultipleUnitLoco  = (ObjectTypeMultipleUnit << 3),
 			};
 
 			typedef unsigned short Data;
@@ -59,10 +59,10 @@ namespace DataModel
 				const ObjectIdentifier& object2,
 				const RelationType type,
 				const Priority priority = 0,
-				const unsigned short data = 0)
+				const Data data = 0)
 			:	manager(manager),
-			 	object1(object1),
-			 	object2(object2),
+				object1(object1),
+				object2(object2),
 				type(type),
 				priority(priority),
 				data(data)

@@ -34,16 +34,47 @@ namespace Server { namespace Web
 		public:
 			HtmlTagInputIntegerWithLabel() = delete;
 
-			HtmlTagInputIntegerWithLabel(const std::string& name, const Languages::TextSelector label, const int min, const int max)
+			HtmlTagInputIntegerWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const int min,
+				const int max)
 			:	HtmlTagInputIntegerWithLabel(name, label, 0, min, max)
 			{}
 
+			HtmlTagInputIntegerWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const Languages::TextSelector tooltip,
+				const int min,
+				const int max)
+			:	HtmlTagInputIntegerWithLabel(name, label, tooltip, 0, min, max)
+			{}
+
 			template<typename... TextArgs>
-			HtmlTagInputIntegerWithLabel(const std::string& name, const Languages::TextSelector label, const int value, const int min, const int max, TextArgs... textArgs)
+			HtmlTagInputIntegerWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const int value,
+				const int min,
+				const int max,
+				TextArgs... textArgs)
 			:	HtmlTag("div")
 			{
 				HtmlTag::AddClass("input_integer_with_label");
 				AddChildTag(HtmlTagLabel(label, name, textArgs...));
+				AddChildTag(HtmlTagInputInteger(name, value, min, max));
+			}
+
+			template<typename... TextArgs>
+			HtmlTagInputIntegerWithLabel(const std::string& name,
+				const Languages::TextSelector label,
+				const Languages::TextSelector tooltip,
+				const int value,
+				const int min,
+				const int max,
+				TextArgs... textArgs)
+			:	HtmlTag("div")
+			{
+				HtmlTag::AddClass("input_integer_with_label");
+				AddChildTag(HtmlTagLabel(label, tooltip, name, textArgs...));
 				AddChildTag(HtmlTagInputInteger(name, value, min, max));
 			}
 

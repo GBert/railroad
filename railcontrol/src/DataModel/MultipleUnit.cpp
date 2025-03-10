@@ -19,7 +19,7 @@ along with RailControl; see the file LICENCE. If not see
 */
 
 #include "Manager.h"
-#include "MultipleUnit.h"
+#include "DataModel/MultipleUnit.h"
 
 #include <map>
 #include <string>

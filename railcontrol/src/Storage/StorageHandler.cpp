@@ -70,14 +70,14 @@ namespace Storage
 		{
 			MultipleUnit* multipleUnit = new MultipleUnit(manager, serializedObject);
 			const MultipleUnitID multipleUnitID = multipleUnit->GetID();
-			multipleUnit->AssignSlaves(RelationsFrom(DataModel::Relation::RelationTypeMultipleUnitSlave, multipleUnitID));
+			multipleUnit->AssignSlaves(RelationsFrom(DataModel::Relation::RelationTypeMultipleUnitLoco, multipleUnitID));
 			multipleUnits[multipleUnitID] = multipleUnit;
 		}
 	}
 
 	void StorageHandler::DeleteMultipleUnit(const MultipleUnitID multipleUnitID)
 	{
-		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeMultipleUnitSlave, multipleUnitID);
+		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeMultipleUnitLoco, multipleUnitID);
 		sqlite.DeleteRelationsTo(ObjectTypeMultipleUnit, multipleUnitID);
 		sqlite.DeleteObject(ObjectTypeMultipleUnit, multipleUnitID);
 	}
@@ -183,7 +183,7 @@ namespace Storage
 		const string serialized = multipleUnit.Serialize();
 		const MultipleUnitID multipleUnitID = multipleUnit.GetID();
 		sqlite.SaveObject(ObjectTypeMultipleUnit, multipleUnitID, multipleUnit.GetName(), serialized);
-		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeMultipleUnitSlave, multipleUnitID);
+		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeMultipleUnitLoco, multipleUnitID);
 		SaveRelations(multipleUnit.GetSlaves());
 	}
 

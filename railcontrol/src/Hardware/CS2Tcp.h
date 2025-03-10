@@ -39,7 +39,7 @@ namespace Hardware
 			static void GetArgumentTypesAndHint(std::map<unsigned char,ArgumentType>& argumentTypes, std::string& hint)
 			{
 				argumentTypes[1] = ArgumentTypeIpAddress;
-				argumentTypes[2] = ArgumentTypeMasterSlave;
+				argumentTypes[2] = ArgumentTypeMainSecundary;
 				hint = Languages::GetText(Languages::TextHintCs2Tcp);
 			}
 

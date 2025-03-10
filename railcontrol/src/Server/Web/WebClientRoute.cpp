@@ -711,7 +711,7 @@ namespace Server { namespace Web
 
 			case ObjectTypeTrack:
 			{
-				std::map<string, Track*> tracks = manager.TrackListByName();
+				std::map<string, Track*> tracks = manager.TrackListMasterByName();
 				map<string, TrackID> trackOptions;
 				for (auto& track : tracks)
 				{

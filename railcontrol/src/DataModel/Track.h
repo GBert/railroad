@@ -73,11 +73,14 @@ namespace DataModel
 				LockableItem(),
 				manager(manager),
 				trackType(TrackTypeStraight),
+				mainID(TrackNone),
+				mainTrack(nullptr),
 				cluster(nullptr),
+				clusterInverted(false),
 				selectRouteApproach(SelectRouteSystemDefault),
 				trackState(DataModel::Feedback::FeedbackStateFree),
 				trackStateDelayed(DataModel::Feedback::FeedbackStateFree),
-				locoOrientation(OrientationRight),
+				locoBaseOrientation(OrientationRight),
 				blocked(false),
 				locoBaseDelayed(),
 				allowLocoTurn(true),
@@ -94,8 +97,8 @@ namespace DataModel
 
 			inline ~Track()
 			{
-				DeleteSignals();
 				DeleteFeedbacks();
+				DeleteSignals();
 			}
 
 			inline ObjectType GetObjectType() const override
@@ -104,6 +107,7 @@ namespace DataModel
 			}
 
 			std::string Serialize() const override;
+
 			bool Deserialize(const std::string& serialized) override;
 
 			inline std::string GetLayoutType() const override
@@ -123,13 +127,14 @@ namespace DataModel
 
 			bool SetFeedbackState(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state);
 
-			inline DataModel::Feedback::FeedbackState GetFeedbackStateDelayed() const
+			inline DataModel::Feedback::FeedbackState GetStateDelayed() const
 			{
 				return trackStateDelayed;
 			}
 
 			bool AddRoute(Route* route);
-			bool RemoveRoute(Route* route);
+
+			bool DeleteRoute(Route* route);
 
 			inline SelectRouteApproach GetSelectRouteApproach() const
 			{
@@ -157,17 +162,24 @@ namespace DataModel
 				const bool allowLocoTurn,
 				std::vector<Route*>& validRoutes) const;
 
-			inline Orientation GetLocoOrientation() const
+			inline Orientation GetLocoBaseOrientation() const
 			{
-				return locoOrientation;
+				return locoBaseOrientation;
 			}
 
-			inline bool CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
+			inline bool CanSetLocoBaseOrientation(const Orientation orientation)
 			{
-				return cluster == nullptr ? true : cluster->CanSetLocoBaseOrientation(orientation, locoBaseIdentifier);
+				return CanSetLocoBaseOrientation(orientation, GetLocoBase());
 			}
 
-			bool SetLocoOrientation(const Orientation orientation);
+			bool CanSetLocoBaseOrientation(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier);
+
+			bool SetLocoBaseOrientation(const Orientation orientation);
+
+			inline void SetLocoBaseOrientationForce(const Orientation orientation)
+			{
+				locoBaseOrientation = orientation;
+			}
 
 			inline bool GetBlocked() const
 			{
@@ -179,7 +191,7 @@ namespace DataModel
 				this->blocked = blocked;
 			}
 
-			inline ObjectIdentifier GetLocoBaseDelayed() const
+			inline const ObjectIdentifier& GetLocoBaseDelayed() const
 			{
 				return this->locoBaseDelayed;
 			}
@@ -219,9 +231,16 @@ namespace DataModel
 				return cluster;
 			}
 
-			inline void SetCluster(DataModel::Cluster* const cluster)
+			inline void SetCluster(DataModel::Cluster* const cluster, const bool inverted)
 			{
 				this->cluster = cluster;
+				this->clusterInverted = inverted;
+			}
+
+			inline void DeleteCluster()
+			{
+				this->cluster = nullptr;
+				this->clusterInverted = false;
 			}
 
 			inline bool GetAllowLocoTurn() const
@@ -244,17 +263,79 @@ namespace DataModel
 			void DeleteFeedbacks();
 			void AssignFeedbacks(const std::vector<DataModel::Relation*>& newFeedbacks);
 
-			inline const std::vector<DataModel::Relation*>& GetSignals() const
+			inline const std::vector<DataModel::Relation*>& GetFeedbacks() const
 			{
-				return signals;
+				return feedbacks;
 			}
 
 			void DeleteSignals();
 			void AssignSignals(const std::vector<DataModel::Relation*>& newSignals);
 
-			inline const std::vector<DataModel::Relation*>& GetFeedbacks() const
+			inline const std::vector<DataModel::Relation*>& GetSignals() const
 			{
-				return feedbacks;
+				return signals;
+			}
+
+			bool AddExtension(Track* track);
+
+			bool DeleteExtension(const Track* track);
+
+			inline std::vector<Track*> GetExtensions() const
+			{
+				return extensions;
+			}
+
+			inline Track* GetMain() const
+			{
+				return mainTrack;
+			}
+
+			inline TrackID GetOwnMainID() const
+			{
+				return mainID;
+			}
+
+			inline void SetMain(Track* main)
+			{
+				mainTrack = main;
+				mainID = (mainTrack ? mainTrack->GetID() : TrackNone);
+			}
+
+			void UpdateMain();
+
+			inline TrackID GetMainID() const
+			{
+				return (mainTrack ? mainTrack->GetID() : GetID());
+			}
+
+			inline const std::string& GetMainName() const
+			{
+				return (mainTrack ? mainTrack->GetName() : GetName());
+			}
+
+			inline const std::string& GetMainDisplayName() const
+			{
+				return (mainTrack ? mainTrack->GetDisplayName() : GetDisplayName());
+			}
+
+			inline DataModel::Feedback::FeedbackState GetMainStateDelayed() const
+			{
+				return (mainTrack ? mainTrack->GetStateDelayed() : GetStateDelayed());
+			}
+
+			inline bool GetMainBlocked() const
+			{
+				return (mainTrack ? mainTrack->GetBlocked() : GetBlocked());
+			}
+
+			inline Orientation GetMainLocoOrientation() const
+			{
+				return (mainTrack ? mainTrack->GetLocoBaseOrientation() : GetLocoBaseOrientation());
+			}
+
+			inline const ObjectIdentifier& GetMainLocoBaseDelayed() const
+			{
+				return (mainTrack ? mainTrack->GetLocoBaseDelayed() : GetLocoBaseDelayed());
 			}
 
 		private:
@@ -269,16 +350,20 @@ namespace DataModel
 
 			Manager* manager;
 			TrackType trackType;
+			TrackID mainID;
+			Track* mainTrack;
+			std::vector<Track*> extensions;
 
 			mutable std::mutex updateMutex;
 			std::vector<DataModel::Relation*> feedbacks;
 			std::vector<DataModel::Relation*> signals;
 			Cluster* cluster;
+			bool clusterInverted;
 			SelectRouteApproach selectRouteApproach;
 			DataModel::Feedback::FeedbackState trackState;
 			DataModel::Feedback::FeedbackState trackStateDelayed;
 			std::vector<Route*> routes;
-			Orientation locoOrientation;
+			Orientation locoBaseOrientation;
 			bool blocked;
 			ObjectIdentifier locoBaseDelayed;
 			bool allowLocoTurn;
