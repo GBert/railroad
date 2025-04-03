@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+RailControl - Model Railway Control Software
+
+Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+
+RailControl is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 3, or (at your option) any
+later version.
+
+RailControl is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with RailControl; see the file LICENCE. If not see
+<http://www.gnu.org/licenses/>.
+
+Written based on idea of Rüdiger Appel. See
+http://www.3quarks.com/en/SVGClock/index.html
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events" version="1.1" baseProfile="full" width="100%" height="100%" viewBox="0 0 200 200">
+  <defs>
+    <symbol id="hourStroke">
+      <rect x="96.25" y="0" width="7.5" height="25"/>
+    </symbol>
+
+    <symbol id="minuteStroke">
+      <rect x="98.5" y="0" width="3" height="7.5"/>
+    </symbol>
+
+    <symbol id="fiveMinutesStrokes">
+      <use xlink:href="#hourStroke"/>
+      <use xlink:href="#minuteStroke" transform="rotate( 6, 100, 100)"/>
+      <use xlink:href="#minuteStroke" transform="rotate(12, 100, 100)"/>
+      <use xlink:href="#minuteStroke" transform="rotate(18, 100, 100)"/>
+      <use xlink:href="#minuteStroke" transform="rotate(24, 100, 100)"/>
+    </symbol>
+
+    <symbol id="quarterStrokes">
+      <use xlink:href="#fiveMinutesStrokes"/>
+      <use xlink:href="#fiveMinutesStrokes" transform="rotate(30, 100, 100)"/>
+      <use xlink:href="#fiveMinutesStrokes" transform="rotate(60, 100, 100)"/>
+    </symbol>
+  </defs>
+
+  <g id="clock">
+    <g id="dial" style="fill:#ccc">
+      <use xlink:href="#quarterStrokes" style="stroke:none"/>
+      <use xlink:href="#quarterStrokes" style="stroke:none" transform="rotate( 90, 100, 100)"/>
+      <use xlink:href="#quarterStrokes" style="stroke:none" transform="rotate(180, 100, 100)"/>
+      <use xlink:href="#quarterStrokes" style="stroke:none" transform="rotate(270, 100, 100)"/>
+    </g>
+
+    <g id="hourHand">
+      <polygon points="95,33 105,33 106,125 94,125" style="stroke:none; fill:#eee"/>
+    </g>
+
+    <g id="minuteHand">
+      <polygon points="96,5 104,5 105,125 95,125" style="stroke:none; fill:#eee"/>
+    </g>
+
+    <g id="secondHand">
+        <polygon points="99.4,8 100.6,8 102.8,123 97.2,123" style="stroke:none; fill:#ad1a14"/>
+    </g>
+  </g>
+
+  <defs>
+    <script type="text/javascript">
+    <![CDATA[
+      var clock  = new Object();
+
+      clock.rotateElement = function(id, angle)
+      {
+        let element = document.getElementById(id);
+        if (!element) return;
+        element.setAttribute('transform', 'rotate(' + angle + ', 100, 100)');
+      }
+
+      clock.draw = function()
+      {
+        let now     = new Date();
+        let hours   = now.getHours();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+
+        this.rotateElement('hourHand', 30 * hours + 0.5 * minutes);
+        this.rotateElement('minuteHand', 6 * minutes + 0.1 * seconds);
+        this.rotateElement('secondHand', 6 * seconds);
+      }
+
+      clock.update = function()
+      {
+        clock.draw();
+        setTimeout(function()
+        {
+          clock.update();
+        }, 250);
+      }
+
+      clock.update();
+
+    ]]>
+    </script>
+  </defs>
+</svg>
+ 
