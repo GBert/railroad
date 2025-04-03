@@ -52,6 +52,9 @@ namespace Server { namespace Web
 			{
 				return childTags[0].IsAttributeSet(name);
 			}
+
+		private:
+			void TunnelEnd(const string& layoutHeight, const unsigned int lengthPixel);
 	};
 }} // namespace Server::Web
 

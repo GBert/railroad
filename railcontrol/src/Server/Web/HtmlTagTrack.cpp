@@ -99,21 +99,18 @@ namespace Server { namespace Web
 			}
 
 			case DataModel::TrackTypeTunnel:
+			{
 				image = "<polygon class=\"track\" points=\"15,0 21,0 21,12 15,12\"/>"
 					"<polygon class=\"track\" points=\"5,1 10,1 10,10 12,12 24,12 26,10 26,1 31,1 31,3 28,3 28,11 25,14 11,14 8,11 8,3 5,3 \"/>";
-				#include "Fallthrough.h"
-				// no break
+				const int lengthPixel = EdgeLength * trackHeight;
+				TunnelEnd(layoutHeight, lengthPixel);
+				break;
+			}
 
 			case DataModel::TrackTypeTunnelEnd:
 			{
-				const string l14 = to_string(EdgeLength * trackHeight - 14);
-				const string l12 = to_string(EdgeLength * trackHeight - 12);
-				const string l11 = to_string(EdgeLength * trackHeight - 11);
-				const string l10 = to_string(EdgeLength * trackHeight - 10);
-				const string l3 = to_string(EdgeLength * trackHeight - 3);
-				const string l1 = to_string(EdgeLength * trackHeight - 1);
-				image += "<polygon class=\"track\" points=\"15," + l12 + " 21," + l12 + " 21," + layoutHeight + " 15," + layoutHeight + "\"/>"
-					"<polygon class=\"track\" points=\"5," + l1 + " 10," + l1 + " 10," + l10 + " 12," + l12 + " 24," + l12 + " 26," + l10 + " 26," + l1 + " 31," + l1 + " 31," + l3 + " 28," + l3 + " 28," + l11 + " 25," + l14 + " 11," + l14 + " 8," + l11 + " 8," + l3 + " 5," + l3 + "\"/>";
+				const int lengthPixel = EdgeLength * trackHeight - 20;
+				TunnelEnd(layoutHeight, lengthPixel);
 				break;
 			}
 
@@ -174,5 +171,17 @@ namespace Server { namespace Web
 		AddContextMenuEntry(Languages::TextDeleteTrack, "loadPopup('/?cmd=trackaskdelete&" + urlIdentifier + "');");
 		AddToolTip(trackName);
 		FinishInit();
+	}
+
+	void HtmlTagTrack::TunnelEnd(const string& layoutHeight, const unsigned int lengthPixel)
+	{
+		const string l14 = to_string(lengthPixel - 14);
+		const string l12 = to_string(lengthPixel - 12);
+		const string l11 = to_string(lengthPixel - 11);
+		const string l10 = to_string(lengthPixel - 10);
+		const string l3 = to_string(lengthPixel - 3);
+		const string l1 = to_string(lengthPixel - 1);
+		image += "<polygon class=\"track\" points=\"15," + l12 + " 21," + l12 + " 21," + layoutHeight + " 15," + layoutHeight + "\"/>"
+			"<polygon class=\"track\" points=\"5," + l1 + " 10," + l1 + " 10," + l10 + " 12," + l12 + " 24," + l12 + " 26," + l10 + " 26," + l1 + " 31," + l1 + " 31," + l3 + " 28," + l3 + " 28," + l11 + " 25," + l14 + " 11," + l14 + " 8," + l11 + " 8," + l3 + " 5," + l3 + "\"/>";
 	}
 }} // namespace Server::Web
