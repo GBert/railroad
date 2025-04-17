@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.11\n\n");
+    fprintf(stderr, "   Version 1.12\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -848,6 +848,8 @@ int main(int argc, char **argv) {
 			print_can_frame(F_CAN_FORMAT_STRG, &frame);
 		    break;
 		case 0x0C:
+		    if (frame.can_dlc != 6)
+			break;
 		    uid = be16(&frame.data[2]);
 		    if (trigger_data.verbose)
 			print_can_frame(F_CAN_FORMAT_STRG, &frame);
