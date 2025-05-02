@@ -1,6 +1,5 @@
 - Counter Objekt (Max Anzahl Züge in eine Richtung)
 - Link auf Ebenen verknüpfen mit Klick
-- Wartezeit bei Erreichen Fahrstrassen-Ende
 - Fahrstrassen mit unverschlossenen Objekten
 - Bedingungen für Fahrstrassen
 - Masseträgheit von Zügen simulieren
@@ -17,7 +16,6 @@
 - Anbinden von USBtin-Märklin-CAN
 - Rückmelder für Weichenlage
 - S88 Link auf separaten Ebenen
-- Ausleuchtung von Gleisen aufgrund von Nachbargleis
 - Autokonversion der Protokolle bei Zentralenwechsel
 - CS2-Server
 - Verzögerung bei Feedback an / aus konfigurierbar

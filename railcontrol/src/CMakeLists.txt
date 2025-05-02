@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(RAILCONTROL_VERSION "23")
+set(RAILCONTROL_VERSION "24")
 
 project(CMakeTest)
 
@@ -106,8 +106,9 @@ Hardware/Protocols/EsuCAN.h
 Hardware/Protocols/LocoNet.cpp
 Hardware/Protocols/LocoNet.h
 Hardware/Protocols/LocoNetLocoCache.h
-Hardware/Protocols/MaerklinCAN.cpp
 Hardware/Protocols/MaerklinCAN.h
+Hardware/Protocols/MaerklinCANCommon.cpp
+Hardware/Protocols/MaerklinCANCommon.h
 Hardware/Protocols/P50x.cpp
 Hardware/Protocols/P50x.h
 Hardware/Protocols/P50xCache.h
@@ -153,6 +154,10 @@ Network/UdpServer.cpp
 Network/UdpServer.h
 RailControl.cpp
 RailControl.h
+Server/CS2/CS2Client.cpp
+Server/CS2/CS2Client.h
+Server/CS2/CS2Server.cpp
+Server/CS2/CS2Server.h
 Server/Web/HtmlTag.cpp
 Server/Web/HtmlTag.h
 Server/Web/HtmlTagAccessory.cpp
