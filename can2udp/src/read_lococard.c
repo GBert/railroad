@@ -113,6 +113,9 @@ unsigned char *read_data(struct loco_config_t *loco_config) {
 	return NULL;
     }
 
+    if (sz > BASIC_DATA_SIZE)
+	sz = BASIC_DATA_SIZE; 
+
     if ((fread((void *)data, 1, BASIC_DATA_SIZE, fp)) != BASIC_DATA_SIZE) {
 	fprintf(stderr, "%s: error: fread failed for [%s]\n", __func__, loco_config->filename);
 	fclose(fp);
