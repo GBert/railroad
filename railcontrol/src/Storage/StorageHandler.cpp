@@ -140,6 +140,8 @@ namespace Storage
 
 	void StorageHandler::DeleteTrack(const TrackID trackID)
 	{
+		sqlite.DeleteRelationsFrom(Relation::RelationTypeTrackSignal, trackID);
+		sqlite.DeleteRelationsFrom(Relation::RelationTypeTrackFeedback, trackID);
 		sqlite.DeleteRelationsTo(ObjectTypeTrack, trackID);
 		sqlite.DeleteObject(ObjectTypeTrack, trackID);
 	}

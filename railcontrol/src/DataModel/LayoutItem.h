@@ -44,7 +44,7 @@ namespace DataModel
 			{
 				public:
 					inline LayoutRotation()
-					:	rotation(Rotation0)
+					:	rotation(Rotation90)
 					{
 					}
 
@@ -120,7 +120,7 @@ namespace DataModel
 				posZ(0),
 				width(Width1),
 				height(Height1),
-				rotation(Rotation0)
+				rotation(Rotation90)
 			{
 			}
 

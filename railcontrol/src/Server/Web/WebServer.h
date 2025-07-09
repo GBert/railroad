@@ -144,7 +144,12 @@ namespace Server { namespace Web
 
 			inline void AddUpdate(const std::string& command, const std::string& status)
 			{
-				AddUpdate("data: command=" + command + ";status=" + status + "\r\n\r\n");
+				AddUpdateInternal("data: command=" + command + ";status=" + status + "\r\n\r\n");
+			}
+
+			inline void AddUpdate(const std::string& command)
+			{
+				AddUpdateInternal("data: command=" + command + "\r\n\r\n");
 			}
 
 			inline void AddUpdate(const Languages::TextSelector status)
@@ -152,7 +157,7 @@ namespace Server { namespace Web
 				AddUpdate(std::string("data: status=") + Languages::GetText(status) + "\r\n\r\n");
 			}
 
-			void AddUpdate(const std::string& data);
+			void AddUpdateInternal(const std::string& data);
 
 			void LogBrowserInfo(const std::string& webserveraddress, const unsigned short port);
 

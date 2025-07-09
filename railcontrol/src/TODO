@@ -9,14 +9,15 @@
 - Lokbilder
 - Fahren nach Fahrplan
 - Formulare als POST-Request senden um maximale URL-Länge zu umgehen
+- Neuverbinden zu Zentrale bei Verbindungsabbruch
 - Anbinden von SPROG DCC
 - Anbinden von Zimo-Zentralen
 - Anbinden von BidiB-Zentralen
 - Anbinden von uCon-Zentralen
 - Anbinden von USBtin-Märklin-CAN
+- Anbinden von SocketCAN (für Märklin CAN)
 - Rückmelder für Weichenlage
 - S88 Link auf separaten Ebenen
 - Autokonversion der Protokolle bei Zentralenwechsel
 - CS2-Server
 - Verzögerung bei Feedback an / aus konfigurierbar
-- SocketCAN (für Märklin CAN)

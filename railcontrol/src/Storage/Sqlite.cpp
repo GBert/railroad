@@ -335,7 +335,7 @@ namespace Storage
 		Execute(query);
 	}
 
-	// save DataModelobject
+	// save DataModel object
 	void SQLite::SaveObject(const ObjectType objectType, const ObjectID objectID, const std::string& name, const std::string& object)
 	{
 		string query = "INSERT OR REPLACE INTO objects (objecttype, objectid, name, object) VALUES ("
@@ -346,7 +346,7 @@ namespace Storage
 		Execute(query);
 	}
 
-	// delete DataModelobject
+	// delete DataModel object
 	void SQLite::DeleteObject(const ObjectType objectType, const ObjectID objectID)
 	{
 		string query = "DELETE FROM objects WHERE objecttype = " + to_string(objectType)
@@ -354,14 +354,14 @@ namespace Storage
 		Execute(query);
 	}
 
-	// read DataModelobjects
+	// read DataModel objects
 	void SQLite::ObjectsOfType(const ObjectType objectType, vector<string>& objects)
 	{
 		string query = "SELECT object FROM objects WHERE objecttype = " + to_string(objectType) + " ORDER BY objectid;";
 		Execute(query, CallbackStringVector, &objects);
 	}
 
-	// save DataModelrelation
+	// save DataModel relation
 	void SQLite::SaveRelation(const DataModel::Relation::RelationType type, const ObjectID objectID1, const ObjectType objectType2, const ObjectID objectID2, const Priority priority, const std::string& relation)
 	{
 		string query = "INSERT OR REPLACE INTO relations (type, objectid1, objecttype2, objectid2, priority, relation) VALUES ("
@@ -374,7 +374,7 @@ namespace Storage
 		Execute(query);
 	}
 
-	// delete DataModelrelaton
+	// delete DataModel relation
 	void SQLite::DeleteRelationsFrom(const DataModel::Relation::RelationType type, const ObjectID objectID)
 	{
 		string query = "DELETE FROM relations WHERE type = " + to_string(type)
@@ -382,7 +382,7 @@ namespace Storage
 		Execute(query);
 	}
 
-	// delete DataModelrelaton
+	// delete DataModel relation
 	void SQLite::DeleteRelationsTo(const ObjectType objectType, const ObjectID objectID)
 	{
 		string query = "DELETE FROM relations WHERE objecttype2 = " + to_string(objectType)
@@ -390,7 +390,7 @@ namespace Storage
 		Execute(query);
 	}
 
-	// read DataModelrelations
+	// read DataModel relations
 	void SQLite::RelationsFrom(const DataModel::Relation::RelationType type, const ObjectID objectID, vector<string>& relations)
 	{
 		string query = "SELECT relation FROM relations WHERE type = " + to_string(type)
@@ -398,7 +398,7 @@ namespace Storage
 		Execute(query, CallbackStringVector, &relations);
 	}
 
-	// read DataModelrelations
+	// read DataModel relations
 	void SQLite::RelationsTo(const ObjectType objectType, const ObjectID objectID, vector<string>& relations)
 	{
 		string query = "SELECT relation FROM relations WHERE objecttype2 = " + to_string(objectType)

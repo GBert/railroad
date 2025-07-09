@@ -346,7 +346,11 @@ namespace Server { namespace Web
 			+ ";orientation=" + orientationText
 			+ ";loconame=" + locoName;
 
-		if (blocked)
+		if (track->GetMain())
+		{
+			AddUpdate(command);
+		}
+		else if (blocked)
 		{
 			if (reserved)
 			{
@@ -662,7 +666,7 @@ namespace Server { namespace Web
 		AddUpdate(command.str(), Languages::TextProgramReadValue , static_cast<int>(cv), static_cast<int>(value));
 	}
 
-	void WebServer::AddUpdate(const string& data)
+	void WebServer::AddUpdateInternal(const string& data)
 	{
 		std::lock_guard<std::mutex> lock(updateMutex);
 		updates[updateID] = data;
