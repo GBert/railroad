@@ -29,25 +29,27 @@ namespace Server { namespace Web
 {
 	class WebClient;
 
-	class WebClientText
+	class WebClientCounter
 	{
 		public:
-			WebClientText() = delete;
-			WebClientText(const WebClientText&) = delete;
-			WebClientText& operator=(const WebClientText&) = delete;
+			WebClientCounter() = delete;
+			WebClientCounter(const WebClientCounter&) = delete;
+			WebClientCounter& operator=(const WebClientCounter&) = delete;
 
-			inline WebClientText(Manager& manager, WebClient& client)
+			inline WebClientCounter(Manager& manager, WebClient& client)
 			:	manager(manager),
 				client(client)
 			{
 			}
 
-			void HandleTextEdit(const std::map<std::string,std::string>& arguments);
-			void HandleTextSave(const std::map<std::string,std::string>& arguments);
-			void HandleTextList();
-			void HandleTextAskDelete(const std::map<std::string,std::string>& arguments);
-			void HandleTextDelete(const std::map<std::string,std::string>& arguments);
-			void HandleTextGet(const std::map<std::string, std::string>& arguments);
+			void HandleCounterEdit(const std::map<std::string,std::string>& arguments);
+			void HandleCounterSave(const std::map<std::string,std::string>& arguments);
+			void HandleCounterList();
+			void HandleCounterAskDelete(const std::map<std::string,std::string>& arguments);
+			void HandleCounterDelete(const std::map<std::string,std::string>& arguments);
+			void HandleCounterGet(const std::map<std::string, std::string>& arguments);
+			void HandleCounterIncrement(const std::map<std::string, std::string>& arguments);
+			void HandleCounterDecrement(const std::map<std::string, std::string>& arguments);
 
 		private:
 			Manager& manager;

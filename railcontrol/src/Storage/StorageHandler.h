@@ -108,6 +108,13 @@ namespace Storage
 				sqlite.DeleteObject(ObjectTypeText, textID);
 			}
 
+			void AllCounters(std::map<CounterID,DataModel::Counter*>& counters);
+
+			inline void DeleteCounter(CounterID counterID)
+			{
+				sqlite.DeleteObject(ObjectTypeCounter, counterID);
+			}
+
 			inline void Save(const Hardware::HardwareParams& hardwareParams)
 			{
 				sqlite.SaveHardwareParams(hardwareParams);

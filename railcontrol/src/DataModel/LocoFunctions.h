@@ -261,7 +261,7 @@ namespace DataModel
 
 			std::string Serialize() const override;
 
-			bool Deserialize(const std::string& serialized) override;
+			void Deserialize(const std::string& serialized) override;
 
 			inline LocoFunctionIcon GetFunctionIcon(const LocoFunctionNr nr) const
 			{

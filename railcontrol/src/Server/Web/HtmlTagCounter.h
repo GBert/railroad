@@ -20,20 +20,37 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
-#include "DataModel/Accessory.h"
-#include "DataModel/AccessoryBase.h"
-#include "DataModel/Cluster.h"
-#include "DataModel/Counter.h"
-#include "DataModel/Feedback.h"
-#include "DataModel/Layer.h"
-#include "DataModel/Loco.h"
-#include "DataModel/LocoBase.h"
-#include "DataModel/LocoFunctions.h"
-#include "DataModel/MultipleUnit.h"
-#include "DataModel/ObjectIdentifier.h"
-#include "DataModel/Relation.h"
-#include "DataModel/Route.h"
-#include "DataModel/Signal.h"
-#include "DataModel/Switch.h"
-#include "DataModel/Text.h"
-#include "DataModel/Track.h"
+#include <string>
+
+#include "Server/Web/HtmlTagLayoutItem.h"
+
+namespace DataModel
+{
+	class Counter;
+}
+
+namespace Server { namespace Web
+{
+	class HtmlTagCounter : public HtmlTagLayoutItem
+	{
+		public:
+			HtmlTagCounter() = delete;
+			HtmlTagCounter(const DataModel::Counter* counter);
+
+			virtual ~HtmlTagCounter()
+			{
+			}
+
+			virtual inline HtmlTag AddAttribute(const std::string& name, const std::string& value) override
+			{
+				childTags[0].AddAttribute(name, value);
+				return *this;
+			}
+
+			virtual inline bool IsAttributeSet(const std::string& name) override
+			{
+				return childTags[0].IsAttributeSet(name);
+			}
+	};
+}} // namespace Server::Web
+

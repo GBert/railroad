@@ -231,6 +231,10 @@ function parseObjectIdentifier(identifier)
 			type = "text";
 			break;
 
+		case "c":
+			type = "counter";
+			break;
+
 		default:
 			type = "object";
 			break;
@@ -863,6 +867,17 @@ function onClickSignal(signalID)
 	return false;
 }
 
+function onClickCounter(counterID)
+{
+	var identifier = 'c_' + counterID;
+	if (modifierKeyPressed(event))
+	{
+		rotateObject(identifier);
+		return;
+	}
+	return false;
+}
+
 function showMenu(elementName) {
 	var element = document.getElementById(elementName);
 	if (!element)
@@ -1487,6 +1502,36 @@ function updateSignal(signalID)
 	requestUpdateLayoutItem(elementName, url);
 }
 
+function updateCounterState(argumentMap)
+{
+	if (!argumentMap.has('counter') || !argumentMap.has('count'))
+	{
+		return;
+	}
+	var elementName = 'c_' + argumentMap.get('counter');
+	var element = document.getElementById(elementName);
+	if (!element)
+	{
+		return;
+	}
+	var count = argumentMap.get('count');
+	elementName += '_text';
+	element = document.getElementById(elementName);
+	if (!element)
+	{
+		return;
+	}
+	element.innerHTML = count;
+}
+
+function updateCounter(counterID)
+{
+	elementName = 'c_' + counterID;
+	var url = '/?cmd=counterget';
+	url += '&counter=' + counterID;
+	requestUpdateLayoutItem(elementName, url);
+}
+
 function dataUpdate(event)
 {
 	var status = document.getElementById('status');
@@ -1631,6 +1676,20 @@ function dataUpdate(event)
 		elementName = 'tx_' + argumentMap.get('text');
 		deleteElement(elementName);
 		deleteElement(elementName + '_context');
+	}
+	else if (command == 'countersettings')
+	{
+		updateCounter(argumentMap.get('counter'));
+	}
+	else if (command == 'counterdelete')
+	{
+		elementName = 'c_' + argumentMap.get('counter');
+		deleteElement(elementName);
+		deleteElement(elementName + '_context');
+	}
+	else if (command == 'counterstate')
+	{
+		updateCounterState(argumentMap);
 	}
 	else if (command == 'trackstate')
 	{

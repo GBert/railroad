@@ -637,6 +637,31 @@ class Manager
 		bool TextDelete(const TextID textID,
 			std::string& result);
 
+		// counter
+		DataModel::Counter* GetCounter(const CounterID counterID) const;
+
+		bool Count(const CounterID counterID, const DataModel::CounterType type);
+
+		inline const std::map<TextID,DataModel::Counter*>& CounterList() const
+		{
+			return counters;
+		}
+
+		const std::map<std::string,DataModel::Counter*> CounterListByName() const;
+
+		bool CounterSave(CounterID counterID,
+			const std::string& name,
+			const int max,
+			const int min,
+			const DataModel::LayoutItem::LayoutPosition x,
+			const DataModel::LayoutItem::LayoutPosition y,
+			const DataModel::LayoutItem::LayoutPosition z,
+			const DataModel::LayoutItem::LayoutRotation rotation,
+			std::string& result);
+
+		bool CounterDelete(const CounterID counterID,
+			std::string& result);
+
 		// automode
 		bool LocoBaseIntoTrack(Logger::Logger* logger, const DataModel::ObjectIdentifier& locoBaseIdentifier, const TrackID trackID);
 		bool LocoRelease(const LocoID locoID);
@@ -822,6 +847,11 @@ class Manager
 			const DataModel::LayoutItem::LayoutPosition posY,
 			std::string& result);
 
+		bool CounterPosition(const CounterID counterID,
+			const DataModel::LayoutItem::LayoutPosition posX,
+			const DataModel::LayoutItem::LayoutPosition posY,
+			std::string& result);
+
 		bool AccessoryRotate(const AccessoryID accessoryID,
 			std::string& result);
 
@@ -840,6 +870,9 @@ class Manager
 		bool TrackRotate(const TrackID trackID,
 			std::string& result);
 
+		bool CounterRotate(const CounterID counterID,
+			std::string& result);
+
 		void AccessorySaveAndPublishSettings(const DataModel::Accessory* const accessory);
 		void FeedbackSaveAndPublishSettings(const DataModel::Feedback* const feedback);
 		void RouteSaveAndPublishSettings(const DataModel::Route* const route);
@@ -847,6 +880,8 @@ class Manager
 		void SwitchSaveAndPublishSettings(const DataModel::Switch* const mySwitch);
 		void TextSaveAndPublishSettings(const DataModel::Text* const text);
 		void TrackSaveAndPublishSettings(const DataModel::Track* const track);
+		void CounterSaveAndPublishSettings(const DataModel::Counter* const counter);
+		void CounterPublishState(const DataModel::Counter* const counter);
 
 		// layout
 		bool CheckPositionFree(const DataModel::LayoutItem::LayoutPosition posX,
@@ -1077,6 +1112,10 @@ class Manager
 		// text
 		std::map<TextID,DataModel::Text*> texts;
 		mutable std::mutex textMutex;
+
+		// counter
+		std::map<CounterID,DataModel::Counter*> counters;
+		mutable std::mutex counterMutex;
 
 		// storage
 		Storage::StorageHandler* storage;

@@ -46,6 +46,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Server/Web/HtmlTagButtonOK.h"
 #include "Server/Web/HtmlTagButtonPopup.h"
 #include "Server/Web/HtmlTagButtonPopupWide.h"
+#include "Server/Web/HtmlTagCounter.h"
 #include "Server/Web/HtmlTagFeedback.h"
 #include "Server/Web/HtmlTagInputCheckbox.h"
 #include "Server/Web/HtmlTagInputCheckboxWithLabel.h"
@@ -649,6 +650,38 @@ namespace Server { namespace Web
 			else if (arguments["cmd"].compare("clusterdelete") == 0)
 			{
 				cluster.HandleClusterDelete(arguments);
+			}
+			else if (arguments["cmd"].compare("counterlist") == 0)
+			{
+				counter.HandleCounterList();
+			}
+			else if (arguments["cmd"].compare("counteredit") == 0)
+			{
+				counter.HandleCounterEdit(arguments);
+			}
+			else if (arguments["cmd"].compare("countersave") == 0)
+			{
+				counter.HandleCounterSave(arguments);
+			}
+			else if (arguments["cmd"].compare("counteraskdelete") == 0)
+			{
+				counter.HandleCounterAskDelete(arguments);
+			}
+			else if (arguments["cmd"].compare("counterdelete") == 0)
+			{
+				counter.HandleCounterDelete(arguments);
+			}
+			else if (arguments["cmd"].compare("counterget") == 0)
+			{
+				counter.HandleCounterGet(arguments);
+			}
+			else if (arguments["cmd"].compare("counterincrement") == 0)
+			{
+				counter.HandleCounterIncrement(arguments);
+			}
+			else if (arguments["cmd"].compare("counterdecrement") == 0)
+			{
+				counter.HandleCounterDecrement(arguments);
 			}
 			else if (arguments["cmd"].compare("newposition") == 0)
 			{
@@ -2026,6 +2059,26 @@ namespace Server { namespace Web
 			content.AddChildTag(HtmlTagText(text.second));
 		}
 
+		const map<SwitchID,DataModel::Track*>& tracks = manager.TrackList();
+		for (auto& track : tracks)
+		{
+			if (track.second->IsVisibleOnLayer(layer) == false)
+			{
+				continue;
+			}
+			content.AddChildTag(HtmlTagTrack(manager, track.second));
+		}
+
+		const map<SignalID,DataModel::Signal*>& signals = manager.SignalList();
+		for (auto& signal : signals)
+		{
+			if (signal.second->IsVisibleOnLayer(layer) == false)
+			{
+				continue;
+			}
+			content.AddChildTag(HtmlTagSignal(manager, signal.second));
+		}
+
 		const map<AccessoryID,DataModel::Accessory*>& accessories = manager.AccessoryList();
 		for (auto& accessory : accessories)
 		{
@@ -2046,14 +2099,14 @@ namespace Server { namespace Web
 			content.AddChildTag(HtmlTagSwitch(mySwitch.second));
 		}
 
-		const map<SwitchID,DataModel::Track*>& tracks = manager.TrackList();
-		for (auto& track : tracks)
+		const map<FeedbackID,Feedback*>& feedbacks = manager.FeedbackList();
+		for (auto& feedback : feedbacks)
 		{
-			if (track.second->IsVisibleOnLayer(layer) == false)
+			if (feedback.second->IsVisibleOnLayer(layer) == false)
 			{
 				continue;
 			}
-			content.AddChildTag(HtmlTagTrack(manager, track.second));
+			content.AddChildTag(HtmlTagFeedback(feedback.second));
 		}
 
 		const map<RouteID,DataModel::Route*>& routes = manager.RouteList();
@@ -2066,24 +2119,14 @@ namespace Server { namespace Web
 			content.AddChildTag(HtmlTagRoute(route.second));
 		}
 
-		const map<FeedbackID,Feedback*>& feedbacks = manager.FeedbackList();
-		for (auto& feedback : feedbacks)
+		const map<CounterID,DataModel::Counter*>& counters = manager.CounterList();
+		for (auto& counter : counters)
 		{
-			if (feedback.second->IsVisibleOnLayer(layer) == false)
+			if (counter.second->IsVisibleOnLayer(layer) == false)
 			{
 				continue;
 			}
-			content.AddChildTag(HtmlTagFeedback(feedback.second));
-		}
-
-		const map<SignalID,DataModel::Signal*>& signals = manager.SignalList();
-		for (auto& signal : signals)
-		{
-			if (signal.second->IsVisibleOnLayer(layer) == false)
-			{
-				continue;
-			}
-			content.AddChildTag(HtmlTagSignal(manager, signal.second));
+			content.AddChildTag(HtmlTagCounter(counter.second));
 		}
 
 		ReplyHtmlWithHeader(content);
@@ -3443,7 +3486,7 @@ namespace Server { namespace Web
 		{
 			string s;
 			bool ok = server.NextUpdate(updateID, s);
-			if (ok == false)
+			if (!ok)
 			{
 				// FIXME: use signaling instead of sleep
 				Utils::Utils::SleepForMilliseconds(100);
@@ -3605,17 +3648,19 @@ namespace Server { namespace Web
 		menuMain.AddChildTag(HtmlTagButtonCommand("<svg width=\"36\" height=\"36\"><polyline points=\"2,12 2,11 11,2 26,2 35,11 35,26 26,35 11,35 2,26 2,12\" stroke=\"black\" stroke-width=\"1\" fill=\"red\"/><text x=\"4\" y=\"22\" fill=\"white\" font-size=\"11\">STOP</text></svg>", "stopallimmediately", Languages::TextStopAllLocos));
 		menuMain.AddChildTag(HtmlTagButtonCommand("<svg width=\"36\" height=\"36\"><polygon points=\"17,36 17,28 15,28 10,23 10,5 15,0 21,0 26,5 26,23 21,28 19,28 19,36\" fill=\"black\" /><circle cx=\"18\" cy=\"8\" r=\"4\" fill=\"red\" /><circle cx=\"18\" cy=\"20\" r=\"4\" fill=\"darkgray\" /></svg>", "stopall", Languages::TextSetAllLocosToManualMode));
 		menuMain.AddChildTag(HtmlTagButtonCommand("<svg width=\"36\" height=\"36\"><polygon points=\"17,36 17,28 15,28 10,23 10,5 15,0 21,0 26,5 26,23 21,28 19,28 19,36\" fill=\"black\" /><circle cx=\"18\" cy=\"8\" r=\"4\" fill=\"darkgray\" /><circle cx=\"18\" cy=\"20\" r=\"4\" fill=\"green\" /></svg>", "startall", Languages::TextSetAllLocosToAutomode));
-		menuMain.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;&nbsp;"));
+		menuMain.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;"));
 		menu.AddChildTag(menuMain);
 
 		HtmlTag menuAdd("div");
 		menuAdd.AddClass("menu_add");
 		menuAdd.AddChildTag(HtmlTagButtonCommandFullScreen());
-		menuAdd.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;&nbsp;"));
+		menuAdd.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;"));
+		menuAdd.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><circle r=\"7\" cx=\"14\" cy=\"14\" fill=\"black\" /><line x1=\"14\" y1=\"5\" x2=\"14\" y2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"6.2\" x2=\"18.5\" y2=\"21.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"9.5\" x2=\"21.8\" y2=\"18.5\" stroke-width=\"2\" stroke=\"black\" /><line y1=\"14\" x1=\"5\" y2=\"14\" x2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"21.8\" x2=\"18.5\" y2=\"6.2\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"18.5\" x2=\"21.8\" y2=\"9.5\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"5\" cx=\"14\" cy=\"14\" fill=\"white\" /><circle r=\"4\" cx=\"24\" cy=\"24\" fill=\"black\" /><line x1=\"18\" y1=\"24\" x2=\"30\" y2=\"24\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"28.2\" y1=\"28.2\" x2=\"19.8\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"24\" y1=\"18\" x2=\"24\" y2=\"30\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"19.8\" y1=\"28.2\" x2=\"28.2\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"2\" cx=\"24\" cy=\"24\" fill=\"white\" /></svg>", "settingsedit", Languages::TextEditSettings));
+		menuAdd.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;"));
 		if (manager.CanHandle(Hardware::CapabilityProgram))
 		{
 			menuAdd.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polyline points=\"1,5 35,5\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"1,16 35,16\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"3,3 3,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"6,3 6,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"9,3 9,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"12,3 12,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"15,3 15,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"18,3 18,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"21,3 21,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"24,3 24,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"27,3 27,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"30,3 30,18\" stroke=\"black\" stroke-width=\"1\" /><polyline points=\"33,3 33,18\" stroke=\"black\" stroke-width=\"1\" /><text x=\"3\" y=\"31\" fill=\"black\" >Prog</text></svg>", "program", Languages::TextProgrammer));
-			menuAdd.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;&nbsp;"));
+			menuAdd.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;"));
 		}
 		menu.AddChildTag(menuAdd);
 
@@ -3623,14 +3668,12 @@ namespace Server { namespace Web
 		menuConfigButton.AddClass("menu_configbutton");
 		menuConfigButton.AddId("menu_configbutton");
 		menuConfigButton.AddChildTag(HtmlTagButton("<svg width=\"36\" height=\"36\"><polyline points=\"5,11 31,11\" stroke=\"black\" stroke-width=\"3\"/><polyline points=\"5,18 31,18\" stroke=\"black\" stroke-width=\"3\"/><polyline points=\"5,25 31,25\" stroke=\"black\" stroke-width=\"3\"/></svg>", "showmenuconfig", Languages::TextConfigMenu).AddAttribute("onclick", "showMenuConfig(); return false;").AddClass("button_menuconfig"));
-		menuConfigButton.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;&nbsp;"));
+		menuConfigButton.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;"));
 		menu.AddChildTag(menuConfigButton);
 
 		HtmlTag menuConfig("div");
 		menuConfig.AddClass("menu_config");
 		menuConfig.AddId("menu_config");
-		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><circle r=\"7\" cx=\"14\" cy=\"14\" fill=\"black\" /><line x1=\"14\" y1=\"5\" x2=\"14\" y2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"6.2\" x2=\"18.5\" y2=\"21.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"9.5\" x2=\"21.8\" y2=\"18.5\" stroke-width=\"2\" stroke=\"black\" /><line y1=\"14\" x1=\"5\" y2=\"14\" x2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"21.8\" x2=\"18.5\" y2=\"6.2\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"18.5\" x2=\"21.8\" y2=\"9.5\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"5\" cx=\"14\" cy=\"14\" fill=\"white\" /><circle r=\"4\" cx=\"24\" cy=\"24\" fill=\"black\" /><line x1=\"18\" y1=\"24\" x2=\"30\" y2=\"24\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"28.2\" y1=\"28.2\" x2=\"19.8\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"24\" y1=\"18\" x2=\"24\" y2=\"30\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"19.8\" y1=\"28.2\" x2=\"28.2\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"2\" cx=\"24\" cy=\"24\" fill=\"white\" /></svg>", "settingsedit", Languages::TextEditSettings));
-		menuConfig.AddChildTag(HtmlTag().AddContent("&nbsp;&nbsp;&nbsp;"));
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polygon points=\"11,1.5 26,1.5 26,35.5 11,35.5\" fill=\"white\" style=\"stroke:black;stroke-width:1;\"/><polygon points=\"14,4.5 23,4.5 23,8.5 14,8.5\" fill=\"white\" style=\"stroke:black;stroke-width:1;\"/><circle cx=\"15.5\" cy=\"12\" r=\"1\" fill=\"black\"/><circle cx=\"18.5\" cy=\"12\" r=\"1\" fill=\"black\"/><circle cx=\"21.5\" cy=\"12\" r=\"1\" fill=\"black\"/><circle cx=\"15.5\" cy=\"15\" r=\"1\" fill=\"black\"/><circle cx=\"18.5\" cy=\"15\" r=\"1\" fill=\"black\"/><circle cx=\"21.5\" cy=\"15\" r=\"1\" fill=\"black\"/><circle cx=\"15.5\" cy=\"18\" r=\"1\" fill=\"black\"/><circle cx=\"18.5\" cy=\"18\" r=\"1\" fill=\"black\"/><circle cx=\"21.5\" cy=\"18\" r=\"1\" fill=\"black\"/><circle cx=\"15.5\" cy=\"21\" r=\"1\" fill=\"black\"/><circle cx=\"18.5\" cy=\"21\" r=\"1\" fill=\"black\"/><circle cx=\"21.5\" cy=\"21\" r=\"1\" fill=\"black\"/><circle cx=\"18.5\" cy=\"28.5\" r=\"5\" fill=\"black\"/></svg>", "controllist", Languages::TextEditControls));
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polyline points=\"0,25 35,25\" fill=\"none\" stroke=\"black\"/><polygon points=\"35,22 6,22 5,19 8,10 35,10\" stroke=\"black\" fill=\"black\"/><polygon points=\"10,12 15,12 15,15 9,15\" fill=\"white\"/><polyline points=\"16,9 20,7 16,5\" stroke=\"black\" fill=\"none\"/><circle cx=\"12\" cy=\"22\" r=\"3\"/><circle cx=\"20\" cy=\"22\" r=\"3\"/></svg>", "locolist", Languages::TextEditLocos));
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polyline points=\"0,25 35,25\" fill=\"none\" stroke=\"black\"/><polygon points=\"0,22 0,10 12,10 15,19 14,22\" stroke=\"black\" fill=\"black\"/><polygon points=\"10,12 11,15 5,15 5,12\" fill=\"white\"/><polyline points=\"8,9 4,7 8,5\" stroke=\"black\" fill=\"none\"/><circle cx=\"8\" cy=\"22\" r=\"3\"/><circle cx=\"0\" cy=\"22\" r=\"3\"/><polygon points=\"35,22 21,22 20,19 23,10 35,10\" stroke=\"black\" fill=\"black\"/><polygon points=\"25,12 30,12 30,15 24,15\" fill=\"white\"/><polyline points=\"27,9 31,7 27,5\" stroke=\"black\" fill=\"none\"/><circle cx=\"27\" cy=\"22\" r=\"3\"/><circle cx=\"35\" cy=\"22\" r=\"3\"/><polyline points=\"0,20 35,20\" fill=\"none\" stroke=\"black\"/></svg>", "multipleunitlist", Languages::TextEditMultipleUnits));
@@ -3642,32 +3685,33 @@ namespace Server { namespace Web
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polyline points=\"1,20 10,20 30,15\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/><polyline points=\"28,17 28,20 34,20\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/></svg>", "accessorylist", Languages::TextEditAccessories));
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polyline points=\"1,25 35,25\" fill=\"none\" stroke=\"black\"/><polygon points=\"4,25 4,23 8,23 8,25\" fill=\"black\" stroke=\"black\"/><polygon points=\"35,22 16,22 15,19 18,10 35,10\" stroke=\"black\" fill=\"black\"/><polygon points=\"20,12 25,12 25,15 19,15\" fill=\"white\"/><polyline points=\"26,10 30,8 26,6\" stroke=\"black\" fill=\"none\"/><circle cx=\"22\" cy=\"22\" r=\"3\"/><circle cx=\"30\" cy=\"22\" r=\"3\"/></svg>", "feedbacklist", Languages::TextEditFeedbacks));
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><polyline points=\"5,34 15,1\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/><polyline points=\"31,34 21,1\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/><polyline points=\"18,34 18,30\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/><polyline points=\"18,24 18,20\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/><polyline points=\"18,14 18,10\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/><polyline points=\"18,4 18,1\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/></svg>", "routelist", Languages::TextEditRoutes));
+		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><text x=\"4\" y=\"22\" fill=\"black\" font-size=\"15\">1 2</text></svg>", "counterlist", Languages::TextEditCounters));
 		menuConfig.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><text x=\"4\" y=\"22\" fill=\"black\" font-size=\"15\">Text</text></svg>", "textlist", Languages::TextEditTexts));
 		menu.AddChildTag(menuConfig);
 
 		body.AddChildTag(menu);
 
 		const unsigned int MaxNumberOfLocoControls = 5;
-		for (unsigned int i = 1; i <= MaxNumberOfLocoControls; ++i)
+		for (unsigned int numberOfLocoControl = 1; numberOfLocoControl <= MaxNumberOfLocoControls; ++numberOfLocoControl)
 		{
-			const string iText = to_string(i);
+			const string numberOfLocoControlText = to_string(numberOfLocoControl);
 			HtmlTag locoContainer("div");
 			locoContainer.AddClass("loco_container");
-			locoContainer.AddId("loco_container_" + iText);
+			locoContainer.AddId("loco_container_" + numberOfLocoControlText);
 
 			HtmlTag locoSelector("div");
 			locoSelector.AddClass("loco_selector");
-			locoSelector.AddClass("loco_selector_" + iText);
-			locoSelector.AddId("loco_selector_" + iText);
-			locoSelector.AddChildTag(HtmlTagLocoSelector(iText));
+			locoSelector.AddClass("loco_selector_" + numberOfLocoControlText);
+			locoSelector.AddId("loco_selector_" + numberOfLocoControlText);
+			locoSelector.AddChildTag(HtmlTagLocoSelector(numberOfLocoControlText));
 			locoContainer.AddChildTag(locoSelector);
 
 			HtmlTag loco("div");
 			loco.AddClass("loco");
-			loco.AddClass("loco_" + iText);
-			loco.AddId("loco_" + iText);
+			loco.AddClass("loco_" + numberOfLocoControlText);
+			loco.AddId("loco_" + numberOfLocoControlText);
 			locoContainer.AddChildTag(loco);
-			if (i > 1)
+			if (numberOfLocoControl > 1)
 			{
 				locoContainer.AddClass("hidden");
 			}
@@ -3695,6 +3739,7 @@ namespace Server { namespace Web
 			.AddChildTag(HtmlTag("li").AddClass("contextentry").AddContent(Languages::GetText(Languages::TextAddFeedback)).AddAttribute("onClick", "loadPopup('/?cmd=feedbackedit&feedback=0');"))
 			.AddChildTag(HtmlTag("li").AddClass("contextentry").AddClass("real_layer_only").AddContent(Languages::GetText(Languages::TextAddRoute)).AddAttribute("onClick", "loadPopup('/?cmd=routeedit&route=0');"))
 			.AddChildTag(HtmlTag("li").AddClass("contextentry").AddClass("real_layer_only").AddContent(Languages::GetText(Languages::TextAddText)).AddAttribute("onClick", "loadPopup('/?cmd=textedit&text=0');"))
+			.AddChildTag(HtmlTag("li").AddClass("contextentry").AddClass("real_layer_only").AddContent(Languages::GetText(Languages::TextAddCounter)).AddAttribute("onClick", "loadPopup('/?cmd=counteredit&counter=0');"))
 			));
 
 		connection->Send(ResponseHtmlFull("RailControl", body));

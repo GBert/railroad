@@ -19,12 +19,10 @@ along with RailControl; see the file LICENCE. If not see
 */
 
 #include <map>
-#include <string>
 
 #include "DataModel/Cluster.h"
 #include "DataModel/LockableItem.h"
 #include "DataModel/Relation.h"
-#include "DataModel/Signal.h"
 #include "DataModel/Track.h"
 #include "Manager.h"
 #include "Utils/Utils.h"
@@ -45,17 +43,17 @@ namespace DataModel
 		return str;
 	}
 
-	bool Cluster::Deserialize(const string& serialized)
+	void Cluster::Deserialize(const string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
-		Object::Deserialize(arguments);
-		if (!arguments.count("objectType") || arguments.at("objectType").compare("Cluster") != 0)
+		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
+		if (objectType.compare("Cluster") != 0)
 		{
-			return false;
+			return;
 		}
+		Object::Deserialize(arguments);
 		orientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "orientation", OrientationRight));
-		return true;
 	}
 
 	bool Cluster::CanSetLocoBaseOrientationUnlocked(const Orientation orientation, const ObjectIdentifier& locoBaseIdentifier)
@@ -124,7 +122,7 @@ namespace DataModel
 		while (tracks.size() > 0)
 		{
 			Relation* trackRelation = tracks.back();
-			Track* track = dynamic_cast<Track*>(trackRelation->GetObject2());
+			Track* track = trackRelation->ObjectType2() == ObjectTypeTrack ? manager->GetTrack(trackRelation->ObjectID2()) : nullptr;
 			if (track)
 			{
 				track->DeleteCluster();

@@ -61,7 +61,7 @@ namespace Server { namespace Web
 		if (textID > TextNone)
 		{
 			const DataModel::Text* text = manager.GetText(textID);
-			if (text != nullptr)
+			if (text)
 			{
 				name = text->GetName();
 				posx = text->GetPosX();
@@ -158,7 +158,7 @@ namespace Server { namespace Web
 		}
 
 		const DataModel::Text* text = manager.GetText(textID);
-		if (text == nullptr)
+		if (!text)
 		{
 			client.ReplyHtmlWithHeaderAndParagraph(Languages::TextTextDoesNotExist);
 			return;
@@ -181,7 +181,7 @@ namespace Server { namespace Web
 	{
 		TextID textID = Utils::Utils::GetIntegerMapEntry(arguments, "text", TextNone);
 		const DataModel::Text* text = manager.GetText(textID);
-		if (text == nullptr)
+		if (!text)
 		{
 			client.ReplyResponse(WebClient::ResponseError, Languages::TextTextDoesNotExist);
 			return;
@@ -202,7 +202,7 @@ namespace Server { namespace Web
 	{
 		TextID textID = Utils::Utils::GetIntegerMapEntry(arguments, "text");
 		const DataModel::Text* text = manager.GetText(textID);
-		if (text == nullptr)
+		if (!text)
 		{
 			client.ReplyHtmlWithHeader(HtmlTag());
 			return;

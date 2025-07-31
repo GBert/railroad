@@ -35,14 +35,13 @@ namespace DataModel
 			+ ";locobasetype=" + std::to_string(locoBaseIdentifier.GetObjectType());
 	}
 
-	bool LockableItem::Deserialize(const map<string, string> arguments)
+	void LockableItem::Deserialize(const map<string, string> arguments)
 	{
 		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "locoID", LocoNone); // FIXME: Remove later: 2024-02-08
 		locoBaseIdentifier.SetObjectID(Utils::Utils::GetIntegerMapEntry(arguments, "locobaseid", locoID));
 		locoBaseIdentifier.SetObjectType(static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "locobasetype", ObjectTypeLoco)));
 		lockState = static_cast<LockState>(Utils::Utils::GetIntegerMapEntry(arguments, "lockState", LockStateFree));  // FIXME: Remove later: 2024-02-08
 		lockState = static_cast<LockState>(Utils::Utils::GetIntegerMapEntry(arguments, "lockstate", lockState));
-		return true;
 	}
 
 	bool LockableItem::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)

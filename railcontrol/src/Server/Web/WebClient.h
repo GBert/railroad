@@ -34,6 +34,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Network/TcpConnection.h"
 #include "ResponseHtml.h"
 #include "Server/Web/WebClientCluster.h"
+#include "Server/Web/WebClientCounter.h"
 #include "Server/Web/WebClientRoute.h"
 #include "Server/Web/WebClientSignal.h"
 #include "Server/Web/WebClientStatic.h"
@@ -81,6 +82,7 @@ namespace Server { namespace Web
 				signal(manager, *this, logger),
 				route(manager, *this, logger),
 				text(manager, *this),
+				counter(manager, *this),
 				headOnly(false),
 				buttonID(0)
 			{
@@ -304,6 +306,7 @@ namespace Server { namespace Web
 			WebClientSignal signal;
 			WebClientRoute route;
 			WebClientText text;
+			WebClientCounter counter;
 			bool headOnly;
 			unsigned int buttonID;
 	};

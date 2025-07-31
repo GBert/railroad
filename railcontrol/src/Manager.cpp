@@ -191,6 +191,12 @@ Manager::Manager(Config& config)
 		logger->Info(Languages::TextLoadedRoute, route.second->GetID(), route.second->GetName());
 	}
 
+	storage->AllCounters(counters);
+	for (auto& counter : counters)
+	{
+		logger->Info(Languages::TextLoadedCounter, counter.second->GetID(), counter.second->GetName());
+	}
+
 	storage->AllLocos(locos);
 	for (auto& loco : locos)
 	{
@@ -275,6 +281,7 @@ Manager::~Manager()
 		Storage::TransactionGuard guard(storage);
 		DeleteAllMapEntries(multipleUnits, multipleUnitMutex);
 		DeleteAllMapEntries(locos, locoMutex);
+		DeleteAllMapEntries(counters, counterMutex);
 		DeleteAllMapEntries(routes, routeMutex);
 		DeleteAllMapEntries(clusters, clusterMutex);
 		DeleteAllMapEntries(switches, switchMutex);
@@ -2679,6 +2686,7 @@ bool Manager::RouteSave(RouteID routeID,
 	route->SetPosX(posX);
 	route->SetPosY(posY);
 	route->SetPosZ(posZ);
+	route->SetRotation(DataModel::LayoutItem::Rotation0);
 	route->SetAutomode(automode);
 	if (automode == AutomodeYes)
 	{
@@ -2984,6 +2992,14 @@ bool Manager::LayerHasElements(const Layer* layer,
 		if (text.second->IsVisibleOnLayer(layerId))
 		{
 			result = Logger::Logger::Format(Languages::GetText(Languages::TextLayerIsUsedByText), layer->GetName(), text.second->GetName());
+			return true;
+		}
+	}
+	for (auto& counter : counters)
+	{
+		if (counter.second->IsVisibleOnLayer(layerId))
+		{
+			result = Logger::Logger::Format(Languages::GetText(Languages::TextLayerIsUsedByCounter), layer->GetName(), counter.second->GetName());
 			return true;
 		}
 	}
@@ -3637,6 +3653,200 @@ bool Manager::TextDelete(const TextID textID, string& result)
 		control.second->TextDelete(textID, textName);
 	}
 	delete text;
+	return true;
+}
+
+/***************************
+* Counter                  *
+***************************/
+
+DataModel::Counter* Manager::GetCounter(const CounterID counterID) const
+{
+	std::lock_guard<std::mutex> guard(counterMutex);
+	if (counters.count(counterID) != 1)
+	{
+		return nullptr;
+	}
+	return counters.at(counterID);
+}
+
+const map<string,DataModel::Counter*> Manager::CounterListByName() const
+{
+	map<string,DataModel::Counter*> out;
+	std::lock_guard<std::mutex> guard(counterMutex);
+	for (auto& counter : counters)
+	{
+		out[counter.second->GetName()] = counter.second;
+	}
+	return out;
+}
+
+bool Manager::CounterSave(CounterID counterID,
+	const string& name,
+	const int max,
+	const int min,
+	const LayoutPosition posX,
+	const LayoutPosition posY,
+	const LayoutPosition posZ,
+	const LayoutRotation rotation,
+	string& result)
+{
+	Counter* counter = GetCounter(counterID);
+	if (!CheckLayoutItemPosition(counter, posX, posY, posZ, LayoutItem::Width1, LayoutItem::Height1, rotation, result))
+	{
+		return false;
+	}
+
+	if (!counter)
+	{
+		counter = CreateAndAddObject(counters, counterMutex);
+	}
+
+	if (!counter)
+	{
+		result = Languages::GetText(Languages::TextUnableToAddCounter);
+		return false;
+	}
+
+	// if we have a new object we have to update counterID
+	counterID = counter->GetID();
+
+	// update existing counter
+	counter->SetName(CheckObjectName(counters, counterMutex, counterID, name.size() == 0 ? "C" : name));
+	counter->SetMax(max);
+	counter->SetMin(min);
+	counter->SetPosX(posX);
+	counter->SetPosY(posY);
+	counter->SetPosZ(posZ);
+	counter->SetWidth(LayoutItem::Width1);
+	counter->SetHeight(LayoutItem::Height1);
+	counter->SetRotation(rotation);
+
+	CounterSaveAndPublishSettings(counter);
+	return true;
+}
+
+bool Manager::CounterPosition(CounterID counterID,
+	const LayoutPosition posX,
+	const LayoutPosition posY,
+	string& result)
+{
+	Counter* counter = GetCounter(counterID);
+	if (!counter)
+	{
+		result = Languages::GetText(Languages::TextCounterDoesNotExist);
+		return false;
+	}
+
+	if (!CheckLayoutItemPosition(counter, posX, posY, counter->GetPosZ(), LayoutItem::Width1, LayoutItem::Height1, counter->GetRotation(), result))
+	{
+		return false;
+	}
+
+	counter->SetPosX(posX);
+	counter->SetPosY(posY);
+
+	CounterSaveAndPublishSettings(counter);
+	return true;
+}
+
+bool Manager::CounterRotate(CounterID counterID,
+	string& result)
+{
+	Counter* counter = GetCounter(counterID);
+	if (!counter)
+	{
+		result = Languages::GetText(Languages::TextCounterDoesNotExist);
+		return false;
+	}
+
+	LayoutRotation newRotation = counter->GetRotation();
+	++newRotation;
+	if (!CheckLayoutItemPosition(counter, counter->GetPosX(), counter->GetPosY(), counter->GetPosZ(), LayoutItem::Width1, LayoutItem::Height1, newRotation, result))
+	{
+		return false;
+	}
+
+	counter->SetRotation(newRotation);
+
+	CounterSaveAndPublishSettings(counter);
+	return true;
+}
+
+void Manager::CounterSaveAndPublishSettings(const Counter* const counter)
+{
+	// save in db
+	if (storage)
+	{
+		TransactionGuard guard(storage);
+		storage->Save(*counter);
+	}
+
+	std::lock_guard<std::mutex> guard(controlMutex);
+	for (auto& control : controls)
+	{
+		control.second->CounterSettings(counter->GetID(), counter->GetName());
+	}
+}
+
+void Manager::CounterPublishState(const DataModel::Counter* const counter)
+{
+	std::lock_guard<std::mutex> guard(controlMutex);
+	for (auto& control : controls)
+	{
+		control.second->CounterState(counter);
+	}
+}
+
+bool Manager::CounterDelete(const CounterID counterID, string& result)
+{
+	if (counterID == CounterNone)
+	{
+		result = Languages::GetText(Languages::TextCounterDoesNotExist);
+		return false;
+	}
+	Counter* counter = nullptr;
+	{
+		std::lock_guard<std::mutex> guard(counterMutex);
+		if (counters.count(counterID) != 1)
+		{
+			result = Languages::GetText(Languages::TextCounterDoesNotExist);
+			return false;
+		}
+
+		counter = counters.at(counterID);
+		counters.erase(counterID);
+	}
+
+	if (storage)
+	{
+		TransactionGuard guard(storage);
+		storage->DeleteCounter(counterID);
+	}
+
+	const string& counterName = counter->GetName();
+	std::lock_guard<std::mutex> guard(controlMutex);
+	for (auto& control : controls)
+	{
+		control.second->CounterDelete(counterID, counterName);
+	}
+	delete counter;
+	return true;
+}
+
+bool Manager::Count(const CounterID counterID, const CounterType type)
+{
+	Counter* counter = GetCounter(counterID);
+	if (!counter)
+	{
+		return false;
+	}
+	const bool result = counter->Count(type);
+	if (!result)
+	{
+		return false;
+	}
+	CounterPublishState(counter);
 	return true;
 }
 
@@ -4867,6 +5077,9 @@ bool Manager::LayoutItemRotate(const DataModel::ObjectIdentifier& identifier,
 		case ObjectTypeTrack:
 			return TrackRotate(id, result);
 
+		case ObjectTypeCounter:
+			return CounterRotate(id, result);
+
 		case ObjectTypeRoute:
 		default:
 			return false;
@@ -4902,6 +5115,9 @@ bool Manager::LayoutItemNewPosition(const DataModel::ObjectIdentifier& identifie
 
 		case ObjectTypeTrack:
 			return TrackPosition(id, posX, posY, result);
+
+		case ObjectTypeCounter:
+			return CounterPosition(id, posX, posY, result);
 
 		default:
 			return false;

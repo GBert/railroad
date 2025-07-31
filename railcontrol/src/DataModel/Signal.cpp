@@ -29,22 +29,6 @@ using std::string;
 
 namespace DataModel
 {
-	void Signal::SetAccessoryType(AccessoryType type)
-	{
-		AccessoryBase::SetAccessoryType(type);
-		ResetStateAddressMap();
-	}
-
-	ObjectType Signal::GetObjectType() const
-	{
-		return ObjectTypeSignal;
-	}
-
-	std::string Signal::GetLayoutType() const
-	{
-		return Languages::GetText(Languages::TextSignal);
-	}
-
 	std::string Signal::Serialize() const
 	{
 		string str = "objectType=Signal;";
@@ -63,14 +47,14 @@ namespace DataModel
 		return str;
 	}
 
-	bool Signal::Deserialize(const std::string& serialized)
+	void Signal::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Signal") != 0)
 		{
-			return false;
+			return;
 		}
 
 		AccessoryBase::Deserialize(arguments);
@@ -87,7 +71,6 @@ namespace DataModel
 			}
 			SetStateAddressOffset(static_cast<AccessoryState>(i), address);
 		}
-		return true;
 	}
 
 	Signal& Signal::operator=(const Hardware::AccessoryCacheEntry& accessory)

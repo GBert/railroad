@@ -75,6 +75,4 @@ namespace Server { namespace Web
 			WebClient& client;
 			Logger::Logger* logger;
 	};
-
 }} // namespace Server::Web
-

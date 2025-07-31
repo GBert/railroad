@@ -36,16 +36,16 @@ namespace DataModel
 		return str;
 	}
 
-	bool MultipleUnit::Deserialize(const std::string& serialized)
+	void MultipleUnit::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
-		if (!arguments.count("objectType") || arguments.at("objectType").compare("MultipleUnit") != 0)
+		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
+		if (objectType.compare("MultipleUnit") != 0)
 		{
-			return false;
+			return;
 		}
 		LocoBase::Deserialize(arguments);
-		return true;
 	}
 
 	void MultipleUnit::CalculatePropulsion()

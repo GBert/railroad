@@ -111,14 +111,14 @@ namespace DataModel
 		return ss.str();
 	}
 
-	bool LayoutItem::Deserialize(const std::string& serialized)
+	void LayoutItem::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
-		return Deserialize(arguments);
+		Deserialize(arguments);
 	}
 
-	bool LayoutItem::Deserialize(const map<string,string>& arguments)
+	void LayoutItem::Deserialize(const map<string,string>& arguments)
 	{
 		Object::Deserialize(arguments);
 		visible = static_cast<Visible>(Utils::Utils::GetIntegerMapEntry(arguments, "visible"));
@@ -136,7 +136,6 @@ namespace DataModel
 		{
 			rotation = Rotation0;
 		}
-		return true;
 	}
 
 	std::string LayoutItem::Rotation(LayoutRotation rotation)

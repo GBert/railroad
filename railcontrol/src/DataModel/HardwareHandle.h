@@ -101,7 +101,7 @@ namespace DataModel
 
 		protected:
 			virtual std::string Serialize() const;
-			virtual bool Deserialize(const std::map<std::string,std::string>& arguments);
+			virtual void Deserialize(const std::map<std::string,std::string>& arguments);
 
 		private:
 			ControlID controlID;

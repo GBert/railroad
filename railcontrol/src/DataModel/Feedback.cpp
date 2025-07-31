@@ -45,14 +45,14 @@ namespace DataModel
 		return str;
 	}
 
-	bool Feedback::Deserialize(const string& serialized)
+	void Feedback::Deserialize(const string& serialized)
 	{
 		map<string, string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Feedback") != 0)
 		{
-			return false;
+			return;
 		}
 		LayoutItem::Deserialize(arguments);
 		SetHeight(Height1);
@@ -64,7 +64,6 @@ namespace DataModel
 		inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted", false);
 		stateCounter = Utils::Utils::GetBoolMapEntry(arguments, "state", FeedbackStateFree) ? MaxStateCounter : 0;
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		return true;
 	}
 
 	void Feedback::SetState(const FeedbackState newState)

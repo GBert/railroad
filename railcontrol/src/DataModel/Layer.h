@@ -33,23 +33,23 @@ namespace DataModel
 	class Layer : public Object
 	{
 		public:
-			Layer(const std::string& serialized)
+			inline Layer(const std::string& serialized)
 			:	Object()
 			{
 				Object::Deserialize(serialized);
 			}
 
-			Layer(__attribute__((unused)) Manager* manager, const LayerID layerID)
+			inline Layer(__attribute__((unused)) Manager* manager, const LayerID layerID)
 			:	Object(layerID)
 			{
 			}
 
-			virtual std::string Serialize() const
+			inline std::string Serialize() const override
 			{
 				return "objectType=Layer;" + Object::Serialize();
 			}
 
-			ObjectType GetObjectType() const
+			inline ObjectType GetObjectType() const override
 			{
 				return ObjectTypeLayer;
 			}

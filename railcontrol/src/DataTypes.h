@@ -70,6 +70,9 @@ typedef uint8_t Pause;
 // text
 typedef ObjectID TextID;
 
+// counter
+typedef ObjectID CounterID;
+
 static const Address AddressNone = 0;
 static const Address AddressDefault = 3;
 static const LocoID LocoNone = 0;
@@ -90,6 +93,7 @@ static const LayerID LayerUndeletable = 1;
 static const SignalID SignalNone = 0;
 static const ClusterID ClusterNone = 0;
 static const TextID TextNone = 0;
+static const CounterID CounterNone = 0;
 
 static const Speed MaxSpeed = 1023;
 static const Speed DefaultTravelSpeed = 700;
@@ -238,7 +242,8 @@ enum ObjectType : uint8_t
 	ObjectTypeText = 11,
 	ObjectTypePause = 12,
 	ObjectTypeMultipleUnit = 13,
-	ObjectTypeBooster = 14
+	ObjectTypeBooster = 14,
+	ObjectTypeCounter = 15
 };
 
 enum Orientation : uint8_t

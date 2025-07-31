@@ -82,7 +82,7 @@ namespace DataModel
 			}
 
 			virtual std::string Serialize() const override;
-			virtual bool Deserialize(const std::string& serialized) override;
+			virtual void Deserialize(const std::string& serialized) override;
 
 			inline ObjectID ObjectID1() const
 			{
@@ -109,7 +109,7 @@ namespace DataModel
 				return object2;
 			}
 
-			LockableItem* GetObject2();
+			Object* GetObject2();
 
 			inline RelationType GetType() const
 			{

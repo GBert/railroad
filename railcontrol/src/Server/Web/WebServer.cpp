@@ -568,6 +568,24 @@ namespace Server { namespace Web
 		AddUpdate(command, Languages::TextTextDeleted, name);
 	}
 
+	void WebServer::CounterSettings(const CounterID counterID, const std::string& name)
+	{
+		const string command = "countersettings;counter=" + to_string(counterID);
+		AddUpdate(command, Languages::TextCounterUpdated, name);
+	}
+
+	void WebServer::CounterDelete(const CounterID counterID, const std::string& name)
+	{
+		const string command = "counterdelete;counter=" + to_string(counterID);
+		AddUpdate(command, Languages::TextCounterDeleted, name);
+	}
+
+	void WebServer::CounterState(const DataModel::Counter* const counter)
+	{
+		const string command ="counterstate;counter=" + to_string(counter->GetID()) + ";count=" + to_string(counter->GetCounter());
+		AddUpdate(command, Languages::TextCounterUpdated, counter->GetName());
+	}
+
 	void WebServer::LocoBaseRelease(const DataModel::LocoBase* loco)
 	{
 		string command("locorelease;loco=");

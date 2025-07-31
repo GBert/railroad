@@ -115,7 +115,7 @@ namespace DataModel
 	class AccessoryBase : public HardwareHandle
 	{
 		public:
-			AccessoryBase()
+			inline AccessoryBase()
 			:	HardwareHandle(),
 				accessoryType(AccessoryTypeDefault),
 				accessoryState(AccessoryStateOff),
@@ -201,7 +201,7 @@ namespace DataModel
 
 		protected:
 			virtual std::string Serialize() const;
-			virtual bool Deserialize(const std::map<std::string,std::string>& arguments);
+			virtual void Deserialize(const std::map<std::string,std::string>& arguments);
 
 		private:
 			AccessoryType accessoryType;

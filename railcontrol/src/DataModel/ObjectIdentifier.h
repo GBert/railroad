@@ -59,7 +59,7 @@ namespace DataModel
 				return GetObjectTypeAsString() + "=" + GetObjectIdAsString();
 			}
 
-			bool Deserialize(const std::map<std::string,std::string>& arguments);
+			void Deserialize(const std::map<std::string,std::string>& arguments);
 
 			inline ObjectIdentifier& operator=(const ObjectIdentifier& other) = default;
 

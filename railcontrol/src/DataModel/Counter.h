@@ -21,77 +21,90 @@ along with RailControl; see the file LICENCE. If not see
 #pragma once
 
 #include <string>
+#include <mutex>
 
 #include "DataTypes.h"
-#include "DataModel/AccessoryBase.h"
-#include "DataModel/HardwareHandle.h"
 #include "DataModel/LayoutItem.h"
 #include "DataModel/LockableItem.h"
-#include "Languages.h"
 
 class Manager;
 
 namespace DataModel
 {
-	class Accessory : public AccessoryBase, public LayoutItem, public LockableItem
+	enum CounterType : uint8_t
 	{
-			Accessory() = delete;
-			Accessory(const Accessory&) = delete;
-			Accessory& operator=(const Accessory&) = delete;
+		CounterTypeIncrement = 0,
+		CounterTypeDecrement
+	};
 
+	class Counter : public LayoutItem
+	{
 		public:
-			inline Accessory(const AccessoryID accessoryID)
-			:	AccessoryBase(),
-				LayoutItem(accessoryID),
-				LockableItem(),
-				port(AddressPortRed)
+			inline Counter(__attribute__((unused)) Manager* manager, const CounterID counterID)
+			:	LayoutItem(counterID),
+				counter(0),
+				max(0),
+				min(0)
 			{
 			}
 
-			inline Accessory(__attribute__((unused)) Manager* manager, const AccessoryID accessoryID)
-			:	Accessory(accessoryID)
-			{
-			}
-
-			inline Accessory(const std::string& serialized)
-			:	Accessory(AccessoryNone)
+			inline Counter(const std::string& serialized)
+			:	LayoutItem(CounterNone)
 			{
 				Deserialize(serialized);
 			}
 
-			virtual ~Accessory()
+			virtual ~Counter()
 			{
 			}
 
 			inline ObjectType GetObjectType() const override
 			{
-				return ObjectTypeAccessory;
+				return ObjectTypeCounter;
 			}
 
 			inline std::string GetLayoutType() const override
 			{
-				return Languages::GetText(Languages::TextAccessory);
+				return Languages::GetText(Languages::TextCounter);
 			}
 
 			std::string Serialize() const override;
 
-			using HardwareHandle::Deserialize;
 			void Deserialize(const std::string& serialized) override;
 
-			Accessory& operator=(const Hardware::AccessoryCacheEntry& accessory);
+			bool Check(const CounterType type);
 
-			inline void SetPort(AddressPort port)
+			bool Count(const CounterType type);
+
+			inline int GetCounter() const
 			{
-				this->port = port;
+				return counter;
 			}
 
-			inline AddressPort GetPort() const
+			inline void SetMax(int max)
 			{
-				return port;
+				this->max = max;
+			}
+
+			inline int GetMax() const
+			{
+				return max;
+			}
+
+			inline void SetMin(int min)
+			{
+				this->min = min;
+			}
+
+			inline int GetMin() const
+			{
+				return min;
 			}
 
 		private:
-			AddressPort port;
+			mutable std::mutex countMutex;
+			int counter;
+			int max;
+			int min;
 	};
 } // namespace DataModel
-

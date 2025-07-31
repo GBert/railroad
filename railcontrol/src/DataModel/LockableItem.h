@@ -48,8 +48,7 @@ namespace DataModel
 			virtual ~LockableItem() {};
 
 			std::string Serialize() const;
-			bool Deserialize(const std::map<std::string,std::string> arguments);
-
+			void Deserialize(const std::map<std::string,std::string> arguments);
 
 			inline const ObjectIdentifier& GetLocoBase() const
 			{

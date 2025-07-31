@@ -73,7 +73,7 @@ body {
 	width: 110px;
 }
 
-@media (max-width: 649px) {
+@media (max-width: 615px) {
 	.menu_config,
 	.menu_config_visible,
 	.menu_add,
@@ -82,7 +82,7 @@ body {
 	}
 }
 
-@media (min-width: 650px) and (max-width: 999px) {
+@media (min-width: 616px) and (max-width: 1023px) {
 	.menu_config {
 		display: none;
 	}
@@ -103,7 +103,7 @@ body {
 	}
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1024px) {
 	.menu_add,
 	.menu_config,
 	.menu_config_visible {
@@ -293,6 +293,7 @@ body {
 }
 
 .accessory_item .track,
+.counter_item .track,
 .feedback_item .track {
 	fill: white;
 }
@@ -437,9 +438,12 @@ body {
 	display: none;
 }
 
+.counter,
 .text_item,
+.loconame,
 .trackname {
 	fill: white;
+	font-size: 14px;
 }
 
 .popup {

@@ -118,9 +118,9 @@ namespace DataModel
 
 			std::string Serialize() const override;
 
-			bool Deserialize(const std::string& serialized) override;
+			void Deserialize(const std::string& serialized) override;
 
-			bool Deserialize(const std::map<std::string,std::string>& arguments) override;
+			void Deserialize(const std::map<std::string,std::string>& arguments) override;
 
 			virtual void SetName(const std::string& name) override
 			{

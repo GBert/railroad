@@ -84,17 +84,18 @@ namespace DataModel
 		return str;
 	}
 
-	bool Route::Deserialize(const std::string& serialized)
+	void Route::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Route") != 0)
 		{
-			return false;
+			return;
 		}
 
 		LayoutItem::Deserialize(arguments);
+		SetRotation(LayoutItem::Rotation0);
 		LockableItem::Deserialize(arguments);
 
 		delay = static_cast<Delay>(Utils::Utils::GetIntegerMapEntry(arguments, "delay", DefaultDelay));
@@ -122,7 +123,7 @@ namespace DataModel
 			maxTrainLength = 0;
 			waitAfterRelease = 0;
 			followUpRoute = RouteNone;
-			return true;
+			return;
 		}
 		fromTrack = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "fromTrack", TrackNone));
 		fromOrientation = static_cast<Orientation>(Utils::Utils::GetBoolMapEntry(arguments, "fromorientation", OrientationRight));
@@ -143,7 +144,6 @@ namespace DataModel
 		maxTrainLength = static_cast<Length>(Utils::Utils::GetIntegerMapEntry(arguments, "maxtrainlength", 0));
 		waitAfterRelease = Utils::Utils::GetIntegerMapEntry(arguments, "waitafterrelease", 0);
 		followUpRoute = Utils::Utils::GetIntegerMapEntry(arguments, "followuproute", RouteNone);
-		return true;
 	}
 
 	void Route::DeleteRelations(std::vector<DataModel::Relation*>& relations)
@@ -298,11 +298,10 @@ namespace DataModel
 
 		for (auto relation : relationsAtLock)
 		{
-			bool retRelation = relation->Reserve(logger, locoBaseIdentifier);
-			if (!retRelation)
+			bool result = relation->Reserve(logger, locoBaseIdentifier);
+			if (!result)
 			{
-				const LockableItem* item = relation->GetObject2();
-				const Object* object = dynamic_cast<const Object*>(item);
+				const Object* object = relation->GetObject2();
 				const string objectName = object ? object->GetName() : Languages::GetText(Languages::TextUnknownElement);
 				logger->Debug(Languages::TextUnableToReserveRouteElement, GetName(), objectName);
 				ReleaseInternalWithToTrack(logger, locoBaseIdentifier);

@@ -35,6 +35,7 @@ along with RailControl; see the file LICENCE. If not see
 namespace DataModel
 {
 	class Accessory;
+	class Counter;
 	class Loco;
 	class Signal;
 	class Route;
@@ -305,6 +306,20 @@ class ControlInterface
 
 		virtual void TextSettings(__attribute__((unused)) const TextID textID,
 			__attribute__((unused)) const std::string& name)
+		{
+		}
+
+		virtual void CounterDelete(__attribute__((unused)) const CounterID counterID,
+			__attribute__((unused)) const std::string& name)
+		{
+		}
+
+		virtual void CounterSettings(__attribute__((unused)) const CounterID counterID,
+			__attribute__((unused)) const std::string& name)
+		{
+		}
+
+		virtual void CounterState(__attribute__((unused)) const DataModel::Counter* const counter)
 		{
 		}
 

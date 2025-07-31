@@ -71,14 +71,14 @@ namespace DataModel
 		return str;
 	}
 
-	bool LocoBase::Deserialize(const std::string& serialized)
+	void LocoBase::Deserialize(const std::string& serialized)
 	{
 		map<string, string> arguments;
 		ParseArguments(serialized, arguments);
-		return LocoBase::Deserialize(arguments);
+		LocoBase::Deserialize(arguments);
 	}
 
-	bool LocoBase::Deserialize(const std::map<std::string,std::string>& arguments)
+	void LocoBase::Deserialize(const std::map<std::string,std::string>& arguments)
 	{
 		Object::Deserialize(arguments);
 		HardwareHandle::Deserialize(arguments);
@@ -95,7 +95,6 @@ namespace DataModel
 		propulsion = static_cast<Propulsion>(Utils::Utils::GetIntegerMapEntry(arguments, "propulsion", PropulsionUnknown));
 		trainType = static_cast<TrainType>(Utils::Utils::GetIntegerMapEntry(arguments, "type", TrainTypeUnknown));
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		return true;
 	}
 
 	bool LocoBase::SetTrack(const TrackID trackID)
@@ -305,10 +304,11 @@ namespace DataModel
 							logger->Info(Languages::TextIsNowInManualMode);
 							state = LocoStateTerminated;
 							requestManualMode = false;
+							wait = 0;
 							return;
 
 						case LocoStateAutomodeGetFirst:
-							if (requestManualMode)
+							if (requestManualMode || (followUpRoute == RouteStop))
 							{
 								state = LocoStateOff;
 								break;

@@ -39,14 +39,14 @@ namespace DataModel
 		return str;
 	}
 
-	bool Accessory::Deserialize(const std::string& serialized)
+	void Accessory::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Accessory") != 0)
 		{
-			return false;
+			return;
 		}
 		AccessoryBase::Deserialize(arguments);
 		LayoutItem::Deserialize(arguments);
@@ -55,7 +55,6 @@ namespace DataModel
 		SetWidth(Width1);
 		SetHeight(Height1);
 		SetVisible(VisibleYes);
-		return true;
 	}
 
 	Accessory& Accessory::operator=(const Hardware::AccessoryCacheEntry& accessory)

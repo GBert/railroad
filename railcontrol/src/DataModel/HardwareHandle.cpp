@@ -36,12 +36,11 @@ namespace DataModel
 		return str;
 	}
 
-	bool HardwareHandle::Deserialize(const map<string,string>& arguments)
+	void HardwareHandle::Deserialize(const map<string,string>& arguments)
 	{
 		controlID = Utils::Utils::GetIntegerMapEntry(arguments, "controlID", ControlIdNone);
 		protocol = static_cast<Protocol>(Utils::Utils::GetIntegerMapEntry(arguments, "protocol", ProtocolNone));
 		address = Utils::Utils::GetIntegerMapEntry(arguments, "address");
 		serverAddress = static_cast<Address>(Utils::Utils::GetIntegerMapEntry(arguments, "serveraddress", AddressNone));
-		return true;
 	}
 } // namespace DataModel

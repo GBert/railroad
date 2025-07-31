@@ -74,7 +74,7 @@ namespace Server { namespace Web
 	void WebClientRoute::HandleRouteEdit(const map<string, string>& arguments)
 	{
 		HtmlTag content;
-		RouteID routeID = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
+		const RouteID routeID = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
 		string name = Languages::GetText(Languages::TextNew);
 		Delay delay = Route::DefaultDelay;
 		Route::PushpullType pushpull = Route::PushpullTypeBoth;
@@ -633,6 +633,7 @@ namespace Server { namespace Web
 		objectTypeOptions[ObjectTypeMultipleUnit] = Languages::TextOrientation;
 		objectTypeOptions[ObjectTypePause] = Languages::TextPause;
 		objectTypeOptions[ObjectTypeBooster] = Languages::TextBooster;
+		objectTypeOptions[ObjectTypeCounter] = Languages::TextCounter;
 		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
 		select.AddClass("select_relation_objecttype");
 		select.AddAttribute("onchange", "loadRelationObject('" + atlock + "', '" + priorityString + "');return false;");
@@ -727,9 +728,9 @@ namespace Server { namespace Web
 			{
 				std::map<string, Route*> routes = manager.RouteListByName();
 				map<string, RouteID> routeOptions;
-				for (auto& track : routes)
+				for (auto& route : routes)
 				{
-					routeOptions[track.first] = track.second->GetID();
+					routeOptions[route.first] = route.second->GetID();
 				}
 				content.AddChildTag(HtmlTagSelect(name + "_id", routeOptions, objectId).AddClass("select_relation_id"));
 				return content;
@@ -900,6 +901,31 @@ namespace Server { namespace Web
 				booster[0] = Languages::Languages::GetText(Languages::Languages::TextOff);
 				booster[1u] = Languages::Languages::GetText(Languages::Languages::TextOn);
 				content.AddChildTag(HtmlTagSelect(name + "_state", booster, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
+				return content;
+			}
+
+			case ObjectTypeCounter:
+			{
+				std::map<string, Counter*> counters = manager.CounterListByName();
+				map<string, CounterID> counterOptions;
+				for (auto& counter : counters)
+				{
+					counterOptions[counter.first] = counter.second->GetID();
+				}
+				CounterID counterId = objectId;
+				if ((counterId == CounterNone) && (counterOptions.size() > 0))
+				{
+					counterId = counterOptions.begin()->second;
+				}
+				HtmlTagSelect selectCounter(name + "_id", counterOptions, counterId);
+				selectCounter.AddClass("select_relation_id");
+				selectCounter.AddAttribute("onchange", "loadRelationObjectStates('counter', '" + name + "', '" + to_string(counterId) + "');return false;");
+				content.AddChildTag(selectCounter);
+
+				map<unsigned int,string> countOptions;
+				countOptions[0] = Languages::Languages::GetText(Languages::Languages::TextIncrement);
+				countOptions[1u] = Languages::Languages::GetText(Languages::Languages::TextDecrement);
+				content.AddChildTag(HtmlTagSelect(name + "_state", countOptions, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 

@@ -139,9 +139,9 @@ namespace Server { namespace Web
 					const string& orientationSign = track->GetMainLocoOrientation() == OrientationRight ? "&rarr; " : "&larr; ";
 					const string& locoName = reserved ? orientationSign + manager.GetLocoBaseName(locoBaseIdentifier) : "";
 					const string textPositionX = to_string(EdgeLength * trackHeight - 1);
-					image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\" font-size=\"14\">" + locoName + "</text>";
+					image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\">" + locoName + "</text>";
 					const string& displayName = track->GetMainDisplayName();
-					image += "<text class=\"trackname\" x=\"-" + textPositionX + "\" y=\"33\" id=\"" + identifier + "_text_trackname\" transform=\"rotate(270 0,0)\" font-size=\"14\">" + (displayName.size() ? displayName : trackName) + "</text>";
+					image += "<text class=\"trackname\" x=\"-" + textPositionX + "\" y=\"33\" id=\"" + identifier + "_text_trackname\" transform=\"rotate(270 0,0)\">" + (displayName.size() ? displayName : trackName) + "</text>";
 				}
 				break;
 		}

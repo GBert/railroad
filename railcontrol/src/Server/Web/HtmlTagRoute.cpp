@@ -31,7 +31,9 @@ namespace Server { namespace Web
 	HtmlTagRoute::HtmlTagRoute(const DataModel::Route* route)
 	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(route))
 	{
-		image += "<svg width=\"" + EdgeLengthString + "\" height=\"" + EdgeLengthString + "\" id=\"_img\"><polygon points=\"1,21 7,21 7,29 1,29\" fill=\"none\" stroke=\"white\"/><polygon points=\"35,7 29,7 29,15 35,15\" fill=\"none\" stroke=\"white\"/><polyline points=\"7,25 15,25 21,11 29,11\" stroke=\"white\" fill=\"none\"/></svg>";
+		image = "<polygon points=\"1,21 7,21 7,29 1,29\" fill=\"none\" stroke=\"white\"/>"
+			"<polygon points=\"35,7 29,7 29,15 35,15\" fill=\"none\" stroke=\"white\"/>"
+			"<polyline points=\"7,25 15,25 21,11 29,11\" stroke=\"white\" fill=\"none\"/>";
 
 		string routeIdString = to_string(route->GetID());
 		imageDiv.AddClass("route_item");

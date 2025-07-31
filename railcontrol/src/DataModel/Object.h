@@ -55,7 +55,7 @@ namespace DataModel
 
 			virtual std::string Serialize() const override;
 
-			virtual bool Deserialize(const std::string& serialized) override;
+			virtual void Deserialize(const std::string& serialized) override;
 
 			inline ObjectID GetID() const
 			{
@@ -78,7 +78,7 @@ namespace DataModel
 			}
 
 		protected:
-			virtual bool Deserialize(const std::map<std::string,std::string>& arguments);
+			virtual void Deserialize(const std::map<std::string,std::string>& arguments);
 
 		private:
 			ObjectID objectID;

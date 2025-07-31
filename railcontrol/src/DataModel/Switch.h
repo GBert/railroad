@@ -68,11 +68,11 @@ namespace DataModel
 			std::string Serialize() const override;
 
 			using HardwareHandle::Deserialize;
-			bool Deserialize(const std::string& serialized) override;
+			void Deserialize(const std::string& serialized) override;
 
 			void SetAccessoryState(const AccessoryState state);
 
-			virtual inline void SetAccessoryType(AccessoryType type) override
+			inline void SetAccessoryType(AccessoryType type) override
 			{
 				AccessoryBase::SetAccessoryType(type);
 				SetSizeFromType();

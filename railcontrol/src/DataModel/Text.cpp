@@ -37,18 +37,17 @@ namespace DataModel
 		return str;
 	}
 
-	bool Text::Deserialize(const string& serialized)
+	void Text::Deserialize(const string& serialized)
 	{
 		map<string, string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Text") != 0)
 		{
-			return false;
+			return;
 		}
 		LayoutItem::Deserialize(arguments);
 		SetHeight(Height1);
 		SetVisible(VisibleYes);
-		return true;
 	}
 } // namespace DataModel

@@ -62,7 +62,7 @@ namespace DataModel
 
 			std::string Serialize() const override;
 
-			bool Deserialize(const std::string& serialized) override;
+			void Deserialize(const std::string& serialized) override;
 
 			Loco& operator=(const Hardware::LocoCacheEntry& loco);
 	};

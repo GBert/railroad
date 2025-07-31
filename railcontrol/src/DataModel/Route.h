@@ -87,6 +87,7 @@ namespace DataModel
 				lastUsed(0),
 				counter(0)
 			{
+				SetRotation(LayoutItem::Rotation0);
 			}
 
 			Route(Manager* manager, const std::string& serialized);
@@ -103,7 +104,7 @@ namespace DataModel
 			}
 
 			std::string Serialize() const override;
-			bool Deserialize(const std::string& serialized) override;
+			void Deserialize(const std::string& serialized) override;
 
 			inline std::string GetLayoutType() const override
 			{

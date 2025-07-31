@@ -42,7 +42,7 @@ namespace DataModel
 		return str;
 	}
 
-	bool AccessoryBase::Deserialize(const map<string,string>& arguments)
+	void AccessoryBase::Deserialize(const map<string,string>& arguments)
 	{
 		HardwareHandle::Deserialize(arguments);
 		accessoryType = static_cast<AccessoryType>(Utils::Utils::GetIntegerMapEntry(arguments, "type"));
@@ -52,7 +52,6 @@ namespace DataModel
 		lastUsed = Utils::Utils::GetIntegerMapEntry(arguments, "lastused", 0);
 		counter = Utils::Utils::GetIntegerMapEntry(arguments, "counter", 0);
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		return true;
 	}
 
 	AccessoryState AccessoryBase::CalculateInvertedAccessoryState(const AccessoryState state) const

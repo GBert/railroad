@@ -41,16 +41,16 @@ namespace DataModel
 		return str;
 	}
 
-	bool Loco::Deserialize(const std::string& serialized)
+	void Loco::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
-		if (!arguments.count("objectType") || arguments.at("objectType").compare("Loco") != 0)
+		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
+		if (objectType.compare("Loco") != 0)
 		{
-			return false;
+			return;
 		}
 		LocoBase::Deserialize(arguments);
-		return true;
 	}
 
 	Loco& Loco::operator=(const Hardware::LocoCacheEntry& loco)

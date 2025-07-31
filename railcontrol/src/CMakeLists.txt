@@ -24,6 +24,8 @@ DataModel/AccessoryBase.h
 DataModel/AccessoryConfig.h
 DataModel/Cluster.cpp
 DataModel/Cluster.h
+DataModel/Counter.cpp
+DataModel/Counter.h
 DataModel/DataModel.h
 DataModel/Feedback.cpp
 DataModel/Feedback.h
@@ -180,6 +182,8 @@ Server/Web/HtmlTagButtonPlus.h
 Server/Web/HtmlTagButtonPopup.cpp
 Server/Web/HtmlTagButtonPopup.h
 Server/Web/HtmlTagButtonPopupWide.h
+Server/Web/HtmlTagCounter.cpp
+Server/Web/HtmlTagCounter.h
 Server/Web/HtmlTagFeedback.cpp
 Server/Web/HtmlTagFeedback.h
 Server/Web/HtmlTagInput.cpp
@@ -233,6 +237,8 @@ Server/Web/ResponseHtmlNotImplemented.cpp
 Server/Web/ResponseHtmlNotImplemented.h
 Server/Web/WebClientCluster.cpp
 Server/Web/WebClientCluster.h
+Server/Web/WebClientCounter.cpp
+Server/Web/WebClientCounter.h
 Server/Web/WebClientRoute.cpp
 Server/Web/WebClientRoute.h
 Server/Web/WebClientSignal.cpp

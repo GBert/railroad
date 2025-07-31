@@ -40,14 +40,14 @@ namespace DataModel
 		return str;
 	}
 
-	bool Switch::Deserialize(const std::string& serialized)
+	void Switch::Deserialize(const std::string& serialized)
 	{
 		map<string,string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Switch") != 0)
 		{
-			return false;
+			return;
 		}
 
 		AccessoryBase::Deserialize(arguments);
@@ -55,7 +55,6 @@ namespace DataModel
 		LockableItem::Deserialize(arguments);
 		SetSizeFromType();
 		SetVisible(VisibleYes);
-		return true;
 	}
 
 	void Switch::SetAccessoryState(const AccessoryState state)

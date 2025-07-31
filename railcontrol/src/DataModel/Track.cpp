@@ -41,7 +41,10 @@ namespace DataModel
 	std::string Track::Serialize() const
 	{
 		std::string str;
-		str = "objectType=Track";
+		str = "objectType=Track;";
+		str += LayoutItem::Serialize();
+		str += ";";
+		str += LockableItem::Serialize();
 		str += ";selectrouteapproach=";
 		str += to_string(selectRouteApproach);
 		str += ";trackstate=";
@@ -64,10 +67,6 @@ namespace DataModel
 		str += to_string(showName);
 		str += ";displayname=";
 		str += displayName;
-		str += ";";
-		str += LayoutItem::Serialize();
-		str += ";";
-		str += LockableItem::Serialize();
 		str += ";tracktype=";
 		str += to_string(trackType);
 		str += ";main=";
@@ -75,14 +74,14 @@ namespace DataModel
 		return str;
 	}
 
-	bool Track::Deserialize(const std::string& serialized)
+	void Track::Deserialize(const std::string& serialized)
 	{
 		map<string, string> arguments;
 		ParseArguments(serialized, arguments);
 		string objectType = Utils::Utils::GetStringMapEntry(arguments, "objectType");
 		if (objectType.compare("Track") != 0)
 		{
-			return false;
+			return;
 		}
 		LayoutItem::Deserialize(arguments);
 		LockableItem::Deserialize(arguments);
@@ -139,7 +138,6 @@ namespace DataModel
 		}
 		mainID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "master", TrackNone)); // FIXME: 2025-02-28 can be removed later
 		mainID = static_cast<TrackID>(Utils::Utils::GetIntegerMapEntry(arguments, "main", mainID));
-		return true;
 	}
 
 	void Track::DeleteFeedbacks()

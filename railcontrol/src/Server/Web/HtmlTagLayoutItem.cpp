@@ -71,6 +71,10 @@ namespace Server { namespace Web
 				identifier = "tx_";
 				break;
 
+			case ObjectTypeCounter:
+				identifier = "c_";
+				break;
+
 			default:
 				identifier = "unknown_";
 				return;
