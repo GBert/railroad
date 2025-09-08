@@ -1,10 +1,15 @@
-﻿Makefile        neu
+﻿	Änderungshistorie
+	=================
+Makefile        neu
     1712    erweitert um check und install
     1803    neue Module aufgenommen
     1806    Optimierungen
+    2508    cppcheck ungefärbt
 a20hw.c         neu
     2112    cppcheck-Meldungen beseitigt
+    2508    aufgeräumt (cppcheck-Meldungen)
 a20hw.h         neu
+    2508    aufgeräumt (sinnlose Prototypen)
 canbus.c        neu 1803
     2112    Wanungen reduziert
 canbus.h        neu 1803
@@ -39,6 +44,7 @@ config.h        erzeugt per config-Script, modifiziert
     2112    korrekte Versionsangabe
     2208    korrekte Versionsangabe
     2307    korrekte Versionsangabe
+    2508    korrekte Versionsangabe
 ddl.c           aus Sigg-srcpd Rev96, modifiziert BaPi, SPI-Timing
     1803    MCS-Anssteuerung eingebaut
     1806    Optimierungen
@@ -59,6 +65,7 @@ ddl.c           aus Sigg-srcpd Rev96, modifiziert BaPi, SPI-Timing
     2208    Anpasung wegen Wiederholungen bei 32 Funktionen
     2307    kurzes Internpaketformat für DCC und MM eingeführt
     2307    wip: ACK-Erkennung, Prog-Gleis, MM-Programmierung
+    2508    ON/OFF-Weiterleitung von SRCP via CAN an Booster
 ddl.h           aus Sigg-srcpd Rev96, original
     1803    MCS-Anssteuerung eingebaut
     1806    Unbenutztes entfernt
@@ -81,6 +88,7 @@ ddl_maerklin.c  aus Sigg-srcpd Rev96, modifiziert -> Original
     2102    Verbesserung bei Notstop und Richtungswechsel 
     2307    vereinfachte MM-Signalerzeugung
     2307    wip: MM-Programmierung und Adresssuche
+    2508    cppcheck-Meldungen beseitigt
 ddl_maerklin.h  aus Sigg-srcpd Rev96, original
     1711    Definitionen ergänzt, 1122 übernommen
     1809    erweiterte Lokadressierung
@@ -101,6 +109,7 @@ ddl_mfx.c       aus Sigg-srcpd Rev96, modifiziert -> Original + BaPi
     2208    Auslesen der mfx-UID
     2208    Anpasung wegen Wiederholungen bei 32 Funktionen
     2307    send_packet ohne Längenangabe
+    2508    cppcheck-Meldungen beseitigt
 ddl_mfx.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1806    Optimierungen
     1905    Optimierungen Signalerzeugung, Parameterprüfung
@@ -109,6 +118,7 @@ ddl_mfx.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     2112    Umstellung auf zukunftsfähiges Zeitformat
     2208    Auslesen der mfx-UID
     2208    Anpasung wegen Wiederholungen bei 32 Funktionen
+    2508    cppcheck-Meldungen beseitigt
 ddl_nmra.c      aus Sigg-srcpd Rev96, original
     1803    kleine Optimierungen
     1806    unbenutzen Code ausgeklammert
@@ -147,6 +157,10 @@ mcs-gateway.c   neu 180307
     2102    Ignorieren von MS1-CAN-Meldungen
     2110    Vorbereitung mfx-Rückmeldung durch Booster
     2208    Lokzyklus beenden hinzugefügt
+    2508    Keine Warnung bei Empfang Gerätekennung
+    2508    Auswertung Überlast gemeldet via CAN-Bus
+    2508    Kommentarloses Verwerfen von Statusmeldungen anderer Knoten
+    2508    Vorspiegeln eines CS-Masters für MS2
 netservice.c    unverändert aus Original-srcpd Stand 1710
     2208    Userabfrage auf effektiven User geändert
 netservice.h    unverändert aus Original-srcpd Stand 1710
@@ -160,6 +174,7 @@ srcp-command.c  aus Sigg-srcpd Rev96, modifiziert -> Original
     1906    Erweiterung auf 32 Funktionen
     2102    Vorbereitung Programmiergleisunterstützung
     2110    Korrekturen beim Locking und diverses Kleinere
+    2508    Vereinfachung und Korrektur der Decodierung
 srcp-command.h  unverändert aus Original-srcpd Stand 1710
 srcp-descr.c    unverändert aus Original-srcpd Stand 1710
     2112    Umstellung auf zukunftsfähiges Zeitformat
@@ -170,6 +185,7 @@ srcp-error.h    unverändert aus Original-srcpd Stand 1710
 srcp-fb.c       unverändert aus Original-srcpd Stand 1710
     1903    Unschönheiten beseitigt
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2508    Korrektur Auswertung des Rückgabecodes
 srcp-fb.h       unverändert aus Original-srcpd Stand 1710
 srcp-ga.c       unverändert aus Original-srcpd Stand 1710
     1906    Stellen über MCS-Gateway eingebaut
@@ -190,6 +206,7 @@ srcp-gl.c       aus Sigg-srcpd Rev96, modifiziert -> Original
     2112    Umstellung auf zukunftsfähiges Zeitformat
     2208    Anpasung wegen Wiederholungen bei 32 Funktionen
     2307    Korrekturen für Anlegen neuer Loks via CAN
+    2508    Keine CAN-Meldungen bei unveränderten srcp-Zuständen
 srcp-gl.h       aus Sigg-srcpd Rev96, modifiziert -> Original
     1803    MCS-Anssteuerung eingebaut
     1806    aufgeräumt
@@ -237,6 +254,7 @@ srcp-sm.h       aus Sigg-srcpd Rev96, original
 srcp-time.c     unverändert aus Original-srcpd Stand 1710
     1903    Unschönheiten beseitigt
     2112    Umstellung auf zukunftsfähiges Zeitformat
+    2508    cppcheck-Meldungen beseitigt
 srcp-time.h     unverändert aus Original-srcpd Stand 1710
 srcpd.c         aus Sigg-srcpd Rev96, modifiziert -> Original + BaPi
     [Gerd: SYSCONFDIR]

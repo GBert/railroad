@@ -1,4 +1,4 @@
-// srcp-gl.c - adapted for basrcpd project 2018 - 2022 by Rainer Müller
+// srcp-gl.c - adapted for basrcpd project 2018 - 2025 by Rainer Müller
 
 /* $Id: srcp-gl.c 1740 2016-04-24 12:36:36Z gscholz $ */
 
@@ -772,17 +772,18 @@ int enqueueGL(bus_t bus, uint32_t locid, int dir, int speed, int maxspeed, const
 	gl_enqueue(bus, p);
 
     itemid = getglid(p);
-	sync[0] = 1;	sync[1] = 2 - p->direction;
-	if (sync[1]) {
-		if (info_mcs(bus, 0x0B, itemid, sync) < 0) return SRCP_OK;
-	} else {
+	sync[0] = 1;
+	if (p->speedchange & SCEMERG) {
 		sync[1] = 3;			// emergency
 		if (info_mcs(bus, 0x01, itemid, sync) < 0) return SRCP_OK;
+	} else if (p->speedchange & SCDIREC) {
+		sync[1] = 2 - p->direction;
+		if (info_mcs(bus, 0x0B, itemid, sync) < 0) return SRCP_OK;
 	}
 
 	i = (p->speed * 1000) / p->n_fs;
 	sync[0] = 2;	sync[1] = i >> 8; 	sync[2] = i & 0xFF;
-	info_mcs(bus, 0x09, itemid, sync);
+	if (info_mcs(bus, 0x09, itemid, sync) < 0) return SRCP_OK;
 
 	for (i = 0; i < p->n_func; i++){
 		if (oldfuncs & (1 << i)) {

@@ -1,4 +1,4 @@
-// ddl-mfx.h - adapted for basrcpd project 2018 - 2022 by Rainer Müller
+// ddl-mfx.h - adapted for basrcpd project 2018 - 2024 by Rainer Müller
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -35,7 +35,7 @@ typedef struct _tMFXRead {
 } tMFXRead;
 
 
-bool checkMfxCRC(uint8_t *buff, int n);
+bool checkMfxCRC(const uint8_t *buff, int n);
 
 /**
  * Starten der MFX Threads:

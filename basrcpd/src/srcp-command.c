@@ -1,4 +1,4 @@
-// srcp-command.c - adapted for basrcpd project 2018 - 2021 by Rainer Müller
+// srcp-command.c - adapted for basrcpd project 2018 - 2024 by Rainer Müller
 /*
  * Vorliegende Software unterliegt der General Public License,
  * Version 2, 1991. (c) Matthias Trute, 2000-2001.
@@ -24,6 +24,7 @@
 #include "srcp-time.h"
 #include "syslogmessage.h"
 
+static struct timeval akt_time;
 
 /**
  * Core SRCP Commands
@@ -33,7 +34,6 @@
 static int handle_setcheck(sessionid_t sessionid, bus_t bus, char *device,
                            char *parameter, char *reply, int setorcheck)
 {
-    struct timeval time;
     int rc = SRCP_UNSUPPORTEDDEVICEGROUP;
     *reply = 0x00;
 
@@ -245,8 +245,7 @@ static int handle_setcheck(sessionid_t sessionid, bus_t bus, char *device,
         }
     }
 
-    gettimeofday(&time, NULL);
-    srcp_fmt_msg(rc, reply, time);
+    *reply = 0x00;
     return rc;
 }
 
@@ -274,10 +273,8 @@ static int handleCHECK(sessionid_t sessionid, bus_t bus, char *device,
 static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
               char *parameter, char *reply, size_t length)
 {
-    struct timeval akt_time;
     int rc = SRCP_UNSUPPORTEDDEVICEGROUP;
     *reply = 0x00;
-    gettimeofday(&akt_time, NULL);
 
     if (bus_has_devicegroup(bus, DG_FB)
         && strncasecmp(device, "FB", 2) == 0) {
@@ -286,7 +283,7 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
         if (nelem >= 1)
             rc = infoFB(bus, port, reply, length);
         else
-            rc = srcp_fmt_msg(SRCP_LISTTOOSHORT, reply, akt_time);
+            rc = SRCP_LISTTOOSHORT;
     }
 
     else if (bus_has_devicegroup(bus, DG_GL)
@@ -296,25 +293,19 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
         if (nelem >= 1)
             rc = cacheInfoGL(bus, addr, reply);
         else
-            rc = srcp_fmt_msg(SRCP_LISTTOOSHORT, reply, akt_time);
+            rc = SRCP_LISTTOOSHORT;
     }
 
     else if (bus_has_devicegroup(bus, DG_GA)
              && strncasecmp(device, "GA", 2) == 0) {
         long addr, port;
         int nelem = sscanf(parameter, "%ld %ld", &addr, &port);
-        switch (nelem) {
-            case 0:
-            case 1:
-                rc = srcp_fmt_msg(SRCP_LISTTOOSHORT, reply, akt_time);;
-                break;
-            case 2:
-                rc = infoGA(bus, addr, port, reply);
-                break;
-            default:
-                rc = srcp_fmt_msg(SRCP_LISTTOOLONG, reply, akt_time);;
-        }
+        if (nelem > 1)
+            rc = infoGA(bus, addr, port, reply);
+        else
+            rc = SRCP_LISTTOOSHORT;
     }
+
     //GET SM
     else if (bus_has_devicegroup(bus, DG_SM)
              && strncasecmp(device, "SM", 2) == 0) {
@@ -393,7 +384,7 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
              && strncasecmp(device, "TIME", 4) == 0) {
         rc = infoTIME(reply);
         if (rc != SRCP_INFO) {
-            rc = srcp_fmt_msg(SRCP_NODATA, reply, akt_time);
+            rc = SRCP_NODATA;
         }
     }
 
@@ -411,8 +402,7 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
         else {
             if (bus_has_devicegroup(bus, DG_DESCRIPTION)) {
                 syslog_bus(bus, DBG_INFO,
-                           "DESCRIPTION: devgrp=%s addr=%ld", devgrp,
-                           addr);
+                           "DESCRIPTION: devgrp=%s addr=%ld", devgrp, addr);
                 if (strncasecmp(devgrp, "GL", 2) == 0)
                     rc = cacheDescribeGL(bus, addr, reply);
                 else if (strncasecmp(devgrp, "GA", 2) == 0)
@@ -427,8 +417,7 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
                     rc = describeSERVER(bus, addr, reply);
             }
             else {
-                rc = srcp_fmt_msg(SRCP_UNSUPPORTEDDEVICEGROUP, reply,
-                                  akt_time);
+                rc = SRCP_UNSUPPORTEDDEVICEGROUP;
             }
         }
     }
@@ -442,7 +431,7 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
         if (strlen(parameter) > 0)
             nelem = sscanf(parameter, "%10s %ld", devgrp, &addr);
         if (nelem <= 1) {
-            rc = srcp_fmt_msg(SRCP_LISTTOOSHORT, reply, akt_time);
+            rc = SRCP_LISTTOOSHORT;
         }
         else {
             rc = SRCP_UNSUPPORTEDDEVICEGROUP;
@@ -453,8 +442,6 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
         }
     }
 
-    if (reply[0] == 0x00)
-        rc = srcp_fmt_msg(rc, reply, akt_time);
     return rc;
 }
 
@@ -465,10 +452,8 @@ static int handleGET(sessionid_t sessionid, bus_t bus, char *device,
 static int handleWAIT(sessionid_t sessionid, bus_t bus, char *device,
                char *parameter, char *reply, size_t length)
 {
-    struct timeval time;
     int rc = SRCP_UNSUPPORTEDDEVICEGROUP;
     *reply = 0x00;
-    gettimeofday(&time, NULL);
 
     /* check, if bus has FB's */
     if (bus_has_devicegroup(bus, DG_FB)
@@ -480,7 +465,7 @@ static int handleWAIT(sessionid_t sessionid, bus_t bus, char *device,
         syslog_bus(bus, DBG_INFO, "wait: %d %d %d", port, waitvalue,
                    timeout);
         if (nelem >= 3) {
-            if (getFB(bus, port, &time, &value) == SRCP_OK
+            if (getFB(bus, port, &akt_time, &value) == SRCP_OK
                 && value == waitvalue) {
                 rc = infoFB(bus, port, reply, length);
             }
@@ -493,14 +478,14 @@ static int handleWAIT(sessionid_t sessionid, bus_t bus, char *device,
                        		"usleep() failed in srcp-command line %d: %s (errno = %d)",
                        		__LINE__, strerror(errno), errno);
                     }
-                    getFB(bus, port, &time, &value);
+                    getFB(bus, port, &akt_time, &value);
                     timeout--;
                 }
                 while ((timeout >= 0) && (value != waitvalue));
 
                 if (timeout < 0) {
-                    gettimeofday(&time, NULL);
-                    rc = srcp_fmt_msg(SRCP_TIMEOUT, reply, time);
+                    gettimeofday(&akt_time, NULL);
+                    rc = SRCP_TIMEOUT;
                 }
                 else {
                     rc = infoFB(bus, port, reply, length);
@@ -508,7 +493,7 @@ static int handleWAIT(sessionid_t sessionid, bus_t bus, char *device,
             }
         }
         else {
-            rc = srcp_fmt_msg(SRCP_LISTTOOSHORT, reply, time);
+            rc = SRCP_LISTTOOSHORT;
         }
     }
 
@@ -541,11 +526,11 @@ static int handleWAIT(sessionid_t sessionid, bus_t bus, char *device,
                 rc = infoTIME(reply);
             }
             else {
-                rc = srcp_fmt_msg(SRCP_NODATA, reply, time);
+                rc = SRCP_NODATA;
             }
         }
         else {
-            rc = srcp_fmt_msg(SRCP_LISTTOOSHORT, reply, time);
+            rc = SRCP_LISTTOOSHORT;
         }
     }
     return rc;
@@ -558,8 +543,6 @@ static int handleVERIFY(sessionid_t sessionid, bus_t bus, char *device,
                  char *parameter, char *reply)
 {
     int rc = SRCP_UNSUPPORTEDOPERATION;
-    struct timeval time;
-    gettimeofday(&time, NULL);
 
     /* VERIFY <bus> SM "<decoderaddress> <type> <1 or more values>" */
     if (bus_has_devicegroup(bus, DG_SM)
@@ -616,7 +599,7 @@ static int handleVERIFY(sessionid_t sessionid, bus_t bus, char *device,
             }
         }
     }
-    srcp_fmt_msg(rc, reply, time);
+
     return rc;
 }
 
@@ -626,7 +609,6 @@ static int handleVERIFY(sessionid_t sessionid, bus_t bus, char *device,
 static int handleTERM(sessionid_t sessionid, bus_t bus, char *device,
                char *parameter, char *reply)
 {
-    struct timeval akt_time;
     int rc = SRCP_UNSUPPORTEDDEVICEGROUP;
     *reply = 0x00;
 
@@ -718,7 +700,7 @@ static int handleTERM(sessionid_t sessionid, bus_t bus, char *device,
         else if (strncasecmp(protocol, "MFX", 3) == 0)
             rc = infoSM(bus, PROTO_MFX, TERM, -1, -1, -1, -1, -1, reply);
         else if (strncasecmp(protocol, "MM", 2) == 0)
-            rc = infoSM(bus, PROTO_MM, INIT, -1, -1, -1, -1, -1, reply);
+            rc = infoSM(bus, PROTO_MM, TERM, -1, -1, -1, -1, -1, reply);
         else
             rc = SRCP_WRONGVALUE;
     }
@@ -728,8 +710,6 @@ static int handleTERM(sessionid_t sessionid, bus_t bus, char *device,
             rc = termTIME();
     }
 
-    gettimeofday(&akt_time, NULL);
-    srcp_fmt_msg(abs(rc), reply, akt_time);
     return rc;
 }
 
@@ -739,7 +719,6 @@ static int handleTERM(sessionid_t sessionid, bus_t bus, char *device,
 static int handleINIT(sessionid_t sessionid, bus_t bus, char *device,
                char *parameter, char *reply)
 {
-    struct timeval time;
     int rc = SRCP_UNSUPPORTEDDEVICEGROUP;
 
     /*INIT <bus> GL "<addr> <protocol> <optional further parameters>" */
@@ -747,7 +726,7 @@ static int handleINIT(sessionid_t sessionid, bus_t bus, char *device,
         long addr, protversion, n_fs, n_func;
         char prot;
         char optData[32];
-        int nelem = sscanf(parameter, "%ld %1c %ld %ld %ld %30[^\t\n]", 
+        int nelem = sscanf(parameter, "%ld %1c %ld %ld %ld %30[^\t\n]",
 							&addr, &prot, &protversion, &n_fs, &n_func, optData);
         if (nelem >= 5) {
             rc = cacheInitGL(bus, addr, prot, protversion, n_fs, n_func, optData);
@@ -818,8 +797,6 @@ static int handleINIT(sessionid_t sessionid, bus_t bus, char *device,
             rc = SRCP_WRONGVALUE;
     }
 
-    gettimeofday(&time, NULL);
-    srcp_fmt_msg(rc, reply, time);
     return rc;
 }
 
@@ -829,17 +806,13 @@ static int handleINIT(sessionid_t sessionid, bus_t bus, char *device,
 static int handleRESET(sessionid_t sessionid, bus_t bus, char *device,
                 char *parameter, char *reply)
 {
-    struct timeval time;
     int rc = SRCP_UNSUPPORTEDDEVICEGROUP;	//SRCP_UNSUPPORTEDOPERATION;
-    *reply = 0x00;
 
-	if (bus_has_devicegroup(bus, DG_SERVER)
+    if (bus_has_devicegroup(bus, DG_SERVER)
              && strncasecmp(device, "SERVER", 6) == 0) {
         rc = SRCP_OK;
         server_reset();
-	}
-    gettimeofday(&time, NULL);
-    srcp_fmt_msg(rc, reply, time);
+    }
     return rc;
 }
 
@@ -855,7 +828,6 @@ int doCmdClient(session_node_t * sn)
     char reply[MAXSRCPLINELEN];
     char *cbus, *command, *devicegroup, *parameter;
     int rc;
-    struct timeval akt_time;
 
     syslog_session(sn->session, DBG_INFO, "Command mode starting.");
 
@@ -887,6 +859,7 @@ int doCmdClient(session_node_t * sn)
 		int nelem = ssplitstr(line, 4, &command, &cbus, &devicegroup, &parameter);
         bus_t bus = atoi(cbus);
         reply[0] = 0x00;
+        gettimeofday(&akt_time, NULL);
 
         if (nelem >= 3) {
             if (bus <= num_buses) {
@@ -914,16 +887,6 @@ int doCmdClient(session_node_t * sn)
                 else if (strncasecmp(command, "TERM", 4) == 0) {
                     rc = handleTERM(sn->session, bus, devicegroup,
                                     parameter, reply);
-                    /*special option for session termination (?) */
-                    if (rc < 0) {
-                        if (writen(sn->socket, reply, strlen(reply)) == -1) {
-                            syslog_session(sn->session, DBG_ERROR,
-                                           "Socket write failed: %s (errno = %d)\n",
-                                           strerror(errno), errno);
-                            break;
-                        }
-                        break;
-                    }
                     rc = abs(rc);
                 }
                 else if (strncasecmp(command, "VERIFY", 6) == 0) {
@@ -938,18 +901,15 @@ int doCmdClient(session_node_t * sn)
             /* bus > num_buses */
             else {
                 rc = SRCP_WRONGVALUE;
-                gettimeofday(&akt_time, NULL);
-                srcp_fmt_msg(rc, reply, akt_time);
             }
         }
         /* nelem < 3 */
         else {
-            syslog_session(sn->session, DBG_DEBUG, "List too short: %d",
-                           nelem);
+            syslog_session(sn->session, DBG_DEBUG, "List too short: %d", nelem);
             rc = SRCP_LISTTOOSHORT;
-            gettimeofday(&akt_time, NULL);
-            srcp_fmt_msg(rc, reply, akt_time);
         }
+        if (reply[0] == 0x00)
+            srcp_fmt_msg(rc, reply, akt_time);
 
         if (writen(sn->socket, reply, strlen(reply)) == -1) {
             syslog_session(sn->session, DBG_ERROR,

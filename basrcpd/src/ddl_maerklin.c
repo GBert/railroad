@@ -1,4 +1,4 @@
-// ddl_maerklin.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller
+// ddl_maerklin.c - adapted for basrcpd project 2018 - 2024 by Rainer Müller
 //
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -119,9 +119,8 @@ void comp_MM(bus_t bus, gl_data_t *glp, int direction, int speed)
 {
 	tMaerklinData mdata;
 
-	int sFS1, sFS2 = 0;
-	int addr = glp->id;
-	if (addr < 0 || addr > 255 || speed < 0 || speed > (glp->n_fs + 1)) return;
+	uint16_t addr = glp->id;
+	if (addr > 255 || speed < 0 || speed > (glp->n_fs + 1)) return;
 
 	mdata.addr = mmadr_cod[addr];
 	mdata.func = (glp->funcs & 1) ? 3 : 0;
@@ -143,6 +142,7 @@ void comp_MM(bus_t bus, gl_data_t *glp, int direction, int speed)
 		}
 	}
 	else {
+		int sFS1, sFS2 = 0;
 		switch (glp->n_fs) {
 		case 14:	break;							// no special handling
 		case 27:	if (speed > 1) {

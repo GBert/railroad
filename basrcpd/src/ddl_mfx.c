@@ -1,4 +1,4 @@
-// ddl_mfx.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller
+// ddl_mfx.c - adapted for basrcpd project 2018 - 2024 by Rainer Müller
 
 /* +----------------------------------------------------------------------+ */
 /* | DDL - Digital Direct for Linux                                       | */
@@ -318,6 +318,7 @@ static uint16_t loadRegistrationCounter() {
   close(regCountFile);
   return atoi(buffer);
 }
+
 /**
  * Den veränderten Neuanmeldezähler speichern.
  * @regCounter Aktueller Neuanmeldezähler, der gespeichert werden soll.
@@ -623,7 +624,7 @@ long mfxManagement(bus_t busnum)
 	return ((searchstep < 2) ? 1000000 : 300000);	// next call in about 1s or 0.3s
 }
 
-bool checkMfxCRC(uint8_t *buff, int n)
+bool checkMfxCRC(const uint8_t *buff, int n)
 {
 	uint16_t crcreg = 0xFF;
 
@@ -719,7 +720,7 @@ void serialMFXresult(uint8_t *buf, int len)
 		int minreq = 4 + 2 * ddl->fbData.fbbytnum;
 //		syslog_bus(busnumber, DBG_DEBUG, "minimum required data length: %d", minreq);
 
-		if ((len >= minreq) && (buf[1] = 0xA)) {
+		if ((len >= minreq) && (buf[1] == 0xA)) {
 			for (int n = 0; n <= ddl->fbData.fbbytnum; n++) {
 				ddl->fbData.serfbdata[n] = (buf[2*n+2] << 4) | (buf[2*n+3] & 0xF); 
 //				syslog_bus(busnumber, DBG_DEBUG, "ser data %d is 0x%02X", n, ddl->fbData.serfbdata[n]);

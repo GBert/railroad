@@ -1,4 +1,4 @@
-// srcp-fb.c - adapted for basrcpd project 2019 - 2021 by Rainer Müller
+// srcp-fb.c - adapted for basrcpd project 2019 - 2025 by Rainer Müller
 
 /***************************************************************************
  *                                                                         *
@@ -293,10 +293,10 @@ int infoFB(bus_t bus, int port, char *msg, size_t length)
     int rc = getFB(bus, port, &time, &state);
     msg[0] = 0x00;
 
-    if (rc >= SRCP_OK) {
+    if (rc == SRCP_OK) {
         snprintf(msg, length, "%lld.%.3ld 100 INFO %lu FB %d %d\n",
                  (long long) time.tv_sec,
-				 (long) (time.tv_usec / 1000), bus, port, state);
+                 (long) (time.tv_usec / 1000), bus, port, state);
         return SRCP_INFO;
     }
     else {

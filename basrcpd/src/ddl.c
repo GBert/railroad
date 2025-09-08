@@ -1,4 +1,4 @@
-// ddl.c - adapted for basrcpd project 2018 - 2023 by Rainer Müller
+// ddl.c - adapted for basrcpd project 2018 - 2024 by Rainer Müller
 
 /* $Id: ddl.c 1456 2010-02-28 20:01:39Z gscholz $ */
 
@@ -1353,6 +1353,9 @@ bool power_is_off(bus_t busnumber)
         }
     }
     if (buses[busnumber].power_changed > 0) {
+		info[0] = 1;
+		info[1] = buses[busnumber].power_state;
+		info_mcs(busnumber, 0, 0, info);
         if (buses[busnumber].power_state == 0) {
             set_SerialLine(busnumber, SL_RTS, OFF);
             syslog_bus(busnumber, DBG_INFO, "Rail signal generation stopped.");

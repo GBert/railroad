@@ -1,4 +1,4 @@
-// srcp-time.c - adapted for basrcpd project 2019 - 2021 by Rainer Müller
+// srcp-time.c - adapted for basrcpd project 2019 - 2024 by Rainer Müller
 
 /***************************************************************************
  *                                                                         *
@@ -41,7 +41,7 @@ int startup_TIME(void)
     return 0;
 }
 
-static void set_time(vtime_t * vt)
+static void set_time(const vtime_t * vt)
 {
     int result;
 
