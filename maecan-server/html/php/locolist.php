@@ -14,7 +14,7 @@
 		</div>
 	</div>
 	<div class="frame_content frame_content_active" id="frame">
-	
+
 		<h1>Neue Lok anlegen</h1>
 
 		<style>
@@ -23,7 +23,7 @@
 		<div id="locolist_grid" class="locolist_grid">
 			<p>Name:</p>
 			<input id="name" type="text" class="text_input" placeholder="Lokname...">
-			
+
 			<p>Lokbild:</p>
 			<div class="locolist_grid" style="margin: 0;">
 				<div id="current_icon" class="icon_list text_input">
@@ -39,17 +39,16 @@
 				<?php
 					$dirname = "loco_icons/";
 					$images = scandir($dirname);
-//					shuffle($images);
 					$ignore = Array(".", "..", "default.png");
 					foreach($images as $curimg){
 						if(!in_array($curimg, $ignore) && (strpos($curimg, 'jpg') || strpos($curimg, 'png'))) {
 							$js_function = "setIcon(`".$curimg."`);";
 							echo "<img id='$curimg' class='preview_icon' src='$dirname$curimg' onclick='setIcon(`".$curimg."`);'/>";
 						}
-					}                 
+					}
 				?>
 			</div>
-		
+
 			<p>Protokoll:</p>
 			<select name="Protokoll" id="protocol_dropdown" class="text_input">
 				<option id="dcc" value="dcc">DCC</option>
@@ -98,43 +97,8 @@
 			<div class="locolist_option_grid">
 				<input id="tachomax" type="number" class="text_input"  min="0" max="300" value="120">
 			</div>
-			<!--
-			<p>Funktionen:</p>
-			<div class="function_div">
-				<p>F0:</p>
-				<select name="F0" id="f0" class="text_input">
-					<option id="deactivated" value="0">Deaktiviert</option>
-					<option id="generic" value="2">Generische Funktion</option>
-					<option id="light" value="3">Lichtfunktion</option>
-				</select>
-				<p>F1:</p>
-				<select name="F1" id="f1" class="text_input">
-					<option id="deactivated" value="0">Deaktiviert</option>
-					<option id="generic" value="2">Generische Funktion</option>
-					<option id="light" value="3">Lichtfunktion</option>
-				</select>
-				<p>F2:</p>
-				<select name="F2" id="f2" class="text_input">
-					<option id="deactivated" value="0">Deaktiviert</option>
-					<option id="generic" value="2">Generische Funktion</option>
-					<option id="light" value="3">Lichtfunktion</option>
-				</select>
-				<p>F3:</p>
-				<select name="F3" id="f3" class="text_input">
-					<option id="deactivated" value="0">Deaktiviert</option>
-					<option id="generic" value="2">Generische Funktion</option>
-					<option id="light" value="3">Lichtfunktion</option>
-				</select>
-				<p>F4:</p>
-				<select name="F4" id="f4" class="text_input">
-					<option id="deactivated" value="0">Deaktiviert</option>
-					<option id="generic" value="2">Generische Funktion</option>
-					<option id="light" value="3">Lichtfunktion</option>
-				</select>
-			</div>
-			-->
 		</div>
-		
+
 
 		<div class="button_grid_2">
 			<div class="button button_active" id="save_loco">Lok speichern</div>
@@ -171,8 +135,6 @@
 	const name = document.getElementById('name');
 	const adress = document.getElementById('adress');
 	const icon_preview = document.getElementById('icon_preview');
-
-	//var dir_list = <?//=$images?>;
 
 	let current_loco = {};
 	let current_loco_index = -1;
@@ -244,7 +206,6 @@
 			hide(prog_buttons[i]);
 		}
 		setIcon('default.png');
-
 	}
 
 	function setActiveLoco(index) {
@@ -272,7 +233,7 @@
 		vmin.value = current_loco.vmin;
 		tachomax.value = current_loco.tachomax;
 		frame.children[0].innerHTML = (current_loco.name + " bearbeiten:");
-		
+
 		protocol_dropdown.disabled = true;
 		setIcon(current_loco.icon);
 
@@ -303,29 +264,7 @@
 			vmin.disabled = false;
 			vmax.disabled = false;
 		}
-
 	}
-
-	/*function loadLocolist(){
-		locolist_container.innerHTML = "";
-		let locolist_request = new XMLHttpRequest();
-		let date = new Date();
-
-		locolist_request.open('GET', './config/locolist.json?' + date.getTime(), true);
-		locolist_request.onload = function(){
-			if (this.status == 200) {
-				locolist = JSON.parse(this.responseText);
-				for (let i = 0; i < locolist.length; i++) {
-					createLocoButton(locolist[i]).onclick = function(){
-						setActiveLoco(i);
-					}
-				}
-				setNewLoco();
-			}
-		}
-
-		locolist_request.send();
-	}*/
 
 	function updateLocolist(_locolist){
 		locolist_container.innerHTML = "";
@@ -468,13 +407,12 @@
 		};
 	}
 
-	add_loco.onclick = () => { 
+	add_loco.onclick = () => {
 		setNewLoco();
-		resizeSettings();	
+		resizeSettings();
 	};
-	
-	reload_loco_list.onclick = () => { 
-		//loadLocolist();
+
+	reload_loco_list.onclick = () => {
 		parent.ws.send('getLocolist');
 		//resizeSettings();
 		};
@@ -493,7 +431,7 @@
 			loco_string = JSON.stringify(current_loco);
 
 			console.log(loco_string);
-			
+
 			if (current_loco_index == -1 ) {
 				parent.send(`addLoco:$${loco_string}§`);
 			} else {
@@ -508,5 +446,4 @@
 		}
 	};
 
-	//loadLocolist();
 </script>
