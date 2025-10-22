@@ -233,6 +233,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextExitRailControl */ { "Exit RailControl", "RailControl beenden", "Apagar RailControl" },
 /* TextFeedback */ { "feedback", "Rückmelder", "retroseñal" },
 /* TextFeedbackChange */ { "State of pin {0} on S88 module {1} is {2}", "Status von Pin {0} an S88 Modul {1} ist {2}", "Estado de contacto {0} del S88 módulo {1} está {2}" },
+/* TextFeedbackChangeCS2 */ { "State of pin {0} on S88 module {1} on bus {2} on device {3} is {4}", "Status von Pin {0} an S88 Modul {1} an Bus {2} an Gerät {3} ist {4}", "Estado de contacto {0} del S88 módulo {1} en bus {2} en dispositivo {3} está {4}" },
 /* TextFeedbackDeleted */ { "Feedback {0} deleted", "Rückmelder {0} gelöscht", "Retroseñal {0} eliminado" },
 /* TextFeedbackDoesNotExist */ { "Feedback does not exist", "Rückmelder existiert nicht", "Retroseñal no existe" },
 /* TextFeedbackIsUsedByTrack */ { "Feedback {0} is used by track {1}", "Rückmelder {0} wird gebraucht von Gleis {1}", "Retroseñal {0} está usado por vía {1}" },

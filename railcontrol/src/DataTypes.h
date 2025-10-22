@@ -44,6 +44,9 @@ typedef ObjectID AccessoryID;
 // feedback
 typedef ObjectID FeedbackID;
 typedef uint32_t FeedbackPin;
+typedef uint32_t FeedbackModule;
+typedef uint32_t FeedbackBus;
+typedef uint32_t FeedbackDevice;
 
 // track
 typedef ObjectID TrackID;

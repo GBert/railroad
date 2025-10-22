@@ -233,6 +233,7 @@ class Languages
 			TextExitRailControl,
 			TextFeedback,
 			TextFeedbackChange,
+			TextFeedbackChangeCS2,
 			TextFeedbackDeleted,
 			TextFeedbackDoesNotExist,
 			TextFeedbackIsUsedByTrack,
