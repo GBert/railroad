@@ -421,7 +421,7 @@ int check_data(int tcp_socket, struct cs2_config_data_t *cs2_config_data, unsign
 }
 
 int main(int argc, char **argv) {
-    int n, i, max_fds, opt, max_tcp_i, nready, conn_fd, timeout, ret, tcp_client[MAX_TCP_CONN], tcp_client2[MAX_TCP_CONN];
+	int n, i, j, max_fds, opt, max_tcp_i, nready, conn_fd, timeout, ret, tcp_client[MAX_TCP_CONN], tcp_client2[MAX_TCP_CONN];
     struct sigaction sigact;
     sigset_t blockset, emptyset;
     struct can_frame frame;
@@ -985,18 +985,17 @@ int main(int argc, char **argv) {
 			    fprintf(stderr, "%s received packet %% 13 : length %d - maybe close connection\n", timestamp, n);
 			syslog(LOG_ERR, "%s: received packet %% 13 : length %d - maybe close connection\n", __func__, n);
 		    } else {
-			for (i = 0; i < n; i += CAN_ENCAP_SIZE) {
-			    /* check if we need to forward the message to CAN */
-			    if (!check_data(tcp_socket, &cs2_config_data, &netframe[i])) {
-				ret = frame_to_can(sc, &netframe[i]);
+			for (j = 0; j < n; j += CAN_ENCAP_SIZE) {
+			    if (!check_data(tcp_socket, &cs2_config_data, &netframe[j])) {
+				ret = frame_to_can(sc, &netframe[j]);
 				if (!ret) {
-				    if (i > 0)
-					print_can_frame(TCP_FORMATS_STRG, &netframe[i], cs2_config_data.verbose && !background);
+				    if (j > 0)
+					print_can_frame(TCP_FORMATS_STRG, &netframe[j], cs2_config_data.verbose && !background);
 				    else
-					print_can_frame(TCP_FORMAT_STRG, &netframe[i], cs2_config_data.verbose && !background);
+					print_can_frame(TCP_FORMAT_STRG, &netframe[j], cs2_config_data.verbose && !background);
 				}
-				net_to_net(sb, (struct sockaddr *)&baddr, &netframe[i], CAN_ENCAP_SIZE);
-				print_can_frame(UDP_FORMAT_STRG, &netframe[i], cs2_config_data.verbose && !background);
+				net_to_net(sb, (struct sockaddr *)&baddr, &netframe[j], CAN_ENCAP_SIZE);
+				print_can_frame(UDP_FORMAT_STRG, &netframe[j], cs2_config_data.verbose && !background);
 			    }
 			}
 		    }
