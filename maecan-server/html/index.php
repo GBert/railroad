@@ -11,7 +11,6 @@
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<!--<script type="text/javascript" src="js/jquery.min.js"></script>-->
 		<noscript>Javascript ist erforderlich!</noscript>
 
 	</head>
@@ -46,9 +45,6 @@
 
 			</div>
 			<div id="stopgo" class="go">GO</div>
-
-
-
 
 
 		</div>
@@ -114,11 +110,7 @@
 		</div>
 
 
-
-
-
 		<script type="text/javascript" src="./js/main.js"></script>
-		<!--<script type="text/javascript" src="js/websocket.js"></script-->
 		<script type="text/javascript">
 
 /*
@@ -271,8 +263,6 @@
 					bookmark[i].setAttribute('class', 'bookmark selected');
 					show(content_frames[i]);
 					resize();
-					//locolist.loadLocolist();
-					//locolist.loadIcons();
 				};
 			})(i);
 
@@ -441,12 +431,11 @@
 				setTimeout(() => {
 					ws.send('getKeyboard');
 					ws.send('getLocolist');
+					ws.send('getProtocol');
+					ws.send('getVersion');
 				}, 100)
 			}
-}
-			//--- Misc ---/
-
-//			resize();
+		}
 
 		</script>
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## [2025-08-03.1]
+- change timing for protocol and version request
+- cleanup several files without functional change
+
 ## [2024-02-09.1]
 - Adapt to php version 8.
 

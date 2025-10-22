@@ -32,8 +32,8 @@
 			<p class="ml30"></p>
 			<p class="ml30"></p>
 			<p class="ml30"></p>
-			<p class="ml30"></p>	
-			<p class="ml30"></p>	
+			<p class="ml30"></p>
+			<p class="ml30"></p>
 			<h2 id="readings_h" style="display: none;">Messwerte:</h2>
 			<div id="readings" style="display: none;">
 			</div>
@@ -63,7 +63,7 @@
 		<p>Lokbilder zum Server Hochladen. Es können mehrere Bilder gleichzeitig hochgeladen werden.</p>
 		<form action="./php/upload.php" method="post", enctype="multipart/form-data" target="php_dummy">
 			<label class="button">Lokbilder auswählen ...
-				<input id="file_upload" name="icon[]" type="file" accept="image/*" style="display:none;" multiple> 
+				<input id="file_upload" name="icon[]" type="file" accept="image/*" style="display:none;" multiple>
 			</label>
 			<div class="icon_list" id="icon_list_upload"></div>
 			<button class="button" id="upload_icon" style="width: calc(100% - 20px);">Hochladen</button>
@@ -79,7 +79,6 @@
 			<?php
 					$dirname = "loco_icons/";
 					$images = scandir($dirname);
-//					shuffle($images);
 					$ignore = Array(".", "..", "default.png");
 					foreach($images as $curimg){
 						if(!in_array($curimg, $ignore) && (strpos($curimg, 'jpg') || strpos($curimg, 'png'))) {
@@ -94,7 +93,7 @@
 								</div>
 							';
 						}
-					}                 
+					}
 				?>
 		</div>
 	</div>
@@ -164,7 +163,7 @@
 
 
 	let dropdown_visible = false;
-	
+
 	let devices = [];
 	let visible_device = {};
 	let protocol = 0;
@@ -226,7 +225,7 @@
 	//--- CAN-Devices ---//
 
 	function showDeviceInfo(device){
-		
+
 		show(device_info);
 		can_dropdown_button.innerHTML = device.name + ' #' + device.serial_number;
 		device_info.children[2].innerHTML = "Name: " + device.name;
@@ -321,7 +320,7 @@
 			range_4.style.backgroundColor = chanel.color_4;
 			range_4.style.width = (1 - (chanel.range_3 / chanel.range_4))*100 + "%";
 			bar.appendChild(range_4);
-			
+
 			let bar_filler = document.createElement('DIV');
 			bar_filler.setAttribute('class', 'bar_filler');
 			bar_filler.id = 'bar_filler_' + chanel.chanel;
@@ -429,7 +428,7 @@
 			createDropdownPoint(devices[i].name + " #" + devices[i].serial_number);
 		}
 		let can_dropdown_option = document.getElementsByClassName('can_dropdown_option');
-		
+
 		for (let i = 0; i < can_dropdown_option.length; i++) ((i)=>{
 			if (devices.length) {
 				can_dropdown_option[i].onclick = function(){
@@ -452,7 +451,7 @@
 				}
 			}
 		}
-	}, 1000); 
+	}, 1000);
 
 
 	// --- loco icons --- //
@@ -533,8 +532,6 @@
 		icon_name_div.appendChild(icon_name_button);
 		icon_name_div.appendChild(icon_name_p);
 		icon_list.appendChild(icon_name_div);
-
-
 	}
 
 	file_upload.addEventListener('change', fileSelection, false);
@@ -573,7 +570,7 @@
 	function getOnlineVersion(){
 		/*let version = 0;
 		let version_request = new XMLHttpRequest();
-		
+
 		version_request.open('GET', "https://raw.githubusercontent.com/Ixam97/MaeCAN-Server/master/html/config/version.txt", true);
 		version_request.onload = function(){
 			if (this.status == 200){
@@ -595,7 +592,6 @@
 			}
 		}
 		version_request.send();*/
-
 	}
 
 	function updateProtocol(new_prtocol) {
@@ -731,10 +727,5 @@
 			parent.ws.send(`setProtocol:${_protocol}`);
 		};
 	}
-
-	setTimeout(function(){
-		parent.ws.send('getProtocol');
-		parent.ws.send('getVersion');
-	}, 1000);
 
 </script>

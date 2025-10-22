@@ -2,22 +2,15 @@ var is_fullscreen = false;
 
 //Wichtige Elemente:
 var html              = document.getElementById('root');
-var content		        = document.getElementById('body');
+var content	          = document.getElementById('body');
 var options           = document.getElementById('options');
 var iframe_1          = document.getElementById('iframe_1');
 var selector          = document.getElementById('selector');
 
-//regelm��ig genutzte Farben:
+//regelmäßig genutzte Farben:
 var cs_red = '#ff0025';
 var cs_green = '#2fa938';
 
-
-/*function setRem(){
-  var rem = parseInt((window.innerWidth / 360) * 10) + 'px';
-  console.log(rem);
-
-  //html.style.fontSize = rem;
-}*/
 
 function enterFullscreen(element) {
   if(element.requestFullscreen) {
