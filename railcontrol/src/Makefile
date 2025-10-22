@@ -2,6 +2,7 @@
 #CPP=g++
 
 CPPFLAGS+=-I. -g -O2 -Wall -Wextra -Werror -std=c++11
+CFLAGS+=-I. -g -O2 -Wall -Wextra -Werror
 LDFLAGS+=-g -Wl,--export-dynamic
 LIBS=-lpthread -ldl
 
@@ -32,10 +33,10 @@ Version.o: Version.cpp Version.h
 	$(CXX) $(CPPFLAGS) -c -o $@ $<
 
 Hardware/zlib/%.o: Hardware/zlib/%.c Hardware/zlib/*.h
-	$(CC) $(CPPFLAGS) $(CFLAGSZLIB) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CFLAGSZLIB) -c -o $@ $<
 
 Storage/sqlite/sqlite3.o: Storage/sqlite/sqlite3.c Storage/sqlite/sqlite3.h
-	$(CC) $(CPPFLAGS) $(CFLAGSSQLITE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(CFLAGSSQLITE) -c -o $@ $<
 
 %.o: %.cpp *.h DataModel/*.h Hardware/*.h Logger/*.h Network/*.h Storage/*.h Utils/*.h Server/Web/*.h Server/CS2/*.h Server/Z21/*.h
 	$(CXX) $(CPPFLAGS) -c -o $@ $<
