@@ -909,6 +909,7 @@ int flush;
 	    /* fallthrough */
         case COPY_:
             state->mode = COPY;
+	    /* fallthrough */
         case COPY:
             copy = state->length;
             if (copy) {
