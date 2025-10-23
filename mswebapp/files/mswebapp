@@ -1,0 +1,74 @@
+#!/bin/sh /etc/rc.common
+#
+# MobileStation Web App - OpenWrt init script (procd)
+# Tries to run the C++ backend if present, otherwise falls back to Python server.
+
+START=95
+USE_PROCD=1
+
+# Defaults (override by editing or via future UCI integration)
+PROG_CPP="/usr/bin/mswebapp"
+PROG_PY="/usr/bin/python3"
+CONFIG_DIR="/www"
+HOST="0.0.0.0"
+PORT=6020
+UDP_IP="127.0.0.1"
+WWW_DIR="/opt/mswebapp/www" # frontend
+DEFAULTS_DIR="/opt/mswebapp/var" # packaged default data (mirrors repo /var)
+
+ensure_data() {
+    # Ensure base config directory exists
+    [ -d "$CONFIG_DIR" ] || mkdir -p "$CONFIG_DIR"
+
+    # Required subfolders under /www on SRSEII
+    for d in config fcticons icons magicons_; do
+        if [ ! -d "$CONFIG_DIR/$d" ]; then
+            if [ -d "$DEFAULTS_DIR/$d" ]; then
+                mkdir -p "$CONFIG_DIR/$d"
+                cp -r "$DEFAULTS_DIR/$d/." "$CONFIG_DIR/$d/"
+            else
+                mkdir -p "$CONFIG_DIR/$d"
+            fi
+        fi
+    done
+
+    # Seed default CS2 files if missing
+    if [ ! -f "$CONFIG_DIR/config/lokomotive.cs2" ] && [ -f "$DEFAULTS_DIR/config/lokomotive.cs2" ]; then
+        cp "$DEFAULTS_DIR/config/lokomotive.cs2" "$CONFIG_DIR/config/"
+    fi
+    if [ ! -f "$CONFIG_DIR/config/magnetartikel.cs2" ] && [ -f "$DEFAULTS_DIR/config/magnetartikel.cs2" ]; then
+        cp "$DEFAULTS_DIR/config/magnetartikel.cs2" "$CONFIG_DIR/config/"
+    fi
+}
+
+start_service() {
+    ensure_data
+    if [ -x "$PROG_CPP" ]; then
+        procd_open_instance
+        procd_set_param command "$PROG_CPP" \
+            --config "$CONFIG_DIR" \
+            --udp-ip "$UDP_IP" \
+            --host "$HOST" \
+            --port "$PORT" \
+            --www "$WWW_DIR"
+        procd_set_param respawn
+        procd_close_instance
+    elif [ -x "$PROG_PY" ]; then
+        procd_open_instance
+        procd_set_param command "$PROG_PY" -m mobile_station_webapp.server \
+            --config "$CONFIG_DIR" \
+            --udp-ip "$UDP_IP" \
+            --host "$HOST" \
+            --port "$PORT" \
+            --www "$WWW_DIR"
+        procd_set_param respawn
+        procd_close_instance
+    else
+        echo "mswebapp: no suitable backend found (neither $PROG_CPP nor $PROG_PY)" >&2
+        return 1
+    fi
+}
+
+stop_service() {
+    : # procd handles stop
+}
