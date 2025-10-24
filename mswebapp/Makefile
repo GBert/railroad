@@ -39,7 +39,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static/grafics
 	$(CP) ./files/www/static/grafics/* $(1)/opt/mswebapp/www/static/grafics
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_DATA) ./files/mswebapp.init $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/mswebapp.init $(1)/etc/init.d
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
