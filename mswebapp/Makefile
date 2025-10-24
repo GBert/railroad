@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mswebapp
-PKG_RELEASE:=1.0
+PKG_RELEASE:=1.1.5
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_BUILD_PARALLEL:=1
@@ -19,7 +19,7 @@ define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=MobileStation Web App 
-  DEPENDS:= +can2udp +python +libstdcpp
+  DEPENDS:= +can2udp +libstdcpp
 endef
 
 define Package/$(PKG_NAME)/description
@@ -28,23 +28,17 @@ define Package/$(PKG_NAME)/description
   accessories (CS2/CS3 style).
 endef
 
-#define Build/Prepare
-#        $(CP) ./src/* $(PKG_BUILD_DIR)
-#endef
-
-#define Build/Compile
-#endef
-
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mswebapp_cpp $(1)/usr/bin/mswebapp
 	$(INSTALL_DIR) $(1)/opt/mswebapp
-	$(CP) ./files/python/* $(1)/opt/mswebapp
 	$(INSTALL_DIR) $(1)/opt/mswebapp/www
 #	$(CP) ./files/www/* $(1)/opt/mswebapp/www
 	$(INSTALL_DIR) $(1)/opt/mswebapp/var
-	$(INSTALL_DIR) $(1)/opt/mswebapp/static
-	$(CP) ./files/static/* $(1)/opt/mswebapp/static
+	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static
+	$(CP) ./files/www/static/* $(1)/opt/mswebapp/www/static
+	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static/grafics
+	$(CP) ./files/www/static/grafics/* $(1)/opt/mswebapp/www/static/grafics
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DATA) ./files/mswebapp $(1)/etc/uci-defaults/90_mswebapp
 endef

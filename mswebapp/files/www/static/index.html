@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <link rel="apple-touch-icon" href="/static/grafics/apple-touch-icon-180.png">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-title" content="MobileStation WebApp">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>MobileStation WebApp</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preload" as="image" href="/static/grafics/apple-touch-icon-180.png" />
+  <script>window.CONFIG_PATH = "{{ config_path }}"; // HTTP-Basis für benutzer Daten (Icons etc.)</script>
+  <style>
+    #infoModal a, #infoModal a:visited, #infoModal a:hover {
+      color: #66ccff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <button id="infoBtn" class="tab">info</button>
+    <div class="tabs">
+      <button id="controlTab" class="tab active">control</button>
+      <button id="keyboardTab" class="tab">keyboard</button>
+    </div>
+    <button id="stopBtn" class="stop">STOP</button>
+  </div>
+
+  <div id="infoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <h2 id="infoModalTitle" data-i18n="info.title">Info</h2>
+        <button id="infoModalClose" class="modal-close" aria-label="Close" data-i18n="common.close" data-i18n-attr="aria-label">×</button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem;">
+        <div style="font-size:clamp(1rem,calc(var(--top-btn-h)*0.40),1.3rem); font-weight:normal; text-align:center;">
+          <span data-i18n="info.aboutHtml">The source code of this WebApp is publicly available on <a href="https://github.com/RalfMende/MobileStationWebApp" target="_blank">GitHub</a>.<br>There you'll also find the license terms (see LICENSE) and the latest release.</span><br>
+          <span data-i18n="info.docsHtml"><a href="https://ralfmende.github.io/MobileStationWebApp/index.html" target="_blank">Online documentation & FAQ</a></span><br>
+          <br>
+          <b><span data-i18n="info.version">Version:</span></b> <span id="appVersion">loading…</span><br>
+          <b><span data-i18n="info.backend">Backend:</span></b> <span id="backendType">loading…</span><br>
+          <br>
+          <span data-i18n="info.author">Author: Ralf Mende</span><br>
+          <span data-i18n="info.issues">For questions, bug reports, or feature requests, please open an issue on GitHub.</span><br>
+        </div>
+        <div style="font-size:clamp(1rem,calc(var(--top-btn-h)*0.40),1.3rem); font-weight:normal; text-align:center;" data-i18n="info.controlsHeader">SRSEII locomotive list controls:</div>
+        <button class="event-btn" id="eventBtn1" data-i18n="info.btn.refresh" style="height:var(--top-btn-h); min-height:0; font-size:clamp(0.8rem,calc(var(--top-btn-h)*0.30),1.1rem); padding-inline:clamp(0.7rem,calc(var(--top-btn-h)*0.40),2rem); width:50vw; max-width:320px; display:block; margin:0 auto;">Refresh locomotive list</button>
+        <button class="event-btn" id="eventBtn2" data-i18n="info.btn.import" style="height:var(--top-btn-h); min-height:0; font-size:clamp(0.8rem,calc(var(--top-btn-h)*0.30),1.1rem); padding-inline:clamp(0.7rem,calc(var(--top-btn-h)*0.40),2rem); width:50vw; max-width:320px; display:block; margin:0 auto;">Import locomotive list from Railcontrol</button>
+        <button class="event-btn" id="eventBtn3" data-i18n="info.btn.restart" style="height:var(--top-btn-h); min-height:0; font-size:clamp(0.8rem,calc(var(--top-btn-h)*0.30),1.1rem); padding-inline:clamp(0.7rem,calc(var(--top-btn-h)*0.40),2rem); width:50vw; max-width:320px; display:block; margin:0 auto;">Restart Railcontrol</button>
+        <button class="event-btn" id="eventBtn4" data-i18n="info.btn.reload" style="height:var(--top-btn-h); min-height:0; font-size:clamp(0.8rem,calc(var(--top-btn-h)*0.30),1.1rem); padding-inline:clamp(0.7rem,calc(var(--top-btn-h)*0.40),2rem); width:50vw; max-width:320px; display:block; margin:0 auto;">Reload locomotive list</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="controlPage" class="page">
+    <div class="main-content">
+      <div class="functions-side" id="leftFunctions"></div>
+
+      <div class="speed-block">
+        <div id="speedValue" class="speed-display">0 km/h</div>
+        <div class="speed-bar-wrapper">
+          <div class="speed-bar" id="speedBar">
+            <div id="speedFill" class="speed-fill"></div>
+            <input type="range" id="speedSlider" min="0" max="200" value="0" class="slider-vertical"/>
+          </div>
+        </div>
+        <div id="locoDesc" class="loco-desc">Select Locomotive</div>
+          <img id="locoImg" class="loco-img" src="/static/grafics/unknown_loco_txt.png" alt="Loco Icon">
+        <div class="direction-buttons">
+          <img id="reverseBtn" class="dir-btn" src="/static/grafics/dir_left_inactive.png" />
+          <img id="forwardBtn" class="dir-btn active" src="/static/grafics/dir_right_active.png" />
+        </div>
+      </div>
+
+      <div class="functions-side" id="rightFunctions"></div>
+    </div>
+
+    <div class="loco-list-wrapper">
+      <div id="locoList" class="loco-list"></div>
+    </div>
+  </div>
+
+  <div id="iconPickerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="iconPickerTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="iconPickerTitle" data-i18n="icon.title">Select Icon</h2>
+        <button id="iconPickerClose" class="modal-close" aria-label="Close" data-i18n="common.close" data-i18n-attr="aria-label">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="iconFilter" placeholder="Filter…" class="modal-filter" data-i18n="icon.filterPlaceholder" data-i18n-attr="placeholder" />
+        <div id="iconPickerGrid" class="icon-grid" aria-live="polite"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="iconPickerCancel" class="tab" data-i18n="icon.cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="keyboardPage" class="page hidden">
+    <div class="keyboard-area">
+      <div class="keyboard-header">
+  <span id="keyboardHeaderText">Keyboard Page 1a</span>
+      </div>
+      <div class="keyboard-grid">
+        <!-- Row 1: Demo labels above each button group -->
+        <div class="keyboard-row">
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="1"></button>
+              <button class="keyboard-btn" data-key="2"></button>
+            </div>
+          </div>
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="3"></button>
+              <button class="keyboard-btn" data-key="4"></button>
+            </div>
+          </div>
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="5"></button>
+              <button class="keyboard-btn" data-key="6"></button>
+            </div>
+          </div>
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="7"></button>
+              <button class="keyboard-btn" data-key="8"></button>
+            </div>
+          </div>
+        </div>
+        <!-- Row 2: Demo labels above each button group -->
+        <div class="keyboard-row">
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="9"></button>
+              <button class="keyboard-btn" data-key="10"></button>
+            </div>
+          </div>
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="11"></button>
+              <button class="keyboard-btn" data-key="12"></button>
+            </div>
+          </div>
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="13"></button>
+              <button class="keyboard-btn" data-key="14"></button>
+            </div>
+          </div>
+          <div class="keyboard-btn-col">
+            <span class="keyboard-btn-group-label"></span>
+            <div class="keyboard-btn-group">
+              <button class="keyboard-btn" data-key="15"></button>
+              <button class="keyboard-btn" data-key="16"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="keyboard-bottom-bar">
+      <button class="keyboard-page-btn">1a</button>
+      <button class="keyboard-page-btn">1b</button>
+      <button class="keyboard-page-btn">2a</button>
+      <button class="keyboard-page-btn">2b</button>
+      <button class="keyboard-page-btn">3a</button>
+      <button class="keyboard-page-btn">3b</button>
+      <button class="keyboard-page-btn">4a</button>
+      <button class="keyboard-page-btn">4b</button>
+    </div>
+  </div>
+
+  <script src="/static/script.js" defer></script>
+
+<script>
+// Set viewport height and width once at load
+(function() {
+  function setAppSizeOnce() {
+    var vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    var vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
+    document.documentElement.style.setProperty('--app-height', vh + 'px');
+    document.documentElement.style.setProperty('--app-width', vw + 'px');
+    // Measure topbar after layout to get an accurate value
+    requestAnimationFrame(function(){
+      var topbar = document.querySelector('.top-bar');
+      var th = topbar ? Math.round(topbar.offsetHeight) : 0;
+      document.documentElement.style.setProperty('--topbar-h', th + 'px');
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setAppSizeOnce, { once: true });
+  } else {
+    setAppSizeOnce();
+  }
+})();
+</script>
+
+<script>
+// Additional protective measures against browser zoom (as far as technically possible):
+(function() {
+  var lastTouchEnd = 0;
+
+  // Prevent Pinch-Zoom
+  document.addEventListener('touchstart', function (e) {
+    if (e.touches && e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // Reduce double tap (iOS Safari Zoom)
+  document.addEventListener('touchend', function (e) {
+    var now = Date.now();
+    if (now - lastTouchEnd <= 350) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(err){ console.warn('SW register failed', err); });
+  });
+}
+</script>
+</body>
+</html>
