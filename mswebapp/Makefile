@@ -38,8 +38,8 @@ define Package/$(PKG_NAME)/install
 	$(CP) ./files/www/static/* $(1)/opt/mswebapp/www/static
 	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static/grafics
 	$(CP) ./files/www/static/grafics/* $(1)/opt/mswebapp/www/static/grafics
-	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static/templates
-	$(CP) ./files/www/static/templates/* $(1)/opt/mswebapp/www/static/templates
+	$(INSTALL_DIR) $(1)/opt/mswebapp/www/templates
+	$(CP) ./files/www/templates/* $(1)/opt/mswebapp/www/templates
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/mswebapp.init $(1)/etc/init.d/mswebapp
 endef
