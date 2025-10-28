@@ -31,8 +31,6 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mswebapp_cpp $(1)/usr/bin/mswebapp
-#	$(INSTALL_DIR) $(1)/opt/mswebapp
-#	$(INSTALL_DIR) $(1)/opt/mswebapp/www
 	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static
 	$(CP) ./files/www/static/* $(1)/opt/mswebapp/www/static
 	$(INSTALL_DIR) $(1)/opt/mswebapp/www/static/grafics
