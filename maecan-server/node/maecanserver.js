@@ -183,7 +183,7 @@ var mfx_buffer = [];
 function sendDatagram(data) {
   // Datagramm senden
 
-  udpClient.send(new Buffer(data), 0, 13, d_port, ip);
+  udpClient.send(Buffer.from(data), 0, 13, d_port, ip);
 }
 
 function sendCanFrame(cmd, response, dlc, data) {
@@ -296,7 +296,7 @@ function buildDeviceInfo(buffer, device) {
 
     device.serial_number = (buffer[1][4] << 24) + (buffer[1][5] << 16) + (buffer[1][6] << 8) + buffer[1][7];
 
-    device.product_number = new Buffer(buffer[2]).toString().replace(/\u0000/g,'');
+    device.product_number = Buffer.from(buffer[2]).toString().replace(/\u0000/g,'');
 
     let name_buffer = [];
     for (let i = 3; i < buffer.length; i++) {
@@ -306,7 +306,7 @@ function buildDeviceInfo(buffer, device) {
         name_buffer[(i-3)*8+j] = data[j];
       }
     }
-    device.name = new Buffer(name_buffer).toString();
+    device.name = Buffer.from(name_buffer).toString();
   } else {
     console.log("buildDeviceInfo Error! New Attempt soon ...");
   }
@@ -342,7 +342,7 @@ function buildStatusChanelInfo(buffer) {
     }
   }
 
-  let buffer_string_array = new Buffer(buffer_string).toString().split('\u0000');
+  let buffer_string_array = Buffer.from(buffer_string).toString().split('\u0000');
   status_chanel.name = buffer_string_array[0];
   status_chanel.start = buffer_string_array[1];
   status_chanel.end = buffer_string_array[2];
@@ -372,7 +372,7 @@ function buildConfigChanelInfo(buffer) {
       }
     }
 
-    let buffer_string_array = new Buffer(buffer_string).toString().split('\u0000');
+    let buffer_string_array = Buffer.from(buffer_string).toString().split('\u0000');
     config_chanel.description = buffer_string_array[0];
     config_chanel.options = [];
     for (let i = 0; i < config_chanel.num_options; i++) {
@@ -394,7 +394,7 @@ function buildConfigChanelInfo(buffer) {
       }
     }
 
-    let buffer_string_array = new Buffer(buffer_string).toString().split('\u0000');
+    let buffer_string_array = Buffer.from(buffer_string).toString().split('\u0000');
     config_chanel.description = buffer_string_array[0];
     config_chanel.start = buffer_string_array[1];
     config_chanel.end = buffer_string_array[2];
@@ -779,7 +779,7 @@ function processMfxBuffer() {
       data[i-1] = mfx_buffer[i];
     }
 
-    temp_mfx_loco.name = new Buffer(data).toString();
+    temp_mfx_loco.name = Buffer.from(data).toString();
 
     readMfxConfig(last_mfx_call[2], 4, 1, 9);
 
