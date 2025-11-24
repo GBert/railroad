@@ -56,6 +56,8 @@ namespace DataModel
 			:	LayoutItem(feedbackID),
 			 	controlID(ControlIdNone),
 			 	pin(FeedbackPinNone),
+				device(FeedbackDeviceNone),
+				bus(FeedbackBusNone),
 			 	manager(manager),
 			 	feedbackType(FeedbackTypeDefault),
 			 	routeId(RouteNone),
@@ -150,6 +152,39 @@ namespace DataModel
 				return pin;
 			}
 
+			inline void SetDevice(const FeedbackDevice device)
+			{
+				this->device = device;
+			}
+
+			inline FeedbackDevice GetDevice() const
+			{
+				return device;
+			}
+
+			inline void SetBus(const FeedbackBus bus)
+			{
+				this->bus = bus;
+			}
+
+			inline FeedbackBus GetBus() const
+			{
+				return bus;
+			}
+
+			inline bool CheckControl(const LayerID layer) const
+			{
+				const ControlID controlID = (-layer) >> 10;
+				const FeedbackDevice device = ((-layer) >> 2) & 0x000000FF;
+				const FeedbackBus bus = (-layer) & 0x00000003;
+				return CheckControl(controlID, device, bus);
+			}
+
+			inline bool CheckControl(const ControlID controlID, const FeedbackDevice device, const FeedbackBus bus) const
+			{
+				return (GetControlID() == controlID) && (GetDevice() == device) && (GetBus() == bus);
+			}
+
 			inline void SetTrack(DataModel::Track* track = nullptr)
 			{
 				this->track = track;
@@ -182,6 +217,8 @@ namespace DataModel
 
 			ControlID controlID;
 			FeedbackPin pin;
+			FeedbackDevice device;
+			FeedbackBus bus;
 
 			Manager* manager;
 			FeedbackType feedbackType;

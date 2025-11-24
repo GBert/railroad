@@ -32,7 +32,7 @@ namespace Server { namespace Web
 		public:
 			HtmlTagLabel() = delete;
 
-			inline HtmlTagLabel(const Languages::TextSelector label, const std::string& reference)
+			inline HtmlTagLabel(const Languages::TextSelector label, const std::string& reference = "")
 			:	HtmlTagLabel(Languages::GetText(label), reference)
 			{
 			}
@@ -46,7 +46,10 @@ namespace Server { namespace Web
 			:	HtmlTag("label")
 			{
 				AddContent(label + ":");
-				AddAttribute("for", reference);
+				if (reference.size())
+				{
+					AddAttribute("for", reference);
+				}
 			}
 
 			template<typename... Args>

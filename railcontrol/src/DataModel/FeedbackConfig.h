@@ -34,6 +34,8 @@ namespace DataModel
 			:	controlId(ControlNone),
 				feedbackId(FeedbackNone),
 				pin(FeedbackPinNone),
+				device(FeedbackDeviceNone),
+				bus(FeedbackBusNone),
 				isInUse(false)
 			{
 			}
@@ -42,6 +44,8 @@ namespace DataModel
 			:	controlId(feedback.GetControlID()),
 				feedbackId(feedback.GetID()),
 				pin(feedback.GetPin()),
+				device(feedback.GetDevice()),
+				bus(feedback.GetBus()),
 				name(feedback.GetName()),
 				matchKey(feedback.GetMatchKey()),
 				isInUse(feedback.IsInUse())
@@ -52,6 +56,8 @@ namespace DataModel
 			:	controlId(feedback.GetControlID()),
 				feedbackId(feedback.GetFeedbackID()),
 				pin(feedback.GetPin()),
+				device(feedback.GetDevice()),
+				bus(feedback.GetBus()),
 				name(feedback.GetName()),
 				matchKey(feedback.GetMatchKey()),
 				isInUse(false)
@@ -63,6 +69,8 @@ namespace DataModel
 				controlId = feedback.GetControlID();
 				feedbackId = feedback.GetID();
 				pin = feedback.GetPin();
+				device = feedback.GetDevice();
+				bus = feedback.GetBus();
 				name = feedback.GetName();
 				matchKey = feedback.GetMatchKey();
 				isInUse = feedback.IsInUse();
@@ -74,6 +82,8 @@ namespace DataModel
 				controlId = feedback.GetControlID();
 				feedbackId = feedback.GetFeedbackID();
 				pin = feedback.GetPin();
+				device = feedback.GetDevice();
+				bus = feedback.GetBus();
 				name = feedback.GetName();
 				matchKey = feedback.GetMatchKey();
 				return *this;
@@ -92,6 +102,16 @@ namespace DataModel
 			inline FeedbackPin GetPin() const
 			{
 				return pin;
+			}
+
+			inline FeedbackDevice GetDevice() const
+			{
+				return device;
+			}
+
+			inline FeedbackBus GetBus() const
+			{
+				return bus;
 			}
 
 			inline std::string GetName() const
@@ -118,6 +138,8 @@ namespace DataModel
 			ControlID controlId;
 			FeedbackID feedbackId;
 			FeedbackPin pin;
+			FeedbackDevice device;
+			FeedbackBus bus;
 			std::string name;
 			std::string matchKey;
 			bool isInUse;

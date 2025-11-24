@@ -37,6 +37,8 @@ namespace DataModel
 		str = "objectType=Feedback;" + LayoutItem::Serialize();
 		str += ";controlID=" + to_string(controlID);
 		str += ";pin=" + to_string(pin);
+		str += ";device=" + to_string(device);
+		str += ";bus=" + to_string(bus);
 		str += ";feedbacktype=" + to_string(feedbackType);
 		str += ";route=" + to_string(routeId);
 		str += ";inverted=" + to_string(inverted);
@@ -59,11 +61,26 @@ namespace DataModel
 		SetWidth(Width1);
 		controlID = Utils::Utils::GetIntegerMapEntry(arguments, "controlID", ControlIdNone);
 		pin = Utils::Utils::GetIntegerMapEntry(arguments, "pin");
+		device = Utils::Utils::GetIntegerMapEntry(arguments, "device");
+		bus = Utils::Utils::GetIntegerMapEntry(arguments, "bus");
 		feedbackType = static_cast<FeedbackType>(Utils::Utils::GetIntegerMapEntry(arguments, "feedbacktype", FeedbackTypeDefault));
 		routeId = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
 		inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted", false);
 		stateCounter = Utils::Utils::GetBoolMapEntry(arguments, "state", FeedbackStateFree) ? MaxStateCounter : 0;
 		matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
+
+		// FIXME: 2025-11-03 convert CS2 feedback pin to pin/bus/device / can be removed later
+		if (pin > 1000)
+		{
+			device = (pin >> 12) & 0x000000FF;
+			bus = 0;
+			pin &= 0x00000FFF;
+			while (pin > 1000)
+			{
+				++bus;
+				pin -= 1000;
+			}
+		}
 	}
 
 	void Feedback::SetState(const FeedbackState newState)
@@ -133,6 +150,8 @@ namespace DataModel
 	{
 		SetControlID(feedback.GetControlID());
 		SetPin(feedback.GetPin());
+		SetDevice(feedback.GetDevice());
+		SetBus(feedback.GetBus());
 		SetName(feedback.GetName());
 		SetMatchKey(feedback.GetMatchKey());
 		return *this;

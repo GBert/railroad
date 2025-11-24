@@ -547,6 +547,10 @@ namespace Server { namespace Web
 			{
 				route.HandleFeedbacksOfTrack(arguments);
 			}
+			else if (arguments["cmd"].compare("devicebus") == 0)
+			{
+				HandleFeedbackDeviceBus(arguments);
+			}
 			else if (arguments["cmd"].compare("protocol") == 0)
 			{
 				HandleProtocol(arguments);
@@ -1265,6 +1269,25 @@ namespace Server { namespace Web
 		return content;
 	}
 
+	HtmlTag WebClient::HtmlTagFeedbackDeviceBus(const ControlID controlID,
+		const FeedbackDevice device,
+		const FeedbackBus bus)
+	{
+		HtmlTag content;
+		const Hardware::Capabilities capabilities = manager.GetCapabilities(controlID);
+		if (capabilities & Hardware::CapabilityFeedbackDeviceBus)
+		{
+			content.AddChildTag(HtmlTagInputIntegerWithLabel("device", Languages::TextDevice, device, 0, 255));
+			content.AddChildTag(HtmlTagInputIntegerWithLabel("bus", Languages::TextBus, bus, 0, 3));
+		}
+		else
+		{
+			content.AddChildTag(HtmlTagInputHidden("device", "0"));
+			content.AddChildTag(HtmlTagInputHidden("bus", "0"));
+		}
+		return content;
+	}
+
 	HtmlTag WebClient::HtmlTagProtocolAccessory(const ControlID controlID, const Protocol selectedProtocol)
 	{
 		map<string,Protocol> protocolMap = manager.AccessoryProtocolsOfControl(controlID);
@@ -1325,6 +1348,14 @@ namespace Server { namespace Web
 		const Address address = static_cast<Address>(Utils::Utils::GetIntegerMapEntry(arguments, "address", AddressDefault));
 		const AddressPort port = static_cast<AddressPort>(Utils::Utils::GetIntegerMapEntry(arguments, "port", AddressPortRed));
 		ReplyHtmlWithHeader(WebClientStatic::HtmlTagAccessoryAddress(type, address, port));
+	}
+
+	void WebClient::HandleFeedbackDeviceBus(const map<string, string>& arguments)
+	{
+		const ControlID controlID = static_cast<ControlID>(Utils::Utils::GetIntegerMapEntry(arguments, "control"));
+		const FeedbackDevice device = static_cast<FeedbackDevice>(Utils::Utils::GetIntegerMapEntry(arguments, "device", FeedbackDeviceNone));
+		const FeedbackBus bus = static_cast<FeedbackBus>(Utils::Utils::GetIntegerMapEntry(arguments, "bus", FeedbackBusNone));
+		ReplyHtmlWithHeader(HtmlTagFeedbackDeviceBus(controlID, device, bus));
 	}
 
 	HtmlTag WebClient::HtmlTagPosition(const LayoutPosition posx,
@@ -1548,7 +1579,7 @@ namespace Server { namespace Web
 		basicContent.AddId("tab_basic");
 		basicContent.AddClass("tab_content");
 		basicContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		basicContent.AddChildTag(HtmlTagControlLoco(controlId, "loco", locoId));
+		basicContent.AddChildTag(HtmlTagControlLoco(controlId, locoId));
 		basicContent.AddChildTag(HtmlTag("div").AddId("select_protocol").AddChildTag(HtmlTagMatchKeyProtocolLoco(controlId, matchKey, protocol)));
 		basicContent.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextAddress, address, 1, 9999));
 		if (manager.IsServerEnabled())
@@ -1640,7 +1671,7 @@ namespace Server { namespace Web
 		basicContent.AddId("tab_basic");
 		basicContent.AddClass("tab_content");
 		basicContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		basicContent.AddChildTag(HtmlTagControlMultipleUnit(controlId, "multipleunit", multipleUnitId));
+		basicContent.AddChildTag(HtmlTagControlMultipleUnit(controlId, multipleUnitId));
 		if (manager.IsServerEnabled())
 		{
 			basicContent.AddChildTag(HtmlTagInputIntegerWithLabel("serveraddress", Languages::TextServerAddress, serverAddress, 0, 9999));
@@ -2030,20 +2061,20 @@ namespace Server { namespace Web
 
 	void WebClient::HandleLayout(const map<string, string>& arguments)
 	{
-		LayerID layer = static_cast<LayerID>(Utils::Utils::GetIntegerMapEntry(arguments, "layer", CHAR_MIN));
+		const LayerID layer = static_cast<LayerID>(Utils::Utils::GetIntegerMapEntry(arguments, "layer", INT_MIN));
 		HtmlTag content;
 
 		if (layer < LayerUndeletable)
 		{
 			const map<FeedbackID,Feedback*>& feedbacks = manager.FeedbackList();
-			for (auto& feedback : feedbacks)
+			for (auto& f : feedbacks)
 			{
-				if (feedback.second->GetControlID() != -layer)
+				const Feedback* feedback = f.second;
+				if (!feedback->CheckControl(layer))
 				{
 					continue;
 				}
-
-				content.AddChildTag(HtmlTagFeedback(feedback.second, true));
+				content.AddChildTag(HtmlTagFeedback(feedback, true));
 			}
 			ReplyHtmlWithHeader(content);
 			return;
@@ -2052,7 +2083,7 @@ namespace Server { namespace Web
 		const map<TextID,DataModel::Text*>& texts = manager.TextList();
 		for (auto& text : texts)
 		{
-			if (text.second->IsVisibleOnLayer(layer) == false)
+			if (!text.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2062,7 +2093,7 @@ namespace Server { namespace Web
 		const map<SwitchID,DataModel::Track*>& tracks = manager.TrackList();
 		for (auto& track : tracks)
 		{
-			if (track.second->IsVisibleOnLayer(layer) == false)
+			if (!track.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2072,7 +2103,7 @@ namespace Server { namespace Web
 		const map<SignalID,DataModel::Signal*>& signals = manager.SignalList();
 		for (auto& signal : signals)
 		{
-			if (signal.second->IsVisibleOnLayer(layer) == false)
+			if (!signal.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2082,7 +2113,7 @@ namespace Server { namespace Web
 		const map<AccessoryID,DataModel::Accessory*>& accessories = manager.AccessoryList();
 		for (auto& accessory : accessories)
 		{
-			if (accessory.second->IsVisibleOnLayer(layer) == false)
+			if (!accessory.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2092,7 +2123,7 @@ namespace Server { namespace Web
 		const map<SwitchID,DataModel::Switch*>& switches = manager.SwitchList();
 		for (auto& mySwitch : switches)
 		{
-			if (mySwitch.second->IsVisibleOnLayer(layer) == false)
+			if (!mySwitch.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2102,7 +2133,7 @@ namespace Server { namespace Web
 		const map<FeedbackID,Feedback*>& feedbacks = manager.FeedbackList();
 		for (auto& feedback : feedbacks)
 		{
-			if (feedback.second->IsVisibleOnLayer(layer) == false)
+			if (!feedback.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2112,7 +2143,7 @@ namespace Server { namespace Web
 		const map<RouteID,DataModel::Route*>& routes = manager.RouteList();
 		for (auto& route : routes)
 		{
-			if (route.second->IsVisibleOnLayer(layer) == false)
+			if (!route.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2122,7 +2153,7 @@ namespace Server { namespace Web
 		const map<CounterID,DataModel::Counter*>& counters = manager.CounterList();
 		for (auto& counter : counters)
 		{
-			if (counter.second->IsVisibleOnLayer(layer) == false)
+			if (!counter.second->IsVisibleOnLayer(layer))
 			{
 				continue;
 			}
@@ -2132,29 +2163,33 @@ namespace Server { namespace Web
 		ReplyHtmlWithHeader(content);
 	}
 
-	HtmlTag WebClient::HtmlTagControlLoco(ControlID& controlId, const string& objectType, const ObjectID objectID) const
+	HtmlTag WebClient::HtmlTagControlLoco(ControlID& controlId,
+		const ObjectID objectID) const
 	{
 		std::map<ControlID,string> controls = manager.ControlListNames(Hardware::CapabilityLoco);
-		return WebClientStatic::HtmlTagControl(controls, controlId, objectType, objectID);
+		return WebClientStatic::HtmlTagControl(controls, controlId, "loco", objectID);
 	}
 
-	HtmlTag WebClient::HtmlTagControlMultipleUnit(ControlID& controlId, const string& objectType, const ObjectID objectID) const
+	HtmlTag WebClient::HtmlTagControlMultipleUnit(ControlID& controlId,
+		const ObjectID objectID) const
 	{
 		std::map<ControlID,string> controls = manager.ControlListNames(Hardware::CapabilityMultipleUnit);
 		controls[ControlNone] = Languages::GetText(Languages::TextIndependentOfControl);
-		return WebClientStatic::HtmlTagControl(controls, controlId, objectType, objectID);
+		return WebClientStatic::HtmlTagControl(controls, controlId, "multipleunit", objectID);
 	}
 
-	HtmlTag WebClient::HtmlTagControlAccessory(ControlID& controlID, const string& objectType, const ObjectID objectID) const
+	HtmlTag WebClient::HtmlTagControlAccessory(ControlID& controlID,
+		const string& objectType,
+		const ObjectID objectID) const
 	{
 		std::map<ControlID,string> controls = manager.ControlListNames(Hardware::CapabilityAccessory);
 		return WebClientStatic::HtmlTagControl(controls, controlID, objectType, objectID);
 	}
 
-	HtmlTag WebClient::HtmlTagControlFeedback(ControlID& controlId, const string& objectType, const ObjectID objectID) const
+	HtmlTag WebClient::HtmlTagControlFeedback(ControlID& controlId) const
 	{
 		std::map<ControlID,string> controls = manager.ControlListNames(Hardware::CapabilityFeedback);
-		return WebClientStatic::HtmlTagControl(controls, controlId, objectType, objectID);
+		return WebClientStatic::HtmlTagControlFeedback(controls, controlId);
 	}
 
 	void WebClient::HandleAccessoryEdit(const map<string, string>& arguments)
@@ -2246,7 +2281,7 @@ namespace Server { namespace Web
 		mainContent.AddClass("tab_content");
 		mainContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
 		mainContent.AddChildTag(HtmlTagSelectWithLabel("accessorytype", Languages::TextType, typeOptions, static_cast<DataModel::AccessoryType>(accessoryType & DataModel::AccessoryTypeMask)));
-		mainContent.AddChildTag(HtmlTagSelectWithLabel("connectiontype", Languages::TextConnection, Languages::TextConnectionHint, connectionOptions, connectionType).AddAttribute("onchange", "loadAccessoryAddress('" + to_string(accessoryID) + "')"));
+		mainContent.AddChildTag(HtmlTagSelectWithLabel("connectiontype", Languages::TextConnection, Languages::TextConnectionHint, connectionOptions, connectionType).AddAttribute("onchange", "loadAccessoryAddress()"));
 		mainContent.AddChildTag(HtmlTagControlAccessory(controlId, "accessory", accessoryID));
 		mainContent.AddChildTag(HtmlTag("div").AddId("select_protocol").AddChildTag(HtmlTagMatchKeyProtocolAccessory(controlId, matchKey, protocol)));
 		mainContent.AddChildTag(HtmlTag("div").AddId("select_address").AddChildTag(WebClientStatic::HtmlTagAccessoryAddress(connectionType, address, port)));
@@ -2743,6 +2778,8 @@ namespace Server { namespace Web
 		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "controlid", manager.GetPossibleControlForFeedback());
 		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		FeedbackPin pin = Utils::Utils::GetIntegerMapEntry(arguments, "pin", FeedbackPinNone);
+		FeedbackDevice device = static_cast<FeedbackDevice>(Utils::Utils::GetIntegerMapEntry(arguments, "device", FeedbackDeviceNone));
+		FeedbackBus bus = static_cast<FeedbackBus>(Utils::Utils::GetIntegerMapEntry(arguments, "bus", FeedbackBusNone));
 		DataModel::FeedbackType feedbackType = static_cast<DataModel::FeedbackType>(Utils::Utils::GetIntegerMapEntry(arguments, "feedbacktype", FeedbackTypeDefault));
 		RouteID routeId = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
@@ -2756,7 +2793,7 @@ namespace Server { namespace Web
 			{
 				controlId = -posz;
 			}
-			if (pin == 0)
+			if (pin == FeedbackPinNone)
 			{
 				pin = posy * 16 + posx + (posx > 8 ? 0 : 1);
 			}
@@ -2766,12 +2803,14 @@ namespace Server { namespace Web
 		{
 			// existing feedback
 			const DataModel::Feedback* feedback = manager.GetFeedback(feedbackID);
-			if (feedback != nullptr)
+			if (feedback)
 			{
 				name = feedback->GetName();
 				matchKey = feedback->GetMatchKey();
 				controlId = feedback->GetControlID();
 				pin = feedback->GetPin();
+				device = feedback->GetDevice();
+				bus = feedback->GetBus();
 				inverted = feedback->GetInverted();
 				feedbackType = feedback->GetFeedbackType();
 				routeId = feedback->GetRouteId();
@@ -2790,10 +2829,15 @@ namespace Server { namespace Web
 			{
 				name = feedback.GetName();
 				pin = feedback.GetPin();
+				device = feedback.GetDevice();
+				bus = feedback.GetBus();
 			}
 		}
 		// else new feedback
-
+		if (pin == FeedbackPinNone)
+		{
+			pin = FeedbackPinMin;
+		}
 
 		content.AddChildTag(HtmlTag("h1").AddContent(name).AddId("popup_title"));
 
@@ -2824,9 +2868,18 @@ namespace Server { namespace Web
 		mainContent.AddId("tab_main");
 		mainContent.AddClass("tab_content");
 		mainContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		mainContent.AddChildTag(HtmlTagControlFeedback(controlId, "feedback", feedbackID));
+		mainContent.AddChildTag(HtmlTagControlFeedback(controlId));
 		mainContent.AddChildTag(HtmlTagMatchKeyFeedback(controlId, matchKey));
-		mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("pin", Languages::TextPin, pin, 1, 4096));
+		mainContent.AddChildTag(HtmlTag("div").AddId("select_device_bus").AddChildTag(HtmlTagFeedbackDeviceBus(controlId, device, bus)));
+		string modulePin(" ");
+		modulePin += Languages::GetText(Languages::TextModule);
+		modulePin += string(":");
+		modulePin += HtmlTag("span").AddId("calc_module").AddContent(to_string(((pin - 1) >> 4) + 1));
+		modulePin += string(" ");
+		modulePin += Languages::GetText(Languages::TextPin);
+		modulePin += string(":");
+		modulePin += HtmlTag("span").AddId("calc_pin").AddContent(to_string(((pin - 1) & 0x0F) + 1));
+		mainContent.AddChildTag(HtmlTagInputIntegerWithLabel("pin", Languages::TextPin, pin, FeedbackPinMin, FeedbackPinMax).AddContent(modulePin));
 		mainContent.AddChildTag(HtmlTagInputCheckboxWithLabel("inverted", Languages::TextInverted, "true", inverted));
 		mainContent.AddChildTag(HtmlTagSelectWithLabel("feedbacktype", Languages::TextType, typeOptions, feedbackType));
 		mainContent.AddChildTag(HtmlTagSelectWithLabel("route", Languages::TextExecuteRoute, routeOptions, routeId));
@@ -2846,7 +2899,9 @@ namespace Server { namespace Web
 		const string name = Utils::Utils::GetStringMapEntry(arguments, "name");
 		const ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
 		const string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
-		const FeedbackPin pin = static_cast<FeedbackPin>(Utils::Utils::GetIntegerMapEntry(arguments, "pin", FeedbackPinNone));
+		const FeedbackPin pin = static_cast<FeedbackPin>(Utils::Utils::GetIntegerMapEntry(arguments, "pin", 1));
+		const FeedbackDevice device = static_cast<FeedbackDevice>(Utils::Utils::GetIntegerMapEntry(arguments, "device", FeedbackDeviceNone));
+		const FeedbackBus bus = static_cast<FeedbackBus>(Utils::Utils::GetIntegerMapEntry(arguments, "bus", FeedbackBusNone));
 		const bool inverted = Utils::Utils::GetBoolMapEntry(arguments, "inverted");
 		const DataModel::FeedbackType feedbackType = static_cast<DataModel::FeedbackType>(Utils::Utils::GetIntegerMapEntry(arguments, "feedbacktype", FeedbackTypeDefault));
 		const RouteID routeId = Utils::Utils::GetIntegerMapEntry(arguments, "route", RouteNone);
@@ -2866,6 +2921,8 @@ namespace Server { namespace Web
 			controlId,
 			matchKey,
 			pin,
+			device,
+			bus,
 			inverted,
 			feedbackType,
 			routeId,
@@ -2977,14 +3034,14 @@ namespace Server { namespace Web
 	{
 		FeedbackID feedbackID = Utils::Utils::GetIntegerMapEntry(arguments, "feedback", FeedbackNone);
 		const DataModel::Feedback* feedback = manager.GetFeedback(feedbackID);
-		if (feedback == nullptr)
+		if (!feedback)
 		{
 			ReplyHtmlWithHeader(HtmlTag());
 			return;
 		}
 
-		LayerID layer = Utils::Utils::GetIntegerMapEntry(arguments, "layer", LayerNone);
-		if (feedback->GetControlID() == -layer)
+		const LayerID layer = Utils::Utils::GetIntegerMapEntry(arguments, "layer", LayerNone);
+		if (feedback->CheckControl(layer))
 		{
 			ReplyHtmlWithHeader(HtmlTagFeedback(feedback, true));
 			return;
@@ -3367,7 +3424,7 @@ namespace Server { namespace Web
 		rawContent.AddId("tab_raw");
 		rawContent.AddClass("tab_content");
 		rawContent.AddClass("narrow_label");
-		HtmlTag controlSelector = WebClientStatic::HtmlTagControl("controlraw", controls);
+		HtmlTag controlSelector = WebClientStatic::HtmlTagControlProgrammer("controlraw", controls);
 		rawContent.AddChildTag(controlSelector);
 
 		const ControlID controlIdFirst = controls.begin()->first;

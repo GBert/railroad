@@ -39,6 +39,8 @@ namespace Hardware
 			:	controlId(controlId),
 				feedbackId(FeedbackNone),
 				pin(FeedbackPinNone),
+				device(FeedbackDeviceNone),
+				bus(FeedbackBusNone),
 				matchKey("")
 			{
 			}
@@ -78,6 +80,26 @@ namespace Hardware
 				this->pin = pin;
 			}
 
+			inline void SetDevice(const FeedbackDevice device)
+			{
+				this->device = device;
+			}
+
+			inline FeedbackDevice GetDevice() const
+			{
+				return device;
+			}
+
+			inline void SetBus(const FeedbackBus bus)
+			{
+				this->bus = bus;
+			}
+
+			inline FeedbackBus GetBus() const
+			{
+				return bus;
+			}
+
 			inline const std::string& GetMatchKey() const
 			{
 				return matchKey;
@@ -98,6 +120,8 @@ namespace Hardware
 			FeedbackID feedbackId;
 			std::string name;
 			FeedbackPin pin;
+			FeedbackDevice device;
+			FeedbackBus bus;
 			std::string matchKey;
 	};
 

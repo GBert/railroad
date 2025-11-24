@@ -51,6 +51,7 @@ namespace Hardware
 		CapabilityMultipleUnitDatabase         = 0x00100000,
 		CapabilityAccessoryDatabase            = 0x00200000,
 		CapabilityFeedbackDatabase             = 0x00400000,
+		CapabilityFeedbackDeviceBus            = 0x00800000,
 	};
 
 	inline Capabilities operator& (const Capabilities c1, const Capabilities c2)

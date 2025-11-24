@@ -20,6 +20,7 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <future>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <unistd.h>
 
@@ -45,6 +46,7 @@ using Visible = DataModel::LayoutItem::Visible;
 using Hardware::HardwareHandler;
 using Hardware::HardwareParams;
 using std::map;
+using std::pair;
 using std::to_string;
 using std::string;
 using std::stringstream;
@@ -1601,9 +1603,13 @@ void Manager::AccessoryRemoveMatchKey(const AccessoryID accessoryId)
 * Feedback                 *
 ***************************/
 
-void Manager::FeedbackState(const ControlID controlID, const FeedbackPin pin, const DataModel::Feedback::FeedbackState state)
+void Manager::FeedbackState(const ControlID controlID,
+	const FeedbackPin pin,
+	const FeedbackDevice device,
+	const FeedbackBus bus,
+	const DataModel::Feedback::FeedbackState state)
 {
-	Feedback* feedback = GetFeedback(controlID, pin);
+	Feedback* feedback = GetFeedback(controlID, pin, device, bus);
 	if (feedback)
 	{
 		FeedbackState(feedback, state);
@@ -1615,11 +1621,13 @@ void Manager::FeedbackState(const ControlID controlID, const FeedbackPin pin, co
 		return;
 	}
 
-	string name = "Feedback auto added " + std::to_string(controlID) + "/" + std::to_string(pin);
+	// add feedback if it does not exist
+	string name(Languages::GetText(Languages::TextFeedback));
+	name += " " + std::to_string(controlID) + "/" + std::to_string(pin) + "/" + std::to_string(device) + "/" + std::to_string(bus);
 	logger->Info(Languages::TextAddingFeedback, name);
 	string result;
 
-	FeedbackSave(FeedbackNone, name, DataModel::LayoutItem::VisibleNo, 0, 0, 0, DataModel::LayoutItem::Rotation0, controlID, "", pin, false, FeedbackTypeDefault, RouteNone, result);
+	FeedbackSave(FeedbackNone, name, DataModel::LayoutItem::VisibleNo, 0, 0, 0, DataModel::LayoutItem::Rotation0, controlID, "", pin, device, bus, false, FeedbackTypeDefault, RouteNone, result);
 }
 
 void Manager::FeedbackState(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state)
@@ -1666,15 +1674,18 @@ Feedback* Manager::GetFeedbackUnlocked(const FeedbackID feedbackID) const
 	return feedbacks.at(feedbackID);
 }
 
-Feedback* Manager::GetFeedback(const ControlID controlID, const FeedbackPin pin) const
+Feedback* Manager::GetFeedback(const ControlID controlID,
+	const FeedbackPin pin,
+	const FeedbackDevice device,
+	const FeedbackBus bus) const
 {
 	std::lock_guard<std::mutex> guard(feedbackMutex);
-	for (auto& feedback : feedbacks)
+	for (auto& f : feedbacks)
 	{
-		if (feedback.second->GetControlID() == controlID
-			&& feedback.second->GetPin() == pin)
+		Feedback* feedback = f.second;
+		if (feedback->CheckControl(controlID, device, bus) && (feedback->GetPin() == pin))
 		{
-			return feedback.second;
+			return feedback;
 		}
 	}
 	return nullptr;
@@ -1719,6 +1730,8 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 	const ControlID controlID,
 	const string& matchKey,
 	const FeedbackPin pin,
+	const FeedbackDevice device,
+	const FeedbackBus bus,
 	const bool inverted,
 	const FeedbackType feedbackType,
 	const RouteID routeId,
@@ -1753,6 +1766,8 @@ bool Manager::FeedbackSave(FeedbackID feedbackID,
 	feedback->SetControlID(controlID);
 	feedback->SetMatchKey(matchKey);
 	feedback->SetPin(pin);
+	feedback->SetDevice(device);
+	feedback->SetBus(bus);
 	feedback->SetInverted(inverted);
 	feedback->SetFeedbackType(feedbackType);
 	feedback->SetRouteId(routeId);
@@ -2888,15 +2903,43 @@ const map<string,LayerID> Manager::LayerListByName() const
 
 const map<string,LayerID> Manager::LayerListByNameWithFeedback() const
 {
+	std::set<ObjectID> controlDeviceBusIDs;
+	{
+		std::lock_guard<std::mutex> guard(controlMutex);
+		for (auto& feedback : feedbacks)
+		{
+			Feedback* f = feedback.second;
+			controlDeviceBusIDs.insert((((f->GetControlID() << 8) + f->GetDevice()) << 2) + f->GetBus());
+		}
+	}
 	map<string,LayerID> list = LayerListByName();
 	std::lock_guard<std::mutex> guard(controlMutex);
-	for (auto& control : controls)
+	for (auto& c : controls)
 	{
-		if (!control.second->CanHandle(Hardware::CapabilityFeedback))
+		const ControlInterface* control = c.second;
+		if (!control->CanHandle(Hardware::CapabilityFeedback))
 		{
 			continue;
 		}
-		list["| Feedbacks of " + control.second->GetShortName()] = -control.first;
+		const ControlID controlID = c.first;
+		if (control->CanHandle(Hardware::CapabilityFeedbackDeviceBus))
+		{
+			for (const ObjectID controlDeviceBusID : controlDeviceBusIDs)
+			{
+				if ((controlDeviceBusID >> 10) == controlID)
+				{
+					const FeedbackDevice device = (controlDeviceBusID >> 2) & 0x000000FF;
+					const FeedbackBus bus = (controlDeviceBusID) & 0x00000003;
+					const string name = Logger::Logger::Format(Languages::GetText(Languages::TextFeedbacksOfControlDeviceBus), control->GetShortName(), device, bus);
+					list[name] = -controlDeviceBusID;
+				}
+			}
+		}
+		else
+		{
+			const string name = Logger::Logger::Format(Languages::GetText(Languages::TextFeedbacksOfControl), control->GetShortName());
+			list[name] = -(controlID << 10);
+		}
 	}
 	return list;
 }

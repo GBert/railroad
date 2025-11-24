@@ -86,9 +86,23 @@ namespace Server { namespace Web
 			static HtmlTag HtmlTagLogLevel();
 			static HtmlTag HtmlTagLanguage();
 			static HtmlTag HtmlTagStartupLocos(const StartupInitLocos startupInitLocos);
+
 			static HtmlTag HtmlTagControlArguments(const HardwareType hardwareType, const std::string& arg1 = "", const std::string& arg2 = "", const std::string& arg3 = "", const std::string& arg4 = "", const std::string& arg5 = "");
-			static HtmlTag HtmlTagControl(const std::map<ControlID,std::string>& controls, ControlID& controlId, const std::string& objectType, const ObjectID objectID);
-			static HtmlTag HtmlTagControl(const std::string& name, const std::map<ControlID,std::string>& controls);
+
+			static HtmlTag HtmlTagControl(const std::map<ControlID,std::string>& controls,
+				ControlID& controlId,
+				const std::string& objectType,
+				const ObjectID objectID);
+
+			static HtmlTag HtmlTagControlFeedback(const std::map<ControlID,std::string>& controls,
+				ControlID& controlId);
+
+			static HtmlTag HtmlTagControl(const std::map<ControlID,std::string>& controls,
+				ControlID& controlId,
+				const std::string& onchange);
+
+			static HtmlTag HtmlTagControlProgrammer(const std::string& name,
+				const std::map<ControlID,std::string>& controls);
 
 			static HtmlTag HtmlTagSlaveEntry(const std::string& prefix,
 				const std::string& priority,

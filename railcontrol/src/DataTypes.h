@@ -43,10 +43,9 @@ typedef ObjectID AccessoryID;
 
 // feedback
 typedef ObjectID FeedbackID;
-typedef uint32_t FeedbackPin;
-typedef uint32_t FeedbackModule;
-typedef uint32_t FeedbackBus;
-typedef uint32_t FeedbackDevice;
+typedef uint32_t FeedbackPin;    // FIXME: 2025-11-02 can be changed to uint16_t later
+typedef uint32_t FeedbackDevice; // FIXME: 2025-11-02 can be changed to uint8_t later
+typedef uint32_t FeedbackBus;    // FIXME: 2025-11-02 can be changed to uint8_t later
 
 // track
 typedef ObjectID TrackID;
@@ -63,11 +62,12 @@ typedef ObjectID RouteID;
 typedef uint16_t Delay;
 
 // layer
-typedef int16_t LayerID;
+typedef int32_t LayerID;
 
 // relations
 typedef uint16_t Priority;
 
+// pause
 typedef uint8_t Pause;
 
 // text
@@ -85,6 +85,10 @@ static const ObjectID ObjectNone = 0;
 static const AccessoryID AccessoryNone = 0;
 static const FeedbackID FeedbackNone = 0;
 static const FeedbackPin FeedbackPinNone = 0;
+static const FeedbackPin FeedbackPinMin = 1;
+static const FeedbackPin FeedbackPinMax = 512;
+static const FeedbackDevice FeedbackDeviceNone = 0;
+static const FeedbackBus FeedbackBusNone = 0;
 static const TrackID TrackNone = 0;
 static const SwitchID SwitchNone = 0;
 static const RouteID RouteNone = 0;

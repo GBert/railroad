@@ -513,6 +513,29 @@ function updateName()
 	return true;
 }
 
+function update_pin()
+{
+	let pinField = document.getElementById('pin');
+	if (!pinField)
+	{
+		return false;
+	}
+	let pin = pinField.value;
+	let calc_moduleField = document.getElementById('calc_module');
+	if (!calc_moduleField)
+	{
+		return false;
+	}
+	calc_moduleField.innerHTML = ((pin - 1) >> 4) + 1;
+	let calc_pinField = document.getElementById('calc_pin');
+	if (!calc_pinField)
+	{
+		return false;
+	}
+	calc_pinField.innerHTML = ((pin - 1) & 0x0F) + 1;
+	return false;
+}
+
 function getArgumentsOfHardwareType()
 {
 	var hardwareType = document.getElementById('s_hardwaretype');
@@ -1734,12 +1757,14 @@ function dataUpdate(event)
 		url += '&feedback=' + feedbackID;
 		url += '&layer=' + layerID;
 		requestUpdateLayoutItem(elementName, url);
+		loadLayerSelector();
 	}
 	else if (command == 'feedbackdelete')
 	{
 		elementName = 'f_' + argumentMap.get('feedback');
 		deleteElement(elementName);
 		deleteElement(elementName + '_context');
+		loadLayerSelector();
 	}
 	else if ((command == 'locosettings')
 		|| (command == 'locodelete')
@@ -1899,6 +1924,39 @@ function loadAccessoryAddress()
 	url += '&type=' + type;
 	url += '&address=' + address;
 	url += '&port=' + port;
+	requestUpdateItem(elementName, url);
+}
+
+function loadDeviceBus()
+{
+	var selectControl = document.getElementById('s_control');
+	if (!selectControl)
+	{
+		return;
+	}
+	var controlID = selectControl.value;
+	var elementName = 'select_device_bus';
+	var selectDeviceBus = document.getElementById(elementName);
+	if (!selectDeviceBus)
+	{
+		return;
+	}
+	var intDevice = document.getElementById('device');
+	if (!intDevice)
+	{
+		return;
+	}
+	var device = intDevice.value;
+	var intBus = document.getElementById('bus');
+	if (!intBus)
+	{
+		return;
+	}
+	var bus = intBus.value;
+	var url = '/?cmd=devicebus';
+	url += '&control=' + controlID;
+	url += '&device=' + device;
+	url += '&bus=' + bus;
 	requestUpdateItem(elementName, url);
 }
 
@@ -2533,3 +2591,4 @@ updater.addEventListener('message', dataUpdate);
 updater.addEventListener('error', dataUpdateError);
 
 window.addEventListener('resize', updateLocoControls);
+

@@ -810,14 +810,12 @@ namespace Hardware { namespace Protocols
 			onOff = Languages::GetText(Languages::TextOff);
 			state = DataModel::Feedback::FeedbackStateFree;
 		}
-		FeedbackPin pinold;
-		FeedbackPin pin;
-		FeedbackModule module;
-		FeedbackBus bus;
 		FeedbackDevice device;
-		ParseFeedbackPin(buffer, pinold, pin, module, bus, device);
-		logger->Info(Languages::TextFeedbackChangeCS2, pin, module, bus, device, onOff);
-		manager->FeedbackState(controlID, pinold, state);
+		FeedbackBus bus;
+		FeedbackPin pin;
+		ParseFeedbackPin(buffer, device, bus, pin);
+		logger->Info(Languages::TextFeedbackChangeCS2, pin & 0x00000007, (pin >> 3) & 0x0000003F, bus, device, onOff);
+		manager->FeedbackState(controlID, pin, device, bus, state);
 	}
 
 	void MaerklinCANCommon::ParseResponseReadConfig(const unsigned char* const buffer)

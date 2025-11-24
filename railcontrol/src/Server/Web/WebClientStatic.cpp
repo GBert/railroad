@@ -309,7 +309,23 @@ namespace Server { namespace Web
 		return HtmlTagSelectWithLabel("startupinitlocos", Languages::TextStartupInitLocos, options, startupInitLocos);
 	}
 
-	HtmlTag WebClientStatic::HtmlTagControl(const std::map<ControlID,string>& controls, ControlID& controlId, const string& objectType, const ObjectID objectID)
+	HtmlTag WebClientStatic::HtmlTagControl(const std::map<ControlID,string>& controls,
+		ControlID& controlId,
+		const string& objectType,
+		const ObjectID objectID)
+	{
+		return HtmlTagControl(controls, controlId, "loadProtocol('" + objectType + "', " + to_string(objectID) + ")");
+	}
+
+	HtmlTag WebClientStatic::HtmlTagControlFeedback(const std::map<ControlID,string>& controls,
+		ControlID& controlId)
+	{
+		return HtmlTagControl(controls, controlId, "loadDeviceBus()");
+	}
+
+	HtmlTag WebClientStatic::HtmlTagControl(const std::map<ControlID,string>& controls,
+		ControlID& controlId,
+		const string& onchange)
 	{
 		if (controls.size() == 0)
 		{
@@ -341,11 +357,13 @@ namespace Server { namespace Web
 		{
 			controlOptions[to_string(control.first)] = control.second;
 		}
-		return HtmlTagSelectWithLabel("control", Languages::TextControl, controlOptions, to_string(controlId)).AddAttribute("onchange", "loadProtocol('" + objectType + "', " + to_string(objectID) + ")");
+		return HtmlTagSelectWithLabel("control", Languages::TextControl, controlOptions, to_string(controlId)).AddAttribute("onchange", onchange);
 	}
 
-	HtmlTag WebClientStatic::HtmlTagControl(const string& name, const std::map<ControlID,string>& controls)
+	HtmlTag WebClientStatic::HtmlTagControlProgrammer(const string& name,
+		const std::map<ControlID,string>& controls)
 	{
+		// FIXME: controls.size == 0
 		ControlID controlIdFirst = controls.begin()->first;
 		if (controls.size() == 1)
 		{

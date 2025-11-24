@@ -16,7 +16,6 @@
 - Anbinden von USBtin-Märklin-CAN
 - Anbinden von SocketCAN (für Märklin CAN)
 - Rückmelder für Weichenlage
-- S88 Link auf separaten Ebenen
 - Autokonversion der Protokolle bei Zentralenwechsel
 - CS2-Server
 - Verzögerung bei Feedback an / aus konfigurierbar

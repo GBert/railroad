@@ -162,10 +162,17 @@ namespace Server { namespace Web
 				const DataModel::LayoutItem::LayoutRotation rotation = DataModel::LayoutItem::RotationNotRelevant,
 				const DataModel::LayoutItem::Visible visible = DataModel::LayoutItem::VisibleNotRelevant) const ;
 
-			HtmlTag HtmlTagControlLoco(ControlID& controlId, const std::string& objectType, const ObjectID objectID) const;
-			HtmlTag HtmlTagControlMultipleUnit(ControlID& controlId, const std::string& objectType, const ObjectID objectID) const;
-			HtmlTag HtmlTagControlAccessory(ControlID& controlID, const std::string& objectType, const ObjectID objectID) const;
-			HtmlTag HtmlTagControlFeedback(ControlID& controlId, const std::string& objectType, const ObjectID objectID) const;
+			HtmlTag HtmlTagControlLoco(ControlID& controlId,
+				const ObjectID objectID) const;
+
+			HtmlTag HtmlTagControlMultipleUnit(ControlID& controlId,
+				const ObjectID objectID) const;
+
+			HtmlTag HtmlTagControlAccessory(ControlID& controlID,
+				const std::string& objectType,
+				const ObjectID objectID) const;
+
+			HtmlTag HtmlTagControlFeedback(ControlID& controlId) const;
 
 			HtmlTag HtmlTagProtocolAccessory(const ControlID controlID, const Protocol selectedProtocol);
 
@@ -177,7 +184,7 @@ namespace Server { namespace Web
 				const SignalID signalId,
 				const DataModel::Relation::Data data = DataModel::SignalStateStop);
 
-			static std::string ProtocolName(const Protocol protocol)
+			static inline std::string ProtocolName(const Protocol protocol)
 			{
 				return ProtocolSymbols[protocol <= ProtocolEnd ? protocol : ProtocolNone];
 			}
@@ -188,6 +195,10 @@ namespace Server { namespace Web
 
 			HtmlTag HtmlTagMatchKeyFeedback(const ControlID controlID,
 				const std::string& selectedMatchKey) const;
+
+			HtmlTag HtmlTagFeedbackDeviceBus(const ControlID controlID,
+				const FeedbackDevice device,
+				const FeedbackBus bus);
 
 		private:
 			void InterpretClientRequest(const std::deque<std::string>& lines, std::string& method, std::string& uri, std::string& protocol, std::map<std::string,std::string>& arguments, std::map<std::string,std::string>& headers);
@@ -250,6 +261,7 @@ namespace Server { namespace Web
 			void HandleMultipleUnitRelease(const std::map<std::string, std::string>& arguments);
 			void HandleProtocol(const std::map<std::string, std::string>& arguments);
 			void HandleAccessoryAddress(const std::map<std::string, std::string>& arguments);
+			void HandleFeedbackDeviceBus(const std::map<std::string, std::string>& arguments);
 			void HandleLayout(const std::map<std::string,std::string>& arguments);
 			void HandleAccessoryEdit(const std::map<std::string,std::string>& arguments);
 			void HandleAccessorySave(const std::map<std::string,std::string>& arguments);

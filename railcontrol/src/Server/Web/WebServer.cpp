@@ -68,7 +68,9 @@ namespace Server { namespace Web
 		AddUpdate(Languages::TextRailControlStarted);
 
 		LogBrowserInfo(webserveraddress, port);
+#ifndef NOUPDATECHECK
 		updateAvailable = Utils::Network::HostResolves(GetVersionInfoGitHash() + ".hash.railcontrol.org");
+#endif
 	}
 
 	WebServer::~WebServer()

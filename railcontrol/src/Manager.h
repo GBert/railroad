@@ -350,7 +350,19 @@ class Manager
 		void AccessoryRemoveMatchKey(const AccessoryID accessoryId);
 
 		// feedback
-		void FeedbackState(const ControlID controlID, const FeedbackPin pin, const DataModel::Feedback::FeedbackState state);
+		inline void FeedbackState(const ControlID controlID,
+			const FeedbackPin pin,
+			const DataModel::Feedback::FeedbackState state)
+		{
+			FeedbackState(controlID, pin, 0, 0, state);
+		}
+
+		void FeedbackState(const ControlID controlID,
+			const FeedbackPin pin,
+			const FeedbackDevice device,
+			const FeedbackBus bus,
+			const DataModel::Feedback::FeedbackState state);
+
 		void FeedbackState(const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state);
 		void FeedbackPublishState(const DataModel::Feedback* feedback);
 		DataModel::Feedback* GetFeedback(const FeedbackID feedbackID) const;
@@ -378,6 +390,8 @@ class Manager
 			const ControlID controlID,
 			const std::string& matchKey,
 			const FeedbackPin pin,
+			const FeedbackDevice device,
+			const FeedbackBus bus,
 			const bool inverted,
 			const DataModel::FeedbackType feedbackType,
 			const RouteID routeId,
@@ -799,7 +813,10 @@ class Manager
 
 		DataModel::Switch* GetSwitch(const ControlID controlID, const Protocol protocol, const Address address) const;
 
-		DataModel::Feedback* GetFeedback(const ControlID controlID, const FeedbackPin pin) const;
+		DataModel::Feedback* GetFeedback(const ControlID controlID,
+			const FeedbackPin pin,
+			const FeedbackDevice device,
+			const FeedbackBus bus) const;
 
 		DataModel::Signal* GetSignal(const ControlID controlID, const Protocol protocol, const Address address) const;
 

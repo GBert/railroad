@@ -336,21 +336,19 @@ namespace Hardware { namespace Protocols
 			}
 
 			static inline void ParseFeedbackPin(const unsigned char* const buffer,
-				FeedbackPin& pinold,
-				FeedbackPin& pin,
-				FeedbackModule& module,
+				FeedbackDevice& device,
 				FeedbackBus& bus,
-				FeedbackDevice& device)
+				FeedbackPin& pin)
 			{
-				pinold = static_cast<FeedbackPin>(Utils::Integer::DataBigEndianToInt(buffer + 5));
-				pin = pinold;
-
-				pinold = (pinold & 0x00000FFF) | ((pinold & 0x00FF0000) >> 4);
-
+				pin = static_cast<FeedbackPin>(Utils::Integer::DataBigEndianToInt(buffer + 5));
 				device = (pin >> 16) & 0x000000FF;
-				bus = (pin / 1000) &0x00000003;
-				module = ((pin >> 3) & 0x0000001F);
-				pin &= 0x00000007;
+				bus = 0;
+				pin &= 0x0000FFFF;
+				while (pin > 1000)
+				{
+					++bus;
+					pin -= 1000;
+				}
 			}
 
 			static inline CanHash ParseHash(const unsigned char* const buffer)

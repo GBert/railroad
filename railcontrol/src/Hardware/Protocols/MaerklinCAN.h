@@ -55,7 +55,8 @@ namespace Hardware { namespace Protocols
 					| Hardware::CapabilityProgramDccDirectWrite
 					| Hardware::CapabilityProgramDccPomLocoWrite
 					| Hardware::CapabilityProgramDccPomAccessoryWrite
-					| Hardware::CapabilityLocoDatabase;
+					| Hardware::CapabilityLocoDatabase
+					| Hardware::CapabilityFeedbackDeviceBus;
 			}
 
 			void GetLocoProtocols(std::vector<Protocol>& protocols) const override
