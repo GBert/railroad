@@ -41,12 +41,10 @@
         <div style="font-size:clamp(1rem,calc(var(--top-btn-h)*0.40),1.3rem); font-weight:normal; text-align:center;">
           <span data-i18n="info.aboutHtml">The source code of this WebApp is publicly available on <a href="https://github.com/RalfMende/MobileStationWebApp" target="_blank">GitHub</a>.<br>There you'll also find the license terms (see LICENSE) and the latest release.</span><br>
           <span data-i18n="info.docsHtml"><a href="https://ralfmende.github.io/MobileStationWebApp/index.html" target="_blank">Online documentation & FAQ</a></span><br>
+          <span data-i18n="info.author">Author: Ralf Mende</span><br>
           <br>
-          <b><span data-i18n="info.version">Version:</span></b> <span id="appVersion">loading…</span><br>
           <b><span data-i18n="info.backend">Backend:</span></b> <span id="backendType">loading…</span><br>
           <br>
-          <span data-i18n="info.author">Author: Ralf Mende</span><br>
-          <span data-i18n="info.issues">For questions, bug reports, or feature requests, please open an issue on GitHub.</span><br>
         </div>
         <div style="font-size:clamp(1rem,calc(var(--top-btn-h)*0.40),1.3rem); font-weight:normal; text-align:center;" data-i18n="info.controlsHeader">SRSEII locomotive list controls:</div>
         <button class="event-btn" id="eventBtn1" data-i18n="info.btn.refresh" style="height:var(--top-btn-h); min-height:0; font-size:clamp(0.8rem,calc(var(--top-btn-h)*0.30),1.1rem); padding-inline:clamp(0.7rem,calc(var(--top-btn-h)*0.40),2rem); width:50vw; max-width:320px; display:block; margin:0 auto;">Refresh locomotive list</button>
@@ -60,9 +58,8 @@
   <div id="controlPage" class="page">
     <div class="main-content">
       <div class="functions-side" id="leftFunctions"></div>
-
       <div class="speed-block">
-        <div id="speedValue" class="speed-display">0 km/h</div>
+        <div id="speedValue" class="speed-display">km/h</div>
         <div class="speed-bar-wrapper">
           <div class="speed-bar" id="speedBar">
             <div id="speedFill" class="speed-fill"></div>
@@ -76,11 +73,9 @@
           <img id="forwardBtn" class="dir-btn active" src="/static/grafics/dir_right_active.png" />
         </div>
       </div>
-
       <div class="functions-side" id="rightFunctions"></div>
     </div>
-
-    <div class="loco-list-wrapper">
+    <div class="control-bottom-bar">
       <div id="locoList" class="loco-list"></div>
     </div>
   </div>

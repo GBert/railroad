@@ -19,6 +19,7 @@
 #include <optional>
 #include <filesystem>
 #include <condition_variable>
+#include <cstring>
 #include <cctype>
 
 #include "httplib.h" // yhirose/cpp-httplib single header (HTTP + SSE via chunked)
@@ -33,29 +34,34 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <sys/inotify.h>
+#include <fcntl.h>
 #endif
 
 namespace fs = std::filesystem;
-
-// Application version (keep in sync with Python package version)
-static const char* kMsWebAppVersion = "1.1.4";
 
 // ---- Basic types/state ----
 struct Loco {
     int uid = 0;
     std::string name;
-    std::string icon; // or bild
-    int tachomax = 200;
+    std::string icon;
+    int symbol = 0;
+    int tachomax = 0;
     std::map<int,int> fn_typ; // function index -> type id
 };
-
 static std::map<int, Loco> g_locos; // uid -> loco
-static std::map<int, int> g_switch_state; // idx -> value
-static std::vector<int> g_switch_uid; // idx -> computed uid (if available)
-static std::vector<std::string> g_switch_name; // idx -> name
 static std::map<int, int> g_loco_speed; // uid -> 0..1023
 static std::map<int, int> g_loco_dir;   // uid -> 0/1/2
 static std::map<int, std::map<int,bool>> g_loco_fn; // uid -> fn->bool
+struct SwitchEntry {
+    int uid = -1;            // computed uid
+    std::string name;
+    std::string typ;
+    std::string dectyp;     // decoder type (mm2/dcc/sx1/...) used to compute uid
+    int switch_delay = 0;   // switching time (ms) parsed as integer
+};
+static std::vector<SwitchEntry> g_switches; // index corresponds to switch slot
+static std::map<int, int> g_switch_state; // idx -> value
 static std::atomic<bool> g_running{false};
 static std::string g_config_dir = "var";
 static std::string g_public_cfg = "/cfg";
@@ -70,6 +76,7 @@ static std::string g_frontend_dir_override; // optional path to frontend dir (te
 static std::map<int, std::string> g_icon_overrides; // uid -> icon name (stem)
 static bool g_enable_bind_timer = false; // enable CMD_BIND timer only when --bind is passed
 static int g_bind_timeout_ms = 1000;     // timeout for MFX-BIND timer in milliseconds (default 1s)
+static bool g_enable_precompressed_gzip = true; // serve .gz files for static assets when available
 
 // ---- Utilities ----
 static std::string trim(const std::string &s) {
@@ -154,6 +161,7 @@ static std::string loco_list_json() {
         std::string icon_eff = (itov != g_icon_overrides.end()) ? itov->second : l.icon;
         os << "\"icon\":\"" << json_escape(icon_eff) << "\",";
         os << "\"tachomax\":" << l.tachomax;
+        os << ",\"symbol\":" << l.symbol;
         if (!l.fn_typ.empty()) {
             os << ",\"funktionen\":{";
             bool ffirst = true;
@@ -346,12 +354,14 @@ static void parse_lokomotive_cs2(const fs::path &p) {
                     cur.name = val;
                 } else if (key == "icon") {
                     cur.icon = val;
+                } else if (key == "symbol") {
+                    cur.symbol = parse_int_auto(val);
                 } else if (key == "tachomax") {
                     cur.tachomax = parse_int_auto(val);
-                } else if (key == "vmax") {
+                } /*else if (key == "vmax") {
                     int vmax = parse_int_auto(val);
-                    if (cur.tachomax <= 0 && vmax > 0) cur.tachomax = vmax;
-                }
+                    if (cur.tachomax <= 0 && vmax > 0) cur.tachomax = vmax; //Workaround for MS where there is no tachomax
+                }*/
             }
         }
     }
@@ -360,36 +370,48 @@ static void parse_lokomotive_cs2(const fs::path &p) {
 
 static void parse_magnetartikel_cs2(const fs::path &p) {
     g_switch_state.clear();
-    g_switch_uid.clear(); g_switch_uid.resize(64, -1);
-    g_switch_name.clear(); g_switch_name.resize(64);
+    g_switches.clear();
+    g_switches.resize(64);
     std::ifstream f(p);
     if (!f) return;
-    std::string line; bool in = false; int idx=0; int cur_id=0; std::string dectyp;
-    while (std::getline(f,line)) {
+    std::string line; bool in = false; int idx = 0; int cur_id = 0; std::string dectyp; std::string cur_name; std::string cur_typ; int cur_time = 0;
+    while (std::getline(f, line)) {
         line = trim(line);
-        if (line == "artikel") { in = true; idx++; cur_id=0; dectyp.clear(); continue; }
-        if (in && !line.empty() && line[0]=='.' && line.find('=')!=std::string::npos) {
+        if (line == "artikel") {
+            in = true; idx++; cur_id = 0; dectyp.clear(); cur_name.clear();
+            continue;
+        }
+        if (in && !line.empty() && line[0] == '.' && line.find('=') != std::string::npos) {
             auto pos = line.find('=');
-            std::string key = trim(line.substr(1, pos-1));
-            std::string val = trim(line.substr(pos+1));
+            std::string key = trim(line.substr(1, pos - 1));
+            std::string val = trim(line.substr(pos + 1));
             if (key == "id") {
                 try { cur_id = parse_int_auto(val); } catch (...) { cur_id = 0; }
+            } else if (key == "name") {
+                cur_name = val;
+            } else if (key == "typ") {
+                cur_typ = val;
+            } else if (key == "schaltzeit") {
+                cur_time = parse_int_auto(val);
             } else if (key == "dectyp") {
                 std::transform(val.begin(), val.end(), val.begin(), [](unsigned char c){ return (char)std::tolower(c); });
                 dectyp = val;
-            } else if (key == "name") {
-                if (idx>=1 && idx<=64) g_switch_name[idx-1] = val;
             }
-            if (idx <= 64) {
-                g_switch_state[idx-1] = 0;
-                // Compute UID once we see id (dectyp may come later; we recompute on each key)
+            if (idx >= 1 && idx <= 64) {
+                int vec_idx = idx - 1;
+                g_switch_state[vec_idx] = 0;
+                // Compute UID (recompute each time as in previous logic)
                 int id_int = cur_id - 1;
                 int uid = -1;
                 if (dectyp == "mm2") uid = 0x3000 | (id_int & 0x3FF);
                 else if (dectyp == "dcc") uid = 0x3800 | (id_int & 0x3FF);
                 else if (dectyp == "sx1") uid = 0x2800 | (id_int & 0x3FF);
                 else uid = (id_int & 0x3FF);
-                g_switch_uid[idx-1] = uid;
+                g_switches[vec_idx].uid = uid;
+                if (!cur_name.empty()) g_switches[vec_idx].name = cur_name;
+                if (!cur_typ.empty()) g_switches[vec_idx].typ = cur_typ;
+                g_switches[vec_idx].switch_delay = cur_time;
+                if (!dectyp.empty()) g_switches[vec_idx].dectyp = dectyp;
             }
         }
     }
@@ -477,14 +499,14 @@ static std::vector<uint8_t> payload_function(uint32_t loco_uid, int fn, int val)
     return b;
 }
 
-static std::vector<uint8_t> payload_switch(uint32_t uid, int val) {
+static std::vector<uint8_t> payload_switch(uint32_t uid, int pos, int cur) {
     std::vector<uint8_t> b;
     b.push_back((uid >> 24) & 0xFF);
     b.push_back((uid >> 16) & 0xFF);
     b.push_back((uid >> 8) & 0xFF);
     b.push_back(uid & 0xFF);
-    b.push_back(val & 0xFF);
-    b.push_back(0x01);
+    b.push_back(pos & 0xFF);
+    b.push_back(cur & 0xFF);
     return b;
 }
 
@@ -499,7 +521,7 @@ static std::vector<uint8_t> payload_system_state(uint32_t device_uid, bool runni
 }
 
 static void udp_send_frame(uint32_t can_id, const std::vector<uint8_t> &payload, int dlc) {
-    auto data = pad_to_8(payload);
+     auto data = pad_to_8(payload);
 #ifdef _WIN32
     SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock == INVALID_SOCKET) return;
@@ -633,8 +655,8 @@ static void udp_listener_thread(std::atomic<bool>& stop_flag) {
                 int value = int(data[4]);
                 // Map UID back to index if known
                 int idx = -1;
-                for (size_t i = 0; i < g_switch_uid.size(); ++i) {
-                    if (g_switch_uid[i] == uid) { idx = int(i); break; }
+                for (size_t i = 0; i < g_switches.size(); ++i) {
+                    if (g_switches[i].uid == uid) { idx = int(i); break; }
                 }
                 if (idx < 0) {
                     // Fallback: use low 10 bits as simple index if unknown mapping
@@ -660,6 +682,7 @@ struct Subscriber {
 };
 static std::mutex g_subs_mtx;
 static std::set<Subscriber*> g_subscribers;
+static const size_t kMaxSseClients = 32; // hard cap to prevent thread-pool starvation
 
 static void publish_event(const std::string &msg) {
     std::lock_guard<std::mutex> lk(g_subs_mtx);
@@ -721,6 +744,7 @@ int main(int argc, char** argv) {
             int v = parse_int_auto(nv); if (v > 0) g_bind_timeout_ms = v;
         }
         else if (a == "--verbose" || a == "-v") { g_verbose = true; }
+        else if (a == "--no-gzip") { g_enable_precompressed_gzip = false; }
         else if (a == "--help" || a == "-h") {
             printf("Usage: mswebapp_cpp [options]\n");
             printf("  --config <dir>     Path to config directory (contains config/, icons/, fcticons/, ...)\n");
@@ -729,6 +753,7 @@ int main(int argc, char** argv) {
             printf("  --port <port>      HTTP port (default 6020)\n");
             printf("  --www <dir>        Frontend directory containing templates/ and static/\n");
             printf("  --bind[=<ms>]      Enable requesting new loco config after MFX-BIND command automatically; optional timeout in ms (default %d)\n", g_bind_timeout_ms);
+            printf("  --no-gzip          Disable serving precompressed .gz files (default is enabled)\n");
             printf("  --verbose          Verbose logging\n");
             return 0;
         }
@@ -754,6 +779,8 @@ int main(int argc, char** argv) {
     std::thread rx(udp_listener_thread, std::ref(stop_flag));
 
     httplib::Server svr;
+    // Increase worker threads to avoid starvation with long-lived SSE requests
+    svr.new_task_queue = [] { return new httplib::ThreadPool(32); };
 
     // Static assets from src/frontend
     // If --frontend is provided, use it. Otherwise derive from executable path.
@@ -816,7 +843,8 @@ int main(int argc, char** argv) {
         std::error_code ec;
         uintmax_t sz = fs::file_size(p, ec);
         auto mt = fs::last_write_time(p, ec).time_since_epoch().count();
-        return "\"" + std::to_string(sz) + "-" + std::to_string(mt) + "\"";
+        return "\"" + std::to_string(static_cast<unsigned long long>(sz)) + "-" +
+               std::to_string(static_cast<long long>(mt)) + "\"";
     };
     svr.Get(R"(/static/(.*))", [&](const httplib::Request& req, httplib::Response &res){
         std::string rel = req.matches[1].str();
@@ -824,7 +852,7 @@ int main(int argc, char** argv) {
         // Prefer precompressed .gz if client accepts gzip
         bool accept_gzip = req.has_header("Accept-Encoding") && req.get_header_value("Accept-Encoding").find("gzip") != std::string::npos;
         fs::path gz = wanted; gz += ".gz";
-        bool use_gz = accept_gzip && fs::exists(gz);
+        bool use_gz = g_enable_precompressed_gzip && accept_gzip && fs::exists(gz);
         fs::path file = use_gz ? gz : wanted;
         std::error_code ec;
         if (!fs::exists(file, ec) || fs::is_directory(file, ec)) { res.status = 404; return; }
@@ -834,7 +862,7 @@ int main(int argc, char** argv) {
         if (!inm.empty() && inm == etag) {
             res.status = 304;
             res.set_header("ETag", etag.c_str());
-            res.set_header("Cache-Control", "public, max-age=31536000, immutable");
+            res.set_header("Cache-Control", "public, max-age=86400");
             res.set_header("Vary", "Accept-Encoding");
             return;
         }
@@ -845,7 +873,7 @@ int main(int argc, char** argv) {
         std::string ext = wanted.extension().string();
         res.set_content(buf.str(), mime_of(ext));
         res.set_header("ETag", etag.c_str());
-        res.set_header("Cache-Control", "public, max-age=31536000, immutable");
+        res.set_header("Cache-Control", "public, max-age=86400");
         res.set_header("Vary", "Accept-Encoding");
         if (use_gz) res.set_header("Content-Encoding", "gzip");
     });
@@ -872,7 +900,7 @@ int main(int argc, char** argv) {
                 std::ifstream f(fallback, std::ios::binary);
                 std::ostringstream buf; buf << f.rdbuf();
                 res.set_content(buf.str(), "application/octet-stream");
-                res.set_header("Cache-Control", "public, max-age=31536000, immutable");
+                res.set_header("Cache-Control", "public, max-age=86400");
             } else {
                 res.status = 404;
             }
@@ -907,9 +935,13 @@ int main(int argc, char** argv) {
         std::ostringstream os; os << "{\"artikel\":[";
         for (int i=0;i<=maxIdx;i++) {
             if (i>0) os << ",";
-            std::string name = (i < (int)g_switch_name.size()) ? g_switch_name[i] : std::string();
-            int uid = (i < (int)g_switch_uid.size() && g_switch_uid[i] >= 0) ? g_switch_uid[i] : i;
-            os << "{\"name\":\"" << json_escape(name) << "\",\"uid\":" << uid << "}";
+            std::string name = (i < (int)g_switches.size()) ? g_switches[i].name : std::string();
+            int uid = (i < (int)g_switches.size() && g_switches[i].uid >= 0) ? g_switches[i].uid : i;
+            os << "{\"name\":\"" << json_escape(name) << "\",\"uid\":" << uid;
+            if (i < (int)g_switches.size() && !g_switches[i].dectyp.empty()) {
+                os << ",\"typ\":\"" << json_escape(g_switches[i].dectyp) << "\"";
+            }
+            os << "}";
         }
         os << "]}";
         res.set_content(os.str(), "application/json");
@@ -954,8 +986,6 @@ int main(int argc, char** argv) {
 
     // API: control_event
     svr.Post("/api/control_event", [&](const httplib::Request& req, httplib::Response &res){
-        // Minimal body parse: expect JSON with keys; to avoid JSON deps, accept form as well
-        // For simplicity, assume application/json and parse very naively
         int uid=0; int speed=-1; int direction=-1; int fn=-1; int val=-1;
         auto body = req.body;
         auto find_num = [&](const char* key)->int{
@@ -994,7 +1024,7 @@ int main(int argc, char** argv) {
 
     // API: keyboard_event (switch)
     svr.Post("/api/keyboard_event", [&](const httplib::Request& req, httplib::Response &res){
-        int idx=-1, value=-1;
+        int idx=-1, pos=-1;
         auto body = req.body;
         auto find_num = [&](const char* key)->int{
             auto pos = body.find(key);
@@ -1006,18 +1036,24 @@ int main(int argc, char** argv) {
             if (k>j) return std::stoi(body.substr(j,k-j));
             return -1;
         };
-        idx = find_num("idx"); value = find_num("value");
-        if (idx<0 || value<0) { res.status=400; res.set_content("{\"status\":\"error\",\"message\":\"idx and value required\"}","application/json"); return; }
-        g_switch_state[idx] = value;
-        publish_event(switch_event_json(idx, value));
+        idx = find_num("idx"); pos = find_num("pos");
+        if (idx<0 || pos<0) { res.status=400; res.set_content("{\"status\":\"error\",\"message\":\"idx and pos required\"}","application/json"); return; }
+        g_switch_state[idx] = pos;
+        publish_event(switch_event_json(idx, pos));
         {
             // Map index to UID if available from parsed magnetartikel.cs2
             int uid = idx;
-            if (idx >= 0 && idx < (int)g_switch_uid.size() && g_switch_uid[idx] >= 0) {
-                uid = g_switch_uid[idx];
+            if (idx >= 0 && idx < (int)g_switches.size() && g_switches[idx].uid >= 0) {
+                uid = g_switches[idx].uid;
             }
             uint32_t can_id = build_can_id((uint32_t)g_device_uid, CMD_SWITCH, 0, 0);
-            udp_send_frame(can_id, payload_switch((uint32_t)uid, value), 6);
+            udp_send_frame(can_id, payload_switch((uint32_t)uid, pos, 1), 6);
+            int switch_delay_ms = 200; // default delay before auto-reset
+            if (g_switches[idx].switch_delay > 0) { switch_delay_ms = g_switches[idx].switch_delay; }
+            std::thread([can_id, uid, pos, switch_delay_ms]{
+                std::this_thread::sleep_for(std::chrono::milliseconds(switch_delay_ms));
+                udp_send_frame(can_id, payload_switch((uint32_t)uid, pos, 0), 6);
+            }).detach();
         }
         res.set_content("{\"status\":\"ok\"}", "application/json");
     });
@@ -1061,6 +1097,16 @@ int main(int argc, char** argv) {
         res.set_header("Cache-Control", "no-cache");
         res.set_header("Content-Type", "text/event-stream");
         res.set_header("Connection", "keep-alive");
+        // Simple admission control: if too many SSE clients are already connected,
+        // reject to avoid exhausting the server's worker threads.
+        {
+            std::lock_guard<std::mutex> lk(g_subs_mtx);
+            if (g_subscribers.size() >= kMaxSseClients) {
+                res.status = 503;
+                res.set_content("too many SSE clients\n", "text/plain");
+                return;
+            }
+        }
         auto *sub = new Subscriber();
         {
             std::lock_guard<std::mutex> lk(g_subs_mtx);
@@ -1092,8 +1138,16 @@ int main(int argc, char** argv) {
                     if (!sink.write(line.data(), line.size())) return false;
                     lk.lock();
                 } else {
-                    sub->cv.wait_for(lk, std::chrono::seconds(15));
+                    // Wait for new events, but also send a periodic keepalive to
+                    // detect broken connections and keep intermediaries happy.
+                    auto status = sub->cv.wait_for(lk, std::chrono::seconds(15));
                     if (sub->closed) return false;
+                    if (status == std::cv_status::timeout && sub->queue.empty()) {
+                        lk.unlock();
+                        static const char ka[] = ": keepalive\n\n"; // SSE comment line
+                        if (!sink.write(ka, sizeof(ka) - 1)) return false;
+                        lk.lock();
+                    }
                 }
             }
             return true;
@@ -1113,8 +1167,7 @@ int main(int argc, char** argv) {
             << "\"system_state\":\"" << (g_running.load()?"running":"stopped") << "\"," 
             << "\"loco_count\":" << g_locos.size() << ","
             << "\"switch_count\":" << g_switch_state.size() << ","
-            << "\"udp_target\":\"" << g_udp_ip << ":" << g_udp_tx << "\"," 
-            << "\"version\":\"" << kMsWebAppVersion << "\"}";
+            << "\"udp_target\":\"" << g_udp_ip << ":" << g_udp_tx << "\"}";
         res.set_content(os.str(), "application/json");
     });
 
@@ -1134,35 +1187,39 @@ int main(int argc, char** argv) {
         printf("UDP target %s tx=%d rx=%d device_uid=%d (hash=%04X)\n", g_udp_ip.c_str(), g_udp_tx, g_udp_rx, g_device_uid, generate_hash((uint32_t)g_device_uid));
     }
 
-    // Watcher thread for lokomotive.cs2 reloads
+    // Watcher thread for lokomotive.cs2 reloads (inotify on Linux/macOS, disabled on Windows)
     std::thread watcher([&](){
         fs::path lokfile = fs::path(g_config_dir)/"config"/"lokomotive.cs2";
-        std::error_code ec;
-        auto last_write = fs::exists(lokfile, ec) ? fs::last_write_time(lokfile, ec) : fs::file_time_type{};
+#ifdef _WIN32
+        (void)lokfile;
+#else
+        int fd = inotify_init1(IN_NONBLOCK);
+        if (fd < 0) return;
+        int wd = inotify_add_watch(fd, lokfile.string().c_str(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_DELETE_SELF | IN_ATTRIB);
+        if (wd < 0) { close(fd); return; }
+        char buf[4096];
         while (!stop_flag.load()) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            auto cur = fs::exists(lokfile, ec) ? fs::last_write_time(lokfile, ec) : fs::file_time_type{};
-            if (ec) continue;
-            if (cur != last_write) {
-                last_write = cur;
-                try {
-                    parse_lokomotive_cs2(lokfile);
-                    // Reinit state maps for new/removed locos preserving values where possible
-                    std::map<int,int> new_speed; std::map<int,int> new_dir; std::map<int,std::map<int,bool>> new_fn;
-                    for (auto &kv : g_locos) {
-                        int uid = kv.first;
-                        new_speed[uid] = g_loco_speed.count(uid)? g_loco_speed[uid] : 0;
-                        new_dir[uid]   = g_loco_dir.count(uid)? g_loco_dir[uid] : 1;
-                        new_fn[uid]    = g_loco_fn.count(uid)? g_loco_fn[uid] : std::map<int,bool>{};
-                    }
-                    g_loco_speed.swap(new_speed);
-                    g_loco_dir.swap(new_dir);
-                    g_loco_fn.swap(new_fn);
-                    publish_event("{\"type\":\"loco_list_reloaded\"}");
-                } catch (...) {
+            ssize_t n = read(fd, buf, sizeof(buf));
+            if (n <= 0) { std::this_thread::sleep_for(std::chrono::milliseconds(200)); continue; }
+            try {
+                parse_lokomotive_cs2(lokfile);
+                // Reinit state maps for new/removed locos preserving values where possible
+                std::map<int,int> new_speed; std::map<int,int> new_dir; std::map<int,std::map<int,bool>> new_fn;
+                for (auto &kv : g_locos) {
+                    int uid = kv.first;
+                    new_speed[uid] = g_loco_speed.count(uid)? g_loco_speed[uid] : 0;
+                    new_dir[uid]   = g_loco_dir.count(uid)? g_loco_dir[uid] : 1;
+                    new_fn[uid]    = g_loco_fn.count(uid)? g_loco_fn[uid] : std::map<int,bool>{};
                 }
+                g_loco_speed.swap(new_speed);
+                g_loco_dir.swap(new_dir);
+                g_loco_fn.swap(new_fn);
+                publish_event("{\"type\":\"loco_list_reloaded\"}");
+            } catch (...) {
             }
         }
+        close(fd);
+#endif
     });
 
     svr.listen_after_bind();
