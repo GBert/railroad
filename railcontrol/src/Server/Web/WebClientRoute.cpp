@@ -84,6 +84,7 @@ namespace Server { namespace Web
 		Length maxTrainLength = 0;
 		vector<Relation*> relationsAtLock;
 		vector<Relation*> relationsAtUnlock;
+		vector<Relation*> relationsConditions;
 		LayoutPosition posx = Utils::Utils::GetIntegerMapEntry(arguments, "posx", 0);
 		LayoutPosition posy = Utils::Utils::GetIntegerMapEntry(arguments, "posy", 0);
 		LayoutPosition posz = Utils::Utils::GetIntegerMapEntry(arguments, "posz", LayerUndeletable);
@@ -117,6 +118,7 @@ namespace Server { namespace Web
 				maxTrainLength = route->GetMaxTrainLength();
 				relationsAtLock = route->GetRelationsAtLock();
 				relationsAtUnlock = route->GetRelationsAtUnlock();
+				relationsConditions = route->GetRelationsConditions();
 				visible = route->GetVisible();
 				posx = route->GetPosX();
 				posy = route->GetPosY();
@@ -144,6 +146,7 @@ namespace Server { namespace Web
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("basic", Languages::TextBasic, true));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("relationatlock", Languages::TextAtLock));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("relationatunlock", Languages::TextAtUnlock, false, !automode));
+		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("relationconditions", Languages::TextConditions));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("position", Languages::TextPosition));
 		tabMenu.AddChildTag(WebClientStatic::HtmlTagTabMenuItem("automode", Languages::TextAutomode));
 		content.AddChildTag(tabMenu);
@@ -168,8 +171,9 @@ namespace Server { namespace Web
 			relationDivAtLock.AddChildTag(HtmlTagRelation("atlock", relation->GetPriority(), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
 			priorityAtLock = relation->GetPriority() + 1;
 		}
-		relationDivAtLock.AddChildTag(HtmlTagInputHidden("relationcounteratlock", to_string(priorityAtLock)));
-		relationDivAtLock.AddChildTag(HtmlTag("div").AddId("new_atlock_priority_" + to_string(priorityAtLock)));
+		const string priorityAtLockString = to_string(priorityAtLock);
+		relationDivAtLock.AddChildTag(HtmlTagInputHidden("relationcounteratlock", priorityAtLockString));
+		relationDivAtLock.AddChildTag(HtmlTag("div").AddId("new_atlock_priority_" + priorityAtLockString));
 
 		HtmlTag relationContentAtLock("div");
 		relationContentAtLock.AddId("tab_relationatlock");
@@ -191,8 +195,9 @@ namespace Server { namespace Web
 			relationDivAtUnlock.AddChildTag(HtmlTagRelation("atunlock", relation->GetPriority(), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
 			priorityAtUnlock = relation->GetPriority() + 1;
 		}
-		relationDivAtUnlock.AddChildTag(HtmlTagInputHidden("relationcounteratunlock", to_string(priorityAtUnlock)));
-		relationDivAtUnlock.AddChildTag(HtmlTag("div").AddId("new_atunlock_priority_" + to_string(priorityAtUnlock)));
+		const string priorityAtUnlockString = to_string(priorityAtUnlock);
+		relationDivAtUnlock.AddChildTag(HtmlTagInputHidden("relationcounteratunlock", priorityAtUnlockString));
+		relationDivAtUnlock.AddChildTag(HtmlTag("div").AddId("new_atunlock_priority_" + priorityAtUnlockString));
 
 		HtmlTag relationContentAtUnlock("div");
 		relationContentAtUnlock.AddId("tab_relationatunlock");
@@ -205,6 +210,30 @@ namespace Server { namespace Web
 		relationContentAtUnlock.AddChildTag(newButtonAtUnlock);
 		relationContentAtUnlock.AddChildTag(HtmlTag("br"));
 		formContent.AddChildTag(relationContentAtUnlock);
+
+		HtmlTag relationDivConditions("div");
+		relationDivConditions.AddId("relationconditions");
+		Priority priorityConditions = 1;
+		for (auto relation : relationsConditions)
+		{
+			relationDivConditions.AddChildTag(HtmlTagRelation("conditions", relation->GetPriority(), relation->ObjectType2(), relation->ObjectID2(), relation->GetData()));
+			priorityConditions = relation->GetPriority() + 1;
+		}
+		const string priorityConditionsString = to_string(priorityConditions);
+		relationDivConditions.AddChildTag(HtmlTagInputHidden("relationcounterconditions", priorityConditionsString));
+		relationDivConditions.AddChildTag(HtmlTag("div").AddId("new_conditions_priority_" + priorityConditionsString));
+
+		HtmlTag relationConditions("div");
+		relationConditions.AddId("tab_relationconditions");
+		relationConditions.AddClass("tab_content");
+		relationConditions.AddClass("hidden");
+		relationConditions.AddChildTag(relationDivConditions);
+		HtmlTagButton newButtonConditions(Languages::TextNew, "newrelationconditions");
+		newButtonConditions.AddAttribute("onclick", "addRelation('conditions');return false;");
+		newButtonConditions.AddClass("wide_button");
+		relationConditions.AddChildTag(newButtonConditions);
+		relationConditions.AddChildTag(HtmlTag("br"));
+		formContent.AddChildTag(relationConditions);
 
 		formContent.AddChildTag(client.HtmlTagTabPosition(posx, posy, posz, visible));
 
@@ -339,6 +368,7 @@ namespace Server { namespace Web
 
 		Priority relationCountAtLock = Utils::Utils::GetIntegerMapEntry(arguments, "relationcounteratlock", 0);
 		Priority relationCountAtUnlock = Utils::Utils::GetIntegerMapEntry(arguments, "relationcounteratunlock", 0);
+		Priority relationCounterConditions = Utils::Utils::GetIntegerMapEntry(arguments, "relationcounterconditions", 0);
 
 		vector<Relation*> relationsAtLock;
 		Priority priorityAtLock = 1;
@@ -406,6 +436,39 @@ namespace Server { namespace Web
 			++priorityAtUnlock;
 		}
 
+		vector<Relation*> conditions;
+		Priority priorityCounterConditions = 1;
+		for (Priority relationId = 1; relationId <= relationCounterConditions; ++relationId)
+		{
+			string priorityString = to_string(relationId);
+			ObjectType objectType = static_cast<ObjectType>(Utils::Utils::GetIntegerMapEntry(arguments, "relation_conditions_" + priorityString + "_type"));
+			ObjectID objectId = Utils::Utils::GetIntegerMapEntry(arguments, "relation_conditions_" + priorityString + "_id", ObjectNone);
+			if (objectId == 0
+				&& objectType != ObjectTypeLoco
+				&& objectType != ObjectTypePause
+				&& objectType != ObjectTypeMultipleUnit
+				&& objectType != ObjectTypeBooster)
+			{
+				continue;
+			}
+			if (objectId == fromTrack && objectType == ObjectTypeTrack)
+			{
+				continue;
+			}
+			if (objectId == toTrack && objectType == ObjectTypeTrack)
+			{
+				continue;
+			}
+			unsigned char state = Utils::Utils::GetIntegerMapEntry(arguments, "relation_conditions_" + priorityString + "_state");
+			conditions.push_back(new Relation(&manager,
+				ObjectIdentifier(ObjectTypeRoute, routeID),
+				ObjectIdentifier(objectType, objectId),
+				Relation::RelationTypeRouteConditions,
+				priorityCounterConditions,
+				state));
+			++priorityCounterConditions;
+		}
+
 		string result;
 		if (!manager.RouteSave(routeID,
 			name,
@@ -417,6 +480,7 @@ namespace Server { namespace Web
 			maxtrainlength,
 			relationsAtLock,
 			relationsAtUnlock,
+			conditions,
 			visible,
 			posx,
 			posy,
@@ -539,8 +603,9 @@ namespace Server { namespace Web
 	void WebClientRoute::HandleRelationAdd(const map<string, string>& arguments)
 	{
 		string priorityString = Utils::Utils::GetStringMapEntry(arguments, "priority", "1");
-		string type = Utils::Utils::GetStringMapEntry(arguments, "type", "atunlock");
-		if (type.compare("atunlock") != 0)
+		string type = Utils::Utils::GetStringMapEntry(arguments, "type", "atlock");
+		if ((type.compare("atunlock") != 0)
+			&& (type.compare("conditions") != 0))
 		{
 			type = "atlock";
 		}
@@ -627,13 +692,19 @@ namespace Server { namespace Web
 		objectTypeOptions[ObjectTypeAccessory] = Languages::TextAccessory;
 		objectTypeOptions[ObjectTypeSignal] = Languages::TextSignal;
 		objectTypeOptions[ObjectTypeSwitch] = Languages::TextSwitch;
-		objectTypeOptions[ObjectTypeTrack] = Languages::TextTrack;
-		objectTypeOptions[ObjectTypeRoute] = Languages::TextRoute;
-		objectTypeOptions[ObjectTypeLoco] = Languages::TextLoco;
-		objectTypeOptions[ObjectTypeMultipleUnit] = Languages::TextOrientation;
-		objectTypeOptions[ObjectTypePause] = Languages::TextPause;
-		objectTypeOptions[ObjectTypeBooster] = Languages::TextBooster;
-		objectTypeOptions[ObjectTypeCounter] = Languages::TextCounter;
+		if (atlock.compare("conditions") != 0)
+		{
+			objectTypeOptions[ObjectTypeTrack] = Languages::TextTrack;
+			objectTypeOptions[ObjectTypeRoute] = Languages::TextRoute;
+			objectTypeOptions[ObjectTypeLoco] = Languages::TextLoco;
+			objectTypeOptions[ObjectTypeMultipleUnit] = Languages::TextOrientation;
+			objectTypeOptions[ObjectTypePause] = Languages::TextPause;
+			objectTypeOptions[ObjectTypeBooster] = Languages::TextBooster;
+			if (atlock.compare("atlock") == 0)
+			{
+				objectTypeOptions[ObjectTypeCounter] = Languages::TextCounter;
+			}
+		}
 		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
 		select.AddClass("select_relation_objecttype");
 		select.AddAttribute("onchange", "loadRelationObject('" + atlock + "', '" + priorityString + "');return false;");

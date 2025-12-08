@@ -96,6 +96,7 @@ namespace DataModel
 			{
 				DeleteRelations(relationsAtLock);
 				DeleteRelations(relationsAtUnlock);
+				DeleteRelations(relationsConditions);
 			}
 
 			inline ObjectType GetObjectType() const override
@@ -131,6 +132,11 @@ namespace DataModel
 				return AssignRelations(relationsAtUnlock, newRelations);
 			}
 
+			inline bool AssignRelationsConditions(const std::vector<DataModel::Relation*>& newConditions)
+			{
+				return AssignRelations(relationsConditions, newConditions);
+			}
+
 			inline const std::vector<DataModel::Relation*>& GetRelationsAtLock() const
 			{
 				return relationsAtLock;
@@ -139,6 +145,11 @@ namespace DataModel
 			inline const std::vector<DataModel::Relation*>& GetRelationsAtUnlock() const
 			{
 				return relationsAtUnlock;
+			}
+
+			inline const std::vector<DataModel::Relation*>& GetRelationsConditions() const
+			{
+				return relationsConditions;
 			}
 
 			bool FromTrackOrientation(Logger::Logger* logger,
@@ -157,6 +168,8 @@ namespace DataModel
 			bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
 
 			bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+
+			bool CheckConditions(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 
 			bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override
 			{
@@ -403,6 +416,7 @@ namespace DataModel
 			Delay delay;
 			std::vector<DataModel::Relation*> relationsAtLock;
 			std::vector<DataModel::Relation*> relationsAtUnlock;
+			std::vector<DataModel::Relation*> relationsConditions;
 			PushpullType pushpull;
 			Propulsion propulsion;
 			TrainType trainType;

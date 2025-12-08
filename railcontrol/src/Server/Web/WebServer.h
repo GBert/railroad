@@ -51,6 +51,11 @@ namespace Server { namespace Web
 
 			void Work(Network::TcpConnection* connection) override;
 
+			void Warning(__attribute__((unused)) Languages::TextSelector textSelector)
+			{
+				AddUpdate("warning", textSelector);
+			}
+
 			bool NextUpdate(unsigned int& updateIDClient, std::string& s);
 
 			inline const std::string& GetName() const override

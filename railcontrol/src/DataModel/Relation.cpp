@@ -168,7 +168,7 @@ namespace DataModel
 
 	bool Relation::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
+		const bool ret = LockableItem::Reserve(logger, locoBaseIdentifier);
 		if (!ret)
 		{
 			logger->Debug(Languages::TextUnableToReserve);
@@ -222,7 +222,7 @@ namespace DataModel
 
 	bool Relation::Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
-		bool ret = LockableItem::Lock(logger, locoBaseIdentifier);
+		const bool ret = LockableItem::Lock(logger, locoBaseIdentifier);
 		if (!ret)
 		{
 			return false;
@@ -269,13 +269,13 @@ namespace DataModel
 			return route->Lock(logger, locoBaseIdentifier);
 		}
 
-		bool retLockable = lockable->Lock(logger, locoBaseIdentifier);
+		const bool retLockable = lockable->Lock(logger, locoBaseIdentifier);
 		if (retLockable)
 		{
 			return true;
 		}
 
-		Object* object = dynamic_cast<Object*>(lockable);
+		const Object* object = dynamic_cast<Object*>(lockable);
 		if (!object)
 		{
 			return false;
@@ -283,6 +283,58 @@ namespace DataModel
 
 		logger->Debug(Languages::TextUnableToLock, object->GetName());
 		return false;
+	}
+
+	bool Relation::CheckCondition(Logger::Logger* logger, __attribute__((unused)) const ObjectIdentifier& locoBaseIdentifier)
+	{
+		const ObjectType objectType2 = ObjectType2();
+		switch(objectType2)
+		{
+			case ObjectTypeAccessory:
+			{
+				Accessory* accessory = manager->GetAccessory(ObjectID2());
+				if (accessory)
+				{
+					return accessory->Check(static_cast<AccessoryState>(data));
+				}
+				else
+				{
+					logger->Debug(Languages::TextRelationTargetNotFound);
+					return false;
+				}
+			}
+
+			case ObjectTypeSwitch:
+			{
+				Switch* mySwitch = manager->GetSwitch(ObjectID2());
+				if (mySwitch)
+				{
+					return mySwitch->Check(static_cast<AccessoryState>(data));
+				}
+				else
+				{
+					logger->Debug(Languages::TextRelationTargetNotFound);
+					return false;
+				}
+			}
+
+			case ObjectTypeSignal:
+			{
+				Signal* signal = manager->GetSignal(ObjectID2());
+				if (signal)
+				{
+					return signal->Check(static_cast<AccessoryState>(data));
+				}
+				else
+				{
+					logger->Debug(Languages::TextRelationTargetNotFound);
+					return false;
+				}
+			}
+
+			default:
+				return true;
+		}
 	}
 
 	bool Relation::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)

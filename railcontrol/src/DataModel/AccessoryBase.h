@@ -158,6 +158,11 @@ namespace DataModel
 				++counter;
 			}
 
+			inline bool Check(const AccessoryState state) const
+			{
+				return accessoryState == state;
+			}
+
 			inline AccessoryPulseDuration GetAccessoryPulseDuration() const
 			{
 				return duration;

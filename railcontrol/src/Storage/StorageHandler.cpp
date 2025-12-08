@@ -179,6 +179,8 @@ namespace Storage
 		SaveRelations(route.GetRelationsAtLock());
 		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeRouteAtUnlock, routeID);
 		SaveRelations(route.GetRelationsAtUnlock());
+		sqlite.DeleteRelationsFrom(DataModel::Relation::RelationTypeRouteConditions, routeID);
+		SaveRelations(route.GetRelationsConditions());
 	}
 
 	void StorageHandler::Save(const DataModel::Loco& loco)
@@ -232,6 +234,7 @@ namespace Storage
 			const RouteID routeID = route->GetID();
 			route->AssignRelationsAtLock(RelationsFrom(Relation::RelationTypeRouteAtLock, routeID));
 			route->AssignRelationsAtUnlock(RelationsFrom(Relation::RelationTypeRouteAtUnlock, routeID));
+			route->AssignRelationsConditions(RelationsFrom(Relation::RelationTypeRouteConditions, routeID));
 			routes[routeID] = route;
 		}
 	}

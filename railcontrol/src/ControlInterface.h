@@ -84,6 +84,10 @@ class ControlInterface
 			return GetName();
 		}
 
+		virtual void Warning(__attribute__((unused)) Languages::TextSelector textSelector)
+		{
+		}
+
 		virtual void AccessoryDelete(__attribute__((unused)) const AccessoryID accessoryID,
 			__attribute__((unused)) const std::string& name,
 			__attribute__((unused)) const std::string& matchKey)

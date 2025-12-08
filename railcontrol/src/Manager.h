@@ -49,6 +49,8 @@ class Manager
 		Manager(Config& config);
 		~Manager();
 
+		void Warning(Languages::TextSelector textSelector);
+
 		// booster
 		inline BoosterState Booster() const
 		{
@@ -536,6 +538,7 @@ class Manager
 			const Length maxTrainLength,
 			const std::vector<DataModel::Relation*>& relationsAtLock,
 			const std::vector<DataModel::Relation*>& relationsAtUnlock,
+			const std::vector<DataModel::Relation*>& condition,
 			const DataModel::LayoutItem::Visible visible,
 			const DataModel::LayoutItem::LayoutPosition posX,
 			const DataModel::LayoutItem::LayoutPosition posY,

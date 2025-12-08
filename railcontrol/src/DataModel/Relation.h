@@ -47,6 +47,7 @@ namespace DataModel
 				RelationTypeFeedbackAtUnset   = (ObjectTypeFeedback << 3) + 1,
 				RelationTypeRouteAtLock       = (ObjectTypeRoute << 3),
 				RelationTypeRouteAtUnlock     = (ObjectTypeRoute << 3) + 1,
+				RelationTypeRouteConditions   = (ObjectTypeRoute << 3) + 2,
 				RelationTypeClusterTrack      = (ObjectTypeCluster << 3),
 				RelationTypeMultipleUnitLoco  = (ObjectTypeMultipleUnit << 3),
 			};
@@ -133,6 +134,7 @@ namespace DataModel
 
 			bool Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
 			bool Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
+			bool CheckCondition(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier);
 			bool Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier) override;
 			bool Execute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier, const Delay delay);
 

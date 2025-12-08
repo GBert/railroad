@@ -304,6 +304,16 @@ Manager::~Manager()
 	storage = nullptr;
 }
 
+void Manager::Warning(Languages::TextSelector textSelector)
+{
+	logger->Warning(textSelector);
+	std::lock_guard<std::mutex> guard(controlMutex);
+	for (auto& control : controls)
+	{
+		control.second->Warning(textSelector);
+	}
+}
+
 /***************************
 * Booster                  *
 ***************************/
@@ -1262,6 +1272,7 @@ bool Manager::AccessoryState(const ControlType controlType, const AccessoryID ac
 {
 	if (boosterState == BoosterStateStop)
 	{
+		Warning(Languages::TextBoosterIsTurnedOff);
 		return false;
 	}
 	Accessory* accessory = GetAccessory(accessoryID);
@@ -2269,6 +2280,7 @@ bool Manager::SwitchState(const ControlType controlType, const SwitchID switchID
 {
 	if (boosterState == BoosterStateStop)
 	{
+		Warning(Languages::TextBoosterIsTurnedOff);
 		return false;
 	}
 
@@ -2632,6 +2644,7 @@ bool Manager::RouteSave(RouteID routeID,
 	const Length maxTrainLength,
 	const std::vector<DataModel::Relation*>& relationsAtLock,
 	const std::vector<DataModel::Relation*>& relationsAtUnlock,
+	const std::vector<DataModel::Relation*>& conditions,
 	const Visible visible,
 	const LayoutPosition posX,
 	const LayoutPosition posY,
@@ -2697,6 +2710,7 @@ bool Manager::RouteSave(RouteID routeID,
 	route->SetDelay(delay);
 	route->AssignRelationsAtLock(relationsAtLock);
 	route->AssignRelationsAtUnlock(relationsAtUnlock);
+	route->AssignRelationsConditions(conditions);
 	route->SetVisible(visible);
 	route->SetPosX(posX);
 	route->SetPosY(posY);
@@ -3112,6 +3126,7 @@ bool Manager::SignalState(const ControlType controlType, const SignalID signalID
 {
 	if (boosterState == BoosterStateStop)
 	{
+		Warning(Languages::TextBoosterIsTurnedOff);
 		return false;
 	}
 	Signal* signal = GetSignal(signalID);

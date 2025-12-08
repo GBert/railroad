@@ -241,6 +241,13 @@ namespace DataModel
 
 	bool Route::Execute(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
+		const bool retCondition = CheckConditions(logger, locoBaseIdentifier);
+		if (!retCondition)
+		{
+			logger->Info(Languages::TextConditionsNotFulfilled, GetName());
+			return false;
+		}
+
 		const bool isInUse = IsInUse();
 		if (isInUse && (locoBaseIdentifier != GetLocoBase()))
 		{
@@ -269,6 +276,13 @@ namespace DataModel
 
 	bool Route::Reserve(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
+		const bool retCondition = CheckConditions(logger, locoBaseIdentifier);
+		if (!retCondition)
+		{
+			logger->Info(Languages::TextConditionsNotFulfilled, GetName());
+			return false;
+		}
+
 		if (manager->Booster() == BoosterStateStop)
 		{
 			logger->Debug(Languages::TextBoosterIsTurnedOff);
@@ -314,6 +328,13 @@ namespace DataModel
 
 	bool Route::Lock(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
 	{
+		const bool retCondition = CheckConditions(logger, locoBaseIdentifier);
+		if (!retCondition)
+		{
+			logger->Info(Languages::TextConditionsNotFulfilled, GetName());
+			return false;
+		}
+
 		if (manager->Booster() == BoosterStateStop)
 		{
 			logger->Debug(Languages::TextBoosterIsTurnedOff);
@@ -347,6 +368,20 @@ namespace DataModel
 			}
 		}
 
+		return true;
+	}
+
+	bool Route::CheckConditions(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
+	{
+		std::lock_guard<std::mutex> Guard(updateMutex);
+		for (auto condition : relationsConditions)
+		{
+			const bool retRelation = condition->CheckCondition(logger, locoBaseIdentifier);
+			if (!retRelation)
+			{
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -389,6 +424,13 @@ namespace DataModel
 			}
 		}
 		for (auto relation : relationsAtUnlock)
+		{
+			if (relation->CompareObject2(identifier))
+			{
+				return true;
+			}
+		}
+		for (auto relation : relationsConditions)
 		{
 			if (relation->CompareObject2(identifier))
 			{

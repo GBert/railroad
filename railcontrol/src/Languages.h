@@ -113,6 +113,8 @@ class Languages
 			TextClusters,
 			TextCommandUnknown,
 			TextCompileDate,
+			TextConditions,
+			TextConditionsNotFulfilled,
 			TextConfigFileNotFound,
 			TextConfigFileReceivedWithSize,
 			TextConfigMenu,
