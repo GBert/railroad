@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.12\n\n");
+    fprintf(stderr, "   Version 1.13\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -203,6 +203,23 @@ int send_can_frame(int can_socket, struct can_frame *frame, int verbose) {
     }
     if (verbose)
 	print_can_frame(T_CAN_FORMAT_STRG, frame);
+    return 0;
+}
+
+int send_can_ping(int can_socket, int verbose) {
+    struct can_frame frame;
+
+    memset(&frame, 0, sizeof(frame));
+    frame.can_id = 0x00300300;	/* CAN Ping */
+    frame.can_id &= CAN_EFF_MASK;
+    frame.can_id |= CAN_EFF_FLAG;
+    /* send CAN frame */
+    if (write(can_socket, &frame, sizeof(frame)) != sizeof(frame)) {
+	fprintf(stderr, "error writing CAN frame: %s\n", strerror(errno));
+	return -1;
+    }
+    if (verbose)
+	print_can_frame(T_CAN_FORMAT_STRG, &frame);
     return 0;
 }
 
@@ -798,6 +815,9 @@ int main(int argc, char **argv) {
 	    fprintf(stderr, "error reading GPIO trigger: %s\n", strerror(errno));
 	lseek(trigger_data.pb_fd, 0, SEEK_SET);
     }
+
+    send_can_ping(trigger_data.socket, trigger_data.verbose);
+
     while (do_loop) {
 	FD_SET(trigger_data.socket, &readfds);
 	/* extend FD_SET only if push button pin is set */
@@ -846,6 +866,11 @@ int main(int argc, char **argv) {
 		case 0x31:
 		    if (trigger_data.verbose)
 			print_can_frame(F_CAN_FORMAT_STRG, &frame);
+		    /* looking for MS2 with 0x30 - 0x3f*/
+		    if ((frame.data[7] >= 0x30) && (frame.data[7] <= 0x3f)) {
+			if (trigger_data.verbose)
+			    printf("found MS2 version %d.%d\n", frame.data[4], frame.data[5]);
+		    }
 		    break;
 		case 0x0C:
 		    if (frame.can_dlc != 6)
