@@ -680,19 +680,19 @@ namespace Server { namespace Web
 		return HtmlTagSelect(name + "_state", stateOptions, static_cast<DataModel::AccessoryState>(data)).AddClass("select_relation_state");
 	}
 
-	HtmlTag WebClientRoute::HtmlTagRelationObject(const string& atlock,
+	HtmlTag WebClientRoute::HtmlTagRelationObject(const string& relationType,
 		const string& priorityString,
 		const ObjectType objectType,
 		const ObjectID objectId,
 		const DataModel::Relation::Data state)
 	{
-		const string name = "relation_" + atlock + "_" + priorityString;
+		const string name = "relation_" + relationType + "_" + priorityString;
 		HtmlTag content;
 		map<ObjectType, Languages::TextSelector> objectTypeOptions;
 		objectTypeOptions[ObjectTypeAccessory] = Languages::TextAccessory;
 		objectTypeOptions[ObjectTypeSignal] = Languages::TextSignal;
 		objectTypeOptions[ObjectTypeSwitch] = Languages::TextSwitch;
-		if (atlock.compare("conditions") != 0)
+		if (relationType.compare("conditions") != 0)
 		{
 			objectTypeOptions[ObjectTypeTrack] = Languages::TextTrack;
 			objectTypeOptions[ObjectTypeRoute] = Languages::TextRoute;
@@ -700,21 +700,25 @@ namespace Server { namespace Web
 			objectTypeOptions[ObjectTypeMultipleUnit] = Languages::TextOrientation;
 			objectTypeOptions[ObjectTypePause] = Languages::TextPause;
 			objectTypeOptions[ObjectTypeBooster] = Languages::TextBooster;
-			if (atlock.compare("atlock") == 0)
+			if (relationType.compare("atlock") == 0)
 			{
 				objectTypeOptions[ObjectTypeCounter] = Languages::TextCounter;
 			}
 		}
+		else
+		{
+			objectTypeOptions[ObjectTypeFeedback] = Languages::TextFeedback;
+		}
 		HtmlTagSelect select(name + "_type", objectTypeOptions, objectType);
 		select.AddClass("select_relation_objecttype");
-		select.AddAttribute("onchange", "loadRelationObject('" + atlock + "', '" + priorityString + "');return false;");
+		select.AddAttribute("onchange", "loadRelationObject('" + relationType + "', '" + priorityString + "');return false;");
 		content.AddChildTag(select);
 
 		switch (objectType)
 		{
 			case ObjectTypeSwitch:
 			{
-				std::map<string, AccessoryConfig> switches = manager.SwitchConfigByName();
+				map<string, AccessoryConfig> switches = manager.SwitchConfigByName();
 				map<string, SwitchID> switchOptions;
 				for (auto& mySwitch : switches)
 				{
@@ -740,7 +744,7 @@ namespace Server { namespace Web
 
 			case ObjectTypeSignal:
 			{
-				std::map<string, AccessoryConfig> signals = manager.SignalConfigByName();
+				map<string, AccessoryConfig> signals = manager.SignalConfigByName();
 				map<string, SignalID> signalOptions;
 				for (auto& signal : signals)
 				{
@@ -766,7 +770,7 @@ namespace Server { namespace Web
 
 			case ObjectTypeAccessory:
 			{
-				std::map<string, AccessoryConfig> accessories = manager.AccessoryConfigByName();
+				map<string, AccessoryConfig> accessories = manager.AccessoryConfigByName();
 				map<string, AccessoryID> accessoryOptions;
 				for (auto& accessory : accessories)
 				{
@@ -783,7 +787,7 @@ namespace Server { namespace Web
 
 			case ObjectTypeTrack:
 			{
-				std::map<string, Track*> tracks = manager.TrackListMasterByName();
+				map<string, Track*> tracks = manager.TrackListMasterByName();
 				map<string, TrackID> trackOptions;
 				for (auto& track : tracks)
 				{
@@ -797,7 +801,7 @@ namespace Server { namespace Web
 
 			case ObjectTypeRoute:
 			{
-				std::map<string, Route*> routes = manager.RouteListByName();
+				map<string, Route*> routes = manager.RouteListByName();
 				map<string, RouteID> routeOptions;
 				for (auto& route : routes)
 				{
@@ -977,7 +981,7 @@ namespace Server { namespace Web
 
 			case ObjectTypeCounter:
 			{
-				std::map<string, Counter*> counters = manager.CounterListByName();
+				map<string, Counter*> counters = manager.CounterListByName();
 				map<string, CounterID> counterOptions;
 				for (auto& counter : counters)
 				{
@@ -997,6 +1001,23 @@ namespace Server { namespace Web
 				countOptions[0] = Languages::Languages::GetText(Languages::Languages::TextIncrement);
 				countOptions[1u] = Languages::Languages::GetText(Languages::Languages::TextDecrement);
 				content.AddChildTag(HtmlTagSelect(name + "_state", countOptions, static_cast<unsigned int>(state)).AddClass("select_relation_state"));
+				return content;
+			}
+
+			case ObjectTypeFeedback:
+			{
+				map<string, Feedback*> feedbacks = manager.FeedbackListByName();
+				map<string, FeedbackID> feedbackOptions;
+				for (auto& feedback : feedbacks)
+				{
+					feedbackOptions[feedback.first] = feedback.second->GetID();
+				}
+				content.AddChildTag(HtmlTagSelect(name + "_id", feedbackOptions, objectId).AddClass("select_relation_id"));
+
+				map<Feedback::FeedbackState,string> stateOptions;
+				stateOptions[Feedback::FeedbackStateFree] = Languages::Languages::GetText(Languages::Languages::TextFree);
+				stateOptions[Feedback::FeedbackStateOccupied] = Languages::Languages::GetText(Languages::Languages::TextOccupied);
+				content.AddChildTag(HtmlTagSelect(name + "_state", stateOptions, static_cast<Feedback::FeedbackState>(state)).AddClass("select_relation_state"));
 				return content;
 			}
 

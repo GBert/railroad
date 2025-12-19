@@ -224,10 +224,10 @@ namespace DataModel
 		if (allowLocoTurn && locoPushpull)
 		{
 			Track* trackBase = manager->GetTrack(fromTrack);
-			if (trackBase != nullptr)
+			if (trackBase)
 			{
 				bool allowTrackTurn = trackBase->GetAllowLocoTurn();
-				if (allowTrackTurn == true)
+				if (allowTrackTurn)
 				{
 					return true;
 				}
@@ -244,7 +244,7 @@ namespace DataModel
 		const bool retCondition = CheckConditions(logger, locoBaseIdentifier);
 		if (!retCondition)
 		{
-			logger->Info(Languages::TextConditionsNotFulfilled, GetName());
+			manager->Warning(Languages::TextConditionsNotFulfilled);
 			return false;
 		}
 
@@ -279,12 +279,12 @@ namespace DataModel
 		const bool retCondition = CheckConditions(logger, locoBaseIdentifier);
 		if (!retCondition)
 		{
-			logger->Info(Languages::TextConditionsNotFulfilled, GetName());
 			return false;
 		}
 
 		if (manager->Booster() == BoosterStateStop)
 		{
+			manager->Warning(Languages::TextBoosterIsTurnedOff);
 			logger->Debug(Languages::TextBoosterIsTurnedOff);
 			return false;
 		}
@@ -331,12 +331,12 @@ namespace DataModel
 		const bool retCondition = CheckConditions(logger, locoBaseIdentifier);
 		if (!retCondition)
 		{
-			logger->Info(Languages::TextConditionsNotFulfilled, GetName());
 			return false;
 		}
 
 		if (manager->Booster() == BoosterStateStop)
 		{
+			manager->Warning(Languages::TextBoosterIsTurnedOff);
 			logger->Debug(Languages::TextBoosterIsTurnedOff);
 			return false;
 		}

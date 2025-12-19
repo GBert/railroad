@@ -72,7 +72,7 @@ namespace DataModel
 
 			void Deserialize(const std::string& serialized) override;
 
-			bool Check(const CounterType type);
+			bool CheckCount(const CounterType type);
 
 			bool Count(const CounterType type);
 

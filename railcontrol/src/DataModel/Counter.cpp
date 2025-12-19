@@ -58,7 +58,7 @@ namespace DataModel
 		min = Utils::Utils::GetIntegerMapEntry(arguments, "min", 0);
 	}
 
-	bool Counter::Check(const CounterType type)
+	bool Counter::CheckCount(const CounterType type)
 	{
 		switch(type)
 		{

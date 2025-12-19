@@ -639,35 +639,41 @@ namespace DataModel
 
 	bool LocoBase::ReserveRoute(const Track* const track, const bool allowLocoTurn, Route* const route)
 	{
+		const string& routeName = route->GetName();
+		logger->Debug(Languages::TextTryingToReserveRoute, routeName);
 		const ObjectIdentifier locoBaseIdentifier = GetObjectIdentifier();
 		if (!route->Reserve(logger, locoBaseIdentifier))
 		{
+			logger->Debug(Languages::TextUnableToReserveRoute, routeName);
 			return false;
 		}
 
-		Track* newTrack = manager->GetTrack(route->GetToTrack());
-		if (!newTrack)
+		Track* toTrack = manager->GetTrack(route->GetToTrack());
+		if (!toTrack)
 		{
+			logger->Debug(Languages::TextUnableToFindDestinationTrack);
 			route->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
-		bool canSetOrientation = newTrack->CanSetLocoBaseOrientation(route->GetToOrientation(), locoBaseIdentifier);
+		bool canSetOrientation = toTrack->CanSetLocoBaseOrientation(route->GetToOrientation(), locoBaseIdentifier);
 		if (!canSetOrientation)
 		{
+			logger->Debug(Languages::TextUnableToSetDestinationOrientation, toTrack->GetName());
 			route->Release(logger, locoBaseIdentifier);
-			newTrack->Release(logger, locoBaseIdentifier);
+			toTrack->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
 		if (!allowLocoTurn && track->GetLocoBaseOrientation() != route->GetFromOrientation())
 		{
+			logger->Debug(Languages::TextDifferentOrientations, routeName);
 			route->Release(logger, locoBaseIdentifier);
-			newTrack->Release(logger, locoBaseIdentifier);
+			toTrack->Release(logger, locoBaseIdentifier);
 			return false;
 		}
 
-		logger->Debug(Languages::TextReservingRoute, route->GetName());
+		logger->Debug(Languages::TextRouteReserved, routeName);
 		return true;
 	}
 

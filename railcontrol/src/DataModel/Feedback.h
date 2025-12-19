@@ -85,7 +85,7 @@ namespace DataModel
 
 			inline bool IsInUse() const
 			{
-				return track != nullptr;
+				return (!track);
 			}
 
 			inline std::string GetLayoutType() const override
@@ -128,6 +128,11 @@ namespace DataModel
 			inline FeedbackState GetState() const
 			{
 				return static_cast<FeedbackState>(stateCounter > 0);
+			}
+
+			inline bool CheckState(const FeedbackState state) const
+			{
+				return (GetState() == state);
 			}
 
 			void Debounce();

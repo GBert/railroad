@@ -187,16 +187,13 @@ namespace DataModel
 			case ObjectTypeCounter:
 			{
 				Counter* counter = manager->GetCounter(ObjectID2());
-				if (counter)
-				{
-					return counter->Check(static_cast<CounterType>(data));
-				}
-				else
+				if (!counter)
 				{
 					logger->Debug(Languages::TextRelationTargetNotFound);
 					LockableItem::Release(logger, locoBaseIdentifier);
 					return false;
 				}
+				return counter->CheckCount(static_cast<CounterType>(data));
 			}
 
 			default:
@@ -240,16 +237,13 @@ namespace DataModel
 			case ObjectTypeCounter:
 			{
 				Counter* counter = manager->GetCounter(ObjectID2());
-				if (counter)
-				{
-					return counter->Check(static_cast<CounterType>(data));
-				}
-				else
+				if (!counter)
 				{
 					logger->Debug(Languages::TextRelationTargetNotFound);
 					LockableItem::Release(logger, locoBaseIdentifier);
 					return false;
 				}
+				return counter->CheckCount(static_cast<CounterType>(data));
 			}
 
 			default:
@@ -293,48 +287,73 @@ namespace DataModel
 			case ObjectTypeAccessory:
 			{
 				Accessory* accessory = manager->GetAccessory(ObjectID2());
-				if (accessory)
-				{
-					return accessory->Check(static_cast<AccessoryState>(data));
-				}
-				else
+				if (!accessory)
 				{
 					logger->Debug(Languages::TextRelationTargetNotFound);
 					return false;
 				}
+				const bool state = accessory->CheckState(static_cast<AccessoryState>(data));
+				if (state)
+				{
+					return true;
+				}
+				break;
 			}
 
 			case ObjectTypeSwitch:
 			{
 				Switch* mySwitch = manager->GetSwitch(ObjectID2());
-				if (mySwitch)
-				{
-					return mySwitch->Check(static_cast<AccessoryState>(data));
-				}
-				else
+				if (!mySwitch)
 				{
 					logger->Debug(Languages::TextRelationTargetNotFound);
 					return false;
 				}
+				const bool state = mySwitch->CheckState(static_cast<AccessoryState>(data));
+				if (state)
+				{
+					return true;
+				}
+				break;
 			}
 
 			case ObjectTypeSignal:
 			{
 				Signal* signal = manager->GetSignal(ObjectID2());
-				if (signal)
-				{
-					return signal->Check(static_cast<AccessoryState>(data));
-				}
-				else
+				if (!signal)
 				{
 					logger->Debug(Languages::TextRelationTargetNotFound);
 					return false;
 				}
+				const bool state = signal->CheckState(static_cast<AccessoryState>(data));
+				if (state)
+				{
+					return true;
+				}
+				break;
+			}
+
+			case ObjectTypeFeedback:
+			{
+				Feedback* feedback = manager->GetFeedback(ObjectID2());
+				if (!feedback)
+				{
+					logger->Debug(Languages::TextRelationTargetNotFound);
+					return false;
+				}
+				const bool state = feedback->CheckState(static_cast<Feedback::FeedbackState>(data));
+				if (state)
+				{
+					return true;
+				}
+				break;
 			}
 
 			default:
 				return true;
 		}
+
+		logger->Debug(Languages::TextConditionsNotFulfilled);
+		return false;
 	}
 
 	bool Relation::Release(Logger::Logger* logger, const ObjectIdentifier& locoBaseIdentifier)
