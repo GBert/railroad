@@ -42,7 +42,7 @@ namespace Network
 
 	int TcpConnection::Send(const unsigned char* buffer, const size_t bufferLength, const int flags) const
 	{
-		if (connectionSocket == 0 || connected == false)
+		if (connectionSocket == 0 || !connected)
 		{
 			errno = ENOTCONN;
 			return -1;
@@ -134,6 +134,7 @@ namespace Network
 			int ret = Receive(data + actualSize, endSize - actualSize, flags);
 			if (ret <= 0)
 			{
+				// FIXME: Why not -1 ?
 				return actualSize;
 			}
 			actualSize += ret;

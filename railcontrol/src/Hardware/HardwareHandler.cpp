@@ -54,17 +54,16 @@ namespace Hardware
 {
 	const std::string HardwareHandler::Unknown = Languages::GetText(Languages::TextUnknownHardware);
 
-	void HardwareHandler::Init(const HardwareParams* params)
+	void HardwareHandler::Init()
 	{
-		this->params = params;
-		HardwareType type = params->GetHardwareType();
+		if (!params)
+		{
+			return;
+		}
 
+		const HardwareType type = params->GetHardwareType();
 		switch(type)
 		{
-			case HardwareTypeNone:
-				instance = nullptr;
-				return;
-
 			case HardwareTypeVirtual:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new Virtual(params));
 				return;
@@ -103,23 +102,23 @@ namespace Hardware
 
 			case HardwareTypeIntellibox:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new Intellibox(params));
-				break;
+				return;
 
 			case HardwareTypeMasterControl:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new MasterControl(params));
-				break;
+				return;
 
 			case HardwareTypeTwinCenter:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new TwinCenter(params));
-				break;
+				return;
 
 			case HardwareTypeMasterControl2:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new MasterControl2(params));
-				break;
+				return;
 
 			case HardwareTypeRedBox:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new RedBox(params));
-				break;
+				return;
 
 			case HardwareTypeRektor:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new Rektor(params));
@@ -143,27 +142,54 @@ namespace Hardware
 
 			case HardwareTypeIntellibox2:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new Intellibox2(params));
-				break;
+				return;
 
 			case HardwareTypeLocoNetAdapter63120:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new LocoNetAdapter63120(params));
-				break;
+				return;
 
 			case HardwareTypeLocoNetAdapter63820:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new LocoNetAdapter63820(params));
-				break;
+				return;
 
 			case HardwareTypeSystemControl7:
 				instance = reinterpret_cast<Hardware::HardwareInterface*>(new SystemControl7(params));
-				break;
+				return;
+
+			case HardwareTypeNone:
+			default:
+				instance = nullptr;
+				return;
 		}
 	}
 
 	void HardwareHandler::Close()
 	{
+		if (!instance)
+		{
+			return;
+		}
+
 		delete(instance);
 		instance = nullptr;
 		params = nullptr;
+	}
+
+	void HardwareHandler::CheckHealth()
+	{
+		if (instance)
+		{
+			if (!instance->NeedsRestart())
+			{
+				return;
+			}
+			HardwareInterface* oldInstance = instance;
+			instance = nullptr;
+			Utils::Utils::SleepForMilliseconds(1);
+			delete(oldInstance);
+		}
+		Init();
+		Start();
 	}
 
 	const std::string& HardwareHandler::GetName() const

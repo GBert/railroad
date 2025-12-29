@@ -83,7 +83,8 @@ namespace DataModel
 		}
 	}
 
-	void Feedback::SetState(const FeedbackState newState)
+	void Feedback::SetState(Logger::Logger* logger,
+		const FeedbackState newState)
 	{
 		FeedbackState state = static_cast<FeedbackState>(newState != inverted);
 		{
@@ -113,8 +114,7 @@ namespace DataModel
 		Route* route = manager->GetRoute(routeId);
 		if (route)
 		{
-			static Logger::Logger* logger = Logger::Logger::GetLogger(Languages::GetText(Languages::TextManager));
-			route->Execute(logger, ObjectIdentifier());
+			route->Execute(logger, (track ? track->GetLocoBase() : ObjectIdentifier()));
 		}
 	}
 

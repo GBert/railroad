@@ -64,6 +64,23 @@ void shutdownRailControlWebserver()
 	killRailControlIfNeeded(logger);
 }
 
+char readFromStdIn(const time_t sec, const long int usec)
+{
+	char input = 0;
+	struct timeval tv;
+	tv.tv_sec = sec;
+	tv.tv_usec = usec;
+	fd_set set;
+	FD_ZERO(&set);
+	FD_SET(STDIN_FILENO, &set);
+	int ret = TEMP_FAILURE_RETRY(select(FD_SETSIZE, &set, NULL, NULL, &tv));
+	if (ret > 0 && FD_ISSET(STDIN_FILENO, &set))
+	{
+		__attribute__((unused)) size_t unused = read(STDIN_FILENO, &input, sizeof(input));
+	}
+	return input;
+}
+
 int main (int argc, char* argv[])
 {
 	std::map<std::string,char> argumentMap;
@@ -172,23 +189,16 @@ int main (int argc, char* argv[])
 			}
 			else
 			{
-				struct timeval tv;
-				tv.tv_sec = 1;
-				tv.tv_usec = 0;
-				fd_set set;
-				FD_ZERO(&set);
-				FD_SET(STDIN_FILENO, &set);
-				int ret = TEMP_FAILURE_RETRY(select(FD_SETSIZE, &set, NULL, NULL, &tv));
-				if (ret > 0 && FD_ISSET(STDIN_FILENO, &set))
-				{
-					__attribute__((unused)) size_t unused = read(STDIN_FILENO, &input, sizeof(input));
-				}
+				input = readFromStdIn(1, 0);
 			}
 		} while ((input != 'q') && (input != 'r') && !isShutdownRunning());
 
 		logger->Info(Languages::TextShutdownRailControl);
 
 	}	// here the destructor of manager is called and RailControl is shut down
+
+	// read all chars in queue of STDIN
+	while (readFromStdIn(0, 1));
 
 	if (input == 'r')
 	{

@@ -68,6 +68,10 @@ class ControlInterface
 		{
 		}
 
+		virtual void CheckHealth()
+		{
+		}
+
 		virtual void Stop()
 		{
 		}

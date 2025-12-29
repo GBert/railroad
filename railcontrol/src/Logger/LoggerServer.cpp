@@ -31,11 +31,14 @@ namespace Logger
 	LoggerServer::~LoggerServer()
 	{
 		// delete all client memory
-		while (clients.size() > 0)
 		{
-			LoggerClient* client = clients.back();
-			clients.pop_back();
-			delete client;
+			std::lock_guard<std::mutex> guard(clientMutex);
+			while (clients.size() > 0)
+			{
+				LoggerClient* client = clients.back();
+				clients.pop_back();
+				delete client;
+			}
 		}
 
 		// delete all logger memory
@@ -63,6 +66,7 @@ namespace Logger
 
 	void LoggerServer::Send(const std::string& text)
 	{
+		std::lock_guard<std::mutex> guard(clientMutex);
 		for (auto client : clients)
 		{
 			client->Send(text);

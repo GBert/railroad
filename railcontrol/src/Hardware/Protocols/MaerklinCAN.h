@@ -31,7 +31,9 @@ along with RailControl; see the file LICENCE. If not see
 #include "Utils/Integer.h"
 
 // CAN protocol specification at http://streaming.maerklin.de/public-media/cs2/cs2CAN-Protokoll-2_0.pdf
-// Very interesting is also http://www.mbernstein.de/modellbahn/can/bem.htm
+// Very interesting is also:
+// http://www.mbernstein.de/modellbahn/can/bem.htm
+// https://modellbahn.mahrer.net/technisches/maerklin_can/
 
 namespace Hardware { namespace Protocols
 {
@@ -181,7 +183,6 @@ namespace Hardware { namespace Protocols
 			{
 			}
 
-		protected:
 			virtual void CacheSave(LocoCacheEntry& entry) override
 			{
 				locoCache.Save(entry);

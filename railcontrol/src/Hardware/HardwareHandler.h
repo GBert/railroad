@@ -54,7 +54,7 @@ namespace Hardware
 
 			virtual void Start() override
 			{
-				if (instance == nullptr)
+				if (!instance)
 				{
 					return;
 				}
@@ -67,6 +67,8 @@ namespace Hardware
 				Init(params);
 				Start();
 			}
+
+			void CheckHealth() override;
 
 			inline ControlID GetControlID() const
 			{
@@ -174,8 +176,16 @@ namespace Hardware
 
 			static const std::string Unknown;
 
-			void Init(const HardwareParams* params);
+			inline void Init(const HardwareParams* params)
+			{
+				this->params = params;
+				Init();
+			}
+
+			void Init();
+
 			void Close();
+
 			bool ProgramCheckValues(const ProgramMode mode, const CvNumber cv, const CvValue value = 1);
 
 			void AccessoryBaseState(const Protocol protocol,

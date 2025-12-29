@@ -39,6 +39,7 @@ namespace Hardware
 		else
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToCreateUdpSocketForSendingData);
+			SetCommunicationError();
 		}
 
 		Init();
@@ -55,6 +56,7 @@ namespace Hardware
 		if (senderConnection.Send(buffer, CANCommandBufferLength) == -1)
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToSendDataToControl);
+			SetCommunicationError();
 		}
 	}
 
@@ -63,6 +65,7 @@ namespace Hardware
 		if (!receiverConnection.IsConnected())
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToCreateUdpSocketForReceivingData);
+			SetCommunicationError();
 			return;
 		}
 
@@ -70,12 +73,13 @@ namespace Hardware
 		if (!ret)
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToBindUdpSocket);
+			SetCommunicationError();
 			return;
 		}
 		unsigned char buffer[CANCommandBufferLength];
 		while(run)
 		{
-			ssize_t datalen = receiverConnection.Receive(buffer, sizeof(buffer));
+			ssize_t datalen = receiverConnection.Receive(buffer, CANCommandBufferLength);
 			if (!run)
 			{
 				break;
@@ -84,6 +88,7 @@ namespace Hardware
 			if (datalen < 0)
 			{
 				HardwareInterface::logger->Error(Languages::TextUnableToReceiveData);
+				SetCommunicationError();
 				break;
 			}
 
@@ -93,7 +98,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (datalen != 13)
+			if (datalen != CANCommandBufferLength)
 			{
 				HardwareInterface::logger->Error(Languages::TextInvalidDataReceived);
 				continue;

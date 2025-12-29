@@ -827,11 +827,6 @@ class Manager
 
 		void SwitchState(const ControlType controlType, DataModel::Switch* mySwitch, const DataModel::AccessoryState state, const bool force);
 
-		static inline void FeedbackState(DataModel::Feedback* feedback, const DataModel::Feedback::FeedbackState state)
-		{
-			feedback->SetState(state);
-		}
-
 		bool AccessoryPosition(const AccessoryID accessoryID,
 			const DataModel::LayoutItem::LayoutPosition posX,
 			const DataModel::LayoutItem::LayoutPosition posY,
@@ -992,6 +987,8 @@ class Manager
 
 		void DebounceWorker();
 
+		void ControlCheckerWorker();
+
 		template<class ID, class T>
 		T* CreateAndAddObject(std::map<ID,T*>& objects, std::mutex& mutex);
 
@@ -1151,6 +1148,8 @@ class Manager
 		volatile bool run;
 		volatile bool debounceRun;
 		std::thread debounceThread;
+		volatile bool controlCheckerRun;
+		std::thread controlCheckerThread;
 
 		volatile bool initLocosDone;
 

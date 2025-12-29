@@ -134,12 +134,19 @@ namespace Server { namespace Web
 			case DataModel::TrackTypeStraight:
 			default:
 				image = "<polygon class=\"track\" points=\"15,0 21,0 21," + layoutHeight + " 15," + layoutHeight + "\"/>";
+				const string textPositionX = to_string(EdgeLength * trackHeight - 1);
+				if (!track->GetMain())
+				{
+					string locoName;
+					if (reserved)
+					{
+						const string& orientationSign = track->GetMainLocoOrientation() == OrientationRight ? "&rarr; " : "&larr; ";
+						locoName = orientationSign + manager.GetLocoBaseName(locoBaseIdentifier);
+					}
+					image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\">" + locoName + "</text>";
+				}
 				if (track->GetShowName())
 				{
-					const string& orientationSign = track->GetMainLocoOrientation() == OrientationRight ? "&rarr; " : "&larr; ";
-					const string& locoName = reserved ? orientationSign + manager.GetLocoBaseName(locoBaseIdentifier) : "";
-					const string textPositionX = to_string(EdgeLength * trackHeight - 1);
-					image += "<text class=\"loconame\" x=\"-" + textPositionX + "\" y=\"11\" id=\"" + identifier + "_text_loconame\" transform=\"rotate(270 0,0)\">" + locoName + "</text>";
 					const string& displayName = track->GetMainDisplayName();
 					image += "<text class=\"trackname\" x=\"-" + textPositionX + "\" y=\"33\" id=\"" + identifier + "_text_trackname\" transform=\"rotate(270 0,0)\">" + (displayName.size() ? displayName : trackName) + "</text>";
 				}

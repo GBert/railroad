@@ -31,9 +31,10 @@ namespace Hardware
 	{
 		HardwareInterface::logger->Info(Languages::TextStarting, GetFullName());
 
-		if (connection.IsConnected() == false)
+		if (!connection.IsConnected())
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToCreateTcpSocket, params->GetArg1(), CS2Port);
+			SetCommunicationError();
 		}
 		Init();
 	}
@@ -43,6 +44,7 @@ namespace Hardware
 		if (connection.Send(buffer, CANCommandBufferLength) == -1)
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToSendDataToControl);
+			SetCommunicationError();
 		}
 	}
 
@@ -51,13 +53,14 @@ namespace Hardware
 		if (!connection.IsConnected())
 		{
 			HardwareInterface::logger->Error(Languages::TextUnableToReceiveData);
+			SetCommunicationError();
 			return;
 		}
 
 		unsigned char buffer[CANCommandBufferLength];
 		while(run)
 		{
-			ssize_t datalen = connection.ReceiveExact(buffer, sizeof(buffer));
+			ssize_t datalen = connection.ReceiveExact(buffer, CANCommandBufferLength);
 			if (!run)
 			{
 				break;
@@ -70,7 +73,7 @@ namespace Hardware
 					continue;
 				}
 				HardwareInterface::logger->Error(Languages::TextErrorReadingData, strerror(errno));
-
+				SetCommunicationError();
 				break;
 			}
 
@@ -80,7 +83,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (datalen != 13)
+			if (datalen != CANCommandBufferLength)
 			{
 				HardwareInterface::logger->Error(Languages::TextErrorReadingData, strerror(errno));
 				continue;

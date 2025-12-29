@@ -39,3 +39,5 @@ inline bool isKillRunning()
 {
 	return stopSignalCounter > 1;
 }
+
+char readFromStdIn(const time_t sec, const long int usec);

@@ -51,7 +51,8 @@ namespace Hardware
 			 	controlID(controlID),
 			 	logger(Logger::Logger::GetLogger(shortName)),
 			 	fullName(fullName),
-			 	shortName(shortName)
+			 	shortName(shortName),
+				communicationError(false)
 			{
 			}
 
@@ -61,6 +62,16 @@ namespace Hardware
 
 			virtual void Start()
 			{
+			}
+
+			inline bool NeedsRestart()
+			{
+				return communicationError;
+			}
+
+			inline void SetCommunicationError()
+			{
+				communicationError = true;
 			}
 
 			// get the full name of the hardware
@@ -249,6 +260,7 @@ namespace Hardware
 			std::map<std::string,Hardware::LocoCacheEntry> emptyLocoDatabase;
 			std::map<std::string,Hardware::AccessoryCacheEntry> emptyAccessoryDatabase;
 			std::map<std::string,Hardware::FeedbackCacheEntry> emptyFeedbackDatabase;
+			bool communicationError;
 	};
 } // namespace
 

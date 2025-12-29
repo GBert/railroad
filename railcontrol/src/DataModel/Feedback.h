@@ -28,6 +28,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/LayoutItem.h"
 #include "Hardware/FeedbackCache.h"
 #include "Languages.h"
+#include "Logger/Logger.h"
 
 class Manager;
 
@@ -123,7 +124,8 @@ namespace DataModel
 				return inverted;
 			}
 
-			void SetState(const FeedbackState state);
+			void SetState(Logger::Logger* logger,
+				const FeedbackState state);
 
 			inline FeedbackState GetState() const
 			{
