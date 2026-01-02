@@ -45,7 +45,7 @@ extern struct loco_data_t *loco_data;
 extern struct loco_names_t *loco_names;
 int do_loop;
 
-#define OUR_HASH	0x4712
+#define OUR_HASH	0x4F12
 #define MINDELAY	1000000	/* min delay in usec */
 #define MAXLEN		64	/* maximum string length */
 #define MAX_BUFFER	8
@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.13\n\n");
+    fprintf(stderr, "   Version 1.14\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
