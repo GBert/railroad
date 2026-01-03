@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.14\n\n");
+    fprintf(stderr, "   Version 1.15\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -146,7 +146,7 @@ void usage(char *prg) {
     fprintf(stderr, "         -p <push button>     push button (e.g. BPi PI10 -> 266)\n");
     fprintf(stderr, "         -k                   use loco 'Lokliste' F0 as trigger\n");
     fprintf(stderr, "         -m [dh]              print mfx address decimal/hex (max 255)\n");
-    fprintf(stderr, "         -n                   MS2 Version >=3.55\n");
+    fprintf(stderr, "         -n                   obsolet - set MS2 Version; auto set\n");
     fprintf(stderr, "         -f                   run in foreground (for debugging)\n");
     fprintf(stderr, "         -v                   be verbose\n\n");
 }
@@ -693,7 +693,6 @@ int main(int argc, char **argv) {
 	    }
 	    break;
 	case 'n':
-	    trigger_data.v3x = 1;
 	    break;
 	case 'v':
 	    trigger_data.verbose = 1;
@@ -868,8 +867,17 @@ int main(int argc, char **argv) {
 			print_can_frame(F_CAN_FORMAT_STRG, &frame);
 		    /* looking for MS2 with 0x30 - 0x3f*/
 		    if ((frame.data[7] >= 0x30) && (frame.data[7] <= 0x3f)) {
-			if (trigger_data.verbose)
+			if (frame.data[4] >= 3)
+			    trigger_data.v3x = 1;
+			else
+			    trigger_data.v3x = 0;
+			if (trigger_data.verbose) {
 			    printf("found MS2 version %d.%d\n", frame.data[4], frame.data[5]);
+			    if (trigger_data.v3x == 1)
+				printf(" use new Version MS2 transfer mode (> V3.x) \n");
+			    else
+				printf(" use old MS2 transfer mode (< V3.x)\n");
+			}
 		    }
 		    break;
 		case 0x0C:
