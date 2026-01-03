@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.16\n\n");
+    fprintf(stderr, "   Version 1.17\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -789,8 +789,11 @@ int main(int argc, char **argv) {
     /* find trigger loco if requested */
     if (trigger_data.loco_uid) {
 	trigger_data.loco_uid = get_loco_uid(LOCOLIST);
-	if (!trigger_data.background && trigger_data.verbose)
+	if (!trigger_data.background && trigger_data.verbose) {
 	    printf("trigger set: Lokliste F0 UID 0x%04x\n", trigger_data.loco_uid);
+	    if (trigger_data.loco_uid != 1)
+		printf("no Lokliste in lokomotive.cs2 with UID 0x0001 found !\n");
+	}
     }
 
     /* initialize push button */
