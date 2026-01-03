@@ -138,7 +138,7 @@ void signal_handler(int sig) {
 
 void usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -kfv [-i <CAN int>][-t <sec>][-l <LED pin>][-p <push button pin>]\n", prg);
-    fprintf(stderr, "   Version 1.15\n\n");
+    fprintf(stderr, "   Version 1.16\n\n");
     fprintf(stderr, "         -c <loco_dir>        set the locomotive file dir - default %s\n", loco_dir);
     fprintf(stderr, "         -i <CAN interface>   using can interface\n");
     fprintf(stderr, "         -t <interval in sec> using timer in sec - 0 only once and exit\n");
@@ -862,6 +862,13 @@ int main(int argc, char **argv) {
 
 	    if (frame.can_id & CAN_EFF_FLAG) {
 		switch ((frame.can_id & 0x00FF0000UL) >> 16) {
+		case 0x36:
+		    /* the user may plugged in the MS2 after the programm was started
+		     * so we are looking for a CAN Bootloader all GO to sent CAN ping
+		     * to get the MS2 version */
+		    if ((frame.can_dlc == 5) && (frame.data[4] == 0x11))
+			send_can_ping(trigger_data.socket, trigger_data.verbose);
+		    break;
 		case 0x31:
 		    if (trigger_data.verbose)
 			print_can_frame(F_CAN_FORMAT_STRG, &frame);
