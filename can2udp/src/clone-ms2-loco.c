@@ -874,7 +874,7 @@ int main(int argc, char **argv) {
 			if (trigger_data.verbose) {
 			    printf("found MS2 version %d.%d\n", frame.data[4], frame.data[5]);
 			    if (trigger_data.v3x == 1)
-				printf(" use new Version MS2 transfer mode (> V3.x) \n");
+				printf(" use new MS2 transfer mode (> V3.x) \n");
 			    else
 				printf(" use old MS2 transfer mode (< V3.x)\n");
 			}
