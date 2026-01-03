@@ -69,9 +69,8 @@ static unsigned char GET_MS2_LOCO_LIST[]   = { 0x6c, 0x6f, 0x6b, 0x6c, 0x69, 0x7
 static unsigned char GET_MS2_LOCO_NAMES[]  = { 0x6c, 0x6f, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x6e };	/* loknamen */
 static unsigned char GET_MS2_CONFIG_LOCO[] = { 0x6c, 0x6f, 0x6b, 0x69, 0x6e, 0x66, 0x6f, 0x00 };	/* lokinfo  */
 
-
-static char *T_CAN_FORMAT_STRG	= "   -> CAN     0x%08X   [%d]";
-static char *F_CAN_FORMAT_STRG	= "      CAN ->  0x%08X   [%d]";
+static char *T_CAN_FORMAT_STRG = "   -> CAN     0x%08X   [%d]";
+static char *F_CAN_FORMAT_STRG = "      CAN ->  0x%08X   [%d]";
 
 static char *LOCOLIST = "Lokliste";
 
@@ -277,7 +276,7 @@ int get_ms2_locoinfo(struct trigger_t *trigger, char *loco_name) {
 	return (EXIT_FAILURE);
 
     memset(frame.data, 0, 8);
-    if (strnlen(loco_name , 16) >= 8)
+    if (strnlen(loco_name, 16) >= 8)
 	memcpy(frame.data, loco_name, 8);
     else
 	strncpy((char *)frame.data, loco_name, 8 - 1);
@@ -778,8 +777,8 @@ int main(int argc, char **argv) {
     sigemptyset(&emptyset);
 
     if (asprintf(&trigger_data.loco_file, "%s/%s", loco_dir, "lokomotive.cs2") < 0) {
-        fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "can't alloc buffer for loco_name: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
     }
 
     read_loco_data(trigger_data.loco_file, CONFIG_FILE);
@@ -875,7 +874,7 @@ int main(int argc, char **argv) {
 		case 0x31:
 		    if (trigger_data.verbose)
 			print_can_frame(F_CAN_FORMAT_STRG, &frame);
-		    /* looking for MS2 with 0x30 - 0x3f*/
+		    /* looking for MS2 with 0x30 - 0x3f */
 		    if ((frame.data[7] >= 0x30) && (frame.data[7] <= 0x3f)) {
 			if (frame.data[4] >= 3)
 			    trigger_data.v3x = 1;
@@ -908,7 +907,7 @@ int main(int argc, char **argv) {
 		    /* initiate SRSEII ping answer when loco "Lokliste" and F1 pressed */
 		    if ((uid == trigger_data.loco_uid) && (frame.data[4] == 1)) {
 			if (!trigger_data.background && trigger_data.verbose)
-				printf("send CAN PING Answer\n");
+			    printf("send CAN PING Answer\n");
 			if (system("/usr/bin/cansend can0 0031B311#43425553010C0040") < 0)
 			    fprintf(stderr, "system error: /usr/bin/cansend can0 0031B311#43425553010C0040\n");
 		    }
@@ -921,7 +920,7 @@ int main(int argc, char **argv) {
 				printf("Starting Railcontrol\n");
 			} else {
 			    if (!trigger_data.background && trigger_data.verbose)
-                                printf("Railcontrol is already running !\n");
+				printf("Railcontrol is already running !\n");
 			}
 		    }
 		    /* delete all locos if "Lokliste" exists and F4 pressed */
