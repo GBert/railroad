@@ -63,7 +63,7 @@
         <div class="speed-bar-wrapper">
           <div class="speed-bar" id="speedBar">
             <div id="speedFill" class="speed-fill"></div>
-            <input type="range" id="speedSlider" min="0" max="200" value="0" class="slider-vertical"/>
+            <input type="range" id="speedSlider" min="0" max="1000" value="0" class="slider-vertical"/>
           </div>
         </div>
         <div id="locoDesc" class="loco-desc">Select Locomotive</div>
@@ -180,29 +180,6 @@
   </div>
 
   <script src="/static/script.js" defer></script>
-
-<script>
-// Set viewport height and width once at load
-(function() {
-  function setAppSizeOnce() {
-    var vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-    var vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
-    document.documentElement.style.setProperty('--app-height', vh + 'px');
-    document.documentElement.style.setProperty('--app-width', vw + 'px');
-    // Measure topbar after layout to get an accurate value
-    requestAnimationFrame(function(){
-      var topbar = document.querySelector('.top-bar');
-      var th = topbar ? Math.round(topbar.offsetHeight) : 0;
-      document.documentElement.style.setProperty('--topbar-h', th + 'px');
-    });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setAppSizeOnce, { once: true });
-  } else {
-    setAppSizeOnce();
-  }
-})();
-</script>
 
 <script>
 // Additional protective measures against browser zoom (as far as technically possible):
