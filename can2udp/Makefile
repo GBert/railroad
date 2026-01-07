@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=can2udp
-PKG_RELEASE:=2.61
+PKG_RELEASE:=2.62
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_BUILD_PARALLEL:=1
@@ -41,6 +41,11 @@ endef
 
 define Package/can2udp/conffiles
 /etc/init.d/can2lan
+/www/config/lokomotive.cs2
+/www/config/magnetartikel.cs2
+/www/config/magnetartikel.sr2
+/www/config/gleisbild.cs2
+/www/config/gleisbild.sr2
 endef
 
 
