@@ -1,7 +1,7 @@
 #CC=gcc
 #CPP=g++
 
-CPPFLAGS+=-I. -g -O2 -Wall -Wextra -Werror -std=c++11 -DNOUPDATECHECK
+CPPFLAGS+=-I. -g -O2 -Wall -Wextra -Werror -std=c++11
 CFLAGS+=-I. -g -O2 -Wall -Wextra -Werror
 LDFLAGS+=-g -Wl,--export-dynamic
 LIBS=-lpthread -ldl

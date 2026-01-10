@@ -42,7 +42,7 @@ endef
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
-		CPPFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -I. -I.. -fPIC -Dlinux -D_REENTRANT -lpthread -ldl" 
+		CPPFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -I. -I.. -fPIC -Dlinux -D_REENTRANT -DNOUPDATECHECK -lpthread -ldl"
 endef
 
 define Package/$(PKG_NAME)/conffiles
