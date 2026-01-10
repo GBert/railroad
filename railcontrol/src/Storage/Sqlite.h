@@ -21,10 +21,10 @@ along with RailControl; see the file LICENCE. If not see
 #pragma once
 
 #include <map>
+#include <sqlite3.h>
 
 #include "DataModel/DataModel.h"
 #include "Logger/Logger.h"
-#include "Storage/sqlite/sqlite3.h"
 #include "Storage/StorageInterface.h"
 #include "Storage/StorageParams.h"
 

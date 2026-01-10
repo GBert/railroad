@@ -88,7 +88,7 @@ namespace Hardware
 	std::string Hsi88::ReadUntilCR()
 	{
 		std::string data;
-		unsigned char input = 0;
+		unsigned char input;
 		while (true)
 		{
 			int ret = serialLine.Receive(&input, sizeof(input), 1, 0);
@@ -97,7 +97,7 @@ namespace Hardware
 				logger->HexIn(data);
 				return data;
 			}
-			data.append(reinterpret_cast<char*>(&input), ret);
+			data.append(reinterpret_cast<char*>(&input));
 		}
 	}
 

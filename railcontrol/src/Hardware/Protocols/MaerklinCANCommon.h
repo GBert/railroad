@@ -87,11 +87,6 @@ namespace Hardware { namespace Protocols
 				hash(CalcHash(this->uid)),
 				hasCs2Main(false),
 				isCs2Main(isCs2Main),
-				canFileData(nullptr),
-				canFileDataPointer(nullptr),
-				canFileDataSize(0),
-				canFileCrc(0),
-				canFileCrcSize(0),
 				controlID(controlID)
 			{
 				logger->Debug(Languages::TextMyUidHash, uid, Utils::Integer::IntegerToHex(hash));
@@ -286,6 +281,16 @@ namespace Hardware { namespace Protocols
 			typedef uint16_t CanHash;
 			typedef uint16_t CanFileCrc;
 
+			struct CanFile
+			{
+				CanHash hash;
+				unsigned char* data;
+				unsigned char* dataPointer;
+				size_t dataSize;
+				CanFileCrc crc;
+				size_t crcSize;
+			};
+
 			void CreateCommandHeader(unsigned char* const buffer,
 				const CanCommand command,
 				const CanResponse response,
@@ -369,9 +374,19 @@ namespace Hardware { namespace Protocols
 			void ParseCommandPing(const unsigned char* const buffer);
 			void ParseCommandRequestConfigData(const unsigned char* const buffer);
 			void SendCompressedFile(const std::string& dataPlain, const unsigned char* fileName = nullptr);
+
+			void DeleteCanFile(CanFile* canFile);
+
+			struct CanFile* GetCanFile(const CanHash hash);
+
 			void ParseCommandConfigData(const unsigned char* const buffer);
-			void ParseCommandConfigDataFirst(const unsigned char* const buffer);
-			void ParseCommandConfigDataNext(const unsigned char* const buffer);
+
+			void ParseCommandConfigDataFirst(const unsigned char* const buffer,
+				struct CanFile* canFile);
+
+			void ParseCommandConfigDataNext(const unsigned char* const buffer,
+				struct CanFile* canFile);
+
 			void ParseResponseS88Event(const unsigned char* const buffer);
 			void ParseResponseReadConfig(const unsigned char* const buffer);
 			void ParseResponsePing(const unsigned char* const buffer);
@@ -404,15 +419,6 @@ namespace Hardware { namespace Protocols
 			}
 			virtual void Send(const unsigned char* buffer) = 0;
 
-			inline void CleanUpCanFileData()
-			{
-				free(canFileData);
-				canFileData = nullptr;
-				canFileDataPointer = nullptr;
-				canFileDataSize = 0;
-				canFileCrc = 0;
-				canFileCrcSize = 0;
-			}
 			CanUid uid;
 			CanHash hash;
 			volatile bool hasCs2Main;
@@ -420,11 +426,7 @@ namespace Hardware { namespace Protocols
 			std::thread receiverThread;
 			std::thread pingThread;
 
-			unsigned char* canFileData;
-			unsigned char* canFileDataPointer;
-			size_t canFileDataSize;
-			CanFileCrc canFileCrc;
-			size_t canFileCrcSize;
+			std::vector<struct CanFile> canFiles;
 
 			ControlID controlID;
 

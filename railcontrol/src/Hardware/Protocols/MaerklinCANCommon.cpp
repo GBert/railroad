@@ -42,10 +42,10 @@ namespace Hardware { namespace Protocols
 		run = false;
 		receiverThread.join();
 		pingThread.join();
-		if (canFileData != nullptr)
+		while (canFiles.size())
 		{
-			free(canFileData);
-			canFileData = nullptr;
+			vector<struct CanFile>::iterator firstCanFile = canFiles.begin();
+			DeleteCanFile(&(*firstCanFile));
 		}
 	}
 
@@ -431,7 +431,7 @@ namespace Hardware { namespace Protocols
 		if (receivedHash == hash)
 		{
 			uint16_t deviceType = Utils::Integer::DataBigEndianToShort(buffer + 11);
-			if (command == CanCommandPing && response == true)
+			if (command == CanCommandPing && response)
 			{
 				if (deviceType == CanDeviceCs2Main)
 				{
@@ -723,18 +723,58 @@ namespace Hardware { namespace Protocols
 		free(dataToSend);
 	}
 
+	void MaerklinCANCommon::DeleteCanFile(MaerklinCANCommon::CanFile* canFile)
+	{
+		if (!canFile)
+		{
+			return;
+		}
+		if (!canFile->data)
+		{
+			return;
+		}
+		free(canFile->data);
+		canFiles.erase(static_cast<vector<Hardware::Protocols::MaerklinCANCommon::CanFile>::iterator>(canFile));
+	}
+
+	struct MaerklinCANCommon::CanFile* MaerklinCANCommon::GetCanFile(const CanHash canHash)
+	{
+
+		for (struct CanFile& canFile : canFiles)
+		{
+			if (canFile.hash != canHash)
+			{
+				// another canFile, go to next
+				continue;
+			}
+
+			// canFile found
+			return &canFile;
+		}
+
+		// create and add canFile to vector
+		struct CanFile canFile;
+		memset(&canFile, 0, sizeof(struct CanFile));
+		canFile.hash = canHash;
+		canFiles.push_back(canFile);
+		std::vector<struct CanFile>::iterator lastCanFile = canFiles.end() - 1;
+		return &(*lastCanFile);
+	}
+
 	void MaerklinCANCommon::ParseCommandConfigData(const unsigned char* const buffer)
 	{
-		CanLength length = ParseLength(buffer);
+		const CanHash canHash = ParseHash(buffer);
+		struct CanFile* canFile = GetCanFile(canHash);
+		const CanLength length = ParseLength(buffer);
 		switch (length)
 		{
 			case 6:
 			case 7:
-				ParseCommandConfigDataFirst(buffer);
+				ParseCommandConfigDataFirst(buffer, canFile);
 				return;
 
 			case 8:
-				ParseCommandConfigDataNext(buffer);
+				ParseCommandConfigDataNext(buffer, canFile);
 				return;
 
 			default:
@@ -743,44 +783,54 @@ namespace Hardware { namespace Protocols
 		return;
 	}
 
-	void MaerklinCANCommon::ParseCommandConfigDataFirst(const unsigned char* const buffer)
+	void MaerklinCANCommon::ParseCommandConfigDataFirst(const unsigned char* const buffer,
+		struct CanFile* canFile)
 	{
-		if (canFileData != nullptr)
+		if (!canFile)
 		{
-			free(canFileData);
+			return;
 		}
-		canFileDataSize = Utils::Integer::DataBigEndianToInt(buffer + 5);
-		canFileCrc = Utils::Integer::DataBigEndianToShort(buffer + 9);
-		canFileCrcSize = (canFileDataSize + 8) & 0xFFFFFFF8;
-		canFileData = reinterpret_cast<unsigned char*>(malloc(canFileCrcSize));
-		canFileDataPointer = canFileData;
+		if (canFile->data)
+		{
+			free(canFile->data);
+		}
+		canFile->dataSize = Utils::Integer::DataBigEndianToInt(buffer + 5);
+		canFile->crc = Utils::Integer::DataBigEndianToShort(buffer + 9);
+		canFile->crcSize = (canFile->dataSize + 8) & 0xFFFFFFF8;
+		canFile->data = reinterpret_cast<unsigned char*>(malloc(canFile->crcSize));
+		canFile->dataPointer = canFile->data;
 	}
 
-	void MaerklinCANCommon::ParseCommandConfigDataNext(const unsigned char* const buffer)
+	void MaerklinCANCommon::ParseCommandConfigDataNext(const unsigned char* const buffer,
+		struct CanFile* canFile)
 	{
-		if (canFileData == nullptr)
+		if (!canFile)
+		{
+			return;
+		}
+		if (!canFile->data)
 		{
 			return;
 		}
 
-		Utils::Utils::Copy8Bytes(buffer + 5, canFileDataPointer);
-		canFileDataPointer += 8;
-		if (canFileDataSize > static_cast<size_t>(canFileDataPointer - canFileData))
+		Utils::Utils::Copy8Bytes(buffer + 5, canFile->dataPointer);
+		canFile->dataPointer += 8;
+		if (canFile->dataSize > static_cast<size_t>(canFile->dataPointer - canFile->data))
 		{
 			return;
 		}
 
-		const CanFileCrc calculatedCrc = CalcCrc(canFileData, canFileCrcSize);
-		if (canFileCrc != calculatedCrc)
+		const CanFileCrc calculatedCrc = CalcCrc(canFile->data, canFile->crcSize);
+		if (canFile->crc != calculatedCrc)
 		{
-			logger->Info(Languages::TextCrcMissmatch, Utils::Integer::IntegerToHex(canFileCrc), Utils::Integer::IntegerToHex(calculatedCrc));
-			CleanUpCanFileData();
+			logger->Info(Languages::TextCrcMissmatch, Utils::Integer::IntegerToHex(canFile->crc), Utils::Integer::IntegerToHex(calculatedCrc));
+			DeleteCanFile(canFile);
 			return;
 		}
 
-		size_t canFileUncompressedSize = Utils::Integer::DataBigEndianToInt(canFileData);
+		size_t canFileUncompressedSize = Utils::Integer::DataBigEndianToInt(canFile->data);
 		logger->Info(Languages::TextConfigFileReceivedWithSize, canFileUncompressedSize);
-		string file = ZLib::UnCompress(reinterpret_cast<char*>(canFileData + 4), canFileDataSize, canFileUncompressedSize);
+		string file = ZLib::UnCompress(reinterpret_cast<char*>(canFile->data + 4), canFile->dataSize, canFileUncompressedSize);
 		deque<string> lines;
 		Utils::Utils::SplitString(file, "\n", lines);
 		for (std::string& line : lines)
@@ -789,7 +839,7 @@ namespace Hardware { namespace Protocols
 		}
 
 		ParseCs2File(lines);
-		CleanUpCanFileData();
+		DeleteCanFile(canFile);
 	}
 
 	void MaerklinCANCommon::ParseResponseS88Event(const unsigned char* const buffer)
@@ -921,7 +971,7 @@ namespace Hardware { namespace Protocols
 			string key;
 			string value;
 			bool ok = ParseCs2FileSubkeyValue(line, key, value);
-			if (ok == false)
+			if (!ok)
 			{
 				break;
 			}
@@ -972,7 +1022,7 @@ namespace Hardware { namespace Protocols
 			string key;
 			string value;
 			bool ok = ParseCs2FileSubkeyValue(line, key, value);
-			if (ok == false)
+			if (!ok)
 			{
 				break;
 			}
@@ -1079,7 +1129,7 @@ namespace Hardware { namespace Protocols
 			string key;
 			string value;
 			bool ok = ParseCs2FileKeyValue(line, key, value);
-			if (ok == false)
+			if (!ok)
 			{
 				return;
 			}
@@ -1097,7 +1147,7 @@ namespace Hardware { namespace Protocols
 			string key;
 			string value;
 			bool ok = ParseCs2FileKeyValue(line, key, value);
-			if (ok == false)
+			if (!ok)
 			{
 				return;
 			}

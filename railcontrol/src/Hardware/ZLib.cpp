@@ -19,8 +19,8 @@ along with RailControl; see the file LICENCE. If not see
 */
 
 #include <string>
+#include <zlib.h>
 
-#include "Hardware/zlib/zlib.h"
 #include "Hardware/ZLib.h"
 #include "Utils/Utils.h"
 

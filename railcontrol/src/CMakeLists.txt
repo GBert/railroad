@@ -1,13 +1,55 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(RAILCONTROL_VERSION "24")
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+	find_package(Git QUIET)
+	if(NOT Git_FOUND)
+		message(WARNING "Git not found")
+		return()
+	endif()
 
-project(CMakeTest)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} describe --tags --abbrev=0
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE RAILCONTROL_VERSION
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} log -1 --format=%H
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE GIT_HASH
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} log -1 --format=%at
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE GIT_TIMESTAMP
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} status -s
+		COMMAND wc -l
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE GIT_DIRTY
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+else()
+	file(READ VERSION RAILCONTROL_VERSION)
+	string(STRIP ${RAILCONTROL_VERSION} RAILCONTROL_VERSION)
+	file(READ VERSION_GIT_HASH GIT_HASH)
+	string(STRIP ${GIT_HASH} GIT_HASH)
+	file(READ VERSION_GIT_TIMESTAMP GIT_TIMESTAMP)
+	string(STRIP ${GIT_TIMESTAMP} GIT_TIMESTAMP)
+	set(GIT_DIRTY 0)
+endif()
 
-add_executable(railcontrol
-Storage/sqlite/sqlite3.c
-Storage/sqlite/sqlite3.h
-Storage/sqlite/sqlite3ext.h
+# Version starts with v
+string(REGEX REPLACE "^v" "" RAILCONTROL_VERSION "${RAILCONTROL_VERSION}")
+
+project(railcontrol VERSION ${RAILCONTROL_VERSION})
+
+STRING(TIMESTAMP COMPILE_TIMESTAMP "%s" UTC)
+
+add_executable(${PROJECT_NAME}
 Manager.cpp
 Manager.h
 Server/Web/WebClient.cpp
@@ -270,56 +312,422 @@ Utils/Network.h
 Utils/ThreadSafeQueue.h
 Utils/Utils.cpp
 Utils/Utils.h
-Version.cpp
-Version.cpp.dummy
-Version.cpp.in
+${CMAKE_CURRENT_BINARY_DIR}/Version.cpp
 Version.h
-Hardware/zlib/adler32.c
-Hardware/zlib/compress.c
-Hardware/zlib/crc32.c
-Hardware/zlib/crc32.h
-Hardware/zlib/deflate.c
-Hardware/zlib/deflate.h
-Hardware/zlib/gzclose.c
-Hardware/zlib/gzguts.h
-Hardware/zlib/gzlib.c
-Hardware/zlib/gzread.c
-Hardware/zlib/gzwrite.c
-Hardware/zlib/infback.c
-Hardware/zlib/inffast.c
-Hardware/zlib/inffast.h
-Hardware/zlib/inffixed.h
-Hardware/zlib/inflate.c
-Hardware/zlib/inflate.h
-Hardware/zlib/inftrees.c
-Hardware/zlib/inftrees.h
-Hardware/zlib/trees.c
-Hardware/zlib/trees.h
-Hardware/zlib/uncompr.c
-Hardware/zlib/zconf.h
-Hardware/zlib/zlib.h
-Hardware/zlib/zutil.c
-Hardware/zlib/zutil.h
 )
+
+option(USE_SYSTEM_LIBRARIES "Build with system libraries" OFF)
+
+if (USE_SYSTEM_LIBRARIES)
+	find_package(SQLite3)
+	target_link_libraries(${PROJECT_NAME} PRIVATE SQLite::SQLite3)
+
+	find_package(ZLIB)
+	target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB)
+else()
+	target_include_directories(${PROJECT_NAME} PRIVATE Storage/sqlite)
+	add_library(sqlite3 STATIC
+		Storage/sqlite/sqlite3.c
+		Storage/sqlite/sqlite3.h
+		Storage/sqlite/sqlite3ext.h
+	)
+	target_link_libraries(${PROJECT_NAME} PRIVATE sqlite3)
+
+	target_include_directories(${PROJECT_NAME} PRIVATE Hardware/zlib)
+	add_library(zlib STATIC
+		Hardware/zlib/adler32.c
+		Hardware/zlib/compress.c
+		Hardware/zlib/crc32.c
+		Hardware/zlib/crc32.h
+		Hardware/zlib/deflate.c
+		Hardware/zlib/deflate.h
+		Hardware/zlib/gzclose.c
+		Hardware/zlib/gzguts.h
+		Hardware/zlib/gzlib.c
+		Hardware/zlib/gzread.c
+		Hardware/zlib/gzwrite.c
+		Hardware/zlib/infback.c
+		Hardware/zlib/inffast.c
+		Hardware/zlib/inffast.h
+		Hardware/zlib/inffixed.h
+		Hardware/zlib/inflate.c
+		Hardware/zlib/inflate.h
+		Hardware/zlib/inftrees.c
+		Hardware/zlib/inftrees.h
+		Hardware/zlib/trees.c
+		Hardware/zlib/trees.h
+		Hardware/zlib/uncompr.c
+		Hardware/zlib/zconf.h
+		Hardware/zlib/zlib.h
+		Hardware/zlib/zutil.c
+		Hardware/zlib/zutil.h
+	)
+	target_link_libraries(${PROJECT_NAME} PRIVATE zlib)
+endif()
 
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -pedantic -Werror")
-set(CMAKE_C_FLAGS "-g -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DHAVE_USLEEP -Wno-implicit-function-declaration -Wno-return-local-addr")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wextra -pedantic -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DHAVE_USLEEP -Wno-implicit-function-declaration -Wno-return-local-addr")
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(railcontrol PRIVATE Threads::Threads dl)
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads dl)
 
-target_include_directories(railcontrol PRIVATE .)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 
-add_custom_command(OUTPUT Version.cpp Version.cpp.dummy
-	DEPENDS Version.cpp.in
-	COMMAND git status -s| wc -l > ${CMAKE_CURRENT_SOURCE_DIR}/git_dirty.txt
-	COMMAND sed s/@COMPILE_TIMESTAMP@/`date +%s`/ < ${CMAKE_CURRENT_SOURCE_DIR}/Version.cpp.in | sed s/@GIT_HASH@/`git log -1 --format=%H`/ | sed s/@GIT_TIMESTAMP@/`git log -1 --format=%at`/ | sed s,@GIT_DIRTY@,`cat ${CMAKE_CURRENT_SOURCE_DIR}/git_dirty.txt`, | sed s/@RAILCONTROL_VERSION@/${RAILCONTROL_VERSION}/ > ${CMAKE_CURRENT_SOURCE_DIR}/Version.cpp
-	COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/git_dirty.txt
-	COMMENT "Creating Version.cpp")
+configure_file(Version.cpp.in Version.cpp @ONLY)
 
+set(CMAKE_INSTALL_BINDIR ".")
+set(DATADIR ".")
+
+install(TARGETS ${PROJECT_NAME})
+install(FILES railcontrol.conf.dist DESTINATION ${DATADIR})
+install(DIRECTORY html DESTINATION ${DATADIR})
+
+include(CPack)
+
+# Documentation
+find_program(PANDOC_EXECUTABLE pandoc)
+if(NOT PANDOC_EXECUTABLE)
+	message(WARNING "pandoc not found!")
+endif()
+
+set(DOC_DE
+	Documentation/de/index.md
+	Documentation/de/startup-arguments.md
+	Documentation/de/general-settings.md
+	Documentation/de/config-controls.md
+	Documentation/de/config-intellibox.md
+	Documentation/de/config-mastercontrol2.md
+	Documentation/de/config-mastercontrol.md
+	Documentation/de/config-redbox.md
+	Documentation/de/config-twincenter.md
+	Documentation/de/control-6051.md
+	Documentation/de/control-cc-schnitte.md
+	Documentation/de/control-cs2-tcp.md
+	Documentation/de/control-cs2-udp.md
+	Documentation/de/control-hsi88.md
+	Documentation/de/control-opendcc-z1.md
+	Documentation/de/control-z21.md
+	Documentation/de/config-rs232-usb.md
+	Documentation/de/config-locomotives.md
+	Documentation/de/config-multipleunits.md
+	Documentation/de/config-layers.md
+	Documentation/de/config-tracks.md
+	Documentation/de/config-groups.md
+	Documentation/de/config-switches.md
+	Documentation/de/config-signals.md
+	Documentation/de/config-accessories.md
+	Documentation/de/config-routes.md
+	Documentation/de/config-feedbacks.md
+	Documentation/de/config-texts.md
+	Documentation/de/config-counter.md
+	Documentation/de/automatic.md
+)
+
+set(DOC_EN
+	Documentation/en/index.md
+	Documentation/en/startup-arguments.md
+	Documentation/en/general-settings.md
+	Documentation/en/config-controls.md
+	Documentation/en/config-intellibox.md
+	Documentation/en/config-mastercontrol2.md
+	Documentation/en/config-mastercontrol.md
+	Documentation/en/config-redbox.md
+	Documentation/en/config-twincenter.md
+	Documentation/en/control-6051.md
+	Documentation/en/control-cc-schnitte.md
+	Documentation/en/control-cs2-tcp.md
+	Documentation/en/control-cs2-udp.md
+	Documentation/en/control-hsi88.md
+	Documentation/en/control-opendcc-z1.md
+	Documentation/en/control-z21.md
+	Documentation/en/config-rs232-usb.md
+	Documentation/en/config-locomotives.md
+	Documentation/en/config-multipleunits.md
+	Documentation/en/config-layers.md
+	Documentation/en/config-tracks.md
+	Documentation/en/config-groups.md
+	Documentation/en/config-switches.md
+	Documentation/en/config-signals.md
+	Documentation/en/config-accessories.md
+	Documentation/en/config-routes.md
+	Documentation/en/config-feedbacks.md
+	Documentation/en/config-texts.md
+	Documentation/en/config-counter.md
+	Documentation/en/automatic.md
+)
+
+set(DOC_ES
+	Documentation/es/index.md
+	Documentation/es/startup-arguments.md
+	Documentation/es/general-settings.md
+	Documentation/es/config-controls.md
+	Documentation/es/config-intellibox.md
+	Documentation/es/config-mastercontrol2.md
+	Documentation/es/config-mastercontrol.md
+	Documentation/es/config-redbox.md
+	Documentation/es/config-twincenter.md
+	Documentation/es/control-6051.md
+	Documentation/es/control-cc-schnitte.md
+	Documentation/es/control-cs2-tcp.md
+	Documentation/es/control-cs2-udp.md
+	Documentation/es/control-hsi88.md
+	Documentation/es/control-opendcc-z1.md
+	Documentation/es/control-z21.md
+	Documentation/es/config-rs232-usb.md
+	Documentation/es/config-locomotives.md
+	Documentation/es/config-multipleunits.md
+	Documentation/es/config-layers.md
+	Documentation/es/config-tracks.md
+	Documentation/es/config-groups.md
+	Documentation/es/config-switches.md
+	Documentation/es/config-signals.md
+	Documentation/es/config-accessories.md
+	Documentation/es/config-routes.md
+	Documentation/es/config-feedbacks.md
+	Documentation/es/config-texts.md
+	Documentation/es/config-counter.md
+	Documentation/es/automatic.md
+)
+
+set(OUTPUT_HTML_DE ${CMAKE_BINARY_DIR}/doc/de/index.html)
+set(OUTPUT_HTML_EN ${CMAKE_BINARY_DIR}/doc/en/index.html)
+set(OUTPUT_HTML_ES ${CMAKE_BINARY_DIR}/doc/es/index.html)
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/de)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/en)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/es)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_HTML_DE}
+    COMMAND pandoc --toc --toc-depth=2 --standalone --css=../style.css
+                   --template=Documentation/template.html
+                   --metadata-file=Documentation/de/metadata.yaml ${DOC_DE}
+                   --output=${OUTPUT_HTML_DE}
+    DEPENDS ${DOC_DE}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating German HTML documentation"
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_HTML_EN}
+    COMMAND pandoc --toc --toc-depth=2 --standalone --css=../style.css
+                   --template=Documentation/template.html
+                   --metadata-file=Documentation/en/metadata.yaml ${DOC_EN}
+                   --output=${OUTPUT_HTML_EN}
+    DEPENDS ${DOC_EN}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating English HTML documentation"
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_HTML_ES}
+    COMMAND pandoc --toc --toc-depth=2 --standalone --css=../style.css
+                   --template=Documentation/template.html
+                   --metadata-file=Documentation/es/metadata.yaml ${DOC_ES}
+                   --output=${OUTPUT_HTML_ES}
+    DEPENDS ${DOC_ES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating Spanish HTML documentation"
+    VERBATIM
+)
+
+set(DOCDATA
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_accessory.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_booster.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_control.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_counter.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_feedback.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_fullscreen.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_group.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_layer.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_loco.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_menu.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_multipleunit.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_program.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_quit.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_route.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_settings.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_signalgreen.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_signal.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_signalred.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_stop.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_street.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_switch.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_text.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_track.png
+    ${PROJECT_SOURCE_DIR}/Documentation/style.css
+)
+
+set(DOCDATA_DE
+    ${PROJECT_SOURCE_DIR}/Documentation/de/config_layers_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/control_list_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/counter_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/counter_position_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/cs2_config_can_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/cs2_config_ip_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/cs2_tcp_config_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/cs2_udp_config_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/feedback_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/feedback_position_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/groups_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/groups_tracks_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/locomotives_automode_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/locomotives_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/locomotives_functions_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/multipleunits_automode_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/multipleunits_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/multipleunits_functions_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/multipleunits_multipleunits_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/routes_atlock_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/routes_atunlock_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/routes_automode_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/routes_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/routes_position_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/settings_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/signals_addresses_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/signals_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/signals_position_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/switches_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/switches_position_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/texts_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/texts_position_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/tracks_automode_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/tracks_basics_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/tracks_feedbacks_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/track_signals_de.png
+    ${PROJECT_SOURCE_DIR}/Documentation/de/tracks_position_de.png
+)
+
+set(DOCDATA_EN
+    ${PROJECT_SOURCE_DIR}/Documentation/en/config_layers_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/control_list_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/counter_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/counter_position_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/cs2_tcp_config_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/cs2_udp_config_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/feedback_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/feedback_position_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/groups_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/groups_tracks_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/locomotives_automode_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/locomotives_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/locomotives_functions_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/multipleunits_automode_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/multipleunits_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/multipleunits_functions_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/multipleunits_multipleunits_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/routes_atlock_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/routes_atunlock_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/routes_automode_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/routes_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/routes_position_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/settings_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/signals_addresses_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/signals_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/signals_position_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/switches_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/switches_position_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/texts_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/texts_position_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/tracks_automode_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/tracks_basics_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/tracks_feedbacks_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/track_signals_en.png
+    ${PROJECT_SOURCE_DIR}/Documentation/en/tracks_position_en.png
+)
+
+set(DOCDATA_ES
+    ${PROJECT_SOURCE_DIR}/Documentation/es/config_layers_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/control_list_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/cs2_tcp_config_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/cs2_udp_config_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/feedback_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/feedback_position_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/groups_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/groups_tracks_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/locomotives_automode_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/locomotives_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/locomotives_functions_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/multipleunits_automode_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/multipleunits_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/multipleunits_functions_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/multipleunits_multipleunits_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/routes_atlock_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/routes_atunlock_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/routes_automode_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/routes_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/routes_position_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/settings_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/signals_addresses_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/signals_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/signals_position_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/switches_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/switches_position_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/texts_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/texts_position_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/tracks_automode_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/tracks_basics_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/tracks_feedbacks_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/track_signals_es.png
+    ${PROJECT_SOURCE_DIR}/Documentation/es/tracks_position_es.png
+)
+
+add_custom_target(doc
+    DEPENDS ${OUTPUT_HTML_DE} ${OUTPUT_HTML_EN} ${OUTPUT_HTML_ES}
+)
+
+foreach(DOCDATA ${DOCDATA})
+    add_custom_command(TARGET doc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${DOCDATA}
+            ${PROJECT_BINARY_DIR}/doc
+    )
+endforeach()
+
+foreach(DOCDATA_DE ${DOCDATA_DE})
+    add_custom_command(TARGET doc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${DOCDATA_DE}
+            ${PROJECT_BINARY_DIR}/doc/de
+    )
+endforeach()
+
+foreach(DOCDATA_EN ${DOCDATA_EN})
+    add_custom_command(TARGET doc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${DOCDATA_EN}
+            ${PROJECT_BINARY_DIR}/doc/en
+    )
+endforeach()
+
+foreach(DOCDATA_ES ${DOCDATA_ES})
+    add_custom_command(TARGET doc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${DOCDATA_ES}
+            ${PROJECT_BINARY_DIR}/doc/es
+    )
+endforeach()
+
+add_custom_target(doc-for-web
+    DEPENDS doc
+)
+
+add_custom_command(TARGET doc-for-web POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${PROJECT_SOURCE_DIR}/Documentation/de/documentation-de
+            ${PROJECT_BINARY_DIR}/doc/de/documentation-de
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${PROJECT_SOURCE_DIR}/Documentation/en/documentation-en
+            ${PROJECT_BINARY_DIR}/doc/en/documentation-en
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${PROJECT_SOURCE_DIR}/Documentation/es/documentation-es
+            ${PROJECT_BINARY_DIR}/doc/es/documentation-es
+)

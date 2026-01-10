@@ -24,7 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <iostream>
 #include <signal.h>
 #include <sstream>
-#include <unistd.h>		//close;
+#include <unistd.h>		//close; isatty
 #include <vector>
 
 #include "ArgumentHandler.h"
@@ -183,7 +183,7 @@ int main (int argc, char* argv[])
 		// wait for q or r followed by \n or SIGINT or SIGTERM
 		do
 		{
-			if (silent)
+			if (!isatty(STDIN_FILENO) || silent)
 			{
 				Utils::Utils::SleepForSeconds(1);
 			}
