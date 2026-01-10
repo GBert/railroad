@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 	find_package(Git QUIET)
