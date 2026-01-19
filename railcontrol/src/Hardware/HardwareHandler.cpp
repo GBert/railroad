@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -270,49 +270,44 @@ namespace Hardware
 	}
 
 	void HardwareHandler::LocoBaseSpeed(const ControlType controlType,
-		const DataModel::LocoBase* loco,
-		const Speed speed)
+		const DataModel::LocoConfig& locoConfig)
 	{
-		if (controlType == ControlTypeHardware || !instance || loco->GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || locoConfig.GetControlID() != GetControlID())
 		{
 			return;
 		}
-		instance->LocoSpeed(loco->GetProtocol(), loco->GetAddress(), speed);
+		instance->LocoSpeed(locoConfig.GetProtocol(), locoConfig.GetAddress(), locoConfig.GetSpeed());
 	}
 
 	void HardwareHandler::LocoBaseOrientation(const ControlType controlType,
-		const DataModel::LocoBase* loco,
-		const Orientation orientation)
+		const DataModel::LocoConfig& locoConfig)
 	{
-		if (controlType == ControlTypeHardware || !instance || loco->GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || locoConfig.GetControlID() != GetControlID())
 		{
 			return;
 		}
-		instance->LocoOrientation(loco->GetProtocol(), loco->GetAddress(), orientation);
+		instance->LocoOrientation(locoConfig.GetProtocol(), locoConfig.GetAddress(), locoConfig.GetOrientation());
 	}
 
-	void HardwareHandler::LocoBaseFunction(const ControlType controlType,
-		const DataModel::LocoBase* loco,
-		const DataModel::LocoFunctionNr function,
-		const DataModel::LocoFunctionState on)
+	void HardwareHandler::LocoBaseFunctionState(const ControlType controlType,
+		const DataModel::LocoConfig& locoConfig,
+		const DataModel::LocoFunctionNr function)
 	{
-		if (controlType == ControlTypeHardware || !instance || loco->GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || locoConfig.GetControlID() != GetControlID())
 		{
 			return;
 		}
-		instance->LocoFunction(loco->GetProtocol(), loco->GetAddress(), function, on);
+		instance->LocoFunctionState(locoConfig.GetProtocol(), locoConfig.GetAddress(), function, locoConfig.GetFunctionState(function));
 	}
 
-	void HardwareHandler::LocoBaseSpeedOrientationFunctions(const DataModel::LocoBase* loco,
-		const Speed speed,
-		const Orientation orientation,
-		std::vector<DataModel::LocoFunctionEntry>& functions)
+	void HardwareHandler::LocoBaseSpeedOrientationFunctionStates(const DataModel::LocoConfig& locoConfig)
 	{
-		if (!instance || loco->GetControlID() != GetControlID())
+		if (!instance || locoConfig.GetControlID() != GetControlID())
 		{
 			return;
 		}
-		instance->LocoSpeedOrientationFunctions(loco->GetProtocol(), loco->GetAddress(), speed, orientation, functions);
+		const std::vector<DataModel::LocoFunctionEntry> functions = locoConfig.GetFunctionStates();
+		instance->LocoSpeedOrientationFunctionStates(locoConfig.GetProtocol(), locoConfig.GetAddress(), locoConfig.GetSpeed(), locoConfig.GetOrientation(), functions);
 	}
 
 	void HardwareHandler::LocoSettings(const LocoID locoId,
@@ -648,7 +643,7 @@ namespace Hardware
 	{
 		if (!instance)
 		{
-			return DataModel::LocoConfig(LocoTypeLoco);
+			return DataModel::LocoConfig(LocoTypeNone);
 		}
 		return instance->GetLocoByMatchKey(match);
 	}

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -53,12 +53,13 @@ namespace DataModel
 		uint8_t newPropulsion = PropulsionUnknown;
 		for (auto slave : slaves)
 		{
-			Loco* loco = manager->GetLoco(slave->ObjectID2());
-			if (loco == nullptr)
+			const LocoID slaveID = slave->ObjectID2();
+			const LocoConfig loco = manager->GetLoco(slaveID);
+			if (loco.GetLocoID() != slaveID)
 			{
 				continue;
 			}
-			const uint8_t locoPropulsion = loco->GetPropulsion();
+			const uint8_t locoPropulsion = loco.GetPropulsion();
 			newPropulsion |= locoPropulsion;
 		}
 		LocoBase::SetPropulsion(static_cast<Propulsion>(newPropulsion));

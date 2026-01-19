@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -94,9 +94,9 @@ class Manager
 		// loco
 		std::string GetLocoList() const;
 
-		DataModel::Loco* GetLoco(const LocoID locoID) const;
+		const DataModel::LocoConfig GetLoco(const LocoID locoID) const;
 
-		DataModel::LocoConfig GetLocoOfConfigByMatchKey(const ControlID controlId, const std::string& matchKey) const;
+		const DataModel::LocoConfig GetLocoOfConfigByMatchKey(const ControlID controlId, const std::string& matchKey) const;
 
 		DataModel::Loco* GetLocoByMatchKey(const ControlID controlId, const std::string& matchKey) const;
 
@@ -106,10 +106,6 @@ class Manager
 
 		const std::map<std::string,DataModel::LocoConfig> GetUnmatchedLocosOfControl(const ControlID controlId,
 			const std::string& matchKey) const;
-
-		const std::map<std::string,LocoID> LocoBaseListFree() const;
-
-		const std::map<std::string,DataModel::LocoConfig> LocoConfigByName() const;
 
 		const std::map<std::string,LocoID> LocoIdsByName() const;
 
@@ -152,77 +148,44 @@ class Manager
 
 		bool LocoProtocolAddress(const LocoID locoID, ControlID& controlID, Protocol& protocol, Address& address) const;
 
-		inline void LocoSpeed(const ControlType controlType,
+		void LocoSpeed(const ControlType controlType,
 			const ControlID controlID,
 			const Protocol protocol,
 			const Address address,
-			const Speed speed)
-		{
-			// nullptr check of loco is done within submethod
-			LocoBaseSpeed(controlType, GetLoco(controlID, protocol, address), speed);
-		}
-
-		inline bool LocoBaseSpeed(const ControlType controlType,
-			const DataModel::ObjectIdentifier& locoBaseIdentifier,
-			const Speed speed)
-		{
-			// nullptr check of loco is done within submethod
-			return LocoBaseSpeed(controlType, GetLocoBase(locoBaseIdentifier), speed);
-		}
+			const Speed speed);
 
 		bool LocoBaseSpeed(const ControlType controlType,
-			DataModel::LocoBase* loco,
+			const DataModel::ObjectIdentifier& locoBaseIdentifier,
 			const Speed speed);
 
 		Speed LocoSpeed(const LocoID locoID) const;
 
-		inline void LocoOrientation(const ControlType controlType,
+		void LocoOrientation(const ControlType controlType,
 			const ControlID controlID,
 			const Protocol protocol,
 			const Address address,
-			const Orientation orientation)
-		{
-			// nullptr check of loco is done within submethod
-			LocoBaseOrientation(controlType, GetLoco(controlID, protocol, address), orientation);
-		}
+			const Orientation orientation);
 
-		inline void LocoBaseOrientation(const ControlType controlType,
+		bool LocoBaseOrientation(const ControlType controlType,
 			const DataModel::ObjectIdentifier& locoBaseIdentifier,
-			const Orientation orientation)
-		{
-			// nullptr check of loco is done within submethod
-			LocoBaseOrientation(controlType, GetLocoBase(locoBaseIdentifier), orientation);
-		}
-
-		void LocoBaseOrientation(const ControlType controlType,
-			DataModel::LocoBase* loco,
-			Orientation orientation);
+			const Orientation orientation);
 
 		void LocoFunctionState(const ControlType controlType,
 			const ControlID controlID,
 			const Protocol protocol,
 			const Address address,
 			const DataModel::LocoFunctionNr function,
-			const DataModel::LocoFunctionState on)
-		{
-			// nullptr check of loco is done within submethod
-			LocoBaseFunctionState(controlType, GetLoco(controlID, protocol, address), function, on);
-		}
+			const DataModel::LocoFunctionState state);
 
-		void LocoBaseFunctionState(const ControlType controlType,
+		bool LocoBaseFunctionState(const ControlType controlType,
 			const DataModel::ObjectIdentifier& locoBaseIdentifier,
 			const DataModel::LocoFunctionNr function,
-			const DataModel::LocoFunctionState on);
-
-		void LocoBaseFunctionState(const ControlType controlType,
-			DataModel::LocoBase* loco,
-			const DataModel::LocoFunctionNr function,
-			const DataModel::LocoFunctionState on);
+			const DataModel::LocoFunctionState state);
 
 		// multiple unit
-		DataModel::MultipleUnit* GetMultipleUnit(const MultipleUnitID multipleUnitId) const;
+		const DataModel::LocoConfig GetMultipleUnit(const MultipleUnitID multipleUnitId) const;
 
-		DataModel::LocoConfig GetMultipleUnitOfConfigByMatchKey(const ControlID controlId,
+		const DataModel::LocoConfig GetMultipleUnitOfConfigByMatchKey(const ControlID controlId,
 			const std::string& matchKey) const;
 
 		const std::map<std::string,DataModel::LocoConfig> MultipleUnitConfigByName() const;
@@ -266,16 +229,21 @@ class Manager
 		bool MultipleUnitRelease(const MultipleUnitID multipleUnitID);
 
 		// locobase
-		inline DataModel::LocoBase* GetLocoBase(const DataModel::ObjectIdentifier& locoBaseIdentifier) const
-		{
-			return locoBaseIdentifier.GetObjectType() == ObjectTypeLoco
-				? static_cast<DataModel::LocoBase*>(GetLoco(locoBaseIdentifier.GetObjectID()))
-				: static_cast<DataModel::LocoBase*>(GetMultipleUnit(locoBaseIdentifier.GetObjectID()));
-		}
+		const std::map<std::string,LocoID> LocoBaseListFree() const;
+
+		const std::map<std::string,DataModel::LocoConfig> LocoConfigByName() const;
+
+		const DataModel::LocoConfig GetLocoBase(const DataModel::ObjectIdentifier& locoBaseIdentifier) const;
 
 		const std::map<std::string,LocoID> LocoBaseIdsByName() const;
 
+		Logger::Logger* CheckFreeingTrack(const DataModel::ObjectIdentifier& locoBaseIdentifier,
+			const TrackID trackID) const;
+
 		const std::string& GetLocoBaseName(const DataModel::ObjectIdentifier& locoBaseIdentifier) const;
+
+		bool LocationReached(const DataModel::ObjectIdentifier& locoBaseIdentifier,
+			const FeedbackID feedbackID);
 
 		// accessory base
 		inline DataModel::AccessoryBase* GetAccessoryBase(const DataModel::ObjectIdentifier& accessoryBaseIdentifier) const
@@ -693,15 +661,21 @@ class Manager
 		void TrackPublishState(const DataModel::Track* track);
 		bool RouteRelease(const RouteID routeID);
 
-		bool LocoDestinationReached(const DataModel::LocoBase* loco,
-			const DataModel::Route* route,
-			const DataModel::Track* track);
+		bool LocoDestinationReached(const DataModel::ObjectIdentifier& locoIdentifier,
+			const std::string& locoName,
+			const RouteID routeID,
+			const std::string& routeName,
+			const TrackID trackID,
+			const std::string& trackName);
 
 		bool LocoBaseStart(const DataModel::ObjectIdentifier& locoBaseIdentifier);
+
 		bool LocoBaseStartAll();
 
 		bool LocoBaseStop(const DataModel::ObjectIdentifier& locoBaseIdentifier);
+
 		bool LocoBaseStopAll();
+
 		void LocoBaseStopAllImmediately(const ControlType controlType);
 
 		bool LocoBaseAddTimeTable(const DataModel::ObjectIdentifier& locoBaseIdentifier,
@@ -797,7 +771,9 @@ class Manager
 			return serverEnabled;
 		}
 
-		DataModel::ObjectIdentifier GetIdentifierOfServerLocoAddress(const Address serverAddress) const;
+		DataModel::LocoConfig GetLocoOfServerAddress(const Address serverAddress) const;
+
+		// FIXME: replace with DataModel::AccessoryConfig GetAccessoryOfServerAddress(const Address serverAddress) const;
 		DataModel::ObjectIdentifier GetIdentifierOfServerAccessoryAddress(const Address serverAddress) const;
 
 	private:
@@ -805,9 +781,45 @@ class Manager
 
 		ControlInterface* GetControl(const ControlID controlID) const;
 
-		DataModel::Loco* GetLoco(const ControlID controlID,
+		const std::string& GetLocoName(const LocoID locoID) const;
+
+		DataModel::Loco* GetLocoInternal(const LocoID locoID) const;
+
+		DataModel::Loco* GetLocoInternal(const ControlID controlID,
 			const Protocol protocol,
 			const Address address) const;
+
+		const std::string& GetMultipleUnitName(const MultipleUnitID multipleUnitID) const;
+
+		DataModel::MultipleUnit* GetMultipleUnitInternal(const MultipleUnitID multipleUnitId) const;
+
+	public:
+		// FIXME: make this private
+		DataModel::LocoBase* GetLocoBaseInternal(const DataModel::ObjectIdentifier& locoBaseIdentifier) const;
+	private:
+
+		bool LocoBaseSpeedInternal(DataModel::LocoBase* locoBase,
+			const Speed speed);
+
+		void LocoBasePublishSpeed(const ControlType controlType,
+			const DataModel::LocoConfig& locoConfig);
+
+		bool LocoBaseOrientation(DataModel::LocoBase* loco,
+			const Orientation orientation);
+
+		void LocoBasePublishOrientation(const ControlType controlType,
+			const DataModel::LocoConfig& locoConfig);
+
+		bool LocoBaseFunctionState(DataModel::LocoBase* loco,
+			const DataModel::LocoFunctionNr function,
+			const DataModel::LocoFunctionState on);
+
+		void LocoBasePublishFunctionState(const ControlType controlType,
+			const DataModel::LocoConfig& locoConfig,
+			const DataModel::LocoFunctionNr function);
+
+		void LocoBasePublishRelease(const DataModel::ObjectIdentifier& locoIdentifier,
+			const std::string& locoName);
 
 		DataModel::Accessory* GetAccessory(const ControlID controlID,
 			const Protocol protocol,
@@ -962,8 +974,6 @@ class Manager
 		bool CheckControlProtocolAddress(const AddressType type, const ControlID controlID, const Protocol protocol, const Address address, std::string& result);
 		const std::map<std::string,Protocol> ProtocolsOfControl(const AddressType type, const ControlID) const;
 
-		bool LocoBaseReleaseInternal(DataModel::LocoBase* locoBase);
-
 		bool LayerHasElements(const DataModel::Layer* layer,
 			std::string& result);
 
@@ -989,8 +999,16 @@ class Manager
 
 		void ControlCheckerWorker();
 
+		// FIXME: if all methods are fixed this should not be needed anymore (mutex using)
 		template<class ID, class T>
-		T* CreateAndAddObject(std::map<ID,T*>& objects, std::mutex& mutex);
+		T* CreateAndAddObject(std::map<ID,T*>& objects, std::mutex& mutex)
+		{
+			std::lock_guard<std::mutex> Guard(mutex);
+			return CreateAndAddObject(objects);
+		}
+
+		template<class ID, class T>
+		T* CreateAndAddObject(std::map<ID,T*>& objects);
 
 		Hardware::HardwareParams* CreateAndAddControl();
 

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -1296,50 +1296,46 @@ namespace Server { namespace Web
 
 	void WebClient::HandleProtocol(const map<string, string>& arguments)
 	{
-		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
-		if (controlId == ControlIdNone)
+		const ControlID controlID = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlIdNone);
+		if (controlID == ControlIdNone)
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextControlDoesNotExist);
 			return;
 		}
 
-		if (Utils::Utils::IsMapEntrySet(arguments, "loco"))
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		if (locoID != LocoNone)
 		{
-			LocoID locoId = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-			string matchKey;
-			Protocol protocol = ProtocolNone;
-			Loco* loco = manager.GetLoco(locoId);
-			if (loco != nullptr)
-			{
-				matchKey = loco->GetMatchKey();
-				protocol = loco->GetProtocol();
-			}
-			ReplyHtmlWithHeader(HtmlTagMatchKeyProtocolLoco(controlId, matchKey, protocol));
-			return;
-		}
-		AccessoryID accessoryId = Utils::Utils::GetIntegerMapEntry(arguments, "accessory", AccessoryNone);
-		if (accessoryId != AccessoryNone)
-		{
-			Accessory *accessory = manager.GetAccessory(accessoryId);
-			ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlId, accessory == nullptr ? ProtocolNone : accessory->GetProtocol()));
-			return;
-		}
-		SwitchID switchId = Utils::Utils::GetIntegerMapEntry(arguments, "switch", SwitchNone);
-		if (switchId != SwitchNone)
-		{
-			Switch *mySwitch = manager.GetSwitch(switchId);
-			ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlId, mySwitch == nullptr ? ProtocolNone : mySwitch->GetProtocol()));
-			return;
-		}
-		SignalID signalId = Utils::Utils::GetIntegerMapEntry(arguments, "signal", SignalNone);
-		if (signalId != SignalNone)
-		{
-			Signal *signal = manager.GetSignal(signalId);
-			ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlId, signal == nullptr ? ProtocolNone : signal->GetProtocol()));
+			const LocoConfig loco = manager.GetLoco(locoID);
+			ReplyHtmlWithHeader(HtmlTagMatchKeyProtocolLoco(controlID, loco.GetMatchKey(), loco.GetProtocol()));
 			return;
 		}
 
-		ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlId, ProtocolNone));
+		const AccessoryID accessoryID = Utils::Utils::GetIntegerMapEntry(arguments, "accessory", AccessoryNone);
+		if (accessoryID != AccessoryNone)
+		{
+			const Accessory* accessory = manager.GetAccessory(accessoryID);
+			ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlID, accessory ? accessory->GetProtocol() : ProtocolNone));
+			return;
+		}
+
+		const SwitchID switchID = Utils::Utils::GetIntegerMapEntry(arguments, "switch", SwitchNone);
+		if (switchID != SwitchNone)
+		{
+			const Switch* mySwitch = manager.GetSwitch(switchID);
+			ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlID, mySwitch ? mySwitch->GetProtocol() : ProtocolNone));
+			return;
+		}
+
+		const SignalID signalID = Utils::Utils::GetIntegerMapEntry(arguments, "signal", SignalNone);
+		if (signalID != SignalNone)
+		{
+			const Signal* signal = manager.GetSignal(signalID);
+			ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlID, signal ? signal->GetProtocol() : ProtocolNone));
+			return;
+		}
+
+		ReplyHtmlWithHeader(HtmlTagProtocolAccessory(controlID, ProtocolNone));
 	}
 
 	void WebClient::HandleAccessoryAddress(const map<string, string>& arguments)
@@ -1495,7 +1491,7 @@ namespace Server { namespace Web
 		map<string, LocoConfig> allLocos = manager.LocoConfigByName();
 		for (auto& loco : allLocos)
 		{
-			options[loco.first] = loco.second.GetLocoId();
+			options[loco.first] = loco.second.GetLocoID();
 		}
 		return options;
 	}
@@ -1503,11 +1499,11 @@ namespace Server { namespace Web
 	void WebClient::HandleLocoEdit(const map<string, string>& arguments)
 	{
 		HtmlTag content;
-		const LocoID locoId = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlNone);
-		if (controlId == ControlNone)
+		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		ControlID controlID = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlNone);
+		if (controlID == ControlNone)
 		{
-			controlId = manager.GetPossibleControlForLoco();
+			controlID = manager.GetPossibleControlForLoco();
 		}
 		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		Protocol protocol = ProtocolNone;
@@ -1525,40 +1521,40 @@ namespace Server { namespace Web
 		LocoFunctionEntry locoFunctions[NumberOfLocoFunctions];
 		vector<Relation*> slaves;
 
-		if (locoId > LocoNone)
+		if (locoID != LocoNone)
 		{
 			// existing loco
-			const DataModel::Loco* loco = manager.GetLoco(locoId);
-			if (loco != nullptr)
+			const LocoConfig loco = manager.GetLoco(locoID);
+			if (loco.GetLocoID() == locoID)
 			{
-				controlId = loco->GetControlID();
-				matchKey = loco->GetMatchKey();
-				protocol = loco->GetProtocol();
-				address = loco->GetAddress();
-				serverAddress = loco->GetServerAddress();
-				name = loco->GetName();
-				pushpull = loco->GetPushpull();
-				length = loco->GetLength();
-				maxSpeed = loco->GetMaxSpeed();
-				travelSpeed = loco->GetTravelSpeed();
-				reducedSpeed = loco->GetReducedSpeed();
-				creepingSpeed = loco->GetCreepingSpeed();
-				propulsion = loco->GetPropulsion();
-				trainType = loco->GetTrainType();
-				loco->GetFunctions(locoFunctions);
+				controlID = loco.GetControlID();
+				matchKey = loco.GetMatchKey();
+				protocol = loco.GetProtocol();
+				address = loco.GetAddress();
+				serverAddress = loco.GetServerAddress();
+				name = loco.GetName();
+				pushpull = loco.GetPushpull();
+				length = loco.GetLength();
+				maxSpeed = loco.GetMaxSpeed();
+				travelSpeed = loco.GetTravelSpeed();
+				reducedSpeed = loco.GetReducedSpeed();
+				creepingSpeed = loco.GetCreepingSpeed();
+				propulsion = loco.GetPropulsion();
+				trainType = loco.GetTrainType();
+				loco.GetFunctionStates(locoFunctions);
 			}
 		}
-		else if (controlId > ControlNone)
+		else if (controlID != ControlNone)
 		{
 			// loco from hardware database
-			DataModel::LocoConfig loco = manager.GetLocoOfConfigByMatchKey(controlId, matchKey);
+			DataModel::LocoConfig loco = manager.GetLocoOfConfigByMatchKey(controlID, matchKey);
 
-			if ((loco.GetControlId() == controlId) && (loco.GetMatchKey() == matchKey))
+			if ((loco.GetControlID() == controlID) && (loco.GetMatchKey() == matchKey))
 			{
 				protocol = loco.GetProtocol();
 				address = loco.GetAddress();
 				name = loco.GetName();
-				loco.GetFunctions(locoFunctions);
+				loco.GetFunctionStates(locoFunctions);
 			}
 		}
 		// else new loco
@@ -1573,14 +1569,14 @@ namespace Server { namespace Web
 		HtmlTag formContent("form");
 		formContent.AddId("editform");
 		formContent.AddChildTag(HtmlTagInputHidden("cmd", "locosave"));
-		formContent.AddChildTag(HtmlTagInputHidden("loco", to_string(locoId)));
+		formContent.AddChildTag(HtmlTagInputHidden("loco", to_string(locoID)));
 
 		HtmlTag basicContent("div");
 		basicContent.AddId("tab_basic");
 		basicContent.AddClass("tab_content");
 		basicContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		basicContent.AddChildTag(HtmlTagControlLoco(controlId, locoId));
-		basicContent.AddChildTag(HtmlTag("div").AddId("select_protocol").AddChildTag(HtmlTagMatchKeyProtocolLoco(controlId, matchKey, protocol)));
+		basicContent.AddChildTag(HtmlTagControlLoco(controlID, locoID));
+		basicContent.AddChildTag(HtmlTag("div").AddId("select_protocol").AddChildTag(HtmlTagMatchKeyProtocolLoco(controlID, matchKey, protocol)));
 		basicContent.AddChildTag(HtmlTagInputIntegerWithLabel("address", Languages::TextAddress, address, 1, 9999));
 		if (manager.IsServerEnabled())
 		{
@@ -1604,8 +1600,8 @@ namespace Server { namespace Web
 	void WebClient::HandleMultipleUnitEdit(const map<string, string>& arguments)
 	{
 		HtmlTag content;
-		const MultipleUnitID multipleUnitId = Utils::Utils::GetIntegerMapEntry(arguments, "multipleunit", MultipleUnitNone);
-		ControlID controlId = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlNone);
+		const MultipleUnitID multipleUnitID = Utils::Utils::GetIntegerMapEntry(arguments, "multipleunit", MultipleUnitNone);
+		ControlID controlID = Utils::Utils::GetIntegerMapEntry(arguments, "control", ControlNone);
 		string matchKey = Utils::Utils::GetStringMapEntry(arguments, "matchkey");
 		string name = Languages::GetText(Languages::TextNew);
 		bool pushpull = false;
@@ -1619,37 +1615,37 @@ namespace Server { namespace Web
 		LocoFunctionEntry locoFunctions[NumberOfLocoFunctions];
 		vector<Relation*> slaves;
 
-		if (multipleUnitId > MultipleUnitNone)
+		if (multipleUnitID != MultipleUnitNone)
 		{
 			// existing multiple unit
-			const DataModel::MultipleUnit* multipleUnit = manager.GetMultipleUnit(multipleUnitId);
-			if (multipleUnit != nullptr)
+			const LocoConfig multipleUnit = manager.GetMultipleUnit(multipleUnitID);
+			if (multipleUnit.GetLocoID() == multipleUnitID)
 			{
-				controlId = multipleUnit->GetControlID();
-				matchKey = multipleUnit->GetMatchKey();
-				name = multipleUnit->GetName();
-				pushpull = multipleUnit->GetPushpull();
-				serverAddress = multipleUnit->GetServerAddress();
-				length = multipleUnit->GetLength();
-				maxSpeed = multipleUnit->GetMaxSpeed();
-				travelSpeed = multipleUnit->GetTravelSpeed();
-				reducedSpeed = multipleUnit->GetReducedSpeed();
-				creepingSpeed = multipleUnit->GetCreepingSpeed();
-				trainType = multipleUnit->GetTrainType();
-				multipleUnit->GetFunctions(locoFunctions);
-				slaves = multipleUnit->GetSlaves();
+				controlID = multipleUnit.GetControlID();
+				matchKey = multipleUnit.GetMatchKey();
+				name = multipleUnit.GetName();
+				pushpull = multipleUnit.GetPushpull();
+				serverAddress = multipleUnit.GetServerAddress();
+				length = multipleUnit.GetLength();
+				maxSpeed = multipleUnit.GetMaxSpeed();
+				travelSpeed = multipleUnit.GetTravelSpeed();
+				reducedSpeed = multipleUnit.GetReducedSpeed();
+				creepingSpeed = multipleUnit.GetCreepingSpeed();
+				trainType = multipleUnit.GetTrainType();
+				multipleUnit.GetFunctionStates(locoFunctions);
+				slaves = WebClientStatic::ConvertSlaveIDVectorToRelation(manager, multipleUnitID, multipleUnit.GetSlaves());
 			}
 		}
-		else if (controlId > ControlNone)
+		else if (controlID != ControlNone)
 		{
 			// multiple unit from hardware database
-			DataModel::LocoConfig multipleUnit = manager.GetMultipleUnitOfConfigByMatchKey(controlId, matchKey);
+			DataModel::LocoConfig multipleUnit = manager.GetMultipleUnitOfConfigByMatchKey(controlID, matchKey);
 
-			if ((multipleUnit.GetControlId() == controlId) && (multipleUnit.GetMatchKey() == matchKey))
+			if ((multipleUnit.GetControlID() == controlID) && (multipleUnit.GetMatchKey() == matchKey))
 			{
 				name = multipleUnit.GetName();
-				multipleUnit.GetFunctions(locoFunctions);
-				slaves = WebClientStatic::ConvertSlaveIDVectorToRelation(manager, multipleUnitId, multipleUnit.GetSlaves());
+				multipleUnit.GetFunctionStates(locoFunctions);
+				slaves = WebClientStatic::ConvertSlaveIDVectorToRelation(manager, multipleUnitID, multipleUnit.GetSlaves());
 			}
 		}
 		// else new multiple unit
@@ -1665,13 +1661,13 @@ namespace Server { namespace Web
 		HtmlTag formContent("form");
 		formContent.AddId("editform");
 		formContent.AddChildTag(HtmlTagInputHidden("cmd", "multipleunitsave"));
-		formContent.AddChildTag(HtmlTagInputHidden("multipleunit", to_string(multipleUnitId)));
+		formContent.AddChildTag(HtmlTagInputHidden("multipleunit", to_string(multipleUnitID)));
 
 		HtmlTag basicContent("div");
 		basicContent.AddId("tab_basic");
 		basicContent.AddClass("tab_content");
 		basicContent.AddChildTag(HtmlTagInputTextWithLabel("name", Languages::TextName, name).AddAttribute("onkeyup", "updateName();"));
-		basicContent.AddChildTag(HtmlTagControlMultipleUnit(controlId, multipleUnitId));
+		basicContent.AddChildTag(HtmlTagControlMultipleUnit(controlID, multipleUnitID));
 		if (manager.IsServerEnabled())
 		{
 			basicContent.AddChildTag(HtmlTagInputIntegerWithLabel("serveraddress", Languages::TextServerAddress, serverAddress, 0, 9999));
@@ -1875,12 +1871,12 @@ namespace Server { namespace Web
 			row.AddChildTag(HtmlTag("td").AddContent(loco.first));
 			row.AddChildTag(HtmlTag("td").AddContent(ProtocolName(locoConfig.GetProtocol())));
 			row.AddChildTag(HtmlTag("td").AddContent(to_string(locoConfig.GetAddress())));
-			const LocoID locoId = locoConfig.GetLocoId();
+			const LocoID locoId = locoConfig.GetLocoID();
 			const string& locoIdString = to_string(locoId);
 			locoArgument["loco"] = locoIdString;
 			if (locoId == LocoNone)
 			{
-				locoArgument["control"] = to_string(locoConfig.GetControlId());
+				locoArgument["control"] = to_string(locoConfig.GetControlID());
 				locoArgument["matchkey"] = locoConfig.GetMatchKey();
 				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextImport, "locoedit_list_0", locoArgument)));
 				row.AddChildTag(HtmlTag("td").AddContent("&nbsp;"));
@@ -1919,12 +1915,12 @@ namespace Server { namespace Web
 			const LocoConfig& locoConfig = multipleUnit.second;
 			HtmlTag row("tr");
 			row.AddChildTag(HtmlTag("td").AddContent(multipleUnit.first));
-			const MultipleUnitID multipleUnitId = locoConfig.GetLocoId();
+			const MultipleUnitID multipleUnitId = locoConfig.GetLocoID();
 			const string& multipleUnitIdString = to_string(multipleUnitId);
 			multipleUnitArgument["multipleunit"] = multipleUnitIdString;
 			if (multipleUnitId == LocoNone)
 			{
-				multipleUnitArgument["control"] = to_string(locoConfig.GetControlId());
+				multipleUnitArgument["control"] = to_string(locoConfig.GetControlID());
 				multipleUnitArgument["matchkey"] = locoConfig.GetMatchKey();
 				row.AddChildTag(HtmlTag("td").AddChildTag(HtmlTagButtonPopupWide(Languages::TextImport, "multipleunitedit_list_" + multipleUnitIdString, multipleUnitArgument)));
 				row.AddChildTag(HtmlTag("td").AddContent("&nbsp;"));
@@ -1961,15 +1957,15 @@ namespace Server { namespace Web
 			return;
 		}
 
-		const DataModel::Loco* loco = manager.GetLoco(locoID);
-		if (loco == nullptr)
+		const LocoConfig loco = manager.GetLoco(locoID);
+		if (loco.GetLocoID() != locoID)
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextLocoDoesNotExist);
 			return;
 		}
 
 		HtmlTag content;
-		const string& locoName = loco->GetName();
+		const string& locoName = loco.GetName();
 		content.AddContent(HtmlTag("h1").AddContent(Languages::TextDeleteLoco));
 		content.AddContent(HtmlTag("p").AddContent(Languages::TextAreYouSureToDelete, locoName));
 		content.AddContent(HtmlTag("form").AddId("editform")
@@ -1991,15 +1987,15 @@ namespace Server { namespace Web
 			return;
 		}
 
-		const DataModel::MultipleUnit* multipleUnit = manager.GetMultipleUnit(multipleUnitID);
-		if (multipleUnit == nullptr)
+		const LocoConfig multipleUnit = manager.GetMultipleUnit(multipleUnitID);
+		if (multipleUnit.GetLocoID() != multipleUnitID)
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextMultipleUnitDoesNotExist);
 			return;
 		}
 
 		HtmlTag content;
-		const string& multipleUnitName = multipleUnit->GetName();
+		const string& multipleUnitName = multipleUnit.GetName();
 		content.AddContent(HtmlTag("h1").AddContent(Languages::TextDeleteMultipleUnit));
 		content.AddContent(HtmlTag("p").AddContent(Languages::TextAreYouSureToDelete, multipleUnitName));
 		content.AddContent(HtmlTag("form").AddId("editform")
@@ -2014,14 +2010,14 @@ namespace Server { namespace Web
 	void WebClient::HandleLocoDelete(const map<string, string>& arguments)
 	{
 		LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		const DataModel::Loco* loco = manager.GetLoco(locoID);
-		if (loco == nullptr)
+		const LocoConfig loco = manager.GetLoco(locoID);
+		if (loco.GetLocoID() != locoID)
 		{
 			ReplyResponse(ResponseError, Languages::TextLocoDoesNotExist);
 			return;
 		}
 
-		string name = loco->GetName();
+		const string& name = loco.GetName();
 		string result;
 		if (!manager.LocoDelete(locoID, result))
 		{
@@ -2035,14 +2031,14 @@ namespace Server { namespace Web
 	void WebClient::HandleMultipleUnitDelete(const map<string, string>& arguments)
 	{
 		MultipleUnitID multipleUnitID = Utils::Utils::GetIntegerMapEntry(arguments, "multipleunit", MultipleUnitNone);
-		const DataModel::MultipleUnit* multipleUnit = manager.GetMultipleUnit(multipleUnitID);
-		if (multipleUnit == nullptr)
+		const LocoConfig multipleUnit = manager.GetMultipleUnit(multipleUnitID);
+		if (multipleUnit.GetLocoID() != multipleUnitID)
 		{
 			ReplyResponse(ResponseError, Languages::TextMultipleUnitDoesNotExist);
 			return;
 		}
 
-		string name = multipleUnit->GetName();
+		const string& name = multipleUnit.GetName();
 		string result;
 		if (!manager.MultipleUnitDelete(multipleUnitID, result))
 		{
@@ -3579,37 +3575,39 @@ namespace Server { namespace Web
 	void WebClient::HandleLoco(const map<string, string>& arguments)
 	{
 		string content;
-		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));
+		const LocoID locoBaseID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
+		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoBaseID));
 		if (!locoBaseIdentifier.IsSet())
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextPleaseSelectLoco);
 			return;
 		}
-		LocoBase* locoBase = manager.GetLocoBase(locoBaseIdentifier);
-		if (locoBase == nullptr)
+		const ObjectType objectType = locoBaseIdentifier.GetObjectType();
+		const ObjectID objectID = locoBaseIdentifier.GetObjectID();
+		const LocoConfig locoConfig = (objectType == ObjectTypeLoco ? manager.GetLoco(objectID) : manager.GetMultipleUnit(objectID)) ;
+		if (locoConfig.GetLocoID() != objectID)
 		{
 			ReplyHtmlWithHeaderAndParagraph(Languages::TextLocoDoesNotExist);
 			return;
 		}
 		HtmlTag container("div");
 		container.AddAttribute("class", "inner_loco");
-		container.AddChildTag(HtmlTag("p").AddId("loconame").AddContent(locoBase->GetName()));
-		unsigned int speed = locoBase->GetSpeed();
+		container.AddChildTag(HtmlTag("p").AddId("loconame").AddContent(locoConfig.GetName()));
+		unsigned int speed = locoConfig.GetSpeed();
 		map<string, string> buttonArguments;
-		buttonArguments["loco"] = to_string(locoID);
+		buttonArguments["loco"] = to_string(locoBaseID);
 
-		string id = "locospeed_" + to_string(locoID);
-		container.AddChildTag(HtmlTagInputSliderLocoSpeed(id, MinSpeed, locoBase->GetMaxSpeed(), speed, locoID));
+		string id = "locospeed_" + to_string(locoBaseID);
+		container.AddChildTag(HtmlTagInputSliderLocoSpeed(id, MinSpeed, locoConfig.GetMaxSpeed(), speed, locoBaseID));
 		buttonArguments["speed"] = to_string(MinSpeed);
 		container.AddChildTag(HtmlTagButtonCommand("0", id + "_0", buttonArguments));
-		buttonArguments["speed"] = to_string(locoBase->GetCreepingSpeed());
+		buttonArguments["speed"] = to_string(locoConfig.GetCreepingSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("I", id + "_1", buttonArguments));
-		buttonArguments["speed"] = to_string(locoBase->GetReducedSpeed());
+		buttonArguments["speed"] = to_string(locoConfig.GetReducedSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("II", id + "_2", buttonArguments));
-		buttonArguments["speed"] = to_string(locoBase->GetTravelSpeed());
+		buttonArguments["speed"] = to_string(locoConfig.GetTravelSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("III", id + "_3", buttonArguments));
-		buttonArguments["speed"] = to_string(locoBase->GetMaxSpeed());
+		buttonArguments["speed"] = to_string(locoConfig.GetMaxSpeed());
 		container.AddChildTag(HtmlTagButtonCommand("IV", id + "_4", buttonArguments));
 		buttonArguments.erase("speed");
 
@@ -3620,7 +3618,7 @@ namespace Server { namespace Web
 		}
 		else
 		{
-			id = "locoedit_" + to_string(locoID);
+			id = "locoedit_" + to_string(locoBaseID);
 		}
 		container.AddChildTag(HtmlTagButtonPopup("<svg width=\"36\" height=\"36\"><circle r=\"7\" cx=\"14\" cy=\"14\" fill=\"black\" /><line x1=\"14\" y1=\"5\" x2=\"14\" y2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"6.2\" x2=\"18.5\" y2=\"21.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"9.5\" x2=\"21.8\" y2=\"18.5\" stroke-width=\"2\" stroke=\"black\" /><line y1=\"14\" x1=\"5\" y2=\"14\" x2=\"23\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"9.5\" y1=\"21.8\" x2=\"18.5\" y2=\"6.2\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"6.2\" y1=\"18.5\" x2=\"21.8\" y2=\"9.5\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"5\" cx=\"14\" cy=\"14\" fill=\"lightgray\" /><circle r=\"4\" cx=\"24\" cy=\"24\" fill=\"black\" /><line x1=\"18\" y1=\"24\" x2=\"30\" y2=\"24\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"28.2\" y1=\"28.2\" x2=\"19.8\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"24\" y1=\"18\" x2=\"24\" y2=\"30\" stroke-width=\"2\" stroke=\"black\" /><line x1=\"19.8\" y1=\"28.2\" x2=\"28.2\" y2=\"19.8\" stroke-width=\"2\" stroke=\"black\" /><circle r=\"2\" cx=\"24\" cy=\"24\" fill=\"lightgray\" /></svg>", id, buttonArguments));
 		if (locoBaseIdentifier.GetObjectType() == ObjectTypeMultipleUnit)
@@ -3628,15 +3626,15 @@ namespace Server { namespace Web
 			buttonArguments.erase("multipleunit");
 		}
 
-		id = "locoorientation_" + to_string(locoID);
+		id = "locoorientation_" + to_string(locoBaseID);
 		container.AddChildTag(HtmlTagButtonCommandToggle("<svg width=\"36\" height=\"36\">"
 			"<polyline points=\"5,15 31,15 31,23 5,23\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" />"
 			"<polyline points=\"16,8 0,19 16,30\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" class=\"orientation_left\" />"
 			"<polyline points=\"20,8 36,19 20,30\" stroke=\"black\" stroke-width=\"0\" fill=\"black\" class=\"orientation_right\" />"
-			"</svg>", id, locoBase->GetOrientation(), buttonArguments).AddClass("button_orientation"));
+			"</svg>", id, locoConfig.GetOrientation(), buttonArguments).AddClass("button_orientation"));
 
-		id = "locofunction_" + to_string(locoID);
-		std::vector<DataModel::LocoFunctionEntry> functions = locoBase->GetFunctionStates();
+		id = "locofunction_" + to_string(locoBaseID);
+		std::vector<DataModel::LocoFunctionEntry> functions = locoConfig.GetFunctionStates();
 		for (DataModel::LocoFunctionEntry& function : functions)
 		{
 			string nrText(to_string(function.nr));
@@ -3653,7 +3651,7 @@ namespace Server { namespace Web
 			}
 		}
 		buttonArguments.erase("function");
-		container.AddChildTag(HtmlTagInputHidden("loco", to_string(locoID)).AddId("loco"));
+		container.AddChildTag(HtmlTagInputHidden("loco", to_string(locoBaseID)).AddId("loco"));
 		ReplyHtmlWithHeader(container);
 	}
 

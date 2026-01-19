@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -214,13 +214,8 @@ namespace Server { namespace CS2
 	}
 
 	void CS2Server::LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
-		const LocoBase* locoBase,
-		__attribute__((unused)) const Speed speed)
+		__attribute__((unused)) const DataModel::LocoConfig& locoConfig)
 	{
-		if (nullptr == locoBase)
-		{
-			return;
-		}
 //		for (auto client : clients)
 //		{
 //			reinterpret_cast<CS2Client*>(client)->SendLocoInfo(locoBase);
@@ -228,31 +223,21 @@ namespace Server { namespace CS2
 	}
 
 	void CS2Server::LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
-		const LocoBase* locoBase,
-		__attribute__((unused)) const Orientation orientation)
+		__attribute__((unused)) const DataModel::LocoConfig& locoConfig)
 	{
-		if (nullptr == locoBase)
-		{
-			return;
-		}
 //		for (auto client : clients)
 //		{
-//			reinterpret_cast<CS2Client*>(client)->SendLocoInfo(locoBase);
+//			reinterpret_cast<CS2Client*>(client)->SendLocoInfo(locoConfig);
 //		}
 	}
 
-	void CS2Server::LocoBaseFunction(__attribute__((unused)) const ControlType controlType,
-		const LocoBase* locoBase,
-		__attribute__((unused)) const LocoFunctionNr function,
-		__attribute__((unused)) const LocoFunctionState state)
+	void CS2Server::LocoBaseFunctionState(__attribute__((unused)) const ControlType controlType,
+			__attribute__((unused)) const DataModel::LocoConfig& locoConfig,
+	__attribute__((unused)) const LocoFunctionNr function)
 	{
-		if (!locoBase)
-		{
-			return;
-		}
 //		for (auto client : clients)
 //		{
-//			reinterpret_cast<CS2Client*>(client)->SendLocoInfo(locoBase);
+//			reinterpret_cast<CS2Client*>(client)->SendLocoInfo(locoConfig);
 //		}
 	}
 

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -22,10 +22,14 @@ along with RailControl; see the file LICENCE. If not see
 #include <cstdlib>		//exit(0);
 #include <cstring>		//memset
 #include <iostream>
-#include <signal.h>
 #include <sstream>
 #include <unistd.h>		//close; isatty
 #include <vector>
+
+#ifdef __GLIBC__
+#include <execinfo.h>
+#include <ucontext.h>
+#endif
 
 #include "ArgumentHandler.h"
 #include "Hardware/HardwareHandler.h"
@@ -62,6 +66,33 @@ void shutdownRailControlWebserver()
 	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
 	logger->Info(Languages::TextShutdownRequestedByWebClient);
 	killRailControlIfNeeded(logger);
+}
+
+void segvHandler(__attribute__((unused)) int signo,
+	siginfo_t* info,
+	__attribute__((unused)) void* secret)
+{
+	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
+
+#ifdef __GLIBC__
+	logger->Error(Languages::TextSigSegvReceivedWithBacktrace, Utils::Integer::IntegerToHex(reinterpret_cast<unsigned long>(info->si_addr), 8));
+
+	static const int MaxTrace = 16;
+	void* trace[MaxTrace];
+
+	const int traceSize = backtrace(trace, MaxTrace);
+
+	char** messages = backtrace_symbols(trace, traceSize);
+
+	for(int i = 0; i < traceSize; ++i)
+	{
+		logger->Error(Languages::TextBacktraceLine, i, messages[i]);
+	}
+#else
+	logger->Error(Languages::TextSigSegvReceived, Utils::Integer::IntegerToHex(reinterpret_cast<unsigned long>(info->si_addr), 8));
+#endif
+
+	exit(EXIT_FAILURE);
 }
 
 char readFromStdIn(const time_t sec, const long int usec)
@@ -121,6 +152,12 @@ int main (int argc, char* argv[])
 	signal(SIGINT, shutdownRailControlSignal);
 	signal(SIGTERM, shutdownRailControlSignal);
 
+	struct sigaction sa;
+	sa.sa_sigaction = segvHandler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_SIGINFO;
+	sigaction(SIGSEGV, &sa, nullptr);
+
 	const string RailControl = "RailControl";
 	Utils::Utils::SetThreadName(RailControl);
 
@@ -165,7 +202,7 @@ int main (int argc, char* argv[])
 		configFileName = configFileDefaultName;
 	}
 
-	if (configFileName.compare(configFileDefaultName) == 0 && !Utils::Utils::FileExists(configFileDefaultName))
+	if ((configFileName.compare(configFileDefaultName) == 0) && (!Utils::Utils::FileExists(configFileDefaultName)))
 	{
 		Utils::Utils::CopyFile(logger, "railcontrol.conf.dist", configFileDefaultName);
 	}

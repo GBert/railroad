@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -108,96 +108,117 @@ namespace DataModel
 
 	ObjectIdentifier& ObjectIdentifier::operator=(const std::string& text)
 	{
-		if (text.substr(0, 5).compare("track") == 0)
-		{
-			objectType = ObjectTypeTrack;
-			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 6).compare("signal") == 0)
-		{
-			objectType = ObjectTypeSignal;
-			objectID = Utils::Integer::StringToInteger(text.substr(6), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 5).compare("route") == 0)
-		{
-			objectType = ObjectTypeRoute;
-			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 4).compare("loco") == 0)
+		std::string shortText = text.substr(0, 4);
+
+		if (shortText.compare("loco") == 0)
 		{
 			objectType = ObjectTypeLoco;
 			objectID = Utils::Integer::StringToInteger(text.substr(4), ObjectNone);
 			return *this;
 		}
-		if (text.substr(0, 8).compare("feedback") == 0)
-		{
-			objectType = ObjectTypeFeedback;
-			objectID = Utils::Integer::StringToInteger(text.substr(8), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 9).compare("accessory") == 0)
-		{
-			objectType = ObjectTypeAccessory;
-			objectID = Utils::Integer::StringToInteger(text.substr(9), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 6).compare("switch") == 0)
-		{
-			objectType = ObjectTypeSwitch;
-			objectID = Utils::Integer::StringToInteger(text.substr(6), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 5).compare("layer") == 0)
-		{
-			objectType = ObjectTypeLayer;
-			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 7).compare("cluster") == 0)
-		{
-			objectType = ObjectTypeCluster;
-			objectID = Utils::Integer::StringToInteger(text.substr(7), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 9).compare("timetable") == 0)
-		{
-			objectType = ObjectTypeTimeTable;
-			objectID = Utils::Integer::StringToInteger(text.substr(9), ObjectNone);
-			return *this;
-		}
-		if (text.substr(0, 4).compare("text") == 0)
+		if (shortText.compare("text") == 0)
 		{
 			objectType = ObjectTypeText;
 			objectID = Utils::Integer::StringToInteger(text.substr(4), ObjectNone);
 			return *this;
 		}
-		if (text.substr(0, 5).compare("pause") == 0)
+
+		shortText = text.substr(0, 5);
+
+		if (shortText.compare("track") == 0)
+		{
+			objectType = ObjectTypeTrack;
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
+			return *this;
+		}
+		if (shortText.compare("route") == 0)
+		{
+			objectType = ObjectTypeRoute;
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
+			return *this;
+		}
+		if (shortText.compare("layer") == 0)
+		{
+			objectType = ObjectTypeLayer;
+			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
+			return *this;
+		}
+		if (shortText.compare("pause") == 0)
 		{
 			objectType = ObjectTypePause;
 			objectID = Utils::Integer::StringToInteger(text.substr(5), ObjectNone);
 			return *this;
 		}
-		if (text.substr(0, 12).compare("multipleunit") == 0)
+
+		shortText = text.substr(0, 6);
+
+		if (shortText.compare("signal") == 0)
 		{
-			objectType = ObjectTypeMultipleUnit;
-			objectID = Utils::Integer::StringToInteger(text.substr(12), ObjectNone);
+			objectType = ObjectTypeSignal;
+			objectID = Utils::Integer::StringToInteger(text.substr(6), ObjectNone);
 			return *this;
 		}
-		if (text.substr(0, 7).compare("booster") == 0)
+		if (shortText.compare("switch") == 0)
+		{
+			objectType = ObjectTypeSwitch;
+			objectID = Utils::Integer::StringToInteger(text.substr(6), ObjectNone);
+			return *this;
+		}
+
+		shortText = text.substr(0, 7);
+
+		if (shortText.compare("cluster") == 0)
+		{
+			objectType = ObjectTypeCluster;
+			objectID = Utils::Integer::StringToInteger(text.substr(7), ObjectNone);
+			return *this;
+		}
+		if (shortText.compare("booster") == 0)
 		{
 			objectType = ObjectTypeBooster;
 			objectID = Utils::Integer::StringToInteger(text.substr(7), ObjectNone);
 			return *this;
 		}
-		if (text.substr(0, 7).compare("counter") == 0)
+		if (shortText.compare("counter") == 0)
 		{
 			objectType = ObjectTypeCounter;
 			objectID = Utils::Integer::StringToInteger(text.substr(7), ObjectNone);
 			return *this;
 		}
+
+		shortText = text.substr(0, 8);
+
+		if (shortText.compare("feedback") == 0)
+		{
+			objectType = ObjectTypeFeedback;
+			objectID = Utils::Integer::StringToInteger(text.substr(8), ObjectNone);
+			return *this;
+		}
+
+		shortText = text.substr(0, 9);
+
+		if (shortText.compare("accessory") == 0)
+		{
+			objectType = ObjectTypeAccessory;
+			objectID = Utils::Integer::StringToInteger(text.substr(9), ObjectNone);
+			return *this;
+		}
+		if (shortText.compare("timetable") == 0)
+		{
+			objectType = ObjectTypeTimeTable;
+			objectID = Utils::Integer::StringToInteger(text.substr(9), ObjectNone);
+			return *this;
+		}
+
+		shortText = text.substr(0, 12);
+
+		if (shortText.compare("multipleunit") == 0)
+		{
+			objectType = ObjectTypeMultipleUnit;
+			objectID = Utils::Integer::StringToInteger(text.substr(12), ObjectNone);
+			return *this;
+		}
+
 		objectType = ObjectTypeTrack;
 		objectID = Utils::Integer::StringToInteger(text, ObjectNone);
 		return *this;
@@ -254,8 +275,10 @@ namespace DataModel
 
 			case ObjectTypeCounter:
 				return "counter";
+
+			default:
+				return "object";
 		}
-		return "object";
 	}
 } // namespace DataModel
 

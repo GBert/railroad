@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -26,6 +26,10 @@ along with RailControl; see the file LICENCE. If not see
 class Config
 {
 	public:
+		Config() = delete;
+		Config(const Config&) = delete;
+		Config& operator=(const Config&) = delete;
+
 		Config(const std::string& fileName);
 		const std::string& getStringValue(const std::string& key, const std::string& defaultValue);
 		int getIntValue(const std::string& key, const int defaultValue);

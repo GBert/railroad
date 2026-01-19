@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -176,7 +176,7 @@ namespace Utils
 		return output;
 	}
 
-	std::string Integer::IntegerToHex(const unsigned int input, const unsigned int size)
+	std::string Integer::IntegerToHex(const unsigned long int input, const unsigned int size)
 	{
 		if (input == 0)
 		{
@@ -184,7 +184,7 @@ namespace Utils
 		}
 		std::string output;
 
-		unsigned int decimal = input;
+		unsigned long int decimal = input;
 		unsigned int internalSize = 0;
 		while (decimal)
 		{

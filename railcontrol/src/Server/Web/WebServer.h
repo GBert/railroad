@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -51,7 +51,7 @@ namespace Server { namespace Web
 
 			void Work(Network::TcpConnection* connection) override;
 
-			void Warning(__attribute__((unused)) Languages::TextSelector textSelector)
+			void Warning(__attribute__((unused)) Languages::TextSelector textSelector) override
 			{
 				AddUpdate("warning", textSelector);
 			}
@@ -74,27 +74,31 @@ namespace Server { namespace Web
 			void LayerDelete(const LayerID layerID, const std::string& name) override;
 			void LayerSettings(const LayerID layerID, const std::string& name) override;
 
-			void LocoBaseDestinationReached(const DataModel::LocoBase* loco,
-				const DataModel::Route* route,
-				const DataModel::Track* track) override;
-
-			void LocoBaseOrientation(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Orientation direction) override;
-
-			void LocoBaseFunction(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const DataModel::LocoFunctionNr function,
-				const DataModel::LocoFunctionState on) override;
-
-			void LocoBaseRelease(const DataModel::LocoBase* loco) override;
+			void LocoBaseDestinationReached(const DataModel::ObjectIdentifier& locoIdentifier,
+				const std::string& locoName,
+				const RouteID routeID,
+				const std::string& routeName,
+				const TrackID trackID,
+				const std::string& trackName) override;
 
 			void LocoBaseSpeed(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Speed speed) override;
+				const DataModel::LocoConfig& locoConfig) override;
 
-			void LocoBaseStart(const DataModel::LocoBase* loco) override;
-			void LocoBaseStop(const DataModel::LocoBase* loco) override;
+			void LocoBaseOrientation(const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig) override;
+
+			void LocoBaseFunctionState(const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig,
+				const DataModel::LocoFunctionNr function) override;
+
+			void LocoBaseRelease(const DataModel::ObjectIdentifier& locolocoIdentifier,
+				const std::string& locoName) override;
+
+			void LocoBaseStart(const DataModel::ObjectIdentifier& locoIdentifier,
+				const std::string& locoName) override;
+
+			void LocoBaseStop(const DataModel::ObjectIdentifier& locoIdentifier,
+				const std::string& locoName) override;
 
 			void LocoSettings(const LocoID locoID,
 				const std::string& name,
@@ -130,7 +134,7 @@ namespace Server { namespace Web
 			void TextSettings(const TextID textID, const std::string& name) override;
 			void CounterDelete(const CounterID counterID, const std::string& name) override;
 			void CounterSettings(const CounterID counterID, const std::string& name) override;
-			void CounterState(const DataModel::Counter* const counter);
+			void CounterState(const DataModel::Counter* const counter) override;
 			void ProgramValue(const CvNumber cv, const CvValue value) override;
 
 			inline bool UpdateAvailable()
@@ -168,6 +172,11 @@ namespace Server { namespace Web
 			void AddUpdateInternal(const std::string& data);
 
 			void LogBrowserInfo(const std::string& webserveraddress, const unsigned short port);
+
+			static inline LocoID LocoIDWithPrefix(const LocoID locoID, const LocoType type)
+			{
+				return locoID + (type == LocoTypeMultipleUnit ? MultipleUnitIdPrefix : 0);
+			}
 
 			Logger::Logger* logger;
 			unsigned int lastClientID;

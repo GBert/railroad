@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -60,18 +60,24 @@ namespace Server { namespace Z21
 
 			void Booster(const ControlType controlType, const BoosterState status) override;
 
-			void LocoBaseOrientation(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Orientation direction) override;
+			void LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig) override
+			{
+				SendLocoInfo(locoConfig);
+			}
 
-			void LocoBaseFunction(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const DataModel::LocoFunctionNr function,
-				const DataModel::LocoFunctionState on) override;
+			void LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig) override
+			{
+				SendLocoInfo(locoConfig);
+			}
 
-			void LocoBaseSpeed(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Speed speed) override;
+			void LocoBaseFunctionState(__attribute__((unused)) const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig,
+				__attribute__((unused)) const DataModel::LocoFunctionNr function) override
+			{
+				SendLocoInfo(locoConfig);
+			}
 
 			void AccessoryState(const ControlType controlType, const DataModel::Accessory* accessory) override;
 
@@ -91,6 +97,8 @@ namespace Server { namespace Z21
 			ssize_t ParseData(const unsigned char* buffer,
 				const ssize_t bufferLength,
 				const struct sockaddr_storage* clientAddress);
+
+			void SendLocoInfo(const DataModel::LocoConfig& locoConfig);
 
 			void ParseXHeader(const unsigned char* buffer);
 

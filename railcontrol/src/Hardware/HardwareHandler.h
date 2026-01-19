@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -86,27 +86,21 @@ namespace Hardware
 			void Booster(const ControlType controlType, BoosterState status) override;
 			Hardware::Capabilities GetCapabilities() const override;
 
-			void LocoBaseOrientation(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Orientation orientation) override;
+			void LocoBaseSpeed(const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig) override;
 
-			void LocoBaseFunction(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const DataModel::LocoFunctionNr function,
-				const DataModel::LocoFunctionState on) override;
+			void LocoBaseOrientation(const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig) override;
+
+			void LocoBaseFunctionState(const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig,
+				const DataModel::LocoFunctionNr function) override;
+
+			void LocoBaseSpeedOrientationFunctionStates(const DataModel::LocoConfig& locoConfig) override;
 
 			void LocoProtocols(std::vector<Protocol>& protocols) const override;
 
 			bool LocoProtocolSupported(Protocol protocol) const override;
-
-			void LocoBaseSpeed(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Speed speed) override;
-
-			void LocoBaseSpeedOrientationFunctions(const DataModel::LocoBase* loco,
-				const Speed speed,
-				const Orientation orientation,
-				std::vector<DataModel::LocoFunctionEntry>& functions) override;
 
 			void LocoSettings(const LocoID locoId,
 				const std::string& name,

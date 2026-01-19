@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -192,23 +192,33 @@ namespace Utils
 		return output;
 	}
 
-	void Utils::CopyFile(Logger::Logger* logger, const std::string& from, const std::string& to)
+	bool Utils::CopyFile(Logger::Logger* logger, const std::string& from, const std::string& to)
 	{
-		logger->Info(Languages::TextCopyingFromTo, from, to);
 		std::ifstream source(from, std::ios::binary);
+		if (!source.is_open())
+		{
+			return false;
+		}
 		std::ofstream destination(to, std::ios::binary);
+		if (!destination.is_open())
+		{
+			return false;
+		}
 		destination << source.rdbuf();
 		source.close();
 		destination.close();
+		logger->Info(Languages::TextCopyingFromTo, from, to);
+		return true;
 	}
 
-	void Utils::RenameFile(Logger::Logger* logger, const std::string& from, const std::string& to)
+	bool Utils::RenameFile(Logger::Logger* logger, const std::string& from, const std::string& to)
 	{
-		if (logger != nullptr)
+		const bool ret = std::rename(from.c_str(), to.c_str());
+		if (ret && logger)
 		{
 			logger->Info(Languages::TextRenamingFromTo, from, to);
 		}
-		std::rename(from.c_str(), to.c_str());
+		return ret;
 	}
 
 	void Utils::RemoveOldBackupFiles (Logger::Logger *logger,
@@ -216,7 +226,7 @@ namespace Utils
 		unsigned int keepBackups)
 	{
 		DIR *dir = opendir(".");
-		if (dir == nullptr)
+		if (!dir)
 		{
 			return;
 		}
@@ -227,12 +237,12 @@ namespace Utils
 		while (true)
 		{
 			ent = readdir(dir);
-			if (ent == nullptr)
+			if (!ent)
 			{
 				break;
 			}
 			string fileName = ent->d_name;
-			if (fileName.length() != filenameSearchLength || fileName.find(filenameSearch) == string::npos)
+			if ((fileName.length() != filenameSearchLength) || (fileName.find(filenameSearch) == string::npos))
 			{
 				continue;
 			}
@@ -242,7 +252,7 @@ namespace Utils
 		std::sort(fileNames.begin(), fileNames.end());
 
 		size_t numberOfFiles = fileNames.size();
-		if (numberOfFiles == 0 || numberOfFiles < keepBackups)
+		if ((numberOfFiles == 0) || (numberOfFiles < keepBackups))
 		{
 			return;
 		}

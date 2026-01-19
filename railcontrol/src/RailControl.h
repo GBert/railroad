@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -20,6 +20,8 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <signal.h>
+
 static volatile unsigned char stopSignalCounter;
 static const unsigned char MaxStopSignalCounter = 3;
 
@@ -29,6 +31,8 @@ void killRailControlIfNeeded(Logger::Logger* logger);
 void shutdownRailControlSignal(int);
 
 void shutdownRailControlWebserver();
+
+void segvHandler(int, siginfo_t*, void*);
 
 inline bool isShutdownRunning()
 {

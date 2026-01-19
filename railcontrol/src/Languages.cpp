@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -69,6 +69,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextAddress */ { "Address", "Adresse", "Dirección" },
 /* TextAddressMustBeHigherThen0 */ { "Address must be higher then 0", "Adresse muss grösser sein als 0", "Dirección tiene que ser mas que 0" },
 /* TextAddresses */ { "Addresses", "Adressen", "Direcciónes" },
+/* TextAllLocosInManualMode */ { "All locos are in manual mode now", "Alle Lokomotiven sind nun im Modus manuell", "Todas las locomotoras están en modo manual" },
 /* TextAllTrains */ { "all trains", "alle Züge", "todos los trenes" },
 /* TextAllowLocoTurn */ { "Allow turn locomotive orientation", "Fahrtrichtung der Lokomotive drehen erlauben", "Permitir girar la dirección de viaje" },
 /* TextAllowedPropulsions */ { "Allowed propulsions", "Erlaubte Antriebe", "Tipos de propulsiones permitios" },
@@ -81,6 +82,7 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextAtUnlock */ { "At unlock", "Beim Auflösen", "Durante liberar" },
 /* TextAutomaticallyAddUnknownFeedbacks */ { "Automatically add unknown feedbacks", "Füge unbekannte Rückmelder automatisch hinzu", "Añadir retroseñales desconocidos automaticamente" },
 /* TextAutomode */ { "Automode", "Automode", "Autómodo" },
+/* TextBacktraceLine */ { "{0}: {1}", "{0}: {1}", "{0}: {1}" },
 /* TextBaseAddress */ { "Baseaddress", "Basisadresse", "Dirección basica" },
 /* TextBasic */ { "Basic data", "Basisdaten", "Datos básicos" },
 /* TextBlockTrack */ { "Block track", "Blockiere Gleis", "Bloquear vía" },
@@ -726,6 +728,8 @@ const char* Languages::languages[MaxTexts][MaxLanguages] =
 /* TextSignalStateZs7 */ { "Caution Zs 7", "Vorsichtssignal Zs 7", "Cuidado Zs 7" },
 /* TextSignalUpdated */ { "Signal {0} updated", "Signal {0} aktualisiert", "Señal {0} actualizado" },
 /* TextSignals */ { "Signals", "Signale", "Señales" },
+/* TextSigSegvReceived */ { "SIGSEGV received at address 0x{0}. Exiting without cleanup.", "SIGSEGV empfangen an Adresse 0x{0}. Beende ohne Aufräumen.", "SIGSEGV recibido en dirección 0x{0}. Terminando sin limpiar." },
+/* TextSigSegvReceivedWithBacktrace */ { "SIGSEGV received at address 0x{0}. Exiting without cleanup. Backtrace:", "SIGSEGV empfangen an Adresse 0x{0}. Beende ohne Aufräumen. Backtrace", "SIGSEGV recibido en dirección 0x{0}. Terminando sin limpiar. Backtrace:" },
 /* TextSimpleLeft */ { "simple left", "einfach links", "simple izquierda" },
 /* TextSimpleRight */ { "simple right", "einfach rechts", "simple derecha" },
 /* TextSlotHasAddress */ { "Slot {0} has address {1}", "Slot {0} hat Adresse {1}", "Slot {0} tiene dirección {1}" },

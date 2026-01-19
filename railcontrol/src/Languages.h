@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -69,6 +69,7 @@ class Languages
 			TextAddress,
 			TextAddressMustBeHigherThen0,
 			TextAddresses,
+			TextAllLocosInManualMode,
 			TextAllTrains,
 			TextAllowLocoTurn,
 			TextAllowedPropulsions,
@@ -81,6 +82,7 @@ class Languages
 			TextAtUnlock,
 			TextAutomaticallyAddUnknownFeedbacks,
 			TextAutomode,
+			TextBacktraceLine,
 			TextBaseAddress,
 			TextBasic,
 			TextBlockTrack,
@@ -726,6 +728,8 @@ class Languages
 			TextSignalStateZs7,
 			TextSignalUpdated,
 			TextSignals,
+			TextSigSegvReceived,
+			TextSigSegvReceivedWithBacktrace,
 			TextSimpleLeft,
 			TextSimpleRight,
 			TextSlotHasAddress,

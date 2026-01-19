@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -362,8 +362,8 @@ namespace DataModel
 	{
 		if (newTrackState == DataModel::Feedback::FeedbackStateOccupied)
 		{
-			LocoBase* locoBase = manager->GetLocoBase(GetLocoBaseDelayed());
-			if (!locoBase)
+			const bool ok = manager->LocationReached(GetLocoBaseDelayed(), feedbackID);
+			if (!ok)
 			{
 				if ((!blocked) && manager->GetStopOnFeedbackInFreeTrack())
 				{
@@ -371,19 +371,15 @@ namespace DataModel
 					blocked = true;
 				}
 			}
-			else
-			{
-				locoBase->LocationReached(feedbackID);
-			}
 
 			this->trackState = DataModel::Feedback::FeedbackStateOccupied;
 			this->trackStateDelayed = DataModel::Feedback::FeedbackStateOccupied;
 			return true;
 		}
 
-		for (auto feedbackRelation : feedbacks)
+		for (auto& feedbackRelation : feedbacks)
 		{
-			DataModel::Feedback* feedback = manager->GetFeedbackUnlocked(feedbackRelation->ObjectID2());
+			const DataModel::Feedback* feedback = manager->GetFeedbackUnlocked(feedbackRelation->ObjectID2());
 			if (!feedback)
 			{
 				continue;
@@ -399,11 +395,11 @@ namespace DataModel
 		const ObjectIdentifier& locoBaseIdentifier = GetLocoBase();
 		if (releaseWhenFree)
 		{
-			const LocoBase* locoBase = manager->GetLocoBase(locoBaseIdentifier);
-			if (locoBase && locoBase->CheckFreeingTrack(GetID()))
+			Logger::Logger* logger = manager->CheckFreeingTrack(locoBaseIdentifier, GetID());
+			if (logger)
 			{
 				StopAllSignals(locoBaseIdentifier);
-				const bool ret = ReleaseForceUnlocked(locoBase->GetLogger(), locoBaseIdentifier);
+				const bool ret = ReleaseForceUnlocked(logger, locoBaseIdentifier);
 				PublishState();
 				return ret;
 			}

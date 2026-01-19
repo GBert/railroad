@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -68,8 +68,8 @@ namespace Utils
 				return (stat(name.c_str(), &buffer) == 0);
 			}
 
-			static void CopyFile(Logger::Logger* logger, const std::string& from, const std::string& to);
-			static void RenameFile(Logger::Logger* logger, const std::string& from, const std::string& to);
+			static bool CopyFile(Logger::Logger* logger, const std::string& from, const std::string& to);
+			static bool RenameFile(Logger::Logger* logger, const std::string& from, const std::string& to);
 
 			static void RemoveOldBackupFiles (Logger::Logger *logger,
 				const std::string &filename,

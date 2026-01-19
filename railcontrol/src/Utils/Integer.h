@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -47,7 +47,7 @@ namespace Utils
 			static void ShortToDataLittleEndian(const uint16_t i, unsigned char* buffer);
 			static uint16_t DataLittleEndianToShort(const unsigned char* buffer);
 			static std::string IntegerToBCD(const unsigned int input);
-			static std::string IntegerToHex(const unsigned int input, const unsigned int size = 1);
+			static std::string IntegerToHex(const unsigned long int input, const unsigned int size = 1);
 
 	}; // class Integer
 } // namespace Utils

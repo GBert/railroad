@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -134,7 +134,7 @@ namespace Hardware
 			}
 
 			// set loco function
-			virtual void LocoFunction(__attribute__((unused)) const Protocol protocol,
+			virtual void LocoFunctionState(__attribute__((unused)) const Protocol protocol,
 				__attribute__((unused)) const Address address,
 				__attribute__((unused)) const DataModel::LocoFunctionNr function,
 				__attribute__((unused)) const DataModel::LocoFunctionState on)
@@ -142,11 +142,11 @@ namespace Hardware
 			}
 
 			// set loco
-			virtual void LocoSpeedOrientationFunctions(const Protocol protocol,
+			virtual void LocoSpeedOrientationFunctionStates(const Protocol protocol,
 				const Address address,
 				const Speed speed,
 				const Orientation orientation,
-				std::vector<DataModel::LocoFunctionEntry>& functions)
+				const std::vector<DataModel::LocoFunctionEntry>& functions)
 			{
 				// sleeps are necessary to prevent command overflow in command stations (especially Märklin Gleisbox)
 				LocoSpeed(protocol, address, speed);
@@ -155,7 +155,7 @@ namespace Hardware
 				Utils::Utils::SleepForMilliseconds(25);
 				for (const DataModel::LocoFunctionEntry& functionEntry : functions)
 				{
-					LocoFunction(protocol, address, functionEntry.nr, functionEntry.state);
+					LocoFunctionState(protocol, address, functionEntry.nr, functionEntry.state);
 					Utils::Utils::SleepForMilliseconds(25);
 				}
 			}
@@ -191,7 +191,7 @@ namespace Hardware
 
 			virtual DataModel::LocoConfig GetLocoByMatchKey(__attribute__((unused)) const std::string& matchKey) const
 			{
-				return DataModel::LocoConfig(LocoTypeLoco);
+				return DataModel::LocoConfig(LocoTypeNone);
 			}
 
 			virtual DataModel::LocoConfig GetMultipleUnitByMatchKey(__attribute__((unused)) const std::string& matchKey) const

@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -67,14 +67,7 @@ namespace DataModel
 
 			inline void SetAddress(Address address)
 			{
-				if (address == AddressNone)
-				{
-					this->address = AddressDefault;
-				}
-				else
-				{
-					this->address = address;
-				}
+				this->address = (address == AddressNone ? AddressDefault : address);
 			}
 
 			inline Address GetAddress() const
@@ -84,14 +77,7 @@ namespace DataModel
 
 			inline void SetServerAddress(const Address serverAddress)
 			{
-				if (serverAddress == AddressNone)
-				{
-					this->serverAddress = this->address;
-				}
-				else
-				{
-					this->serverAddress = serverAddress;
-				}
+				this->serverAddress = (serverAddress == AddressNone ? this->address : serverAddress);
 			}
 
 			inline Address GetServerAddress() const

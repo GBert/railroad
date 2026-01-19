@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -218,7 +218,7 @@ namespace Hardware
 			SendXLok(address);
 		}
 
-		void P50x::LocoFunction(__attribute__((unused))  const Protocol protocol,
+		void P50x::LocoFunctionState(__attribute__((unused))  const Protocol protocol,
 		    const Address address,
 		    const DataModel::LocoFunctionNr function,
 		    const DataModel::LocoFunctionState on)
@@ -255,11 +255,11 @@ namespace Hardware
 			SendXFunc34(address);
 		}
 
-		void P50x::LocoSpeedOrientationFunctions(__attribute__((unused))  const Protocol protocol,
+		void P50x::LocoSpeedOrientationFunctionStates(__attribute__((unused))  const Protocol protocol,
 		    const Address address,
 		    const Speed speed,
 		    const Orientation orientation,
-		    std::vector<DataModel::LocoFunctionEntry>& functions)
+		    const std::vector<DataModel::LocoFunctionEntry>& functions)
 		{
 			if (!CheckLocoAddress(address))
 			{

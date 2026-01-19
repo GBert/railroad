@@ -1,7 +1,7 @@
 /*
 RailControl - Model Railway Control Software
 
-Copyright (c) 2017-2025 by Teddy / Dominik Mahrer - www.railcontrol.org
+Copyright (c) 2017-2026 by Teddy / Dominik Mahrer - www.railcontrol.org
 
 RailControl is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -64,18 +64,15 @@ namespace Server { namespace CS2
 
 			void Booster(const ControlType controlType, const BoosterState status) override;
 
-			void LocoBaseOrientation(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Orientation direction) override;
-
-			void LocoBaseFunction(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const DataModel::LocoFunctionNr function,
-				const DataModel::LocoFunctionState on) override;
-
 			void LocoBaseSpeed(const ControlType controlType,
-				const DataModel::LocoBase* loco,
-				const Speed speed) override;
+				const DataModel::LocoConfig& locoConfig) override;
+
+			void LocoBaseOrientation(const ControlType controlType,
+				const DataModel::LocoConfig& locoConfig) override;
+
+			void LocoBaseFunctionState(const ControlType controlType,
+					const DataModel::LocoConfig& locoConfig,
+				const DataModel::LocoFunctionNr function) override;
 
 			void AccessoryState(const ControlType controlType, const DataModel::Accessory* accessory) override;
 
