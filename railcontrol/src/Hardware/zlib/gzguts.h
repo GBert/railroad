@@ -18,11 +18,13 @@
 #endif
 
 #include <stdio.h>
+
 #include "zlib.h"
 #ifdef STDC
 #  include <string.h>
 #  include <stdlib.h>
 #  include <limits.h>
+#  include <unistd.h>
 #endif
 
 #ifndef _POSIX_SOURCE
