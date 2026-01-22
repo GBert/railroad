@@ -734,7 +734,7 @@ namespace Hardware { namespace Protocols
 			return;
 		}
 		free(canFile->data);
-		canFiles.erase(static_cast<vector<Hardware::Protocols::MaerklinCANCommon::CanFile>::iterator>(canFile));
+		canFiles.erase(canFiles.begin() + (canFile - canFiles.data()));
 	}
 
 	struct MaerklinCANCommon::CanFile* MaerklinCANCommon::GetCanFile(const CanHash canHash)
