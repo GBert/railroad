@@ -222,17 +222,30 @@ namespace Utils
 	}
 
 	void Utils::RemoveOldBackupFiles (Logger::Logger *logger,
-		const std::string &filename,
+		const string &pathFile,
 		unsigned int keepBackups)
 	{
-		DIR *dir = opendir(".");
+		size_t posDirSeperator = pathFile.find_last_of('/');
+		DIR* dir;
+		string path;
+		string file;
+		if (posDirSeperator == string::npos)
+		{
+			file = pathFile;
+		}
+		else
+		{
+			path = pathFile.substr(0, posDirSeperator + 1);
+			file = pathFile.substr(posDirSeperator + 1);
+		}
+		dir= opendir(path.length() ? path.c_str() : ".");
 		if (!dir)
 		{
 			return;
 		}
 		struct dirent *ent;
 		std::vector < string > fileNames;
-		const string filenameSearch = filename + ".";
+		const string filenameSearch = file + ".";
 		const size_t filenameSearchLength = filenameSearch.length() + 10;
 		while (true)
 		{
@@ -241,7 +254,7 @@ namespace Utils
 			{
 				break;
 			}
-			string fileName = ent->d_name;
+			const string fileName = ent->d_name;
 			if ((fileName.length() != filenameSearchLength) || (fileName.find(filenameSearch) == string::npos))
 			{
 				continue;
@@ -267,8 +280,9 @@ namespace Utils
 			}
 
 			--removeBackups;
-			logger->Info(Languages::TextRemoveBackupFile, fileName);
-			remove(fileName.c_str());
+			const string fileToDelete(path + fileName);
+			logger->Info(Languages::TextRemoveBackupFile, fileToDelete);
+			remove(fileToDelete.c_str());
 		}
 	}
 

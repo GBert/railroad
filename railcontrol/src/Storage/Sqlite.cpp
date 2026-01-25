@@ -59,7 +59,7 @@ namespace Storage
 		map<string, bool> tablenames;
 		const char* query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
 		bool ret = Execute(query, CallbackListTables, &tablenames);
-		if (ret == false)
+		if (!ret)
 		{
 			return;
 		}
@@ -68,7 +68,7 @@ namespace Storage
 		if (tablenames["hardware"] == false)
 		{
 			bool ret = CreateTableHardware();
-			if (ret == false)
+			if (!ret)
 			{
 				return;
 			}
@@ -78,7 +78,7 @@ namespace Storage
 		if (tablenames["objects"] == false)
 		{
 			bool ret = CreateTableObjects();
-			if (ret == false)
+			if (!ret)
 			{
 				return;
 			}
@@ -90,10 +90,11 @@ namespace Storage
 		{
 			ret = CheckTableRelations();
 		}
-		else {
+		else
+		{
 			ret = CreateTableRelations(tableNameRelations);
 		}
-		if (ret == false)
+		if (!ret)
 		{
 			return;
 		}
@@ -102,7 +103,7 @@ namespace Storage
 		if (tablenames["settings"] == false)
 		{
 			bool ret = CreateTableSettings();
-			if (ret == false)
+			if (!ret)
 			{
 				return;
 			}
@@ -112,7 +113,7 @@ namespace Storage
 
 	SQLite::~SQLite()
 	{
-		if (db == nullptr)
+		if (!db)
 		{
 			return;
 		}
@@ -215,7 +216,7 @@ namespace Storage
 		vector<TableInfo> tableInfos;
 		string query = "PRAGMA table_info('relations');";
 		bool ret = Execute(query, CallbackTableInfo, &tableInfos);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
@@ -234,7 +235,7 @@ namespace Storage
 		// FIXME: simple check, extend with check if each object really exists
 		query = "DELETE FROM relations WHERE objectid1 like 0;";
 		ret = Execute(query);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
@@ -248,19 +249,19 @@ namespace Storage
 		const string tableName = "relations";
 		const string tempTableName = "relations_temp";
 		bool ret = CreateTableRelations(tempTableName);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
 		logger->Info(Languages::TextCopyingFromTo, tableName, tempTableName);
 		const string query = "INSERT INTO " + tempTableName + " SELECT objecttype1 * 8, objectid1, objecttype2, objectid2, priority, relation FROM " + tableName + ";";
 		ret = Execute(query);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
 		ret = DropTable(tableName);
-		if (ret == false)
+		if (!ret)
 		{
 			return false;
 		}
@@ -448,7 +449,7 @@ namespace Storage
 
 	bool SQLite::Execute(const char* query, sqlite3_callback callback = nullptr, void* result = nullptr)
 	{
-		if (db == nullptr)
+		if (!db)
 		{
 			return false;
 		}
