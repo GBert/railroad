@@ -29,7 +29,7 @@ namespace Server { namespace Web
 {
 	HtmlTagSignal::HtmlTagSignal(__attribute__((unused)) const Manager& manager, const DataModel::Signal* const signal)
 	:	HtmlTagLayoutItem(dynamic_cast<const DataModel::LayoutItem*>(signal)),
-	 	signal(signal)
+		signal(signal)
 	{
 		image += "<polygon points=\"15,0 21,0 21,36 15,36\" fill=\"white\"/>";
 		image += GetSignalImagePlain(signal);

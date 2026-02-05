@@ -41,7 +41,7 @@ namespace DataModel
 
 			inline LockableItem()
 			:	lockState(LockStateFree),
-			 	locoBaseIdentifier()
+				locoBaseIdentifier()
 			{
 			}
 

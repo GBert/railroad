@@ -41,8 +41,8 @@ namespace Storage
 {
 	SQLite::SQLite(const StorageParams* params)
 	:	filename(params->filename),
-	 	logger(Logger::Logger::GetLogger("SQLite")),
-	 	keepBackups(params->keepBackups)
+		logger(Logger::Logger::GetLogger("SQLite")),
+		keepBackups(params->keepBackups)
 	{
 		Utils::Utils::RemoveOldBackupFiles (logger, filename, keepBackups);
 		logger->Info(Languages::TextOpeningSQLite, filename);

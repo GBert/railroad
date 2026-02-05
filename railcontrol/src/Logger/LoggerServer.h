@@ -75,7 +75,7 @@ namespace Logger
 		private:
 			inline LoggerServer()
 			:	fileLoggerStarted(false),
-			 	consoleLoggerStarted(false)
+				consoleLoggerStarted(false)
 			{
 			}
 

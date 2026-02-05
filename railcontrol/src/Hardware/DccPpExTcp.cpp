@@ -29,7 +29,7 @@ namespace Hardware
 	:	DccPpEx(params,
 			"DCC-EX TCP / " + params->GetName() + " at IP " + params->GetArg1(),
 			params->GetName()),
-	 	connection(Network::TcpClient::GetTcpClientConnection(logger, params->GetArg1(), Port))
+		connection(Network::TcpClient::GetTcpClientConnection(logger, params->GetArg1(), Port))
 	{
 		logger->Info(Languages::TextStarting, GetFullName());
 

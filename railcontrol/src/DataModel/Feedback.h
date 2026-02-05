@@ -55,15 +55,15 @@ namespace DataModel
 			inline Feedback(Manager* manager,
 				const FeedbackID feedbackID)
 			:	LayoutItem(feedbackID),
-			 	controlID(ControlIdNone),
-			 	pin(FeedbackPinNone),
+				controlID(ControlIdNone),
+				pin(FeedbackPinNone),
 				device(FeedbackDeviceNone),
 				bus(FeedbackBusNone),
-			 	manager(manager),
-			 	feedbackType(FeedbackTypeDefault),
-			 	routeId(RouteNone),
-			 	inverted(false),
-			 	track(nullptr),
+				manager(manager),
+				feedbackType(FeedbackTypeDefault),
+				routeId(RouteNone),
+				inverted(false),
+				track(nullptr),
 				stateCounter(0)
 			{
 			}

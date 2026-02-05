@@ -7,6 +7,17 @@ Se puede extraer el archivo descargado en qualquier lugar de la computadora.
 ## Instalación en Windows
 En Windows se tiene que extraer el archivo en una subcarpeta. D:\\ no vale, D:\\Modelismo está bien.
 
+## Instalación en  Debian GNU/Linux
+
+Deste Debian GNU/Linux 13 "trixie" RailControl está incluido en Debian. Se puede installar con este commando:
+
+```
+sudo apt install railcontrol
+```
+
+**Nota:** La documentación específica de Debian se encuentra en el directorio
+`/usr/share/doc/railcontrol`.
+
 # Fichero de la configuración
 En el archivo extraido hay una plantilla de archivo de la configuración (railcontrol.conf.dist). Durante el primero inicio de RailControl la plantilla está copiado a railcontrol.conf. Normalmente no es necesario cambiar algo en el archivo de configuración.
 

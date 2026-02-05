@@ -52,8 +52,8 @@ clean:
 clean-sqlite-shell:
 	make -C Storage/sqlite clean
 
-test:
-	make -C test
+test: railcontrol
+	pytest -vv
 
 tools:
 	make -C tools

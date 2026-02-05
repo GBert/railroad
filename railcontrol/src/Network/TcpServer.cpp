@@ -37,10 +37,10 @@ namespace Network
 		const unsigned short port,
 		const std::string& threadName)
 	:	run(false),
-	 	error(""),
-	 	address(address),
-	 	port(port),
-	 	threadName(threadName)
+		error(""),
+		address(address),
+		port(port),
+		threadName(threadName)
 	{
 	}
 

@@ -61,8 +61,8 @@ namespace DataModel
 
 			Route(Manager* manager, const RouteID routeID)
 			:	LayoutItem(routeID),
-			 	LockableItem(),
-			 	manager(manager),
+				LockableItem(),
+				manager(manager),
 				executeAtUnlock(false),
 				delay(0),
 				pushpull(PushpullTypeBoth),

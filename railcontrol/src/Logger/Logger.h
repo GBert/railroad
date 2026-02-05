@@ -42,7 +42,7 @@ namespace Logger
 
 			Logger(LoggerServer& server, const std::string& component)
 			:	server(server),
-			 	component(component)
+				component(component)
 			{}
 
 			~Logger() {};

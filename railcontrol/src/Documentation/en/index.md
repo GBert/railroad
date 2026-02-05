@@ -7,6 +7,18 @@ The downloaded archive can be extracted everywhere on the computer.
 ## Installing on Windows
 On Windows the archive has to be extracted in a subdirectory. For example D:\\ is not allowed, D:\\ModelRailway\\ is OK.
 
+## Installing on Debian GNU/Linux
+
+Since Debian GNU/Linux 13 "trixie" RailControl is included in Debian. To
+install, execute in a terminal
+
+```
+sudo apt install railcontrol
+```
+
+**Note:** Debian-specific documentation is located in the directory
+`/usr/share/doc/railcontrol`.
+
 # Configuration-File
 In the extracted archive there is a template of the configuration file (railcontrol.conf.dist). At first start of RailControl it will be copied to railcontrol.conf. Usually it is not needed to change any settings in the config file.
 

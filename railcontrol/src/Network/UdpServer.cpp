@@ -40,10 +40,10 @@ namespace Network
 	:	logger(Logger::Logger::GetLogger(threadName)),
 		run(false),
 		error(""),
-	 	address(address),
-	 	port(port),
-	 	serverSocket(0),
-	 	threadName(threadName)
+		address(address),
+		port(port),
+		serverSocket(0),
+		threadName(threadName)
 	{
 	}
 

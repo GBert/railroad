@@ -34,7 +34,7 @@ namespace Hardware
 	:	MaerklinCAN(params,
 			"CC-Schnitte / " + params->GetName() + " at serial port " + params->GetArg1(),
 			params->GetName()),
-	 	serialLine(HardwareInterface::logger, params->GetArg1(), B500000, 8, 'N', 1, true)
+		serialLine(HardwareInterface::logger, params->GetArg1(), B500000, 8, 'N', 1, true)
 	{
 		HardwareInterface::logger->Info(Languages::TextStarting, GetFullName());
 

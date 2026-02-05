@@ -281,7 +281,7 @@ namespace Hardware
 		}
 
 		/**
- 	 	 * Reverse Engineered with a KM1 System control 7, but it does not work properly.
+		 * Reverse Engineered with a KM1 System control 7, but it does not work properly.
 		void LocoNet::ProgramMain(const Address address,
 			const CvNumber cv,
 			const CvValue value)

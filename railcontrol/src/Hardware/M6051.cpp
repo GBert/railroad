@@ -35,7 +35,7 @@ namespace Hardware
 			params->GetControlID(),
 			"Maerklin Interface (6050/6051) / " + params->GetName() + " at serial port " + params->GetArg1(),
 			params->GetName()),
-	 	serialLine(logger, params->GetArg1(), B2400, 8, 'N', 2),
+		serialLine(logger, params->GetArg1(), B2400, 8, 'N', 2),
 		run(true)
 	{
 		logger->Info(Languages::TextStarting, GetFullName());

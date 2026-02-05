@@ -37,7 +37,7 @@ namespace DataModel
 
 			inline Object()
 			:	objectID(ObjectNone),
-			 	name(std::to_string(objectID))
+				name(std::to_string(objectID))
 			{
 			}
 

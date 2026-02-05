@@ -123,7 +123,7 @@ namespace DataModel
 				inverted(false),
 				lastUsed(0),
 				counter(0),
-			 	matchKey("")
+				matchKey("")
 			{
 			}
 

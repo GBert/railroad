@@ -36,8 +36,8 @@ namespace DataModel
 {
 	Route::Route(Manager* manager, const std::string& serialized)
 	:	LockableItem(),
-	 	manager(manager),
-	 	executeAtUnlock(false)
+		manager(manager),
+		executeAtUnlock(false)
 	{
 		Deserialize(serialized);
 		Track* track = manager->GetTrack(fromTrack);

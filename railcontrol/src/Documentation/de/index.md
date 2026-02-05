@@ -8,6 +8,17 @@ Das heruntergeladene Archiv kann an jedem Ort auf dem PC ausgepackt werden.
 
 Unter Windows muss beachtet werden, dass RailControl in einem Unterverzeichnis entpackt wird. z.B. ist D:\\ nicht zulässig, D:\\Modellbahn\\ hingegen ist in Ordnung.
 
+## Installieren unter Debian GNU/Linux
+
+Ab Debian GNU/Linux 13 "trixie" ist RailControl in Debian. Mit diesem Befehl wird RailControl installiert:
+
+```
+sudo apt install railcontrol
+```
+
+**Hinweis:** Debian-spezifische Dokumentation befindet sich im Verzeichnis
+`/usr/share/doc/railcontrol`.
+
 # Konfigurations-Datei
 Im ausgepackten Archiv befindet sich eine Vorlage der Konfigurations-Datei (railcontrol.conf.dist). Diese wird beim ersten Start von RailControl nach railcontrol.conf kopiert. Üblicherweise ist es nicht nötig darin Einstellungen zu ändern.
 

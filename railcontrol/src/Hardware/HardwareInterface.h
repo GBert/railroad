@@ -48,10 +48,10 @@ namespace Hardware
 				const std::string& fullName,
 				const std::string& shortName)
 			:	manager(manager),
-			 	controlID(controlID),
-			 	logger(Logger::Logger::GetLogger(shortName)),
-			 	fullName(fullName),
-			 	shortName(shortName),
+				controlID(controlID),
+				logger(Logger::Logger::GetLogger(shortName)),
+				fullName(fullName),
+				shortName(shortName),
 				communicationError(false)
 			{
 			}

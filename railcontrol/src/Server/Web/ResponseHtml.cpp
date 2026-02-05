@@ -27,7 +27,7 @@ namespace Server { namespace Web
 {
 	ResponseHtml::ResponseHtml(const ResponseCode responseCode, const std::string& title, const HtmlTag body)
 	:	Response(responseCode, body),
-	 	title(title)
+		title(title)
 	{
 		AddHeader("Cache-Control", "no-cache, must-revalidate");
 		AddHeader("Pragma", "no-cache");

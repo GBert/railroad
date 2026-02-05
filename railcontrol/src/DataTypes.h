@@ -321,7 +321,7 @@ enum TrainType : uint32_t
 	TrainTypeHistoric                  = 0x00001000,
 	TrainTypeExtra                     = 0x00002000,
 
- 	TrainTypePassengerWithCargo        = 0x00008000,
+	TrainTypePassengerWithCargo        = 0x00008000,
 
 	TrainTypePassenger                 = TrainTypeInternationalHighSpeed
 											| TrainTypeNationalHighSpeed
@@ -346,12 +346,12 @@ enum TrainType : uint32_t
 
 	TrainTypeCargoWithPassenger        = 0x00800000,
 
- 	TrainTypeCargo                     = TrainTypeCargoLongDistance
- 											| TrainTypeCargoLocal
- 											| TrainTypeCargoBlock
- 											| TrainTypeCargoTractor
- 											| TrainTypeCargoExpress
- 											| TrainTypeCargoWithPassenger,
+	TrainTypeCargo                     = TrainTypeCargoLongDistance
+											| TrainTypeCargoLocal
+											| TrainTypeCargoBlock
+											| TrainTypeCargoTractor
+											| TrainTypeCargoExpress
+											| TrainTypeCargoWithPassenger,
 
 	TrainTypeRescue                    = 0x01000000,
 	TrainTypeConstruction              = 0x02000000,

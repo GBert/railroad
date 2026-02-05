@@ -731,3 +731,6 @@ add_custom_command(TARGET doc-for-web POST_BUILD
             ${PROJECT_SOURCE_DIR}/Documentation/es/documentation-es
             ${PROJECT_BINARY_DIR}/doc/es/documentation-es
 )
+
+include(CTest)
+add_test(NAME pytest COMMAND pytest -vv ${CMAKE_SOURCE_DIR}/tests)

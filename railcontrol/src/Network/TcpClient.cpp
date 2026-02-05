@@ -29,45 +29,45 @@ namespace Network
 {
 	TcpConnection TcpClient::GetTcpClientConnection(Logger::Logger* logger, const std::string& host, const unsigned short port)
 	{
-	    struct sockaddr_storage address;
-	    struct sockaddr_in* addressPointer = reinterpret_cast<struct sockaddr_in*>(&address);
-	    addressPointer->sin_family = AF_INET;
-	    addressPointer->sin_port = htons(port);
-	    int ok = inet_pton(AF_INET, host.c_str(), &(addressPointer->sin_addr));
-	    if (ok <= 0)
-	    {
+		struct sockaddr_storage address;
+		struct sockaddr_in* addressPointer = reinterpret_cast<struct sockaddr_in*>(&address);
+		addressPointer->sin_family = AF_INET;
+		addressPointer->sin_port = htons(port);
+		int ok = inet_pton(AF_INET, host.c_str(), &(addressPointer->sin_addr));
+		if (ok <= 0)
+		{
 			logger->Error(Languages::TextUnableToResolveAddress, host);
-	        return TcpConnection(0);
-	    }
+			return TcpConnection(0);
+		}
 
-	    int sock = socket(AF_INET, SOCK_STREAM, 0);
-	    if (sock < 0)
-	    {
+		int sock = socket(AF_INET, SOCK_STREAM, 0);
+		if (sock < 0)
+		{
 			logger->Error(Languages::TextUnableToCreateTcpSocket, host, port);
-	        return TcpConnection(0);
-	    }
+			return TcpConnection(0);
+		}
 
-	    ok = ConnectWithTimeout(sock, reinterpret_cast<struct sockaddr*>(addressPointer), sizeof(address));
-	    if (ok < 0)
-	    {
-	    	Languages::TextSelector text;
-	    	switch (errno)
-	    	{
-	    		case ECONNREFUSED:
-	    			text = Languages::TextConnectionRefused;
-	    			break;
+		ok = ConnectWithTimeout(sock, reinterpret_cast<struct sockaddr*>(addressPointer), sizeof(address));
+		if (ok < 0)
+		{
+			Languages::TextSelector text;
+			switch (errno)
+			{
+				case ECONNREFUSED:
+					text = Languages::TextConnectionRefused;
+					break;
 
-	    		case ENETUNREACH:
-	    			text = Languages::TextNetworkUnreachable;
-	    			break;
+				case ENETUNREACH:
+					text = Languages::TextNetworkUnreachable;
+					break;
 
-	    		default:
-	    			text = Languages::TextConnectionFailed;
-		    }
+				default:
+					text = Languages::TextConnectionFailed;
+			}
 			logger->Error(text, host, port);
-	        close(sock);
-	        return TcpConnection(0);
-	    }
+			close(sock);
+			return TcpConnection(0);
+		}
 
 		return TcpConnection(sock, &address);
 	}

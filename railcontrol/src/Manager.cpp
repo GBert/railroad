@@ -57,7 +57,7 @@ using Storage::StorageParams;
 
 Manager::Manager(Config& config)
 :	logger(Logger::Logger::GetLogger(Languages::GetText(Languages::TextManager))),
- 	boosterState(BoosterStateStop),
+	boosterState(BoosterStateStop),
 	storage(nullptr),
 	startupInitLocos(StartupInitLocosAll),
 	defaultAccessoryDuration(DataModel::DefaultAccessoryPulseDuration),
