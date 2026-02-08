@@ -1,13 +1,13 @@
 # Descargar
 Se puede descargar RailControl de la pagina [Download](https://www.railcontrol.org/index.php/es/download-es).
 
-# Instalación
+## Instalación
 Se puede extraer el archivo descargado en qualquier lugar de la computadora.
 
-## Instalación en Windows
+### Instalación en Windows
 En Windows se tiene que extraer el archivo en una subcarpeta. D:\\ no vale, D:\\Modelismo está bien.
 
-## Instalación en  Debian GNU/Linux
+### Instalación en  Debian GNU/Linux
 
 Deste Debian GNU/Linux 13 "trixie" RailControl está incluido en Debian. Se puede installar con este commando:
 
@@ -18,20 +18,20 @@ sudo apt install railcontrol
 **Nota:** La documentación específica de Debian se encuentra en el directorio
 `/usr/share/doc/railcontrol`.
 
-# Fichero de la configuración
+## Fichero de la configuración
 En el archivo extraido hay una plantilla de archivo de la configuración (railcontrol.conf.dist). Durante el primero inicio de RailControl la plantilla está copiado a railcontrol.conf. Normalmente no es necesario cambiar algo en el archivo de configuración.
 
-# Arrancar RailControl
+## Arrancar RailControl
 Con un doble clic en railcontrol.exe (Windows) o railcontrol (otras sistemas) se puede poner en marcha RailControl. Está recomendado utilizar RailControl en un terminal para recibir más informaciones sobre RailControl. Tambien en un terminal se puede cambiar el funcionamiento de Railcontrol con argumentos de inicio.
 
-# Terminar RailControl
+## Terminar RailControl
 Se puede terminar RailControl por entrar q+Enter o Ctrl+C en el terminal de RailControl o usar el botón en el navegador internet.
 
 **Importante: Usar la X arriba en la derecha del terminal de RailControl puede dar problemas para guardar los ajustes y puede dar problemas para arrancar Railcontrol otra vez.**
 
 Entrar q+Enter o Ctrl+C en el terminal o usar el botton en el navegador multiples veces va a terminar RailControl de inmediatamente. Usa eso opción solamente si RailControl no termina correctamente.
 
-# Navegador Internet
+## Navegador Internet
 Despues poner RailControl en marcha, se puede conectar a RailControl con un navegador internet actual. RailControl muestra los enlaces posibles durante el inicio. Se puede copiar uno de los enlaces al navegador internet. Los enlaces con localhost, 127.0.0.1 y [::1] solamente funcionan en el mismo dispositivo como RailControl.
 
 # Funciones y configuración

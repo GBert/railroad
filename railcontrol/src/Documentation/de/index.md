@@ -1,14 +1,14 @@
 # Herunterladen
 RailControl kann auf der [Download](https://www.railcontrol.org/index.php/de/download-de "Download-Seite")-Seite heruntergeladen werden.
 
-# Installieren
+## Installieren
 Das heruntergeladene Archiv kann an jedem Ort auf dem PC ausgepackt werden.
 
-## Installieren unter Windows
+### Installieren unter Windows
 
 Unter Windows muss beachtet werden, dass RailControl in einem Unterverzeichnis entpackt wird. z.B. ist D:\\ nicht zulässig, D:\\Modellbahn\\ hingegen ist in Ordnung.
 
-## Installieren unter Debian GNU/Linux
+### Installieren unter Debian GNU/Linux
 
 Ab Debian GNU/Linux 13 "trixie" ist RailControl in Debian. Mit diesem Befehl wird RailControl installiert:
 
@@ -19,20 +19,20 @@ sudo apt install railcontrol
 **Hinweis:** Debian-spezifische Dokumentation befindet sich im Verzeichnis
 `/usr/share/doc/railcontrol`.
 
-# Konfigurations-Datei
+## Konfigurations-Datei
 Im ausgepackten Archiv befindet sich eine Vorlage der Konfigurations-Datei (railcontrol.conf.dist). Diese wird beim ersten Start von RailControl nach railcontrol.conf kopiert. Üblicherweise ist es nicht nötig darin Einstellungen zu ändern.
 
-# Starten von RailControl
+## Starten von RailControl
 RailControl kann gestartet werden mit einem Doppelklick auf die ausführbare Datei railcontrol.exe (Windows) bzw. railcontrol (andere Betriebssysteme). Um ausführliche Informationen zu erhalten wird empfohlen RailControl von der Kommandozeile aus zu starten. Bei einem Start von der Kommandozeile aus kann das Verhalten von RailControl noch angepasst werden mit verschiedenen [Argumenten beim Programmstart](#argumente-beim-programmstart).
 
-# Beenden von RailControl
+## Beenden von RailControl
 RailControl sollte beendet werden, indem man in der Server-Konsole q+Enter eingibt oder Ctrl+C drückt oder im Browser auf den entsprechenden Button klickt.
 
 **Wichtig: Wenn einfach oben rechts das X gedrückt wird, werden die Einstellungen nicht vollständig gespeichert und beim nächsten Start treten Probleme auf.**
 
 Mehrmaliges drücken von q+Enter, Ctrl+C oder Beenden-Button im Browser beendet RailControl vorzeitig. Dies sollte nur gemacht werden, wenn RailControl nicht sauber herunterfährt.
 
-# Browser
+## Browser
 Wenn RailControl gestartet wurde, kann mit einem aktuellen Browser zu RailControl verbunden werden. RailControl listet die möglichen Links im Fenster auf. Einer dieser Links kann in den Browser kopiert werden. Die Links mit localhost, 127.0.0.1 und [::1] funktionieren nur auf dem Gerät auf dem auch RailControl ausgeführt wird.
 
 # Funktionen und Konfigurationen

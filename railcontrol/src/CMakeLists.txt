@@ -365,6 +365,13 @@ else()
 	target_link_libraries(${PROJECT_NAME} PRIVATE zlib)
 endif()
 
+option(USE_CPPTRACE "Build with cpptrace library" OFF)
+
+if (USE_CPPTRACE)
+	find_package(cpptrace CONFIG REQUIRED)
+	target_link_libraries(${PROJECT_NAME} PRIVATE cpptrace::cpptrace)
+endif()
+
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -428,144 +435,6 @@ set(DOC_DE
 	Documentation/de/config-counter.md
 	Documentation/de/automatic.md
 )
-
-set(DOC_EN
-	Documentation/en/index.md
-	Documentation/en/startup-arguments.md
-	Documentation/en/general-settings.md
-	Documentation/en/config-controls.md
-	Documentation/en/config-intellibox.md
-	Documentation/en/config-mastercontrol2.md
-	Documentation/en/config-mastercontrol.md
-	Documentation/en/config-redbox.md
-	Documentation/en/config-twincenter.md
-	Documentation/en/control-6051.md
-	Documentation/en/control-cc-schnitte.md
-	Documentation/en/control-cs2-tcp.md
-	Documentation/en/control-cs2-udp.md
-	Documentation/en/control-hsi88.md
-	Documentation/en/control-opendcc-z1.md
-	Documentation/en/control-z21.md
-	Documentation/en/config-rs232-usb.md
-	Documentation/en/config-locomotives.md
-	Documentation/en/config-multipleunits.md
-	Documentation/en/config-layers.md
-	Documentation/en/config-tracks.md
-	Documentation/en/config-groups.md
-	Documentation/en/config-switches.md
-	Documentation/en/config-signals.md
-	Documentation/en/config-accessories.md
-	Documentation/en/config-routes.md
-	Documentation/en/config-feedbacks.md
-	Documentation/en/config-texts.md
-	Documentation/en/config-counter.md
-	Documentation/en/automatic.md
-)
-
-set(DOC_ES
-	Documentation/es/index.md
-	Documentation/es/startup-arguments.md
-	Documentation/es/general-settings.md
-	Documentation/es/config-controls.md
-	Documentation/es/config-intellibox.md
-	Documentation/es/config-mastercontrol2.md
-	Documentation/es/config-mastercontrol.md
-	Documentation/es/config-redbox.md
-	Documentation/es/config-twincenter.md
-	Documentation/es/control-6051.md
-	Documentation/es/control-cc-schnitte.md
-	Documentation/es/control-cs2-tcp.md
-	Documentation/es/control-cs2-udp.md
-	Documentation/es/control-hsi88.md
-	Documentation/es/control-opendcc-z1.md
-	Documentation/es/control-z21.md
-	Documentation/es/config-rs232-usb.md
-	Documentation/es/config-locomotives.md
-	Documentation/es/config-multipleunits.md
-	Documentation/es/config-layers.md
-	Documentation/es/config-tracks.md
-	Documentation/es/config-groups.md
-	Documentation/es/config-switches.md
-	Documentation/es/config-signals.md
-	Documentation/es/config-accessories.md
-	Documentation/es/config-routes.md
-	Documentation/es/config-feedbacks.md
-	Documentation/es/config-texts.md
-	Documentation/es/config-counter.md
-	Documentation/es/automatic.md
-)
-
-set(OUTPUT_HTML_DE ${CMAKE_BINARY_DIR}/doc/de/index.html)
-set(OUTPUT_HTML_EN ${CMAKE_BINARY_DIR}/doc/en/index.html)
-set(OUTPUT_HTML_ES ${CMAKE_BINARY_DIR}/doc/es/index.html)
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/de)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/en)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/es)
-
-add_custom_command(
-    OUTPUT ${OUTPUT_HTML_DE}
-    COMMAND pandoc --toc --toc-depth=2 --standalone --css=../style.css
-                   --template=Documentation/template.html
-                   --metadata-file=Documentation/de/metadata.yaml ${DOC_DE}
-                   --output=${OUTPUT_HTML_DE}
-    DEPENDS ${DOC_DE}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Generating German HTML documentation"
-    VERBATIM
-)
-
-add_custom_command(
-    OUTPUT ${OUTPUT_HTML_EN}
-    COMMAND pandoc --toc --toc-depth=2 --standalone --css=../style.css
-                   --template=Documentation/template.html
-                   --metadata-file=Documentation/en/metadata.yaml ${DOC_EN}
-                   --output=${OUTPUT_HTML_EN}
-    DEPENDS ${DOC_EN}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Generating English HTML documentation"
-    VERBATIM
-)
-
-add_custom_command(
-    OUTPUT ${OUTPUT_HTML_ES}
-    COMMAND pandoc --toc --toc-depth=2 --standalone --css=../style.css
-                   --template=Documentation/template.html
-                   --metadata-file=Documentation/es/metadata.yaml ${DOC_ES}
-                   --output=${OUTPUT_HTML_ES}
-    DEPENDS ${DOC_ES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Generating Spanish HTML documentation"
-    VERBATIM
-)
-
-set(DOCDATA
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_accessory.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_booster.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_control.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_counter.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_feedback.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_fullscreen.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_group.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_layer.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_loco.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_menu.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_multipleunit.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_program.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_quit.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_route.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_settings.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_signalgreen.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_signal.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_signalred.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_stop.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_street.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_switch.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_text.png
-    ${PROJECT_SOURCE_DIR}/Documentation/menu_track.png
-    ${PROJECT_SOURCE_DIR}/Documentation/style.css
-)
-
 set(DOCDATA_DE
     ${PROJECT_SOURCE_DIR}/Documentation/de/config_layers_de.png
     ${PROJECT_SOURCE_DIR}/Documentation/de/control_list_de.png
@@ -606,6 +475,38 @@ set(DOCDATA_DE
     ${PROJECT_SOURCE_DIR}/Documentation/de/tracks_position_de.png
 )
 
+set(DOC_EN
+	Documentation/en/index.md
+	Documentation/en/startup-arguments.md
+	Documentation/en/general-settings.md
+	Documentation/en/config-controls.md
+	Documentation/en/config-intellibox.md
+	Documentation/en/config-mastercontrol2.md
+	Documentation/en/config-mastercontrol.md
+	Documentation/en/config-redbox.md
+	Documentation/en/config-twincenter.md
+	Documentation/en/control-6051.md
+	Documentation/en/control-cc-schnitte.md
+	Documentation/en/control-cs2-tcp.md
+	Documentation/en/control-cs2-udp.md
+	Documentation/en/control-hsi88.md
+	Documentation/en/control-opendcc-z1.md
+	Documentation/en/control-z21.md
+	Documentation/en/config-rs232-usb.md
+	Documentation/en/config-locomotives.md
+	Documentation/en/config-multipleunits.md
+	Documentation/en/config-layers.md
+	Documentation/en/config-tracks.md
+	Documentation/en/config-groups.md
+	Documentation/en/config-switches.md
+	Documentation/en/config-signals.md
+	Documentation/en/config-accessories.md
+	Documentation/en/config-routes.md
+	Documentation/en/config-feedbacks.md
+	Documentation/en/config-texts.md
+	Documentation/en/config-counter.md
+	Documentation/en/automatic.md
+)
 set(DOCDATA_EN
     ${PROJECT_SOURCE_DIR}/Documentation/en/config_layers_en.png
     ${PROJECT_SOURCE_DIR}/Documentation/en/control_list_en.png
@@ -644,6 +545,38 @@ set(DOCDATA_EN
     ${PROJECT_SOURCE_DIR}/Documentation/en/tracks_position_en.png
 )
 
+set(DOC_ES
+	Documentation/es/index.md
+	Documentation/es/startup-arguments.md
+	Documentation/es/general-settings.md
+	Documentation/es/config-controls.md
+	Documentation/es/config-intellibox.md
+	Documentation/es/config-mastercontrol2.md
+	Documentation/es/config-mastercontrol.md
+	Documentation/es/config-redbox.md
+	Documentation/es/config-twincenter.md
+	Documentation/es/control-6051.md
+	Documentation/es/control-cc-schnitte.md
+	Documentation/es/control-cs2-tcp.md
+	Documentation/es/control-cs2-udp.md
+	Documentation/es/control-hsi88.md
+	Documentation/es/control-opendcc-z1.md
+	Documentation/es/control-z21.md
+	Documentation/es/config-rs232-usb.md
+	Documentation/es/config-locomotives.md
+	Documentation/es/config-multipleunits.md
+	Documentation/es/config-layers.md
+	Documentation/es/config-tracks.md
+	Documentation/es/config-groups.md
+	Documentation/es/config-switches.md
+	Documentation/es/config-signals.md
+	Documentation/es/config-accessories.md
+	Documentation/es/config-routes.md
+	Documentation/es/config-feedbacks.md
+	Documentation/es/config-texts.md
+	Documentation/es/config-counter.md
+	Documentation/es/automatic.md
+)
 set(DOCDATA_ES
     ${PROJECT_SOURCE_DIR}/Documentation/es/config_layers_es.png
     ${PROJECT_SOURCE_DIR}/Documentation/es/control_list_es.png
@@ -678,6 +611,79 @@ set(DOCDATA_ES
     ${PROJECT_SOURCE_DIR}/Documentation/es/tracks_feedbacks_es.png
     ${PROJECT_SOURCE_DIR}/Documentation/es/track_signals_es.png
     ${PROJECT_SOURCE_DIR}/Documentation/es/tracks_position_es.png
+)
+
+set(DOCDATA
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_accessory.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_booster.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_control.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_counter.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_feedback.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_fullscreen.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_group.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_layer.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_loco.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_menu.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_multipleunit.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_program.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_quit.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_route.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_settings.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_signalgreen.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_signal.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_signalred.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_stop.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_street.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_switch.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_text.png
+    ${PROJECT_SOURCE_DIR}/Documentation/menu_track.png
+    ${PROJECT_SOURCE_DIR}/Documentation/style.css
+)
+
+set(OUTPUT_HTML_DE ${CMAKE_BINARY_DIR}/doc/de/index.html)
+set(OUTPUT_HTML_EN ${CMAKE_BINARY_DIR}/doc/en/index.html)
+set(OUTPUT_HTML_ES ${CMAKE_BINARY_DIR}/doc/es/index.html)
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/de)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/en)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/es)
+
+set(PANDOC_OPTS --toc --toc-depth=2
+                --standalone
+                --css=../style.css
+                --template=Documentation/template.html)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_HTML_DE}
+    COMMAND pandoc ${PANDOC_OPTS}
+                   --metadata-file=Documentation/de/metadata.yaml
+                   --output=${OUTPUT_HTML_DE} ${DOC_DE}
+    DEPENDS ${DOC_DE}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating German HTML documentation"
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_HTML_EN}
+    COMMAND pandoc ${PANDOC_OPTS}
+                   --metadata-file=Documentation/en/metadata.yaml
+                   --output=${OUTPUT_HTML_EN} ${DOC_EN}
+    DEPENDS ${DOC_EN}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating English HTML documentation"
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_HTML_ES}
+    COMMAND pandoc ${PANDOC_OPTS}
+                   --metadata-file=Documentation/es/metadata.yaml
+                   --output=${OUTPUT_HTML_ES} ${DOC_ES}
+    DEPENDS ${DOC_ES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating Spanish HTML documentation"
+    VERBATIM
 )
 
 add_custom_target(doc
@@ -731,6 +737,67 @@ add_custom_command(TARGET doc-for-web POST_BUILD
             ${PROJECT_SOURCE_DIR}/Documentation/es/documentation-es
             ${PROJECT_BINARY_DIR}/doc/es/documentation-es
 )
+
+# Build documentation as small HTML files ("chunked html")
+set(OUTPUT_CHUNKEDHTML_DE ${CMAKE_BINARY_DIR}/chunkedhtml/de)
+set(OUTPUT_CHUNKEDHTML_EN ${CMAKE_BINARY_DIR}/chunkedhtml/en)
+set(OUTPUT_CHUNKEDHTML_ES ${CMAKE_BINARY_DIR}/chunkedhtml/es)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/chunkedhtml)
+
+set(PANDOC_CHUNKEDOPTS --toc --toc-depth=2
+                       --standalone
+                       --css=../style.css
+                       --template=Documentation/template.html
+                       --write=chunkedhtml
+                       --embed-resources
+                       --split-level=1)
+add_custom_command(
+    OUTPUT ${OUTPUT_CHUNKEDHTML_DE}/index.html
+    COMMAND pandoc ${PANDOC_CHUNKEDOPTS}
+                   --resource-path=".:Documentation:Documentation/de:doc:doc/de"
+                   --metadata-file=Documentation/de/metadata.yaml
+                   --output=${OUTPUT_CHUNKEDHTML_DE} ${DOC_DE}
+    DEPENDS ${DOC_DE}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating German Chunked HTML documentation"
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_CHUNKEDHTML_EN}/index.html
+    COMMAND pandoc ${PANDOC_CHUNKEDOPTS}
+                   --resource-path=".:Documentation:Documentation/en:doc:doc/en"
+                   --metadata-file=Documentation/en/metadata.yaml
+                   --output=${OUTPUT_CHUNKEDHTML_EN} ${DOC_EN}
+    DEPENDS ${DOC_EN}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating English Chunked HTML documentation"
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${OUTPUT_CHUNKEDHTML_ES}/index.html
+    COMMAND pandoc ${PANDOC_CHUNKEDOPTS}
+                   --resource-path="doc/en:Documentation/en:.:Documentation:Documentation/es:doc:doc/es"
+                   --metadata-file=Documentation/es/metadata.yaml
+                   --output=${OUTPUT_CHUNKEDHTML_ES} ${DOC_ES}
+    DEPENDS ${DOC_ES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating Spanish Chunked HTML documentation"
+    VERBATIM
+)
+
+add_custom_target(chunked-doc
+    DEPENDS ${OUTPUT_CHUNKEDHTML_DE}/index.html ${OUTPUT_CHUNKEDHTML_EN}/index.html ${OUTPUT_CHUNKEDHTML_ES}/index.html
+)
+
+foreach(DOCDATA ${DOCDATA})
+    add_custom_command(TARGET chunked-doc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${DOCDATA}
+            ${PROJECT_BINARY_DIR}/chunkedhtml
+    )
+endforeach()
 
 include(CTest)
 add_test(NAME pytest COMMAND pytest -vv ${CMAKE_SOURCE_DIR}/tests)

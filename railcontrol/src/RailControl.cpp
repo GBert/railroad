@@ -26,7 +26,10 @@ along with RailControl; see the file LICENCE. If not see
 #include <unistd.h>		//close; isatty
 #include <vector>
 
-#ifdef __GLIBC__
+#if defined(USE_CPPTRACE)
+#include <cpptrace/cpptrace.hpp>
+
+#elif defined(__GLIBC__)
 #include <execinfo.h>
 #include <ucontext.h>
 #endif
@@ -73,9 +76,19 @@ void segvHandler(__attribute__((unused)) int signo,
 	siginfo_t* info,
 	__attribute__((unused)) void* secret)
 {
-	Logger::Logger* logger = Logger::Logger::GetLogger("Main");
+	Logger::Logger* logger = Logger::Logger::GetLogger("System");
 
-#ifdef __GLIBC__
+#if defined(USE_CPPTRACE)
+	logger->Error(Languages::TextSigSegvReceivedWithBacktrace, Utils::Integer::IntegerToHex(reinterpret_cast<unsigned long>(info->si_addr), 8));
+	struct cpptrace::stacktrace trace = cpptrace::generate_trace();
+	unsigned int nr = 0;
+	for(struct cpptrace::stacktrace_frame& frame : trace.frames)
+	{
+		logger->Error(Languages::TextBacktraceLine, nr, frame.to_string());
+		++nr;
+	}
+
+#elif defined(__GLIBC__)
 	logger->Error(Languages::TextSigSegvReceivedWithBacktrace, Utils::Integer::IntegerToHex(reinterpret_cast<unsigned long>(info->si_addr), 8));
 
 	static const int MaxTrace = 16;
@@ -89,6 +102,7 @@ void segvHandler(__attribute__((unused)) int signo,
 	{
 		logger->Error(Languages::TextBacktraceLine, i, messages[i]);
 	}
+
 #else
 	logger->Error(Languages::TextSigSegvReceived, Utils::Integer::IntegerToHex(reinterpret_cast<unsigned long>(info->si_addr), 8));
 #endif

@@ -1,13 +1,13 @@
 # Download
 RailControl can be downloaded on the [Download](https://www.railcontrol.org/index.php/en/download-en)-page.
 
-# Installation
+## Installation
 The downloaded archive can be extracted everywhere on the computer.
 
-## Installing on Windows
+### Installing on Windows
 On Windows the archive has to be extracted in a subdirectory. For example D:\\ is not allowed, D:\\ModelRailway\\ is OK.
 
-## Installing on Debian GNU/Linux
+### Installing on Debian GNU/Linux
 
 Since Debian GNU/Linux 13 "trixie" RailControl is included in Debian. To
 install, execute in a terminal
@@ -19,20 +19,20 @@ sudo apt install railcontrol
 **Note:** Debian-specific documentation is located in the directory
 `/usr/share/doc/railcontrol`.
 
-# Configuration-File
+## Configuration-File
 In the extracted archive there is a template of the configuration file (railcontrol.conf.dist). At first start of RailControl it will be copied to railcontrol.conf. Usually it is not needed to change any settings in the config file.
 
-# Starting RailControl
+## Starting RailControl
 RailControl can be started with a double click on the executable file railcontrol.exe (Windows) respectively railcontrol (other operation systems). To get logging informations from RailControl it is recommended to start RailControl from a console. Also possible is to change the behavior of RailControl with [startup arguments](#startup-arguments).
 
-# Shutdown RailControl
+## Shutdown RailControl
 RailControl should be terminated by entering q+Enter or Ctrl+C in the RailControl-terminal or by using the top left button in the browser.
 
 **Important: If the X in the top right of the RailControl-terminal is used some settings are not stored correctly and problems can apear when starting RailControl again.**
 
 Entering q+Enter or Ctrl+C in the terminal or using the terminate-button in the browser multiple times will terminate RailControl early. This should only be used if RailControl does not shutdown cleanly.
 
-# Browser
+## Browser
 If RailControl already has started one can connect with a recent Browser. RailControl lists the possible links that can be used in the browser. One of these links can be copied into the browser. Links with localhost, 127.0.0.1 and [::1] only work on the device where RailControl is executed. The other links also work on other devices.
 
 # Functions and Configuration
