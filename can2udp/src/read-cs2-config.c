@@ -99,8 +99,7 @@ char* skip_whitespace(char* str) {
     char* result;
     result = str;
     if (result) {
-        result = str;
-        while (*result != '\0' && isspace(*str)) {
+        while (*result != '\0' && isspace(*result)) {
             result++;
         }
     }
