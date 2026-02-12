@@ -502,7 +502,6 @@ int get_data(struct trigger_t *trigger, struct can_frame *frame) {
 	    if (!trigger->background && trigger->verbose)
 		printf("Number of new locos: %d\n", trigger->loco_number);
 	    if (trigger->loco_number) {
-		printf("FSM: State change FSM_START -> FSM_GET_LOCO_NAMES\n");
 		trigger->fsm_state = FSM_GET_LOCO_NAMES;
 		get_ms2_loco_names(trigger, 0, 1);
 	    }
@@ -521,18 +520,15 @@ int get_data(struct trigger_t *trigger, struct can_frame *frame) {
 	case FSM_GET_LOCO_NAMES:
 	    read_loco_names((char *)trigger->data);
 	    if (trigger->loco_counter + 1 <= trigger->loco_number) {
-		printf("FSM: Request next Locos\n");
 		get_ms2_loco_names(trigger, trigger->loco_counter + 1, 2);
 		trigger->loco_counter += 2;
 	    } else {
-		printf("FSM: State change FSM_GET_LOCO_NAMES -> FSM_GET_LOCOS_BY_NAME\n");
 		trigger->fsm_state = FSM_GET_LOCOS_BY_NAME;
 		trigger->loco_names = loco_names;
 		if (trigger->loco_names) {
 		    get_ms2_locoinfo(trigger, trigger->loco_names->name);
 		    trigger->loco_names = trigger->loco_names->hh.next;
 		} else {
-		    printf("FSM: State change FSM_GET_LOCO_NAMES -> FSM_START\n");
 		    trigger->fsm_state = FSM_START;
 		}
 		if (!trigger->background && trigger->verbose)

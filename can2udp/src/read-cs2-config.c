@@ -108,7 +108,7 @@ char* skip_whitespace(char* str) {
 
 int get_value(char *st, char *search) {
     char line[MAXSIZE];
-    char *str;
+    char *str = NULL;
     char *sret;
     char *config = st;
 
@@ -894,7 +894,7 @@ int read_loco_data(char *config_file, int config_type) {
     int l0_token_n, l1_token_n, l2_token_n, loco_complete;
     FILE *fp = NULL;
     char line[MAXSIZE];
-    char *str;
+    char *str = NULL;
     char *name = NULL, *type = NULL, *icon = NULL, *sret = NULL;
     int16_t function, temp, mfx_data;
     struct loco_data_t *loco;
@@ -942,9 +942,7 @@ int read_loco_data(char *config_file, int config_type) {
 
     while (sret != NULL) {
 	line[strcspn(line, "\r\n")] = 0;
-	printf("read_loco_data: line '%s'\n", line);
-        str = skip_whitespace(line);
-	printf("read_loco_data: str  '%s'\n", str);
+    str = skip_whitespace(line);
 	if (str[0] != '.') {
 	    l0_token_n = get_char_index(l0_token, str);
 	    switch (l0_token_n) {
@@ -1276,7 +1274,7 @@ int read_loco_data(char *config_file, int config_type) {
 int read_loco_names(char *config_file) {
     int l0_token_n, l1_token_n;
     char line[MAXSIZE];
-    char* str;
+    char* str = NULL;
     struct loco_names_t *loco;
     char *name = NULL, *sret = NULL, *config = config_file;
 
@@ -1289,9 +1287,7 @@ int read_loco_names(char *config_file) {
     sret = fgets_buffer(line, MAXSIZE, config);
     while (sret != NULL) {
 	line[strcspn(line, "\r\n")] = 0;
-	printf("read_loco_names: line '%s'\n", line);
-        str = skip_whitespace(line);
-	printf("read_loco_names: str  '%s'\n", str);
+    str = skip_whitespace(line);
 	if (str[0] == '[') {
 	    l0_token_n = get_char_index(l0_token, str);
 	    switch (l0_token_n) {
@@ -1299,11 +1295,9 @@ int read_loco_names(char *config_file) {
 		break;
 	    }
 	} else if (str[0] == '.') {
-            printf("elseif\n");
 	    l1_token_n = get_char_index(l1_token, str);
 	    switch (l1_token_n) {
 	    case L1_NAME:
-                printf("L1_NAME\n'");
 		if (asprintf(&name, "%s", &str[L1_NAME_LENGTH]) < 0)
 		    fprintf(stderr, "can't alloc memory for loco->name: %s\n", __func__);
 		loco->name = name;
@@ -1312,19 +1306,16 @@ int read_loco_names(char *config_file) {
 		    add_loco_name(loco);
 		break;
 	    case L1_NR:
-                printf("L1_NR\n'");
 		loco->number = strtoul(&str[L1_NR_LENGTH], NULL, 10);
 		debug_print("match nr:  >%u<\n", loco->number);
 		break;
 	    case L1_VALUE:
-                printf("L1_VALUE\n'");
 		loco->max_value = strtoul(&str[L1_VALUE_LENGTH], NULL, 10);
 		debug_print("match value:  >%u<\n", loco->max_value);
 		if (loco->name)
 		    add_loco_name(loco);
 		break;
 	    default:
-                printf("DEFAULT\n'");
 		break;
 	    }
 	}
