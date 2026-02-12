@@ -615,7 +615,6 @@ void print_locos_short(FILE *file) {
 int read_track_data(char *config_file) {
     int l0_token_n, l1_token_n, element;
     FILE *fp;
-	char *str = NULL;
     char line[MAXSIZE];
     struct track_page_t *tp;
     struct track_data_t *td;
@@ -645,13 +644,12 @@ int read_track_data(char *config_file) {
 
     while (fgets(line, MAXSIZE, fp) != NULL) {
 	line[strcspn(line, "\r\n")] = 0;
-	str = skip_whitespace(line);
-	if (str[0] != '.') {
-	    l0_token_n = get_char_index(l0_token, str);
+	if (line[0] != ' ') {
+	    l0_token_n = get_char_index(l0_token, line);
 	    switch (l0_token_n) {
 	    case L0_PAGE:
 		tp->id = 0;
-		debug_print("match seite:   >%s<\n", str);
+		debug_print("match seite:   >%s<\n", line);
 		break;
 	    case L0_ELEMENT:
 		if (element) {
@@ -662,62 +660,62 @@ int read_track_data(char *config_file) {
 		break;
 	    }
 	} else {
-	    l1_token_n = get_char_index(l1_token, str);
+	    l1_token_n = get_char_index(l1_token, line);
 	    switch (l1_token_n) {
 	    case L1_MAJOR:
-		tp->major = strtoul(&str[L1_MAJOR_LENGTH], NULL, 10);
+		tp->major = strtoul(&line[L1_MAJOR_LENGTH], NULL, 10);
 		debug_print("match major:   >%u<\n", tp->major);
 		break;
 	    case L1_MINOR:
-		tp->minor = strtoul(&str[L1_MINOR_LENGTH], NULL, 10);
+		tp->minor = strtoul(&line[L1_MINOR_LENGTH], NULL, 10);
 		debug_print("match minor:   >%u<\n", tp->minor);
 		break;
 	    case L1_XOFFSET:
-		tp->xoffset = strtoul(&str[L1_XOFFSET_LENGTH], NULL, 10);
+		tp->xoffset = strtoul(&line[L1_XOFFSET_LENGTH], NULL, 10);
 		debug_print("match xoffset: >%u<\n", tp->xoffset);
 		break;
 	    case L1_YOFFSET:
-		tp->yoffset = strtoul(&str[L1_YOFFSET_LENGTH], NULL, 10);
+		tp->yoffset = strtoul(&line[L1_YOFFSET_LENGTH], NULL, 10);
 		debug_print("match yoffset: >%u<\n", tp->yoffset);
 		break;
 	    case L1_WIDTH:
-		tp->width = strtoul(&str[L1_WIDTH_LENGTH], NULL, 10);
+		tp->width = strtoul(&line[L1_WIDTH_LENGTH], NULL, 10);
 		debug_print("match width:   >%u<\n", tp->width);
 		break;
 	    case L1_HEIGHT:
-		tp->height = strtoul(&str[L1_HEIGHT_LENGTH], NULL, 10);
+		tp->height = strtoul(&line[L1_HEIGHT_LENGTH], NULL, 10);
 		debug_print("match height:  >%u<\n", tp->height);
 		break;
 	    case L1_ID:
-		td->id = strtoul(&str[L1_ID_LENGTH], NULL, 16);
+		td->id = strtoul(&line[L1_ID_LENGTH], NULL, 16);
 		debug_print("match id:      >0x%05x<\n", td->id);
 		break;
 	    case L1_TYPE:
-		td->type = get_char_index(track_types, &str[L1_TYPE_LENGTH]);
+		td->type = get_char_index(track_types, &line[L1_TYPE_LENGTH]);
 		debug_print("match type:    >%d<\n", td->type);
 		break;
 	    case L1_ROTATION:
-		td->rotation = strtoul(&str[L1_ROTATION_LENGTH], NULL, 10);
+		td->rotation = strtoul(&line[L1_ROTATION_LENGTH], NULL, 10);
 		debug_print("match rotation:>%d<\n", td->rotation);
 		break;
 	    case L1_ITEM:
-		td->item = strtoul(&str[L1_ITEM_LENGTH], NULL, 10);
+		td->item = strtoul(&line[L1_ITEM_LENGTH], NULL, 10);
 		debug_print("match item:    >%d<\n", td->item);
 		break;
 	    case L1_TEXT:
-		td->text = &str[L1_TEXT_LENGTH];
+		td->text = &line[L1_TEXT_LENGTH];
 		debug_print("match text:    >%s<\n", td->text);
 		break;
 	    case L1_STATE:
-		td->state = strtoul(&str[L1_STATE_LENGTH], NULL, 10);
+		td->state = strtoul(&line[L1_STATE_LENGTH], NULL, 10);
 		debug_print("match state:   >%d<\n", td->state);
 		break;
 	    case L1_DEVICEID:
-		td->deviceid = strtoul(&str[L1_DEVICEID_LENGTH], NULL, 10);
+		td->deviceid = strtoul(&line[L1_DEVICEID_LENGTH], NULL, 10);
 		debug_print("match deviceId:>%u<\n", td->deviceid);
 		break;
 	    default:
-		fprintf(stderr, "unknown:       >%s<\n", str);
+		fprintf(stderr, "unknown:       >%s<\n", line);
 		break;
 	    }
 	}
@@ -735,7 +733,6 @@ int read_track_data(char *config_file) {
 int read_track_config(char *config_file) {
     int gbs_valid, l0_token_n, l1_token_n;
     FILE *fp;
-	char *str = NULL;
     char line[MAXSIZE];
     struct track_page_t *page;
 
@@ -755,53 +752,52 @@ int read_track_config(char *config_file) {
 
     while (fgets(line, MAXSIZE, fp) != NULL) {
 	line[strcspn(line, "\r\n")] = 0;
-	str = skip_whitespace(line);
-	if (str[0] != '.') {
-	    l0_token_n = get_char_index(l0_token, str);
+	if (line[0] != ' ') {
+	    l0_token_n = get_char_index(l0_token, line);
 	    if (l0_token_n == L0_PAGE) {
 		gbs_valid = 1;
 		page->id = 0;
-		debug_print("match seite:   >%s<\n", str);
+		debug_print("match seite:   >%s<\n", line);
 	    }
 	} else {
-	    l1_token_n = get_char_index(l1_token, str);
+	    l1_token_n = get_char_index(l1_token, line);
 	    switch (l1_token_n) {
 	    case L1_ID:
-		page->id = strtoul(&str[L1_ID_LENGTH], NULL, 10);
+		page->id = strtoul(&line[L1_ID_LENGTH], NULL, 10);
 		debug_print("match id:      >%u<\n", page->id);
 		break;
 	    case L1_MAJOR:
-		page->major = strtoul(&str[L1_MAJOR_LENGTH], NULL, 10);
+		page->major = strtoul(&line[L1_MAJOR_LENGTH], NULL, 10);
 		debug_print("match major:   >%u<\n", page->major);
 		break;
 	    case L1_MINOR:
-		page->minor = strtoul(&str[L1_MINOR_LENGTH], NULL, 10);
+		page->minor = strtoul(&line[L1_MINOR_LENGTH], NULL, 10);
 		debug_print("match minor:   >%u<\n", page->minor);
 		break;
 	    case L1_XOFFSET:
-		page->xoffset = strtoul(&str[L1_XOFFSET_LENGTH], NULL, 10);
+		page->xoffset = strtoul(&line[L1_XOFFSET_LENGTH], NULL, 10);
 		debug_print("match xoffset: >%u<\n", page->xoffset);
 		break;
 	    case L1_YOFFSET:
-		page->yoffset = strtoul(&str[L1_YOFFSET_LENGTH], NULL, 10);
+		page->yoffset = strtoul(&line[L1_YOFFSET_LENGTH], NULL, 10);
 		debug_print("match yoffset: >%u<\n", page->yoffset);
 		break;
 	    case L1_WIDTH:
-		page->width = strtoul(&str[L1_WIDTH_LENGTH], NULL, 10);
+		page->width = strtoul(&line[L1_WIDTH_LENGTH], NULL, 10);
 		debug_print("match width:   >%u<\n", page->width);
 		break;
 	    case L1_HEIGHT:
-		page->height = strtoul(&str[L1_HEIGHT_LENGTH], NULL, 10);
+		page->height = strtoul(&line[L1_HEIGHT_LENGTH], NULL, 10);
 		debug_print("match height:  >%u<\n", page->height);
 		break;
 	    case L1_NAME:
 		if (gbs_valid) {
-		    debug_print("match name:    >%s<  id %u\n", &str[L1_NAME_LENGTH], page->id);
-		    add_track_page(page, &str[L1_NAME_LENGTH]);
+		    debug_print("match name:    >%s<  id %u\n", &line[L1_NAME_LENGTH], page->id);
+		    add_track_page(page, &line[L1_NAME_LENGTH]);
 		}
 		break;
 	    default:
-		printf("unknown:       >%s<\n", str);
+		printf("unknown:       >%s<\n", line);
 		break;
 	    }
 	}
@@ -1259,7 +1255,6 @@ int read_magnet_data(char *config_file, int config_type) {
     int l0_token_n, l1_token_n, magnet_complete;
     FILE *fp = NULL;
     char line[MAXSIZE];
-	char *str = NULL;
     char *name = NULL, *sret = NULL;
     struct magnet_data_t *magnet;
 
@@ -1291,9 +1286,8 @@ int read_magnet_data(char *config_file, int config_type) {
 
     while (sret != NULL) {
 	line[strcspn(line, "\r\n")] = 0;
-	str = skip_whitespace(line);
-	if (str[0] != '.') {
-	    l0_token_n = get_char_index(l0_token, str);
+	if (line[0] != ' ') {
+	    l0_token_n = get_char_index(l0_token, line);
 	    switch (l0_token_n) {
 	    case L0_VERSION:
 	    case L00_MAGNET:
@@ -1309,58 +1303,58 @@ int read_magnet_data(char *config_file, int config_type) {
 		}
 		break;
 	    default:
-		printf(">>%s\n", str);
+		printf(">>%s\n", line);
 		break;
 	    }
-	} else if (str[1] != '.') {
-	    l1_token_n = get_char_index(l1_token, str);
+	} else if (line[2] != '.') {
+	    l1_token_n = get_char_index(l1_token, line);
 	    switch (l1_token_n) {
 	    case L1_MAJOR:
-		magnet->major = strtoul(&str[L1_MAJOR_LENGTH], NULL, 10);
+		magnet->major = strtoul(&line[L1_MAJOR_LENGTH], NULL, 10);
 		debug_print("match major:     >%u<\n", magnet->major);
 		break;
 	    case L1_MINOR:
-		magnet->minor = strtoul(&str[L1_MINOR_LENGTH], NULL, 10);
+		magnet->minor = strtoul(&line[L1_MINOR_LENGTH], NULL, 10);
 		debug_print("match minor:     >%u<\n", magnet->minor);
 		break;
 	    case L1_ID:
-		magnet->id = strtoul(&str[L1_ID_LENGTH], NULL, 10);
+		magnet->id = strtoul(&line[L1_ID_LENGTH], NULL, 10);
 		debug_print("match id:        >%u<\n", magnet->id);
 		magnet->id = magnet->id << 1;
 		break;
 	    case L1_NAME:
-		if (asprintf(&name, "%s", &str[L1_NAME_LENGTH]) < 0)
+		if (asprintf(&name, "%s", &line[L1_NAME_LENGTH]) < 0)
 		    fprintf(stderr, "can't alloc memory for magnet->name: %s\n", __func__);
 		magnet->name = name;
 		debug_print("match name:      >%s<\n", magnet->name);
 		break;
 	    case L1_TYPE:
-		magnet->type = get_char_index(magnet_types, &str[L1_TYPE_LENGTH]);
+		magnet->type = get_char_index(magnet_types, &line[L1_TYPE_LENGTH]);
 		debug_print("match type:      >%d<\n", magnet->type);
 		break;
 	    case L1_SWITCHTIME:
-		magnet->switchtime = strtoul(&str[L1_SWITCHTIME_LENGTH], NULL, 16);
+		magnet->switchtime = strtoul(&line[L1_SWITCHTIME_LENGTH], NULL, 16);
 		debug_print("switchtime:      >%d<\n", magnet->switchtime);
 		break;
 	    case L1_ODD:
-		magnet->odd = strtoul(&str[L1_ODD_LENGTH], NULL, 16);
+		magnet->odd = strtoul(&line[L1_ODD_LENGTH], NULL, 16);
 		debug_print("odd number:      >%d<\n", magnet->odd);
 		magnet->id++;
 		break;
 	    case L1_DECODER:
-		magnet->decoder = get_char_index(magnet_decoder, &str[L1_DECODER_LENGTH]);
+		magnet->decoder = get_char_index(magnet_decoder, &line[L1_DECODER_LENGTH]);
 		debug_print("decoder:         >%d<\n", magnet->decoder);
 		break;
 	    case L1_DECODER_TYPE:
-		magnet->decoder_type = get_char_index(magnet_decoder_type, &str[L1_DECODER_TYPE_LENGTH]);
+		magnet->decoder_type = get_char_index(magnet_decoder_type, &line[L1_DECODER_TYPE_LENGTH]);
 		debug_print("decoder type:    >%d<\n", magnet->decoder_type);
 		break;
 	    case L1_POSITION:
-		magnet->position = strtoul(&str[L1_POSITION_LENGTH], NULL, 16);
+		magnet->position = strtoul(&line[L1_POSITION_LENGTH], NULL, 16);
 		debug_print("position:        >%d<\n", magnet->position);
 		break;
 	    default:
-		printf(">>%s<<\n", str);
+		printf(">>%s<<\n", line);
 		break;
 	    }
 	}
