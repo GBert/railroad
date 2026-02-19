@@ -155,7 +155,7 @@ var bussy_fetching_timeout;
 var http = require('http');
 var server = http.createServer(function(request, response) {});
 var dgram = require('dgram');
-var udpServer = dgram.createSocket('udp4');
+var udpServer = dgram.createSocket({type: 'udp4', reuseAddr: true});
 var udpClient = dgram.createSocket('udp4');
 
 var exec = require('child_process').exec;

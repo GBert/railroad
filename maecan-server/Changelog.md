@@ -1,5 +1,8 @@
 # Changelog
 
+## [2026-02-18.1]
+- let UDP socket share the receive port to allow cooperation
+
 ## [2025-11-08.1]
 - replace deprecated buffer initialisations
 
