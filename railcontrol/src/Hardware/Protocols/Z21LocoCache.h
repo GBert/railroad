@@ -32,18 +32,20 @@ namespace Hardware
 		{
 			public:
 				Z21LocoCacheEntry()
-					: speed(MinSpeed),
-					    orientation(OrientationRight),
-					    functions(0),
-					    protocol(ProtocolNone)
+				:	speed(MinSpeed),
+					orientation(OrientationRight),
+					functions(0),
+					protocol(ProtocolNone)
 				{
 				}
 
-				Z21LocoCacheEntry(const Speed speed, const Orientation orientation, const Protocol protocol)
-					: speed(speed),
-					    orientation(orientation),
-					    functions(0),
-					    protocol(protocol)
+				Z21LocoCacheEntry(const Speed speed,
+					const Orientation orientation,
+					const Protocol protocol)
+				:	speed(speed),
+					orientation(orientation),
+					functions(0),
+					protocol(protocol)
 				{
 				}
 
@@ -58,24 +60,23 @@ namespace Hardware
 			public:
 				Z21LocoCache& operator=(const Z21LocoCache&) = delete;
 
-				Z21LocoCacheEntry GetData(const Address address)
+				inline Z21LocoCacheEntry GetData(const Address address)
 				{
 					if (cache.count(address) == 1)
 					{
 						return cache[address];
 					}
-					Z21LocoCacheEntry entry;
-					return entry;
+					return Z21LocoCacheEntry();
 				}
 
-				void SetSpeed(const Address address, const Speed speed)
+				inline void SetSpeed(const Address address, const Speed speed)
 				{
 					Z21LocoCacheEntry entry = GetData(address);
 					entry.speed = speed;
 					cache[address] = entry;
 				}
 
-				Speed GetSpeed(const Address address)
+				inline Speed GetSpeed(const Address address)
 				{
 					if (cache.count(address) == 0)
 					{
@@ -84,14 +85,14 @@ namespace Hardware
 					return cache[address].speed;
 				}
 
-				void SetOrientation(const Address address, const Orientation orientation)
+				inline void SetOrientation(const Address address, const Orientation orientation)
 				{
 					Z21LocoCacheEntry entry = GetData(address);
 					entry.orientation = orientation;
 					cache[address] = entry;
 				}
 
-				Orientation GetOrientation(const Address address)
+				inline Orientation GetOrientation(const Address address)
 				{
 					if (cache.count(address) == 0)
 					{
@@ -100,16 +101,18 @@ namespace Hardware
 					return cache[address].orientation;
 				}
 
-				void SetSpeedOrientationProtocol(const Address address, const Speed speed,
-				    const Orientation orientation, const Protocol protocol)
+				inline void SetSpeedOrientationProtocol(const Address address,
+					const Speed speed,
+					const Orientation orientation,
+					const Protocol protocol)
 				{
 					Z21LocoCacheEntry entry(speed, orientation, protocol);
 					cache[address] = entry;
 				}
 
-				void SetFunction(const Address address,
-				    const DataModel::LocoFunctionNr function,
-				    const bool on)
+				inline void SetFunction(const Address address,
+					const DataModel::LocoFunctionNr function,
+					const bool on)
 				{
 					Z21LocoCacheEntry entry = GetData(address);
 					uint32_t mask = ~(1 << function);
@@ -118,7 +121,7 @@ namespace Hardware
 					cache[address] = entry;
 				}
 
-				uint32_t GetFunctions(const Address address)
+				inline uint32_t GetFunctions(const Address address)
 				{
 					if (cache.count(address) == 0)
 					{
@@ -127,14 +130,14 @@ namespace Hardware
 					return cache[address].functions;
 				}
 
-				void SetProtocol(const Address address, const Protocol protocol)
+				inline void SetProtocol(const Address address, const Protocol protocol)
 				{
 					Z21LocoCacheEntry entry = GetData(address);
 					entry.protocol = protocol;
 					cache[address] = entry;
 				}
 
-				Protocol GetProtocol(const Address address)
+				inline Protocol GetProtocol(const Address address)
 				{
 					if (cache.count(address) == 0)
 					{

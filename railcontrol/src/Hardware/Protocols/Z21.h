@@ -23,7 +23,6 @@ along with RailControl; see the file LICENCE. If not see
 #include <arpa/inet.h>
 #include <cstring>
 #include <string>
-#include <thread>
 
 #include "DataModel/AccessoryBase.h"
 #include "Hardware/HardwareInterface.h"

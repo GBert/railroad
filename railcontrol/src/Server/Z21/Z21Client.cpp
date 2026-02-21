@@ -24,6 +24,7 @@ along with RailControl; see the file LICENCE. If not see
 #include "Hardware/Protocols/Z21.h"
 #include "Manager.h"
 #include "Server/Z21/Z21Client.h"
+#include "Server/Z21/Z21Server.h"
 
 using DataModel::LocoConfig;
 using DataModel::ObjectIdentifier;
@@ -34,11 +35,13 @@ namespace Server { namespace Z21
 {
 	Z21Client::Z21Client(const unsigned int id,
 		Manager& manager,
+		Z21Server& z21Server,
 		const int serverSocket,
 		const struct sockaddr_storage* clientAddress)
 	:	Network::UdpClient(serverSocket, clientAddress, 60),
 		logger(Logger::Logger::GetLogger("Z21Client # " + std::to_string(id))),
 		manager(manager),
+		z21Server(z21Server),
 		broadCastFlags(Z21Enums::BroadCastFlagNone)
 	{
 		logger->Debug(Languages::TextUdpConnectionEstablished, AddressAsString());
@@ -157,14 +160,10 @@ namespace Server { namespace Z21
 
 			case Z21Enums::XHeaderGetLocoInfo:
 			{
-				const Address address = ParseLocoAddress(buffer + 6);
-				logger->Debug("Address: {0}", address);
-				const DataModel::LocoConfig locoConfig = manager.GetLocoOfServerAddress(address);
-				if (locoConfig.GetLocoID() == LocoNone)
-				{
-					return;
-				}
-				SendLocoInfo(locoConfig);
+				const Address serverAddress = ParseLocoAddress(buffer + 6);
+				logger->Debug("Address: {0}", serverAddress);
+				Hardware::Protocols::Z21LocoCacheEntry entry = z21Server.GetLocoCacheEntry(serverAddress);
+				SendLocoInfo(entry, serverAddress);
 				return;
 			}
 
@@ -173,7 +172,7 @@ namespace Server { namespace Z21
 				const Address address = ParseLocoAddress(buffer + 5);
 				logger->Debug("Address: {0}", address);
 				const DataModel::AccessoryBase* const accessoryBase = manager.GetAccessoryBase(manager.GetIdentifierOfServerAccessoryAddress(address));
-				if (nullptr == accessoryBase)
+				if (!accessoryBase)
 				{
 					return;
 				}
@@ -288,50 +287,23 @@ namespace Server { namespace Z21
 		manager.LocoBaseOrientation(ControlTypeZ21Server, locoBaseIdentifier, static_cast<Orientation>(buffer[8] >> 7));
 	}
 
-	void Z21Client::SendLocoInfo(const DataModel::LocoConfig& locoConfig)
+	void Z21Client::SendLocoInfo(const Hardware::Protocols::Z21LocoCacheEntry& locoCache,
+		const Address serverAddress)
 	{
-		unsigned char sendBuffer[15] = { 0x0F, 0x00, 0x40, 0x00, 0xEF, 0x00, 0x00, 0x04 };
-		const Address address = locoConfig.GetServerAddress();
-		if (address == AddressNone)
+		if (serverAddress == AddressNone)
 		{
 			return;
 		}
-		Utils::Integer::ShortToDataBigEndian(address, sendBuffer + 5);
-		sendBuffer[8] = (locoConfig.GetOrientation() << 7) | Hardware::Protocols::Z21::EncodeSpeed128(locoConfig.GetSpeed());
-		sendBuffer[9] = ((locoConfig.GetFunctionState(0) & 0x01) << 4)
-				| ((locoConfig.GetFunctionState(4) & 0x01) << 3)
-				| ((locoConfig.GetFunctionState(3) & 0x01) << 2)
-				| ((locoConfig.GetFunctionState(2) & 0x01) << 1)
-				| (locoConfig.GetFunctionState(1) & 0x01);
-		sendBuffer[10] = ((locoConfig.GetFunctionState(12) & 0x01) << 7)
-				| ((locoConfig.GetFunctionState(11) & 0x01) << 6)
-				| ((locoConfig.GetFunctionState(10) & 0x01) << 5)
-				| ((locoConfig.GetFunctionState(9) & 0x01) << 4)
-				| ((locoConfig.GetFunctionState(8) & 0x01) << 3)
-				| ((locoConfig.GetFunctionState(7) & 0x01) << 2)
-				| ((locoConfig.GetFunctionState(6) & 0x01) << 1)
-				| (locoConfig.GetFunctionState(5) & 0x01);
-		sendBuffer[11] = ((locoConfig.GetFunctionState(20) & 0x01) << 7)
-				| ((locoConfig.GetFunctionState(19) & 0x01) << 6)
-				| ((locoConfig.GetFunctionState(18) & 0x01) << 5)
-				| ((locoConfig.GetFunctionState(17) & 0x01) << 4)
-				| ((locoConfig.GetFunctionState(16) & 0x01) << 3)
-				| ((locoConfig.GetFunctionState(15) & 0x01) << 2)
-				| ((locoConfig.GetFunctionState(14) & 0x01) << 1)
-				| (locoConfig.GetFunctionState(12) & 0x01);
-		sendBuffer[12] = ((locoConfig.GetFunctionState(28) & 0x01) << 7)
-				| ((locoConfig.GetFunctionState(27) & 0x01) << 6)
-				| ((locoConfig.GetFunctionState(26) & 0x01) << 5)
-				| ((locoConfig.GetFunctionState(25) & 0x01) << 4)
-				| ((locoConfig.GetFunctionState(24) & 0x01) << 3)
-				| ((locoConfig.GetFunctionState(23) & 0x01) << 2)
-				| ((locoConfig.GetFunctionState(22) & 0x01) << 1)
-				| (locoConfig.GetFunctionState(21) & 0x01);
-		sendBuffer[13] = ((locoConfig.GetFunctionState(31) & 0x01) << 2)
-				| ((locoConfig.GetFunctionState(30) & 0x01) << 1)
-				| (locoConfig.GetFunctionState(29) & 0x01);
+		unsigned char sendBuffer[15] = { 0x0F, 0x00, 0x40, 0x00, 0xEF, 0x00, 0x00, 0x04 };
+		Utils::Integer::ShortToDataBigEndian(serverAddress, sendBuffer + 5);
+		sendBuffer[8] = (locoCache.orientation << 7) | Hardware::Protocols::Z21::EncodeSpeed128(locoCache.speed);
+		sendBuffer[9] = ((locoCache.functions >> 1) & 0x07) | ((locoCache.functions & 0x01) << 4);
+		sendBuffer[10] = locoCache.functions >> 5;
+		sendBuffer[11] = locoCache.functions >> 13;
+		sendBuffer[12] = locoCache.functions >> 21;
+		sendBuffer[13] = locoCache.functions >> 29;
 		sendBuffer[sizeof(sendBuffer) - 1] = Utils::Utils::CalcXORCheckSum(sendBuffer, sizeof(sendBuffer) - 1);
-		logger->Debug(Languages::Languages::TextSendingLocoInfo, address);
+		logger->Debug(Languages::Languages::TextSendingLocoInfo, serverAddress);
 		Send(sendBuffer, sizeof(sendBuffer));
 	}
 

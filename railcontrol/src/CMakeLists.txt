@@ -389,6 +389,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 configure_file(Version.cpp.in Version.cpp @ONLY)
 
 set(CMAKE_INSTALL_BINDIR ".")
+set(CMAKE_INSTALL_DOCDIR "doc")
 set(DATADIR ".")
 
 install(TARGETS ${PROJECT_NAME})
@@ -435,6 +436,7 @@ set(DOC_DE
 	Documentation/de/config-counter.md
 	Documentation/de/automatic.md
 )
+
 set(DOCDATA_DE
     ${PROJECT_SOURCE_DIR}/Documentation/de/config_layers_de.png
     ${PROJECT_SOURCE_DIR}/Documentation/de/control_list_de.png
@@ -640,13 +642,17 @@ set(DOCDATA
     ${PROJECT_SOURCE_DIR}/Documentation/style.css
 )
 
-set(OUTPUT_HTML_DE ${CMAKE_BINARY_DIR}/doc/de/index.html)
-set(OUTPUT_HTML_EN ${CMAKE_BINARY_DIR}/doc/en/index.html)
-set(OUTPUT_HTML_ES ${CMAKE_BINARY_DIR}/doc/es/index.html)
+set(OUTPUT_HTML ${CMAKE_BINARY_DIR}/doc)
+set(OUTPUT_HTML_DE ${OUTPUT_HTML}/de)
+set(OUTPUT_HTML_DE_INDEX ${OUTPUT_HTML_DE}/index.html)
+set(OUTPUT_HTML_EN ${OUTPUT_HTML}/en)
+set(OUTPUT_HTML_EN_INDEX ${OUTPUT_HTML_EN}/index.html)
+set(OUTPUT_HTML_ES ${OUTPUT_HTML}/es)
+set(OUTPUT_HTML_ES_INDEX ${OUTPUT_HTML_ES}/index.html)
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/de)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/en)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/es)
+file(MAKE_DIRECTORY ${OUTPUT_HTML_DE})
+file(MAKE_DIRECTORY ${OUTPUT_HTML_EN})
+file(MAKE_DIRECTORY ${OUTPUT_HTML_ES})
 
 set(PANDOC_OPTS --toc --toc-depth=2
                 --standalone
@@ -654,73 +660,49 @@ set(PANDOC_OPTS --toc --toc-depth=2
                 --template=Documentation/template.html)
 
 add_custom_command(
-    OUTPUT ${OUTPUT_HTML_DE}
-    COMMAND pandoc ${PANDOC_OPTS}
+    OUTPUT ${OUTPUT_HTML_DE_INDEX}
+    COMMAND ${PANDOC_EXECUTABLE} ${PANDOC_OPTS}
                    --metadata-file=Documentation/de/metadata.yaml
-                   --output=${OUTPUT_HTML_DE} ${DOC_DE}
-    DEPENDS ${DOC_DE}
+		   --output=${OUTPUT_HTML_DE_INDEX} ${DOC_DE}
+    DEPENDS ${DOC_DE} ${OUTPUT_HTML_DE}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Generating German HTML documentation"
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT ${OUTPUT_HTML_EN}
-    COMMAND pandoc ${PANDOC_OPTS}
+    OUTPUT ${OUTPUT_HTML_EN_INDEX}
+    COMMAND ${PANDOC_EXECUTABLE} ${PANDOC_OPTS}
                    --metadata-file=Documentation/en/metadata.yaml
-                   --output=${OUTPUT_HTML_EN} ${DOC_EN}
-    DEPENDS ${DOC_EN}
+		   --output=${OUTPUT_HTML_EN_INDEX} ${DOC_EN}
+    DEPENDS ${DOC_EN} ${OUTPUT_HTML_EN}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Generating English HTML documentation"
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT ${OUTPUT_HTML_ES}
-    COMMAND pandoc ${PANDOC_OPTS}
+    OUTPUT ${OUTPUT_HTML_ES_INDEX}
+    COMMAND ${PANDOC_EXECUTABLE} ${PANDOC_OPTS}
                    --metadata-file=Documentation/es/metadata.yaml
-                   --output=${OUTPUT_HTML_ES} ${DOC_ES}
-    DEPENDS ${DOC_ES}
+                   --output=${OUTPUT_HTML_ES_INDEX} ${DOC_ES}
+    DEPENDS ${DOC_ES} ${OUTPUT_HTML_ES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Generating Spanish HTML documentation"
     VERBATIM
 )
 
-add_custom_target(doc
-    DEPENDS ${OUTPUT_HTML_DE} ${OUTPUT_HTML_EN} ${OUTPUT_HTML_ES}
-)
+if(PANDOC_EXECUTABLE)
+	install(DIRECTORY ${OUTPUT_HTML}/ DESTINATION ${CMAKE_INSTALL_DOCDIR})
+	add_custom_target(doc ALL
+		DEPENDS ${OUTPUT_HTML_DE_INDEX} ${OUTPUT_HTML_EN_INDEX} ${OUTPUT_HTML_ES_INDEX}
+	)
+endif()
 
-foreach(DOCDATA ${DOCDATA})
-    add_custom_command(TARGET doc POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${DOCDATA}
-            ${PROJECT_BINARY_DIR}/doc
-    )
-endforeach()
-
-foreach(DOCDATA_DE ${DOCDATA_DE})
-    add_custom_command(TARGET doc POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${DOCDATA_DE}
-            ${PROJECT_BINARY_DIR}/doc/de
-    )
-endforeach()
-
-foreach(DOCDATA_EN ${DOCDATA_EN})
-    add_custom_command(TARGET doc POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${DOCDATA_EN}
-            ${PROJECT_BINARY_DIR}/doc/en
-    )
-endforeach()
-
-foreach(DOCDATA_ES ${DOCDATA_ES})
-    add_custom_command(TARGET doc POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${DOCDATA_ES}
-            ${PROJECT_BINARY_DIR}/doc/es
-    )
-endforeach()
+file(COPY ${DOCDATA} DESTINATION ${OUTPUT_HTML})
+file(COPY ${DOCDATA_DE} DESTINATION ${OUTPUT_HTML_DE})
+file(COPY ${DOCDATA_EN} DESTINATION ${OUTPUT_HTML_EN})
+file(COPY ${DOCDATA_ES} DESTINATION ${OUTPUT_HTML_ES})
 
 add_custom_target(doc-for-web
     DEPENDS doc
@@ -753,7 +735,7 @@ set(PANDOC_CHUNKEDOPTS --toc --toc-depth=2
                        --split-level=1)
 add_custom_command(
     OUTPUT ${OUTPUT_CHUNKEDHTML_DE}/index.html
-    COMMAND pandoc ${PANDOC_CHUNKEDOPTS}
+    COMMAND ${PANDOC_EXECUTABLE} ${PANDOC_CHUNKEDOPTS}
                    --resource-path=".:Documentation:Documentation/de:doc:doc/de"
                    --metadata-file=Documentation/de/metadata.yaml
                    --output=${OUTPUT_CHUNKEDHTML_DE} ${DOC_DE}
@@ -765,7 +747,7 @@ add_custom_command(
 
 add_custom_command(
     OUTPUT ${OUTPUT_CHUNKEDHTML_EN}/index.html
-    COMMAND pandoc ${PANDOC_CHUNKEDOPTS}
+    COMMAND ${PANDOC_EXECUTABLE} ${PANDOC_CHUNKEDOPTS}
                    --resource-path=".:Documentation:Documentation/en:doc:doc/en"
                    --metadata-file=Documentation/en/metadata.yaml
                    --output=${OUTPUT_CHUNKEDHTML_EN} ${DOC_EN}
@@ -777,7 +759,7 @@ add_custom_command(
 
 add_custom_command(
     OUTPUT ${OUTPUT_CHUNKEDHTML_ES}/index.html
-    COMMAND pandoc ${PANDOC_CHUNKEDOPTS}
+    COMMAND ${PANDOC_EXECUTABLE} ${PANDOC_CHUNKEDOPTS}
                    --resource-path="doc/en:Documentation/en:.:Documentation:Documentation/es:doc:doc/es"
                    --metadata-file=Documentation/es/metadata.yaml
                    --output=${OUTPUT_CHUNKEDHTML_ES} ${DOC_ES}
@@ -790,6 +772,20 @@ add_custom_command(
 add_custom_target(chunked-doc
     DEPENDS ${OUTPUT_CHUNKEDHTML_DE}/index.html ${OUTPUT_CHUNKEDHTML_EN}/index.html ${OUTPUT_CHUNKEDHTML_ES}/index.html
 )
+
+# Required for pandoc --write=chunkedhtml
+#
+# In that mode, pandoc is not idempotent and the target directories we want it
+# to write to, need to be gone before it is called one more time.
+# I.e., if you're working on the chunked HTML output, ideally call
+# cmake [...] --clean-first --target chunked-doc
+set_property(
+    TARGET chunked-doc
+    APPEND
+    PROPERTY ADDITIONAL_CLEAN_FILES
+    ${CMAKE_BINARY_DIR}/chunkedhtml/de
+    ${CMAKE_BINARY_DIR}/chunkedhtml/en
+    ${CMAKE_BINARY_DIR}/chunkedhtml/es)
 
 foreach(DOCDATA ${DOCDATA})
     add_custom_command(TARGET chunked-doc POST_BUILD

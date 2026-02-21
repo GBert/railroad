@@ -802,21 +802,42 @@ class Manager
 			const Speed speed);
 
 		void LocoBasePublishSpeed(const ControlType controlType,
-			const DataModel::LocoConfig& locoConfig);
+			const ControlID controlID,
+			const LocoID locoID,
+			const LocoType locoType,
+			const Protocol protocol,
+			const Address address,
+			const Address serverAddress,
+			const std::string& name,
+			const Speed speed);
 
 		bool LocoBaseOrientation(DataModel::LocoBase* loco,
 			const Orientation orientation);
 
 		void LocoBasePublishOrientation(const ControlType controlType,
-			const DataModel::LocoConfig& locoConfig);
+			const ControlID controlID,
+			const LocoID locoID,
+			const LocoType locoType,
+			const Protocol protocol,
+			const Address address,
+			const Address serverAddress,
+			const std::string& name,
+			const Orientation orientation);
 
 		bool LocoBaseFunctionState(DataModel::LocoBase* loco,
 			const DataModel::LocoFunctionNr function,
 			const DataModel::LocoFunctionState on);
 
 		void LocoBasePublishFunctionState(const ControlType controlType,
-			const DataModel::LocoConfig& locoConfig,
-			const DataModel::LocoFunctionNr function);
+			const ControlID controlID,
+			const LocoID locoID,
+			const LocoType locoType,
+			const Protocol protocol,
+			const Address address,
+			const Address serverAddress,
+			const std::string& name,
+			const DataModel::LocoFunctionNr function,
+			const DataModel::LocoFunctionState state);
 
 		void LocoBasePublishRelease(const DataModel::ObjectIdentifier& locoIdentifier,
 			const std::string& locoName);

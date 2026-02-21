@@ -18,9 +18,9 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
-#include <future>
 #include <sstream>
 #include <string>
+#include <thread>
 
 #include "Hardware/Virtual.h"
 #include "Manager.h"
@@ -105,7 +105,8 @@ namespace Hardware
 			default:
 				return;
 		}
-		__attribute__((unused)) auto r = std::async(std::launch::async, Manager::ProgramDccValueStatic, manager, cv, cv & 0xFF);
+		std::thread t(Manager::ProgramDccValueStatic, manager, cv, cv & 0xFF);
+		t.detach();
 	}
 
 	// write DCC CV value

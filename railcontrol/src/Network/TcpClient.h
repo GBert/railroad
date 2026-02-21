@@ -22,7 +22,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <string>
 #include <sys/socket.h>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 

@@ -249,6 +249,9 @@ namespace DataModel
 				return entries[nr].state;
 			}
 
+			// FIXME: create GetFunctionStates with only state but not config
+
+			// FIXME: rename to GetFunctionConfigs
 			std::vector<LocoFunctionEntry> GetFunctionStates() const;
 
 			inline void GetFunctions(LocoFunctionEntry* out) const

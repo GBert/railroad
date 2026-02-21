@@ -18,10 +18,10 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
-#include <future>
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <thread>
 #include <unistd.h>
 
 #include "DataModel/LayoutItem.h"
@@ -345,7 +345,8 @@ void Manager::Booster(const ControlType controlType, const BoosterState state)
 		return;
 	}
 
-	__attribute__((unused)) auto r = std::async(std::launch::async, InitLocosStatic, this);
+	std::thread t(InitLocosStatic, this);
+	t.detach();
 	initLocosDone = true;
 }
 
@@ -356,32 +357,66 @@ void Manager::InitLocos()
 		return;
 	}
 	Utils::Utils::SleepForSeconds(1);
-	map<string,LocoID> locoIds = LocoIdsByName();
-	for (auto locoId : locoIds)
+	map<string,LocoID> locoNames = LocoIdsByName();
+	for (auto locoName : locoNames)
 	{
 		if (!run)
 		{
 			return;
 		}
 
-		const LocoConfig locoConfig = GetLoco(locoId.second);
-
-		if (GetStartupInitLocos() == StartupInitLocosSpeed)
+		ControlID controlID;
+		LocoID locoID = locoName.second;
+		LocoType locoType;
+		Protocol protocol;
+		Address address;
+		Address serverAddress;
+		std::string name;
+		Speed speed;
+		Orientation orientation;
+		std::vector<DataModel::LocoFunctionEntry> functions;
 		{
-			std::lock_guard<std::mutex> guard(controlMutex);
-			for (auto& control : controls)
+			const Loco* loco = GetLocoInternal(locoID);
+			if (!loco)
 			{
-				control.second->LocoBaseSpeed(ControlTypeInternal, locoConfig);
-				control.second->LocoBaseOrientation(ControlTypeInternal, locoConfig);
+				continue;
 			}
+			controlID = loco->GetControlID();
+			locoType = loco->GetLocoType();
+			protocol = loco->GetProtocol();
+			address = loco->GetAddress();
+			serverAddress = loco->GetServerAddress();
+			name = loco->GetName();
+			speed = loco->GetSpeed();
+			orientation = loco->GetOrientation();
+			functions = loco->GetFunctionStates();
 		}
-		else
+
+		switch (GetStartupInitLocos())
 		{
-			std::lock_guard<std::mutex> guard(controlMutex);
-			for (auto& control : controls)
+			case StartupInitLocosSpeed:
 			{
-				control.second->LocoBaseSpeedOrientationFunctionStates(locoConfig);
+				std::lock_guard<std::mutex> guard(controlMutex);
+				for (auto& control : controls)
+				{
+					control.second->LocoBaseSpeed(ControlTypeInternal, controlID, locoID, locoType, protocol, address, serverAddress, name, speed);
+					control.second->LocoBaseOrientation(ControlTypeInternal, controlID, locoID, locoType, protocol, address, serverAddress, name, orientation);
+				}
+				break;
 			}
+
+			case StartupInitLocosAll:
+			{
+				std::lock_guard<std::mutex> guard(controlMutex);
+				for (auto& control : controls)
+				{
+					control.second->LocoBaseSpeedOrientationFunctionStates(controlID, locoID, locoType, protocol, address, serverAddress, name, speed, orientation, functions);
+				}
+				break;
+			}
+
+			case StartupInitLocosNone:
+				break;
 		}
 		Utils::Utils::SleepForMilliseconds(10);
 	}
@@ -733,7 +768,7 @@ const map<string,LocoConfig> Manager::GetUnmatchedLocosOfControl(const ControlID
 		return out;
 	}
 	out = control->GetUnmatchedLocos(matchKey);
-	out[""] = LocoConfig(LocoTypeNone);
+	out.emplace("", LocoTypeNone);
 	return out;
 }
 
@@ -796,7 +831,7 @@ const map<string,DataModel::LocoConfig> Manager::LocoConfigByName() const
 		for (auto& l : locos)
 		{
 			Loco* loco = l.second;
-			out[loco->GetName()] = *loco;
+			out.emplace(loco->GetName(), *loco);
 		}
 	}
 	std::lock_guard<std::mutex> guard(controlMutex);
@@ -816,7 +851,7 @@ const map<string,LocoID> Manager::LocoIdsByName() const
 		for (auto& l : locos)
 		{
 			Loco* loco = l.second;
-			out[loco->GetName()] = loco->GetID();
+			out.emplace(loco->GetName(), loco->GetID());
 		}
 	}
 	return out;
@@ -962,7 +997,11 @@ void Manager::LocoSpeed(const ControlType controlType,
 	const Address address,
 	const Speed speed)
 {
-	LocoConfig locoConfig;
+	LocoID locoID;
+	LocoType locoType;
+	Address serverAddress;
+	std::string name;
+	Speed newSpeed;
 	{
 		std::lock_guard<std::mutex> guard(locoMutex);
 		DataModel::Loco* loco = GetLocoInternal(controlID, protocol, address);
@@ -970,10 +1009,20 @@ void Manager::LocoSpeed(const ControlType controlType,
 		{
 			return;
 		}
-		LocoBaseSpeedInternal(loco, speed);
-		locoConfig = *loco;
+
+		const bool change = LocoBaseSpeedInternal(loco, speed);
+		if (!change)
+		{
+			return;
+		}
+
+		locoID = loco->GetID();
+		locoType = loco->GetLocoType();
+		serverAddress = loco->GetServerAddress();
+		name = loco->GetName();
+		newSpeed = loco->GetSpeed();
 	}
-	LocoBasePublishSpeed(controlType, locoConfig);
+	LocoBasePublishSpeed(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, newSpeed);
 }
 
 Speed Manager::LocoSpeed(const LocoID locoID) const
@@ -993,7 +1042,11 @@ void Manager::LocoOrientation(const ControlType controlType,
 	const Address address,
 	const Orientation orientation)
 {
-	LocoConfig locoConfig;
+	LocoID locoID;
+	LocoType locoType;
+	Address serverAddress;
+	std::string name;
+	Orientation newOrientation;
 	{
 		std::lock_guard<std::mutex> guard(locoMutex);
 		DataModel::Loco* loco = GetLocoInternal(controlID, protocol, address);
@@ -1006,9 +1059,13 @@ void Manager::LocoOrientation(const ControlType controlType,
 		{
 			return;
 		}
-		locoConfig = *loco;
+		locoID = loco->GetID();
+		locoType = loco->GetLocoType();
+		serverAddress = loco->GetServerAddress();
+		name = loco->GetName();
+		newOrientation = loco->GetOrientation();
 	}
-	LocoBasePublishOrientation(controlType, locoConfig);
+	LocoBasePublishOrientation(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, newOrientation);
 	return;
 }
 
@@ -1019,7 +1076,11 @@ void Manager::LocoFunctionState(const ControlType controlType,
 	const DataModel::LocoFunctionNr function,
 	const DataModel::LocoFunctionState state)
 {
-	LocoConfig locoConfig;
+	LocoID locoID;
+	LocoType locoType;
+	Address serverAddress;
+	std::string name;
+	DataModel::LocoFunctionState newState;
 	{
 		std::lock_guard<std::mutex> guard(locoMutex);
 		DataModel::Loco* loco = GetLocoInternal(controlID, protocol, address);
@@ -1032,9 +1093,13 @@ void Manager::LocoFunctionState(const ControlType controlType,
 		{
 			return;
 		}
-		locoConfig = *loco;
+		locoID = loco->GetID();
+		locoType = loco->GetLocoType();
+		serverAddress = loco->GetServerAddress();
+		name = loco->GetName();
+		newState = loco->GetFunctionState(function);
 	}
-	LocoBasePublishFunctionState(controlType, locoConfig, function);
+	LocoBasePublishFunctionState(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, function, newState);
 	return;
 }
 
@@ -1090,7 +1155,7 @@ const map<string,DataModel::LocoConfig> Manager::MultipleUnitConfigByName() cons
 		std::lock_guard<std::mutex> guard(multipleUnitMutex);
 		for (auto& multipleUnit : multipleUnits)
 		{
-			out[multipleUnit.second->GetName()] = *(multipleUnit.second);
+			out.emplace(multipleUnit.second->GetName(), *(multipleUnit.second));
 		}
 	}
 	std::lock_guard<std::mutex> guard(controlMutex);
@@ -1256,7 +1321,15 @@ bool Manager::LocoBaseSpeed(const ControlType controlType,
 {
 	const ObjectType type = locoBaseIdentifier.GetObjectType();
 	std::mutex& mutex = (type == ObjectTypeLoco ? locoMutex : multipleUnitMutex);
-	LocoConfig locoConfig;
+
+	ControlID controlID;
+	LocoID locoID;
+	LocoType locoType;
+	Protocol protocol;
+	Address address;
+	Address serverAddress;
+	std::string name;
+	Speed newSpeed;
 	{
 		LocoBase* locoBase = nullptr;
 		std::lock_guard<std::mutex> guard(mutex);
@@ -1279,9 +1352,17 @@ bool Manager::LocoBaseSpeed(const ControlType controlType,
 		{
 			return true;
 		}
-		locoConfig = *locoBase;
+
+		controlID = locoBase->GetControlID();
+		locoID = locoBase->GetID();
+		locoType = locoBase->GetLocoType();
+		protocol = locoBase->GetProtocol();
+		address = locoBase->GetAddress();
+		serverAddress = locoBase->GetServerAddress();
+		name = locoBase->GetName();
+		newSpeed = locoBase->GetSpeed();
 	}
-	LocoBasePublishSpeed(controlType, locoConfig);
+	LocoBasePublishSpeed(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, newSpeed);
 	return true;
 }
 
@@ -1302,12 +1383,19 @@ bool Manager::LocoBaseSpeedInternal(LocoBase* locoBase,
 }
 
 void Manager::LocoBasePublishSpeed(const ControlType controlType,
-	const LocoConfig& locoConfig)
+	const ControlID controlID,
+	const LocoID locoID,
+	const LocoType locoType,
+	const Protocol protocol,
+	const Address address,
+	const Address serverAddress,
+	const string& name,
+	const Speed speed)
 {
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->LocoBaseSpeed(controlType, locoConfig);
+		control.second->LocoBaseSpeed(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, speed);
 	}
 }
 
@@ -1317,7 +1405,14 @@ bool Manager::LocoBaseOrientation(const ControlType controlType,
 {
 	const ObjectType type = locoBaseIdentifier.GetObjectType();
 	std::mutex& mutex = (type == ObjectTypeLoco ? locoMutex : multipleUnitMutex);
-	LocoConfig locoConfig;
+	ControlID controlID;
+	LocoID locoID;
+	LocoType locoType;
+	Protocol protocol;
+	Address address;
+	Address serverAddress;
+	std::string name;
+	Orientation newOrientation;
 	{
 		LocoBase* locoBase = nullptr;
 		std::lock_guard<std::mutex> guard(mutex);
@@ -1340,9 +1435,17 @@ bool Manager::LocoBaseOrientation(const ControlType controlType,
 		{
 			return true;
 		}
-		locoConfig = *locoBase;
+
+		controlID = locoBase->GetControlID();
+		locoID = locoBase->GetID();
+		locoType = locoBase->GetLocoType();
+		protocol = locoBase->GetProtocol();
+		address = locoBase->GetAddress();
+		serverAddress = locoBase->GetServerAddress();
+		name = locoBase->GetName();
+		newOrientation = locoBase->GetOrientation();
 	}
-	LocoBasePublishOrientation(controlType, locoConfig);
+	LocoBasePublishOrientation(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, newOrientation);
 	return true;
 }
 
@@ -1367,12 +1470,19 @@ bool Manager::LocoBaseOrientation(LocoBase* locoBase,
 }
 
 void Manager::LocoBasePublishOrientation(const ControlType controlType,
-	const LocoConfig& locoConfig)
+	const ControlID controlID,
+	const LocoID locoID,
+	const LocoType locoType,
+	const Protocol protocol,
+	const Address address,
+	const Address serverAddress,
+	const string& name,
+	const Orientation orientation)
 {
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->LocoBaseOrientation(controlType, locoConfig);
+		control.second->LocoBaseOrientation(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, orientation);
 	}
 }
 
@@ -1383,7 +1493,14 @@ bool Manager::LocoBaseFunctionState(const ControlType controlType,
 {
 	const ObjectType type = locoBaseIdentifier.GetObjectType();
 	std::mutex& mutex = (type == ObjectTypeLoco ? locoMutex : multipleUnitMutex);
-	LocoConfig locoConfig;
+	ControlID controlID;
+	LocoID locoID;
+	LocoType locoType;
+	Protocol protocol;
+	Address address;
+	Address serverAddress;
+	std::string name;
+	DataModel::LocoFunctionState newState;
 	{
 		LocoBase* locoBase = nullptr;
 		std::lock_guard<std::mutex> guard(mutex);
@@ -1406,9 +1523,17 @@ bool Manager::LocoBaseFunctionState(const ControlType controlType,
 		{
 			return true;
 		}
-		locoConfig = *locoBase;
+
+		controlID = locoBase->GetControlID();
+		locoID = locoBase->GetID();
+		locoType = locoBase->GetLocoType();
+		protocol = locoBase->GetProtocol();
+		address = locoBase->GetAddress();
+		serverAddress = locoBase->GetServerAddress();
+		name = locoBase->GetName();
+		newState = locoBase->GetFunctionState(function);
 	}
-	LocoBasePublishFunctionState(controlType, locoConfig, function);
+	LocoBasePublishFunctionState(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, function, newState);
 	return true;
 }
 
@@ -1428,13 +1553,20 @@ bool Manager::LocoBaseFunctionState(LocoBase* locoBase,
 }
 
 void Manager::LocoBasePublishFunctionState(const ControlType controlType,
-	const LocoConfig& locoConfig,
-	const DataModel::LocoFunctionNr function)
+	const ControlID controlID,
+	const LocoID locoID,
+	const LocoType locoType,
+	const Protocol protocol,
+	const Address address,
+	const Address serverAddress,
+	const string& name,
+	const DataModel::LocoFunctionNr function,
+	const DataModel::LocoFunctionState state)
 {
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->LocoBaseFunctionState(controlType, locoConfig, function);
+		control.second->LocoBaseFunctionState(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, function, state);
 	}
 }
 
@@ -1504,7 +1636,15 @@ bool Manager::LocationReached(const DataModel::ObjectIdentifier& locoBaseIdentif
 {
 	const ObjectType type = locoBaseIdentifier.GetObjectType();
 	std::mutex& mutex = (type == ObjectTypeLoco ? locoMutex : multipleUnitMutex);
-	LocoConfig locoConfig(LocoTypeNone);
+
+	ControlID controlID;
+	LocoID locoID;
+	LocoType locoType;
+	Protocol protocol;
+	Address address;
+	Address serverAddress;
+	std::string name;
+	Speed newSpeed;
 	{
 		LocoBase* locoBase = nullptr;
 		std::lock_guard<std::mutex> guard(mutex);
@@ -1522,15 +1662,23 @@ bool Manager::LocationReached(const DataModel::ObjectIdentifier& locoBaseIdentif
 			return false;
 		}
 
-		const Speed newSpeed = locoBase->LocationReached(feedbackID);
+		newSpeed = locoBase->LocationReached(feedbackID);
 		const bool change = LocoBaseSpeedInternal(locoBase, newSpeed);
 		if (!change)
 		{
 			return true;
 		}
-		locoConfig = *locoBase;
+
+		controlID = locoBase->GetControlID();
+		locoID = locoBase->GetID();
+		locoType = locoBase->GetLocoType();
+		protocol = locoBase->GetProtocol();
+		address = locoBase->GetAddress();
+		serverAddress = locoBase->GetServerAddress();
+		name = locoBase->GetName();
+		newSpeed = locoBase->GetSpeed();
 	}
-	LocoBasePublishSpeed(ControlTypeInternal, locoConfig);
+	LocoBasePublishSpeed(ControlTypeInternal, controlID, locoID, locoType, protocol, address, serverAddress, name, newSpeed);
 	return true;
 }
 
@@ -2921,7 +3069,8 @@ void Manager::RouteExecuteAsync(Logger::Logger* logger, const RouteID routeID)
 	{
 		return;
 	}
-	__attribute__((unused)) auto r = std::async(std::launch::async, Route::ExecuteStatic, logger, route);
+	std::thread t(Route::ExecuteStatic, logger, route);
+	t.detach();
 }
 
 string Manager::GetRouteList() const

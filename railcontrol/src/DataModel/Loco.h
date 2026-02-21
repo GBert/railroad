@@ -20,13 +20,9 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
-#include <mutex>
 #include <string>
-#include <thread>
-#include <vector>
 
 #include "DataTypes.h"
-#include "DataModel/LocoFunctions.h"
 #include "DataModel/LocoBase.h"
 #include "DataModel/Relation.h"
 

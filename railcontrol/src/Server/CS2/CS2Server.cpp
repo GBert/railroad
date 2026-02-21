@@ -214,7 +214,14 @@ namespace Server { namespace CS2
 	}
 
 	void CS2Server::LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
-		__attribute__((unused)) const DataModel::LocoConfig& locoConfig)
+		__attribute__((unused)) const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		__attribute__((unused)) const Protocol protocol,
+		__attribute__((unused)) const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		__attribute__((unused)) const Speed speed)
 	{
 //		for (auto client : clients)
 //		{
@@ -223,7 +230,14 @@ namespace Server { namespace CS2
 	}
 
 	void CS2Server::LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
-		__attribute__((unused)) const DataModel::LocoConfig& locoConfig)
+		__attribute__((unused)) const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		__attribute__((unused)) const Protocol protocol,
+		__attribute__((unused)) const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		__attribute__((unused)) const Orientation orientation)
 	{
 //		for (auto client : clients)
 //		{
@@ -232,8 +246,15 @@ namespace Server { namespace CS2
 	}
 
 	void CS2Server::LocoBaseFunctionState(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::LocoConfig& locoConfig,
-	__attribute__((unused)) const LocoFunctionNr function)
+		__attribute__((unused)) const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		__attribute__((unused)) const Protocol protocol,
+		__attribute__((unused)) const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		__attribute__((unused)) const LocoFunctionNr function,
+		__attribute__((unused)) const LocoFunctionState state)
 	{
 //		for (auto client : clients)
 //		{

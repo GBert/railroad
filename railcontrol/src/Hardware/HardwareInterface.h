@@ -151,8 +151,10 @@ namespace Hardware
 				// sleeps are necessary to prevent command overflow in command stations (especially Märklin Gleisbox)
 				LocoSpeed(protocol, address, speed);
 				Utils::Utils::SleepForMilliseconds(25);
+
 				LocoOrientation(protocol, address, orientation);
 				Utils::Utils::SleepForMilliseconds(25);
+
 				for (const DataModel::LocoFunctionEntry& functionEntry : functions)
 				{
 					LocoFunctionState(protocol, address, functionEntry.nr, functionEntry.state);
@@ -196,7 +198,7 @@ namespace Hardware
 
 			virtual DataModel::LocoConfig GetMultipleUnitByMatchKey(__attribute__((unused)) const std::string& matchKey) const
 			{
-				return DataModel::LocoConfig(LocoTypeMultipleUnit);
+				return DataModel::LocoConfig(LocoTypeNone);
 			}
 
 			virtual void SetLocoIdOfMatchKey(__attribute__((unused)) const LocoID locoId,

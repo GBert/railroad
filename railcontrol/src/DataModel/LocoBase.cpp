@@ -21,6 +21,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <algorithm>
 #include <map>
 #include <string>
+#include <thread>
 
 #include "DataModel/LocoBase.h"
 #include "DataModel/Track.h"
@@ -865,7 +866,8 @@ namespace DataModel
 		{
 			if (reducedDelay)
 			{
-				__attribute((unused)) auto r = std::async(std::launch::async, LocationReducedReachedStatic, manager, this, feedbackID, reducedDelay);
+				std::thread t(LocationReducedReachedStatic, manager, this, feedbackID, reducedDelay);
+				t.detach();
 			}
 			else
 			{
@@ -877,7 +879,8 @@ namespace DataModel
 		{
 			if (creepDelay)
 			{
-				__attribute((unused)) auto r = std::async(std::launch::async, LocationCreepReachedStatic, manager, this, feedbackID, creepDelay);
+				std::thread t(LocationCreepReachedStatic, manager, this, feedbackID, creepDelay);
+				t.detach();
 			}
 			else
 			{
@@ -889,7 +892,8 @@ namespace DataModel
 		{
 			if (stopDelay)
 			{
-				__attribute((unused)) auto r = std::async(std::launch::async, LocationStopReachedStatic, manager, this, feedbackID, stopDelay);
+				std::thread t(LocationStopReachedStatic, manager, this, feedbackID, stopDelay);
+				t.detach();
 			}
 			else
 			{

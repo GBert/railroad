@@ -21,7 +21,6 @@ along with RailControl; see the file LICENCE. If not see
 #pragma once
 
 #include <string>
-#include <thread>
 #include <vector>
 
 #include <sys/socket.h>

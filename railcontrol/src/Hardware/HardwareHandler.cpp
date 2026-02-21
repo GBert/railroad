@@ -18,7 +18,8 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
-#include "DataModel/Loco.h"
+#include <thread>
+
 #include "DataModel/LocoFunctions.h"
 #include "DataTypes.h"
 #include "Logger/Logger.h"
@@ -270,44 +271,73 @@ namespace Hardware
 	}
 
 	void HardwareHandler::LocoBaseSpeed(const ControlType controlType,
-		const DataModel::LocoConfig& locoConfig)
+		const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		const Protocol protocol,
+		const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		const Speed speed)
 	{
-		if (controlType == ControlTypeHardware || !instance || locoConfig.GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || controlID != GetControlID())
 		{
 			return;
 		}
-		instance->LocoSpeed(locoConfig.GetProtocol(), locoConfig.GetAddress(), locoConfig.GetSpeed());
+		instance->LocoSpeed(protocol, address, speed);
 	}
 
 	void HardwareHandler::LocoBaseOrientation(const ControlType controlType,
-		const DataModel::LocoConfig& locoConfig)
+		const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		const Protocol protocol,
+		const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		const Orientation orientation)
 	{
-		if (controlType == ControlTypeHardware || !instance || locoConfig.GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || controlID != GetControlID())
 		{
 			return;
 		}
-		instance->LocoOrientation(locoConfig.GetProtocol(), locoConfig.GetAddress(), locoConfig.GetOrientation());
+		instance->LocoOrientation(protocol, address, orientation);
 	}
 
 	void HardwareHandler::LocoBaseFunctionState(const ControlType controlType,
-		const DataModel::LocoConfig& locoConfig,
-		const DataModel::LocoFunctionNr function)
+		const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		const Protocol protocol,
+		const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		const DataModel::LocoFunctionNr function,
+		const DataModel::LocoFunctionState state)
 	{
-		if (controlType == ControlTypeHardware || !instance || locoConfig.GetControlID() != GetControlID())
+		if (controlType == ControlTypeHardware || !instance || controlID != GetControlID())
 		{
 			return;
 		}
-		instance->LocoFunctionState(locoConfig.GetProtocol(), locoConfig.GetAddress(), function, locoConfig.GetFunctionState(function));
+		instance->LocoFunctionState(protocol, address, function, state);
 	}
 
-	void HardwareHandler::LocoBaseSpeedOrientationFunctionStates(const DataModel::LocoConfig& locoConfig)
+	void HardwareHandler::LocoBaseSpeedOrientationFunctionStates(const ControlID controlID,
+		__attribute__((unused)) const LocoID locoID,
+		__attribute__((unused)) const LocoType locoType,
+		const Protocol protocol,
+		const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		__attribute__((unused)) const std::string& name,
+		const Speed speed,
+		const Orientation orientation,
+		const std::vector<DataModel::LocoFunctionEntry>& functions)
 	{
-		if (!instance || locoConfig.GetControlID() != GetControlID())
+		if (!instance || controlID != GetControlID())
 		{
 			return;
 		}
-		const std::vector<DataModel::LocoFunctionEntry> functions = locoConfig.GetFunctionStates();
-		instance->LocoSpeedOrientationFunctionStates(locoConfig.GetProtocol(), locoConfig.GetAddress(), locoConfig.GetSpeed(), locoConfig.GetOrientation(), functions);
+		instance->LocoSpeedOrientationFunctionStates(protocol, address, speed, orientation, functions);
 	}
 
 	void HardwareHandler::LocoSettings(const LocoID locoId,
@@ -402,7 +432,8 @@ namespace Hardware
 		const DataModel::AccessoryPulseDuration duration)
 	{
 		instance->Accessory(protocol, address, state, true, duration);
-		__attribute((unused)) auto r = std::async(std::launch::async, AccessoryBaseStateStatic, instance, protocol, address, state, duration);
+		std::thread t(AccessoryBaseStateStatic, instance, protocol, address, state, duration);
+		t.detach();
 	}
 
 	void HardwareHandler::SwitchSettings(const SwitchID switchId,
@@ -611,7 +642,7 @@ namespace Hardware
 			{
 				continue;
 			}
-			list[loco.GetName() + " (" + instance->GetShortName() + ")"] = loco;
+			list.emplace(loco.GetName() + " (" + instance->GetShortName() + ")", loco);
 		}
 	}
 
@@ -634,7 +665,7 @@ namespace Hardware
 			{
 				continue;
 			}
-			out[loco.GetName()] = loco;
+			out.emplace(loco.GetName(), loco);
 		}
 		return out;
 	}
@@ -643,7 +674,7 @@ namespace Hardware
 	{
 		if (!instance)
 		{
-			return DataModel::LocoConfig(LocoTypeNone);
+			return DataModel::LocoConfig();
 		}
 		return instance->GetLocoByMatchKey(match);
 	}
@@ -667,7 +698,7 @@ namespace Hardware
 			{
 				continue;
 			}
-			list[loco.GetName() + " (" + instance->GetShortName() + ")"] = loco;
+			list.emplace(loco.GetName() + " (" + instance->GetShortName() + ")", loco);
 		}
 	}
 
@@ -690,7 +721,7 @@ namespace Hardware
 			{
 				continue;
 			}
-			out[loco.GetName()] = loco;
+			out.emplace(loco.GetName(), loco);
 		}
 		return out;
 	}

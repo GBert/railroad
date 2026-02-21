@@ -26,6 +26,7 @@ along with RailControl; see the file LICENCE. If not see
 #include <vector>
 
 #include "ControlInterface.h"
+#include "Hardware/Protocols/Z21LocoCache.h"
 #include "Logger/Logger.h"
 #include "Manager.h"
 #include "Network/UdpServer.h"
@@ -60,30 +61,58 @@ namespace Server { namespace Z21
 
 			void Booster(const ControlType controlType, const BoosterState status) override;
 
-			void LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
-				const DataModel::LocoConfig& locoConfig) override
-			{
-				SendLocoInfo(locoConfig);
-			}
+			void LocoBaseSpeed(const ControlType controlType,
+				const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const Speed speed) override;
 
-			void LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
-				const DataModel::LocoConfig& locoConfig) override
-			{
-				SendLocoInfo(locoConfig);
-			}
+			void LocoBaseOrientation(const ControlType controlType,
+				const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const Orientation orientation) override;
 
-			void LocoBaseFunctionState(__attribute__((unused)) const ControlType controlType,
-				const DataModel::LocoConfig& locoConfig,
-				__attribute__((unused)) const DataModel::LocoFunctionNr function) override
-			{
-				SendLocoInfo(locoConfig);
-			}
+			void LocoBaseFunctionState(const ControlType controlType,
+				const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const DataModel::LocoFunctionNr function,
+				const DataModel::LocoFunctionState state) override;
+
+			void LocoBaseSpeedOrientationFunctionStates(const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const Speed speed,
+				const Orientation orientation,
+				const std::vector<DataModel::LocoFunctionEntry>& functions) override;
 
 			void AccessoryState(const ControlType controlType, const DataModel::Accessory* accessory) override;
 
 			void SwitchState(const ControlType controlType, const DataModel::Switch* mySwitch) override;
 
 			void SignalState(const ControlType controlType, const DataModel::Signal* signal) override;
+
+			inline Hardware::Protocols::Z21LocoCacheEntry GetLocoCacheEntry(const Address serverAddress)
+			{
+				return locoCache.GetData(serverAddress);
+			}
 
 		protected:
 			Network::UdpClient* UdpClientFactory(const int serverSocket,
@@ -93,12 +122,14 @@ namespace Server { namespace Z21
 			Logger::Logger* logger;
 			Manager& manager;
 			unsigned int lastClientID;
+			Hardware::Protocols::Z21LocoCache locoCache;
 
 			ssize_t ParseData(const unsigned char* buffer,
 				const ssize_t bufferLength,
 				const struct sockaddr_storage* clientAddress);
 
-			void SendLocoInfo(const DataModel::LocoConfig& locoConfig);
+			void SendLocoInfo(const Hardware::Protocols::Z21LocoCacheEntry& locoCache,
+				const Address serverAddress);
 
 			void ParseXHeader(const unsigned char* buffer);
 

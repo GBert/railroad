@@ -151,110 +151,6 @@ namespace DataModel
 				SetFunctionStates(locoBase.GetFunctionStates());
 			}
 
-			inline LocoConfig& operator=(const DataModel::Loco& loco)
-			{
-				type = LocoTypeLoco;
-				controlID = loco.GetControlID();
-				locoID = loco.GetID();
-				protocol = loco.GetProtocol();
-				address = loco.GetAddress();
-				serverAddress = loco.GetServerAddress();
-				name = loco.GetName();
-				matchKey = loco.GetMatchKey();
-				isInUse = loco.IsInUse();
-				SetFunctionStates(loco.GetFunctionStates());
-				pushpull = loco.GetPushpull();
-				length = loco.GetLength();
-				maxSpeed = loco.GetMaxSpeed();
-				travelSpeed = loco.GetTravelSpeed();
-				reducedSpeed = loco.GetReducedSpeed();
-				creepingSpeed = loco.GetCreepingSpeed();
-				propulsion = loco.GetPropulsion();
-				trainType = loco.GetTrainType();
-				slaves.clear();
-				speed = loco.GetSpeed();
-				orientation = loco.GetOrientation();
-				return *this;
-			}
-
-			inline LocoConfig& operator=(const Hardware::LocoCacheEntry& locoCache)
-			{
-				type = locoCache.GetType();
-				controlID = locoCache.GetControlID();
-				locoID = locoCache.GetLocoID();
-				protocol = locoCache.GetProtocol();
-				address = locoCache.GetAddress();
-				serverAddress = AddressNone;
-				name = locoCache.GetName();
-				matchKey = locoCache.GetMatchKey();
-				isInUse = false;
-				SetFunctionStates(locoCache.GetFunctionStates());
-				pushpull = false;
-				length = 0;
-				maxSpeed = MinSpeed;
-				travelSpeed = MinSpeed;
-				reducedSpeed = MinSpeed;
-				creepingSpeed = MinSpeed;
-				propulsion = PropulsionUnknown;
-				trainType = TrainTypeUnknown;
-				slaves = locoCache.GetSlaveIDs();
-				speed = MinSpeed;
-				orientation = OrientationLeft;
-				return *this;
-			}
-
-			inline LocoConfig& operator=(const DataModel::MultipleUnit& multipleUnit)
-			{
-				type = LocoTypeMultipleUnit;
-				controlID = multipleUnit.GetControlID();
-				locoID = multipleUnit.GetID();
-				protocol = ProtocolNone;
-				address = multipleUnit.GetAddress();
-				serverAddress = multipleUnit.GetServerAddress();
-				name = multipleUnit.GetName();
-				matchKey = multipleUnit.GetMatchKey();
-				isInUse = multipleUnit.IsInUse();
-				SetFunctionStates(multipleUnit.GetFunctionStates());
-				pushpull = multipleUnit.GetPushpull();
-				length = multipleUnit.GetLength();
-				maxSpeed = multipleUnit.GetMaxSpeed();
-				travelSpeed = multipleUnit.GetTravelSpeed();
-				reducedSpeed = multipleUnit.GetReducedSpeed();
-				creepingSpeed = multipleUnit.GetCreepingSpeed();
-				propulsion = multipleUnit.GetPropulsion();
-				trainType = multipleUnit.GetTrainType();
-				slaves = multipleUnit.GetSlaveIDs();
-				speed = multipleUnit.GetSpeed();
-				orientation = multipleUnit.GetOrientation();
-				return *this;
-			}
-
-			inline LocoConfig& operator=(const DataModel::LocoBase& locoBase)
-			{
-				type = locoBase.GetLocoType();
-				controlID = locoBase.GetControlID();
-				locoID = locoBase.GetID();
-				protocol = locoBase.GetProtocol();
-				address = locoBase.GetAddress();
-				serverAddress = locoBase.GetServerAddress();
-				name = locoBase.GetName();
-				matchKey = locoBase.GetMatchKey();
-				isInUse = locoBase.IsInUse();
-				SetFunctionStates(locoBase.GetFunctionStates());
-				pushpull = locoBase.GetPushpull();
-				length = locoBase.GetLength();
-				maxSpeed = locoBase.GetMaxSpeed();
-				travelSpeed = locoBase.GetTravelSpeed();
-				reducedSpeed = locoBase.GetReducedSpeed();
-				creepingSpeed = locoBase.GetCreepingSpeed();
-				propulsion = locoBase.GetPropulsion();
-				trainType = locoBase.GetTrainType();
-				slaves.clear();
-				speed = locoBase.GetSpeed();
-				orientation = locoBase.GetOrientation();
-				return *this;
-			}
-
 			inline LocoType GetType() const
 			{
 				return type;
@@ -320,11 +216,6 @@ namespace DataModel
 				return functions.GetFunctionStates();
 			}
 
-			inline LocoFunctionState GetFunctionState(const LocoFunctionNr nr) const
-			{
-				return functions.GetFunctionState(nr);
-			}
-
 			inline void GetFunctionStates(LocoFunctionEntry* out) const
 			{
 				functions.GetFunctions(out);
@@ -375,11 +266,6 @@ namespace DataModel
 				return trainType;
 			}
 
-			inline void AddSlave(const LocoID locoID)
-			{
-				slaves.push_back(locoID);
-			}
-
 			inline const std::vector<LocoID>& GetSlaves() const
 			{
 				return slaves;
@@ -396,27 +282,27 @@ namespace DataModel
 			}
 
 		private:
-			LocoType type;
-			ControlID controlID;
-			LocoID locoID;
-			Protocol protocol;
-			Address address;
-			Address serverAddress;
-			std::string name;
-			std::string matchKey;
-			bool isInUse;
+			const LocoType type;
+			const ControlID controlID;
+			const LocoID locoID;
+			const Protocol protocol;
+			const Address address;
+			const Address serverAddress;
+			const std::string name;
+			const std::string matchKey;
+			const bool isInUse;
 			LocoFunctions functions;
-			bool pushpull;
-			Length length;
-			Speed maxSpeed;
-			Speed travelSpeed;
-			Speed reducedSpeed;
-			Speed creepingSpeed;
-			Propulsion propulsion;
-			TrainType trainType;
-			std::vector<LocoID> slaves;
+			const bool pushpull;
+			const Length length;
+			const Speed maxSpeed;
+			const Speed travelSpeed;
+			const Speed reducedSpeed;
+			const Speed creepingSpeed;
+			const Propulsion propulsion;
+			const TrainType trainType;
+			const std::vector<LocoID> slaves;
 
-			Speed speed;
-			Orientation orientation;
-};
+			const Speed speed;
+			const Orientation orientation;
+	};
 } // namespace DataModel

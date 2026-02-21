@@ -22,7 +22,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <mutex>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include "DataTypes.h"
@@ -168,11 +167,6 @@ namespace DataModel
 			inline std::vector<DataModel::LocoFunctionEntry> GetFunctionStates() const
 			{
 				return functions.GetFunctionStates();
-			}
-
-			inline void GetFunctions(LocoFunctionEntry* out) const
-			{
-				functions.GetFunctions(out);
 			}
 
 			inline const LocoFunctions& GetFunctions() const

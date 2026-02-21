@@ -197,31 +197,51 @@ namespace Server { namespace Web
 	}
 
 	void WebServer::LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
-		const LocoConfig& locoConfig)
+		__attribute__((unused)) const ControlID controlID,
+		const LocoID locoID,
+		const LocoType locoType,
+		__attribute__((unused)) const Protocol protocol,
+		__attribute__((unused)) const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		const string& name,
+		const Speed speed)
 	{
-		const LocoID locoID = LocoIDWithPrefix(locoConfig.GetLocoID(), locoConfig.GetType());
-		const Speed speed = locoConfig.GetSpeed();
-		string command = "locospeed;loco=" + to_string(locoID) + ";speed=" + to_string(speed);
-		AddUpdate(command, Languages::TextLocoSpeedIs, locoConfig.GetName(), speed);
+		const LocoID locoIDwithPrefix = LocoIDWithPrefix(locoID, locoType);
+		string command = "locospeed;loco=" + to_string(locoIDwithPrefix) + ";speed=" + to_string(speed);
+		AddUpdate(command, Languages::TextLocoSpeedIs, name, speed);
 	}
 
 	void WebServer::LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
-		const LocoConfig& locoConfig)
+		__attribute__((unused)) const ControlID controlID,
+		const LocoID locoID,
+		const LocoType locoType,
+		__attribute__((unused)) const Protocol protocol,
+		__attribute__((unused)) const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		const string& name,
+		const Orientation orientation)
+
 	{
-		const LocoID locoID = LocoIDWithPrefix(locoConfig.GetLocoID(), locoConfig.GetType());
-		const Orientation orientation = locoConfig.GetOrientation();
-		string command = "locoorientation;loco=" + to_string(locoID) + ";orientation=" + (orientation ? "true" : "false");
-		AddUpdate(command, orientation ? Languages::TextLocoDirectionOfTravelIsRight : Languages::TextLocoDirectionOfTravelIsLeft, locoConfig.GetName());
+		const LocoID locoIDwithPrefix = LocoIDWithPrefix(locoID, locoType);
+		string command = "locoorientation;loco=" + to_string(locoIDwithPrefix) + ";orientation=" + (orientation ? "true" : "false");
+		AddUpdate(command, orientation ? Languages::TextLocoDirectionOfTravelIsRight : Languages::TextLocoDirectionOfTravelIsLeft, name);
 	}
 
 	void WebServer::LocoBaseFunctionState(__attribute__((unused)) const ControlType controlType,
-		const LocoConfig& locoConfig,
-		const LocoFunctionNr function)
+		__attribute__((unused)) const ControlID controlID,
+		const LocoID locoID,
+		const LocoType locoType,
+		__attribute__((unused)) const Protocol protocol,
+		__attribute__((unused)) const Address address,
+		__attribute__((unused)) const Address serverAddress,
+		const string& name,
+		const LocoFunctionNr function,
+		const LocoFunctionState state)
 	{
-		const LocoID locoID = LocoIDWithPrefix(locoConfig.GetLocoID(), locoConfig.GetType());
-		const LocoFunctionState state = locoConfig.GetFunctionState(function);
-		string command = "locofunction;loco=" + to_string(locoID) + ";function=" + to_string(function) + ";on=" + (state ? "true" : "false");
-		AddUpdate(command, state ? Languages::TextLocoFunctionIsOn : Languages::TextLocoFunctionIsOff, locoConfig.GetName(), function);
+		const bool stateBool = (state != DataModel::LocoFunctionStateOff);
+		const LocoID locoIDwithPrefix = LocoIDWithPrefix(locoID, locoType);
+		string command = "locofunction;loco=" + to_string(locoIDwithPrefix) + ";function=" + to_string(function) + ";on=" + (stateBool ? "true" : "false");
+		AddUpdate(command, stateBool ? Languages::TextLocoFunctionIsOn : Languages::TextLocoFunctionIsOff, name, function);
 	}
 
 	void WebServer::AccessoryState(__attribute__((unused)) const ControlType controlType, const DataModel::Accessory* accessory)

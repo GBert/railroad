@@ -20,6 +20,8 @@ along with RailControl; see the file LICENCE. If not see
 
 #pragma once
 
+#include <string>
+
 #include "DataTypes.h"
 #include "DataModel/LocoBase.h"
 #include "DataModel/Relation.h"

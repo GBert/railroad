@@ -61,7 +61,7 @@ ArgumentHandler::ArgumentHandler(const int argc, char* argv[], const std::map<st
 
 std::string ArgumentHandler::GetArgumentString(const char argument, const std::string& defaultValue)
 {
-	if (GetArgumentBool(argument) == false)
+	if (!GetArgumentBool(argument))
 	{
 		return defaultValue;
 	}

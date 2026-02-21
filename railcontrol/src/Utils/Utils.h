@@ -22,7 +22,6 @@ along with RailControl; see the file LICENCE. If not see
 
 #include <chrono>
 #include <deque>
-#include <future>
 #include <map>
 #include <string>
 #include <sys/stat.h>

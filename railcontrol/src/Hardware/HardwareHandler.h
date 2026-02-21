@@ -87,16 +87,46 @@ namespace Hardware
 			Hardware::Capabilities GetCapabilities() const override;
 
 			void LocoBaseSpeed(const ControlType controlType,
-				const DataModel::LocoConfig& locoConfig) override;
+				const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const Speed speed) override;
 
 			void LocoBaseOrientation(const ControlType controlType,
-				const DataModel::LocoConfig& locoConfig) override;
+				const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const Orientation orientation) override;
 
 			void LocoBaseFunctionState(const ControlType controlType,
-				const DataModel::LocoConfig& locoConfig,
-				const DataModel::LocoFunctionNr function) override;
+				const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const DataModel::LocoFunctionNr function,
+				const DataModel::LocoFunctionState state) override;
 
-			void LocoBaseSpeedOrientationFunctionStates(const DataModel::LocoConfig& locoConfig) override;
+			void LocoBaseSpeedOrientationFunctionStates(const ControlID controlID,
+				const LocoID locoID,
+				const LocoType locoType,
+				const Protocol protocol,
+				const Address address,
+				const Address serverAddress,
+				const std::string& name,
+				const Speed speed,
+				const Orientation orientation,
+				const std::vector<DataModel::LocoFunctionEntry>& functions) override;
 
 			void LocoProtocols(std::vector<Protocol>& protocols) const override;
 

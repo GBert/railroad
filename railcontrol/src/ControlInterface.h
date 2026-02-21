@@ -51,7 +51,6 @@ namespace Hardware
 class ControlInterface
 {
 	public:
-		// FIXME: replace all Loco* with Loco& and do not use calls with direct pointer to loco vector
 		inline ControlInterface(ControlType controlType)
 		:	controlType(controlType)
 		{
@@ -175,29 +174,60 @@ class ControlInterface
 		}
 
 		virtual void LocoBaseSpeed(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::LocoConfig& locoConfig)
+			__attribute__((unused)) const ControlID controlID,
+			__attribute__((unused)) const LocoID locoID,
+			__attribute__((unused)) const LocoType locoType,
+			__attribute__((unused)) const Protocol protocol,
+			__attribute__((unused)) const Address address,
+			__attribute__((unused)) const Address serverAddress,
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const Speed speed)
 		{
 		}
 
 		virtual void LocoBaseOrientation(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::LocoConfig& locoConfig)
+			__attribute__((unused)) const ControlID controlID,
+			__attribute__((unused)) const LocoID locoID,
+			__attribute__((unused)) const LocoType locoType,
+			__attribute__((unused)) const Protocol protocol,
+			__attribute__((unused)) const Address address,
+			__attribute__((unused)) const Address serverAddress,
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const Orientation orientation)
 		{
 		}
 
 
 		virtual void LocoBaseFunctionState(__attribute__((unused)) const ControlType controlType,
-			__attribute__((unused)) const DataModel::LocoConfig& locoConfig,
-			__attribute__((unused)) const DataModel::LocoFunctionNr function)
+			__attribute__((unused)) const ControlID controlID,
+			__attribute__((unused)) const LocoID locoID,
+			__attribute__((unused)) const LocoType locoType,
+			__attribute__((unused)) const Protocol protocol,
+			__attribute__((unused)) const Address address,
+			__attribute__((unused)) const Address serverAddress,
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LocoFunctionNr function,
+			__attribute__((unused)) const DataModel::LocoFunctionState state)
 		{
 		}
 
-		virtual void LocoBaseSpeedOrientationFunctionStates(const DataModel::LocoConfig& locoConfig)
+		virtual void LocoBaseSpeedOrientationFunctionStates(const ControlID controlID,
+			const LocoID locoID,
+			const LocoType locoType,
+			const Protocol protocol,
+			const Address address,
+			const Address serverAddress,
+			const std::string& name,
+			const Speed speed,
+			const Orientation orientation,
+			const std::vector<DataModel::LocoFunctionEntry>& functions)
 		{
-			LocoBaseSpeed(ControlTypeInternal, locoConfig);
-			LocoBaseOrientation(ControlTypeInternal, locoConfig);
-			for (int nr = 0; nr < DataModel::NumberOfLocoFunctions; ++nr)
+			LocoBaseSpeed(ControlTypeInternal, controlID, locoID, locoType, protocol, address, serverAddress, name, speed);
+			LocoBaseOrientation(ControlTypeInternal, controlID, locoID, locoType, protocol, address, serverAddress, name, orientation);
+
+			for (const DataModel::LocoFunctionEntry& function : functions)
 			{
-				LocoBaseFunctionState(ControlTypeInternal, locoConfig, nr);
+				LocoBaseFunctionState(ControlTypeInternal, controlID, locoID, locoType, protocol, address, serverAddress, name, function.nr, function.state);
 			}
 		}
 
