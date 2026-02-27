@@ -1,5 +1,6 @@
 mkdir docker-openwrt-builder
 
+wget https://github.com/GBert/railroad/raw/refs/heads/master/openwrt-onion-docker/Dockerfile
 cd docker-openwrt-builder
 docker build -t openwrt_builder .
 
@@ -13,7 +14,9 @@ cd onion-21.02
 
 git checkout openwrt-21.02
 
-patch -p1 < patch_srseii.patch
+wget https://github.com/GBert/railroad/raw/refs/heads/master/openwrt-onion-docker/openwrt_srseii.patch
+patch -p1 < openwrt_srseii.patch
+
 # nodejs
 ./scripts/feeds update node
 rm ./package/feeds/packages/node
@@ -28,6 +31,7 @@ scripts/feeds install -a -p luci
 ./scripts/feeds install canutils can2udp can-monitor ms1relay maecan-c maecan-server mrsystem railcontrol z21emu libpcap simple-com nano joe websockify minicom picocom dfu-util easy-loader io lsof tree xxd shellinabox
 ./scripts/feeds install openssh-sftp-server python-evdev libpcap-dev libxml2-dev
 
+wget https://github.com/GBert/railroad/raw/refs/heads/master/openwrt-onion-docker/config.txt
 cp config.txt .config
 
 scripts/feeds update -a ; git pull ; make -j9 || make V=s
