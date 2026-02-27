@@ -1,7 +1,6 @@
 mkdir docker-openwrt-builder
-
-wget https://github.com/GBert/railroad/raw/refs/heads/master/openwrt-onion-docker/Dockerfile
 cd docker-openwrt-builder
+wget https://github.com/GBert/railroad/raw/refs/heads/master/openwrt-onion-docker/Dockerfile
 docker build -t openwrt_builder .
 
 mkdir ~/mybuild
