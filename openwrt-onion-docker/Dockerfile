@@ -11,7 +11,7 @@ RUN apt-get update && \
         flex gettext wget unzip xz-utils python3 python3-distutils-extra \
         python3-distutils-extra python3-setuptools swig rsync curl \
         libsnmp-dev liblzma-dev libpam0g-dev cpio rsync gcc-multilib qemu-utils \
-        python2.7 gcc-multilib g++-multilib && \
+        python2.7 gcc-multilib g++-multilib vim && \
     apt-get clean && \
     useradd -m user && \
     echo 'user ALL=NOPASSWD: ALL' > /etc/sudoers.d/user
