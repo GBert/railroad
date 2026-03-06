@@ -751,6 +751,7 @@ class Manager
 
 		inline static void ProgramDccValueStatic(Manager* manager, const CvNumber cv, const CvValue value)
 		{
+			Utils::Utils::SetThreadName("ProgramDccValueStatic");
 			manager->ProgramValue(cv, value);
 		}
 
@@ -1103,6 +1104,7 @@ class Manager
 
 		static inline void InitLocosStatic(Manager* manager)
 		{
+			Utils::Utils::SetThreadName("InitLocosStatic");
 			manager->InitLocos();
 		}
 

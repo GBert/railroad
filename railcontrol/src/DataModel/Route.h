@@ -162,6 +162,7 @@ namespace DataModel
 
 			inline static bool ExecuteStatic(Logger::Logger* logger, Route* route)
 			{
+				Utils::Utils::SetThreadName("ExecuteStatic");
 				return route->Execute(logger, ObjectIdentifier());
 			}
 

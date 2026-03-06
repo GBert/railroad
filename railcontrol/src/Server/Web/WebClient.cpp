@@ -34,8 +34,6 @@ along with RailControl; see the file LICENCE. If not see
 #include "DataModel/ObjectIdentifier.h"
 #include "Hardware/HardwareHandler.h"
 #include "RailControl.h"
-#include "Utils/Utils.h"
-#include "Version.h"
 #include "Server/Web/HtmlTagAccessory.h"
 #include "Server/Web/HtmlTagButtonCancel.h"
 #include "Server/Web/HtmlTagButtonCommand.h"
@@ -70,6 +68,8 @@ along with RailControl; see the file LICENCE. If not see
 #include "Server/Web/WebClientStatic.h"
 #include "Server/Web/WebServer.h"
 #include "Utils/Integer.h"
+#include "Utils/Utils.h"
+#include "Version.h"
 
 using namespace DataModel;
 using LayoutPosition = DataModel::LayoutItem::LayoutPosition;

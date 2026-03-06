@@ -143,8 +143,6 @@ namespace DataModel
 
 			bool Release();
 
-			void ReleaseRouteAndTrack();
-
 			bool CheckFreeingTrack(const TrackID trackID) const;
 
 			Speed LocationReached(const FeedbackID feedbackID);
@@ -389,6 +387,14 @@ namespace DataModel
 				LocoBase* locoBase,
 				const FeedbackID feedbackID,
 				const Delay reducedDelay);
+
+			void ReleaseRouteAndTrack();
+
+			static inline void ReleaseRouteAndTrackStatic(LocoBase* locoBase)
+			{
+				Utils::Utils::SetThreadName("ReleaseRouteAndTrackStatic");
+				locoBase->ReleaseRouteAndTrack();
+			}
 
 			mutable std::mutex stateMutex;
 			std::thread locoThread;

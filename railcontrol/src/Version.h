@@ -18,10 +18,20 @@ along with RailControl; see the file LICENCE. If not see
 <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <string>
 
 const std::string& GetVersionInfoGitHash();
+
 time_t GetVersionInfoGitTimestamp();
+
 unsigned int GetVersionInfoGitDirty();
+
 time_t GetVersionInfoCompileTimestamp();
+
 const std::string& GetVersionInfoRailControlVersion();
+
+const std::string& GetOS();
+
+const std::string& GetCompiler();

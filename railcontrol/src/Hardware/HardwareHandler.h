@@ -223,6 +223,7 @@ namespace Hardware
 				const DataModel::AccessoryState state,
 				const DataModel::AccessoryPulseDuration duration)
 			{
+				Utils::Utils::SetThreadName("AccessoryBaseStateStatic");
 				Utils::Utils::SleepForMilliseconds(duration);
 				instance->Accessory(protocol, address, state, false, 0);
 			}

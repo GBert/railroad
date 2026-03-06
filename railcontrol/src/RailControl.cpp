@@ -193,6 +193,8 @@ int main (int argc, char* argv[])
 	logger->Info(Languages::TextStarting, RailControl);
 	logger->Info(Languages::TextVersion, GetVersionInfoRailControlVersion());
 	logger->Info(Languages::TextCompileDate, Utils::Utils::TimestampToDate(GetVersionInfoCompileTimestamp()));
+	logger->Info(Languages::TextCompiler, GetCompiler());
+	logger->Info(Languages::TextOs, GetOS());
 	logger->Info(Languages::TextGitHash, GetVersionInfoGitHash());
 	logger->Info(Languages::TextGitDate, Utils::Utils::TimestampToDate(GetVersionInfoGitTimestamp()));
 
