@@ -26,8 +26,8 @@ along with RailControl; see the file LICENCE. If not see
 #include "Utils/Utils.h"
 
 using std::map;
-using std::stringstream;
 using std::string;
+using std::to_string;
 
 namespace DataModel
 {
@@ -99,16 +99,14 @@ namespace DataModel
 
 	std::string LayoutItem::Serialize() const
 	{
-		stringstream ss;
-		ss << Object::Serialize()
-			<< ";visible=" << static_cast<int>(visible)
-			<< ";posX=" << static_cast<int>(posX)
-			<< ";posY=" << static_cast<int>(posY)
-			<< ";posZ=" << static_cast<int>(posZ)
-			<< ";width=" << static_cast<int>(width)
-			<< ";height=" << static_cast<int>(height)
-			<< ";rotation=" << static_cast<int>(rotation);
-		return ss.str();
+		return Object::Serialize()
+			+ ";visible=" + to_string(visible)
+			+ ";posX=" + to_string(posX)
+			+ ";posY=" + to_string(posY)
+			+ ";posZ=" + to_string(posZ)
+			+ ";width=" + to_string(width)
+			+ ";height=" + to_string(height)
+			+ ";rotation=" + to_string(rotation);
 	}
 
 	void LayoutItem::Deserialize(const std::string& serialized)

@@ -109,6 +109,7 @@ class ControlInterface
 
 		virtual void AccessorySettings(__attribute__((unused)) const AccessoryID accessoryID,
 			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz,
 			__attribute__((unused)) const std::string& matchKey)
 		{
 		}
@@ -144,7 +145,8 @@ class ControlInterface
 		}
 
 		virtual void FeedbackSettings(__attribute__((unused)) const FeedbackID feedbackID,
-			__attribute__((unused)) const std::string& name)
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz)
 		{
 		}
 
@@ -289,7 +291,8 @@ class ControlInterface
 		}
 
 		virtual void RouteSettings(__attribute__((unused)) const RouteID routeID,
-			__attribute__((unused)) const std::string& name)
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz)
 		{
 		}
 
@@ -301,6 +304,7 @@ class ControlInterface
 
 		virtual void SwitchSettings(__attribute__((unused)) const SwitchID switchID,
 			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz,
 			__attribute__((unused)) const std::string& matchKey)
 		{
 		}
@@ -316,7 +320,8 @@ class ControlInterface
 		}
 
 		virtual void TrackSettings(__attribute__((unused)) const TrackID trackID,
-			__attribute__((unused)) const std::string& name)
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz)
 		{
 		}
 
@@ -332,6 +337,7 @@ class ControlInterface
 
 		virtual void SignalSettings(__attribute__((unused)) const SignalID signalID,
 			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz,
 			__attribute__((unused)) const std::string& matchKey)
 		{
 		}
@@ -357,7 +363,8 @@ class ControlInterface
 		}
 
 		virtual void TextSettings(__attribute__((unused)) const TextID textID,
-			__attribute__((unused)) const std::string& name)
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz)
 		{
 		}
 
@@ -367,7 +374,8 @@ class ControlInterface
 		}
 
 		virtual void CounterSettings(__attribute__((unused)) const CounterID counterID,
-			__attribute__((unused)) const std::string& name)
+			__attribute__((unused)) const std::string& name,
+			__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz)
 		{
 		}
 

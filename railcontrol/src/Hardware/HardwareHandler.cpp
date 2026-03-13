@@ -364,6 +364,7 @@ namespace Hardware
 
 	void HardwareHandler::AccessorySettings(const AccessoryID accessoryId,
 		__attribute__((unused)) const std::string& name,
+		__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz,
 		const std::string& matchKey)
 	{
 		if (!instance)
@@ -438,6 +439,7 @@ namespace Hardware
 
 	void HardwareHandler::SwitchSettings(const SwitchID switchId,
 		__attribute__((unused)) const std::string& name,
+		__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz,
 		const std::string& matchKey)
 	{
 		if (!instance)
@@ -501,6 +503,7 @@ namespace Hardware
 
 	void HardwareHandler::SignalSettings(const SignalID signalId,
 		__attribute__((unused)) const std::string& name,
+		__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz,
 		const std::string& matchKey)
 	{
 		if (!instance)
@@ -614,7 +617,9 @@ namespace Hardware
 		instance->FeedbackDelete(feedbackID, name);
 	}
 
-	void HardwareHandler::FeedbackSettings(const FeedbackID feedbackID, const std::string& name)
+	void HardwareHandler::FeedbackSettings(const FeedbackID feedbackID,
+		const std::string& name,
+		__attribute__((unused)) const DataModel::LayoutItem::LayoutPosition posz)
 	{
 		if (!instance)
 		{

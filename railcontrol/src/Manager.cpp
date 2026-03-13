@@ -49,7 +49,6 @@ using std::map;
 using std::pair;
 using std::to_string;
 using std::string;
-using std::stringstream;
 using std::vector;
 using Storage::TransactionGuard;
 using Storage::StorageHandler;
@@ -1607,7 +1606,11 @@ Logger::Logger* Manager::CheckFreeingTrack(const DataModel::ObjectIdentifier& lo
 			return nullptr;
 		}
 
-		locoBase->CheckFreeingTrack(trackID);
+		const bool freeOK = locoBase->CheckFreeingTrack(trackID);
+		if (!freeOK)
+		{
+			return nullptr;
+		}
 
 		return locoBase->GetLogger();
 	}
@@ -1974,7 +1977,7 @@ void Manager::AccessorySaveAndPublishSettings(const Accessory* const accessory)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->AccessorySettings(accessory->GetID(), accessory->GetName(), accessory->GetMatchKey());
+		control.second->AccessorySettings(accessory->GetID(), accessory->GetName(), accessory->GetPosZ(), accessory->GetMatchKey());
 	}
 }
 
@@ -2325,7 +2328,7 @@ void Manager::FeedbackSaveAndPublishSettings(const Feedback* const feedback)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->FeedbackSettings(feedback->GetID(), feedback->GetName());
+		control.second->FeedbackSettings(feedback->GetID(), feedback->GetName(), feedback->GetPosZ());
 	}
 }
 
@@ -2680,7 +2683,7 @@ void Manager::TrackSaveAndPublishSettings(const Track* const track)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->TrackSettings(track->GetID(), track->GetName());
+		control.second->TrackSettings(track->GetID(), track->GetName(), track->GetPosZ());
 	}
 }
 
@@ -2947,7 +2950,7 @@ void Manager::SwitchSaveAndPublishSettings(const Switch* const mySwitch)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->SwitchSettings(mySwitch->GetID(), mySwitch->GetName(), mySwitch->GetMatchKey());
+		control.second->SwitchSettings(mySwitch->GetID(), mySwitch->GetName(), mySwitch->GetPosZ(),  mySwitch->GetMatchKey());
 	}
 }
 
@@ -3286,7 +3289,7 @@ void Manager::RouteSaveAndPublishSettings(const Route* const route)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->RouteSettings(route->GetID(), route->GetName());
+		control.second->RouteSettings(route->GetID(), route->GetName(), route->GetPosZ());
 	}
 }
 
@@ -3796,7 +3799,7 @@ void Manager::SignalSaveAndPublishSettings(const Signal* const signal)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->SignalSettings(signal->GetID(), signal->GetName(), signal->GetMatchKey());
+		control.second->SignalSettings(signal->GetID(), signal->GetName(), signal->GetPosZ(), signal->GetMatchKey());
 	}
 }
 
@@ -4150,7 +4153,7 @@ void Manager::TextSaveAndPublishSettings(const Text* const text)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->TextSettings(text->GetID(), text->GetName());
+		control.second->TextSettings(text->GetID(), text->GetName(), text->GetPosZ());
 	}
 }
 
@@ -4319,7 +4322,7 @@ void Manager::CounterSaveAndPublishSettings(const Counter* const counter)
 	std::lock_guard<std::mutex> guard(controlMutex);
 	for (auto& control : controls)
 	{
-		control.second->CounterSettings(counter->GetID(), counter->GetName());
+		control.second->CounterSettings(counter->GetID(), counter->GetName(), counter->GetPosZ());
 	}
 }
 

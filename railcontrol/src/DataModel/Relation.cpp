@@ -27,23 +27,21 @@ along with RailControl; see the file LICENCE. If not see
 #include "Utils/Utils.h"
 
 using std::map;
-using std::stringstream;
 using std::string;
+using std::to_string;
 
 namespace DataModel
 {
 	std::string Relation::Serialize() const
 	{
-		stringstream ss;
-		ss << LockableItem::Serialize()
-			<< ";type=" << static_cast<int>(type)
-			<< ";objectType1=" << static_cast<int>(ObjectType1())
-			<< ";objectID1=" << object1.GetObjectID()
-			<< ";objectType2=" << static_cast<int>(ObjectType2())
-			<< ";objectID2=" << object2.GetObjectID()
-			<< ";priority=" << static_cast<int>(priority)
-			<< ";data=" << static_cast<int>(data);
-		return ss.str();
+		return LockableItem::Serialize()
+			+ ";type=" + to_string(type)
+			+ ";objectType1=" + to_string(ObjectType1())
+			+ ";objectID1=" + to_string(object1.GetObjectID())
+			+ ";objectType2=" + to_string(ObjectType2())
+			+ ";objectID2=" + to_string(object2.GetObjectID())
+			+ ";priority=" + to_string(priority)
+			+ ";data=" + to_string(data);
 	}
 
 	void Relation::Deserialize(const std::string& serialized)

@@ -86,7 +86,7 @@ namespace DataModel
 	void Feedback::SetState(Logger::Logger* logger,
 		const FeedbackState newState)
 	{
-		FeedbackState state = static_cast<FeedbackState>(newState != inverted);
+		const FeedbackState state = static_cast<FeedbackState>(newState != inverted);
 		{
 			std::lock_guard<std::mutex> Guard(updateMutex);
 			if (state == FeedbackStateFree)

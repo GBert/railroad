@@ -1181,16 +1181,32 @@ function updateTitle()
 	updateItem("title", locoName.innerHTML + " - RailControl");
 }
 
-function updateText(textID)
+function updateText(argumentMap)
 {
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var textID = argumentMap.get('text');
 	elementName = 'tx_' + textID;
 	var url = '/?cmd=textget';
 	url += '&text=' + textID;
 	requestUpdateLayoutItem(elementName, url);
 }
 
-function updateTrack(trackID)
+function updateTrack(argumentMap)
 {
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var trackID = argumentMap.get('track');
 	elementName = 't_' + trackID;
 	var url = '/?cmd=trackget';
 	url += '&track=' + trackID;
@@ -1329,6 +1345,22 @@ function updateTrackState(argumentMap)
 	}
 }
 
+function updateAccessory(argumentMap)
+{
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var accessoryID = argumentMap.get('accessory');
+	elementName = 'a_' + accessoryID;
+	var url = '/?cmd=accessoryget';
+	url += '&accessory=' + accessoryID;
+	requestUpdateLayoutItem(elementName, url);
+}
+
 function updateSwitchState(argumentMap)
 {
 	if (!argumentMap.has('switch') || !argumentMap.has('state'))
@@ -1371,6 +1403,22 @@ function updateSwitchStateDiv(element, state)
 			element.classList.add('switch_third');
 			break;
 	}
+}
+
+function updateSwitch(argumentMap)
+{
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var switchID = argumentMap.get('switch');
+	elementName = 'sw_' + switchID;
+	var url = '/?cmd=switchget';
+	url += '&switch=' + switchID;
+	requestUpdateLayoutItem(elementName, url);
 }
 
 function updateSignalState(argumentMap)
@@ -1517,8 +1565,16 @@ function updateSignalStateDiv(element, state)
 	}
 }
 
-function updateSignal(signalID)
+function updateSignal(argumentMap)
 {
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var signalID = argumentMap.get('signal');
 	elementName = 'si_' + signalID;
 	var url = '/?cmd=signalget';
 	url += '&signal=' + signalID;
@@ -1547,12 +1603,38 @@ function updateCounterState(argumentMap)
 	element.innerHTML = count;
 }
 
-function updateCounter(counterID)
+function updateCounter(argumentMap)
 {
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var counterID = argumentMap.get('counter');
 	elementName = 'c_' + counterID;
 	var url = '/?cmd=counterget';
 	url += '&counter=' + counterID;
 	requestUpdateLayoutItem(elementName, url);
+}
+
+function updateFeedback(argumentMap)
+{
+	var layer = argumentMap.get('layer');
+	var layerSelected = document.getElementById('s_layer').value;
+	if (layer != layerSelected)
+	{
+		return;
+	}
+
+	var feedbackID = argumentMap.get('feedback');
+	elementName = 'f_' + feedbackID;
+	var url = '/?cmd=feedbackget';
+	url += '&feedback=' + feedbackID;
+	url += '&layer=' + layerSelected;
+	requestUpdateLayoutItem(elementName, url);
+	loadLayerSelector();
 }
 
 function dataUpdate(event)
@@ -1627,20 +1709,12 @@ function dataUpdate(event)
 	}
 	else if (command == 'accessorysettings')
 	{
-		var accessoryID = argumentMap.get('accessory');
-		elementName = 'a_' + accessoryID;
-		var url = '/?cmd=accessoryget';
-		url += '&accessory=' + accessoryID;
-		requestUpdateLayoutItem(elementName, url);
+		updateAccessory(argumentMap);
 	}
 	else if (command == 'accessorydelete')
 	{
 		elementName = 'a_' + argumentMap.get('accessory');
-		var element = document.getElementById(elementName);
-		if (element)
-		{
-			element.parentNode.removeChild(element);
-		}
+		deleteElement(elementName);
 	}
 	else if (command == 'switch')
 	{
@@ -1648,11 +1722,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'switchsettings')
 	{
-		var switchID = argumentMap.get('switch');
-		elementName = 'sw_' + switchID;
-		var url = '/?cmd=switchget';
-		url += '&switch=' + switchID;
-		requestUpdateLayoutItem(elementName, url);
+		updateSwitch(argumentMap);
 	}
 	else if (command == 'switchdelete')
 	{
@@ -1667,7 +1737,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'signalsettings')
 	{
-		updateSignal(argumentMap.get('signal'));
+		updateSignal(argumentMap);
 	}
 	else if (command == 'signaldelete')
 	{
@@ -1692,7 +1762,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'textsettings')
 	{
-		updateText(argumentMap.get('text'));
+		updateText(argumentMap);
 	}
 	else if (command == 'textdelete')
 	{
@@ -1702,7 +1772,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'countersettings')
 	{
-		updateCounter(argumentMap.get('counter'));
+		updateCounter(argumentMap);
 	}
 	else if (command == 'counterdelete')
 	{
@@ -1720,7 +1790,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'tracksettings')
 	{
-		updateTrack(argumentMap.get('track'));
+		updateTrack(argumentMap);
 	}
 	else if (command == 'trackdelete')
 	{
@@ -1750,14 +1820,7 @@ function dataUpdate(event)
 	}
 	else if (command == 'feedbacksettings')
 	{
-		var feedbackID = argumentMap.get('feedback');
-		var layerID = document.getElementById('s_layer').value;
-		elementName = 'f_' + feedbackID;
-		var url = '/?cmd=feedbackget';
-		url += '&feedback=' + feedbackID;
-		url += '&layer=' + layerID;
-		requestUpdateLayoutItem(elementName, url);
-		loadLayerSelector();
+		updateFeedback(argumentMap);
 	}
 	else if (command == 'feedbackdelete')
 	{

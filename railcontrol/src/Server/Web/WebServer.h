@@ -65,11 +65,20 @@ namespace Server { namespace Web
 			}
 
 			void AccessoryDelete(const AccessoryID accessoryID, const std::string& name, const std::string& matchKey) override;
-			void AccessorySettings(const AccessoryID accessoryID, const std::string& name, const std::string& matchkey) override;
+
+			void AccessorySettings(const AccessoryID accessoryID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ,
+				const std::string& matchkey) override;
+
 			void AccessoryState(const ControlType controlType, const DataModel::Accessory* accessory) override;
 			void Booster(const ControlType controlType, const BoosterState status) override;
 			void FeedbackDelete(const FeedbackID feedbackID, const std::string& name) override;
-			void FeedbackSettings(const FeedbackID feedbackID, const std::string& name) override;
+
+			void FeedbackSettings(const FeedbackID feedbackID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ) override;
+
 			void FeedbackState(const std::string& name, const FeedbackID feedbackID, const DataModel::Feedback::FeedbackState state) override;
 			void LayerDelete(const LayerID layerID, const std::string& name) override;
 			void LayerSettings(const LayerID layerID, const std::string& name) override;
@@ -139,22 +148,48 @@ namespace Server { namespace Web
 
 			void RouteDelete(const RouteID routeID, const std::string& name) override;
 			void RouteRelease(const RouteID routeID) override;
-			void RouteSettings(const RouteID routeID, const std::string& name) override;
+
+			void RouteSettings(const RouteID routeID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ) override;
+
 			void SwitchDelete(const SwitchID switchID, const std::string& name, const std::string& matchKey) override;
-			void SwitchSettings(const SwitchID switchID, const std::string& name, const std::string& matchKey) override;
+
+			void SwitchSettings(const SwitchID switchID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ,
+				const std::string& matchKey) override;
+
 			void SwitchState(const ControlType controlType, const DataModel::Switch* mySwitch) override;
 			void TrackDelete(const TrackID trackID, const std::string& name) override;
-			void TrackSettings(const TrackID trackID, const std::string& name) override;
+
+			void TrackSettings(const TrackID trackID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ) override;
+
 			void TrackState(const DataModel::Track* track) override;
 			void SignalDelete(const SignalID signalID, const std::string& name, const std::string& matchKey) override;
-			void SignalSettings(const SignalID signalID, const std::string& name, const std::string& matchKey) override;
+
+			void SignalSettings(const SignalID signalID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ,
+				const std::string& matchKey) override;
+
 			void SignalState(const ControlType controlType, const DataModel::Signal* signal) override;
 			void ClusterDelete(const ClusterID clusterID, const std::string& name) override;
 			void ClusterSettings(const ClusterID clusterID, const std::string& name) override;
 			void TextDelete(const TextID textID, const std::string& name) override;
-			void TextSettings(const TextID textID, const std::string& name) override;
+
+			void TextSettings(const TextID textID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ) override;
+
 			void CounterDelete(const CounterID counterID, const std::string& name) override;
-			void CounterSettings(const CounterID counterID, const std::string& name) override;
+
+			void CounterSettings(const CounterID counterID,
+				const std::string& name,
+				const DataModel::LayoutItem::LayoutPosition posZ) override;
+
 			void CounterState(const DataModel::Counter* const counter) override;
 			void ProgramValue(const CvNumber cv, const CvValue value) override;
 

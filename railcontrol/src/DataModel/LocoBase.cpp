@@ -497,16 +497,16 @@ namespace DataModel
 
 		trackFirst = newTrack;
 		routeFirst = route;
-		feedbackIdFirstReduced = FeedbackNone;
-		feedbackIdFirstCreep = FeedbackNone;
 		feedbackIdFirst = FeedbackNone;
-		feedbackIdReduced = routeFirst->GetFeedbackIdReduced();
-		reducedDelay = routeFirst->GetReducedDelay();
-		feedbackIdCreep = routeFirst->GetFeedbackIdCreep();
-		creepDelay = routeFirst->GetCreepDelay();
+		feedbackIdFirstCreep = FeedbackNone;
+		feedbackIdFirstReduced = FeedbackNone;
+		feedbackIdOver = routeFirst->GetFeedbackIdOver();
 		feedbackIdStop = routeFirst->GetFeedbackIdStop();
 		stopDelay = routeFirst->GetStopDelay();
-		feedbackIdOver = routeFirst->GetFeedbackIdOver();
+		feedbackIdCreep = routeFirst->GetFeedbackIdCreep();
+		creepDelay = routeFirst->GetCreepDelay();
+		feedbackIdReduced = routeFirst->GetFeedbackIdReduced();
+		reducedDelay = routeFirst->GetReducedDelay();
 
 		wait = routeFirst->GetWaitAfterRelease();
 
@@ -593,8 +593,11 @@ namespace DataModel
 		feedbackIdFirstReduced = feedbackIdReduced;
 		feedbackIdOver = routeSecond->GetFeedbackIdOver();
 		feedbackIdStop = routeSecond->GetFeedbackIdStop();
+		stopDelay = routeSecond->GetStopDelay();
 		feedbackIdCreep = routeSecond->GetFeedbackIdCreep();
+		creepDelay = routeSecond->GetCreepDelay();
 		feedbackIdReduced = routeSecond->GetFeedbackIdReduced();
+		reducedDelay = routeSecond->GetReducedDelay();
 
 		wait = routeSecond->GetWaitAfterRelease();
 
