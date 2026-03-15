@@ -498,7 +498,7 @@ int get_data(struct trigger_t *trigger, struct can_frame *frame) {
 	switch (trigger->fsm_state) {
 	case FSM_START:
 	    set_led_pattern(trigger, LED_ST_HB_FAST);
-	    trigger->loco_number = get_value((char *)trigger->data, " .wert=");
+	    trigger->loco_number = get_value((char *)trigger->data, ".wert=");
 	    if (!trigger->background && trigger->verbose)
 		printf("Number of new locos: %d\n", trigger->loco_number);
 	    if (trigger->loco_number) {
