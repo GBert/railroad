@@ -1,0 +1,22 @@
+#####################################################################
+
+This is the devcontainer for the OpenWRT SDK for SRSEII.
+The SDK will let you cross-compile and package code for the SRSEII.
+
+See http://lnxpps.de/can2udp/srseII/ for details about the hardware.
+See https://openwrt.org/docs/guide-developer/toolchain/using_the_sdk for information about general usage of the OpenWRT SDK.
+
+The SDK is located in the folder "/sdk".
+To build the package "can2udp", do the following:
+
+  cd /sdk
+  ./scripts/feeds install can2udp
+  make package/can2udp/compile -j
+
+You can then find the compiled package in ./bin/packages/mipsel_24kc/railroad/can2udp_2.62_mipsel_24kc.ipk
+
+If you want to manually cross-compile code for the target, set the environment variables STAGING_DIR, CC, CXX, LD (see .devcontainer/devcontainer.json for the values). Don't forget to unset them before going back to using the SDK, or you will see lots of really confusing errors.
+
+Happy Coding!
+
+#####################################################################
