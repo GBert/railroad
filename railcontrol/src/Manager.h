@@ -179,7 +179,7 @@ class Manager
 
 		bool LocoBaseFunctionState(const ControlType controlType,
 			const DataModel::ObjectIdentifier& locoBaseIdentifier,
-			const DataModel::LocoFunctionNr function,
+			const DataModel::LocoFunctionIcon icon,
 			const DataModel::LocoFunctionState state);
 
 		// multiple unit

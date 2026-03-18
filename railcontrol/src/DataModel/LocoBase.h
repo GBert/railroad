@@ -292,14 +292,17 @@ namespace DataModel
 				return matchKey;
 			}
 
-			DataModel::LocoFunctionNr GetFunctionNumberFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const;
+			inline DataModel::LocoFunctionNr GetFunctionNrFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const
+			{
+				return functions.GetFunctionNrFromFunctionIcon(icon);
+			}
 
-			DataModel::LocoFunctionIcon GetFunctionIcon(const DataModel::LocoFunctionNr nr) const
+			inline DataModel::LocoFunctionIcon GetFunctionIcon(const DataModel::LocoFunctionNr nr) const
 			{
 				return functions.GetFunctionIcon(nr);
 			}
 
-			DataModel::LocoFunctionType GetFunctionType(const DataModel::LocoFunctionNr nr) const
+			inline DataModel::LocoFunctionType GetFunctionType(const DataModel::LocoFunctionNr nr) const
 			{
 				return functions.GetFunctionType(nr);
 			}

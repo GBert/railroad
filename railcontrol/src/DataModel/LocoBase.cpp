@@ -1038,18 +1038,6 @@ namespace DataModel
 		releaseTrackQueue.EnqueueBack(removeTrack);
 	}
 
-	DataModel::LocoFunctionNr LocoBase::GetFunctionNumberFromFunctionIcon(const DataModel::LocoFunctionIcon icon) const
-	{
-		for (DataModel::LocoFunctionNr nr = 0; nr < NumberOfLocoFunctions; ++nr)
-		{
-			if (icon == functions.GetFunctionIcon(nr))
-			{
-				return nr;
-			}
-		}
-		return NumberOfLocoFunctions;
-	}
-
 	LocoBase& LocoBase::operator=(const Hardware::LocoCacheEntry& loco)
 	{
 		SetControlID(loco.GetControlID());

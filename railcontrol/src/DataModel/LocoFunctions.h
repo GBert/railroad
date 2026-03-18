@@ -199,7 +199,8 @@ namespace DataModel
 				Deserialize(serialized);
 			}
 
-			inline void SetFunctionState(const LocoFunctionNr nr, const LocoFunctionState state)
+			inline void SetFunctionState(const LocoFunctionNr nr,
+				const LocoFunctionState state)
 			{
 				if (nr >= NumberOfLocoFunctions)
 				{
@@ -284,6 +285,25 @@ namespace DataModel
 					return LocoFunctionTypeNone;
 				}
 				return entries[nr].type;
+			}
+
+			inline LocoFunctionNr GetFunctionNrFromFunctionIcon(const LocoFunctionIcon icon) const
+			{
+				if (icon < NumberOfLocoFunctions)
+				{
+					// icon is function number
+					return icon;
+				}
+				const LocoFunctionIcon realIcon = static_cast<LocoFunctionIcon>(icon - 256);
+				for (int i = 0; i < NumberOfLocoFunctions; ++i)
+				{
+					if (entries[i].icon == realIcon)
+					{
+						// icon is found in config of functions
+						return i;
+					}
+				}
+				return NumberOfLocoFunctions;
 			}
 
 		private:

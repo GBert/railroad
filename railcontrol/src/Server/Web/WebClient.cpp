@@ -1183,7 +1183,7 @@ namespace Server { namespace Web
 	void WebClient::HandleLocoFunction(const map<string, string>& arguments)
 	{
 		const LocoID locoID = Utils::Utils::GetIntegerMapEntry(arguments, "loco", LocoNone);
-		const DataModel::LocoFunctionNr function = Utils::Utils::GetIntegerMapEntry(arguments, "function", 0);
+		const DataModel::LocoFunctionIcon function = static_cast<LocoFunctionIcon>(Utils::Utils::GetIntegerMapEntry(arguments, "function", 0));
 		const DataModel::LocoFunctionState state = static_cast<DataModel::LocoFunctionState>(Utils::Utils::GetBoolMapEntry(arguments, "on"));
 
 		const ObjectIdentifier locoBaseIdentifier(WebClientStatic::LocoIdToObjectIdentifier(locoID));

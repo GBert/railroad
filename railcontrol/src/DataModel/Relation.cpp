@@ -101,16 +101,16 @@ namespace DataModel
 
 			case ObjectTypeLoco:
 			{
-				const DataModel::LocoFunctionNr nr = static_cast<DataModel::LocoFunctionNr>(ObjectID2());
+				const DataModel::LocoFunctionIcon icon = static_cast<DataModel::LocoFunctionIcon>(ObjectID2());
 				if (data > DataModel::LocoFunctionStateOn)
 				{
-					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, nr, DataModel::LocoFunctionStateOn);
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, icon, DataModel::LocoFunctionStateOn);
 					Utils::Utils::SleepForMilliseconds(static_cast<unsigned int>(data) * 100);
-					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, nr, DataModel::LocoFunctionStateOff);
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, icon, DataModel::LocoFunctionStateOff);
 				}
 				else
 				{
-					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, nr, static_cast<DataModel::LocoFunctionState>(data));
+					manager->LocoBaseFunctionState(ControlTypeInternal, locoBaseIdentifier, icon, static_cast<DataModel::LocoFunctionState>(data));
 				}
 				return true;
 			}

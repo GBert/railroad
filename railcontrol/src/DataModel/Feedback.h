@@ -34,6 +34,7 @@ class Manager;
 
 namespace DataModel
 {
+	class Route;
 	class Track;
 
 	enum FeedbackType : unsigned char
@@ -221,6 +222,10 @@ namespace DataModel
 
 		private:
 			void UpdateTrackState(const FeedbackState state);
+
+			static void ExecuteRouteStatic(DataModel::Route* route,
+				Logger::Logger* logger,
+				const DataModel::ObjectIdentifier objectIdentifier);
 
 			ControlID controlID;
 			FeedbackPin pin;

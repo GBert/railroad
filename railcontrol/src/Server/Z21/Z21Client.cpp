@@ -273,7 +273,7 @@ namespace Server { namespace Z21
 
 			case Z21Enums::DB0LocoFunction:
 			{
-				const DataModel::LocoFunctionNr nr = buffer[8] & 0x3F;
+				const DataModel::LocoFunctionIcon nr = static_cast<DataModel::LocoFunctionIcon>(buffer[8] & 0x3F);
 				const DataModel::LocoFunctionState on = static_cast<DataModel::LocoFunctionState>((buffer[8] >> 6) & 0x01);
 				manager.LocoBaseFunctionState(ControlTypeZ21Server, locoBaseIdentifier, nr, on);
 				return;

@@ -1072,7 +1072,7 @@ void Manager::LocoFunctionState(const ControlType controlType,
 	const ControlID controlID,
 	const Protocol protocol,
 	const Address address,
-	const DataModel::LocoFunctionNr function,
+	const LocoFunctionNr function,
 	const DataModel::LocoFunctionState state)
 {
 	LocoID locoID;
@@ -1487,7 +1487,7 @@ void Manager::LocoBasePublishOrientation(const ControlType controlType,
 
 bool Manager::LocoBaseFunctionState(const ControlType controlType,
 	const DataModel::ObjectIdentifier& locoBaseIdentifier,
-	const DataModel::LocoFunctionNr function,
+	const LocoFunctionIcon icon,
 	const DataModel::LocoFunctionState state)
 {
 	const ObjectType type = locoBaseIdentifier.GetObjectType();
@@ -1499,7 +1499,7 @@ bool Manager::LocoBaseFunctionState(const ControlType controlType,
 	Address address;
 	Address serverAddress;
 	std::string name;
-	DataModel::LocoFunctionState newState;
+	LocoFunctionNr function;
 	{
 		LocoBase* locoBase = nullptr;
 		std::lock_guard<std::mutex> guard(mutex);
@@ -1517,6 +1517,7 @@ bool Manager::LocoBaseFunctionState(const ControlType controlType,
 			return false;
 		}
 
+		function = locoBase->GetFunctionNrFromFunctionIcon(icon);
 		const bool change = LocoBaseFunctionState(locoBase, function, state);
 		if (!change)
 		{
@@ -1530,14 +1531,13 @@ bool Manager::LocoBaseFunctionState(const ControlType controlType,
 		address = locoBase->GetAddress();
 		serverAddress = locoBase->GetServerAddress();
 		name = locoBase->GetName();
-		newState = locoBase->GetFunctionState(function);
 	}
-	LocoBasePublishFunctionState(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, function, newState);
+	LocoBasePublishFunctionState(controlType, controlID, locoID, locoType, protocol, address, serverAddress, name, function, state);
 	return true;
 }
 
 bool Manager::LocoBaseFunctionState(LocoBase* locoBase,
-	const DataModel::LocoFunctionNr function,
+	const LocoFunctionNr function,
 	const DataModel::LocoFunctionState newState)
 {
 	const DataModel::LocoFunctionState oldState = locoBase->GetFunctionState(function);
@@ -1559,7 +1559,7 @@ void Manager::LocoBasePublishFunctionState(const ControlType controlType,
 	const Address address,
 	const Address serverAddress,
 	const string& name,
-	const DataModel::LocoFunctionNr function,
+	const LocoFunctionNr function,
 	const DataModel::LocoFunctionState state)
 {
 	std::lock_guard<std::mutex> guard(controlMutex);

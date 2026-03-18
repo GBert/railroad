@@ -99,7 +99,7 @@ namespace DataModel
 		LocoBase::SetFunctionState(nr, state);
 		for (auto slave : slaves)
 		{
-			manager->LocoBaseFunctionState(ControlTypeInternal, slave->ObjectIdentifier2(), nr, state);
+			manager->LocoBaseFunctionState(ControlTypeInternal, slave->ObjectIdentifier2(), static_cast<LocoFunctionIcon>(nr), state);
 			Utils::Utils::SleepForMilliseconds(10);
 		}
 	}
