@@ -113,113 +113,113 @@ enum {
 };
 
 const char *l1_token [] = {
-    " .dv",
-    " .funktionen",
-    " .funktionen_2",
-    " .fkt",
-    " .fkt2",
-    " .mfxAdr",
-    " .major=",
-    " .minor=",
-    " .id=",
-    " .uid=",
-    " .nickname=",
-    " .kennung=",
-    " .richtung=",
-    " .kanal=",
-    " .wert=",
-    " .nr=",
-    " .velocity=",
-    " .adresse=",
-    " .sid=",
-    " .mfxuid=",
-    " .symbol=",
-    " .icon=",
-    " .av=",
-    " .bv=",
-    " .volume=",
-    " .progmask=",
-    " .vmin=",
-    " .vmax=",
-    " .xprot=",
-    " .xprotokoll=",
-    " .stand=",
-    " .fahrt=",
-    " .tachomax=",
-    " .spm=",
-    " .ft=",
-    " .mfxtyp=",
-    " .name=",
-    " .vorname=",
-    " .typ=",
-    " .drehung=",
-    " .artikel=",
-    " .xoffset=",
-    " .yoffset=",
-    " .width=",
-    " .height=",
-    " .text=",
-    " .zustand=",
-    " .deviceId=",
-    " .inTraktion=",
-    " .decoder=",
-    " .dectyp=",
-    " .schaltzeit=",
-    " .stellung=",
-    " .ungerade=",
+    ".dv",
+    ".funktionen",
+    ".funktionen_2",
+    ".fkt",
+    ".fkt2",
+    ".mfxAdr",
+    ".major=",
+    ".minor=",
+    ".id=",
+    ".uid=",
+    ".nickname=",
+    ".kennung=",
+    ".richtung=",
+    ".kanal=",
+    ".wert=",
+    ".nr=",
+    ".velocity=",
+    ".adresse=",
+    ".sid=",
+    ".mfxuid=",
+    ".symbol=",
+    ".icon=",
+    ".av=",
+    ".bv=",
+    ".volume=",
+    ".progmask=",
+    ".vmin=",
+    ".vmax=",
+    ".xprot=",
+    ".xprotokoll=",
+    ".stand=",
+    ".fahrt=",
+    ".tachomax=",
+    ".spm=",
+    ".ft=",
+    ".mfxtyp=",
+    ".name=",
+    ".vorname=",
+    ".typ=",
+    ".drehung=",
+    ".artikel=",
+    ".xoffset=",
+    ".yoffset=",
+    ".width=",
+    ".height=",
+    ".text=",
+    ".zustand=",
+    ".deviceId=",
+    ".inTraktion=",
+    ".decoder=",
+    ".dectyp=",
+    ".schaltzeit=",
+    ".stellung=",
+    ".ungerade=",
     "\0"
 };
 
 /* TODO : use strlen macro */
-#define L1_DV_LENGTH		5
-#define L1_MAJOR_LENGTH		8
-#define L1_MINOR_LENGTH		8
-#define L1_ID_LENGTH		5
-#define L1_UID_LENGTH		6
-#define L1_NICKNAME_LENGTH	11
-#define L1_RECOGNITION_LENGTH	10
-#define L1_DIRECTION_LENGTH	11
-#define L1_CHANNEL_LENGTH	8
-#define L1_VALUE_LENGTH		7
-#define L1_NR_LENGTH		5
-#define L1_VELOCITY_LENGTH	11
-#define L1_ADDRESS_LENGTH	10
-#define L1_SID_LENGTH		6
-#define L1_MFXUID_LENGTH	9
-#define L1_SYMBOL_LENGTH	9
-#define L1_ICON_LENGTH		7
-#define L1_AV_LENGTH		5
-#define L1_BV_LENGTH		5
-#define L1_VOLUME_LENGTH	9
-#define L1_PROGMASK_LENGTH	11
-#define L1_VMIN_LENGTH		7
-#define L1_VMAX_LENGTH		7
-#define L1_XPROT_LENGTH		8
-#define L1_XPROTOCOL_LENGTH	13
-#define L1_LOCATION_LENGTH	8
-#define L1_JOURNEY_LENGTH	8
-#define L1_TMAX_LENGTH		11
-#define L1_SPM_LENGTH		6
-#define L1_FT_LENGTH		5
-#define L1_MFXTYPE_LENGTH	9
-#define L1_NAME_LENGTH		7
-#define L1_SURNAME_LENGTH	10
-#define L1_TYPE_LENGTH		6
-#define L1_ROTATION_LENGTH	10
-#define L1_ITEM_LENGTH		10
-#define L1_XOFFSET_LENGTH	10
-#define L1_YOFFSET_LENGTH	10
-#define L1_WIDTH_LENGTH		8
-#define L1_HEIGHT_LENGTH	9
-#define L1_TEXT_LENGTH		7
-#define L1_STATE_LENGTH		10
-#define L1_DEVICEID_LENGTH	11
-#define L1_INTRACTION_LENGTH	13
-#define L1_DECODER_LENGTH	10
-#define L1_DECODER_TYPE_LENGTH	9
-#define L1_SWITCHTIME_LENGTH	13
-#define L1_POSITION_LENGTH	11
-#define L1_ODD_LENGTH		11
+#define L1_DV_LENGTH		4
+#define L1_MAJOR_LENGTH		7
+#define L1_MINOR_LENGTH		7
+#define L1_ID_LENGTH		4
+#define L1_UID_LENGTH		5
+#define L1_NICKNAME_LENGTH	10
+#define L1_RECOGNITION_LENGTH	9
+#define L1_DIRECTION_LENGTH	10
+#define L1_CHANNEL_LENGTH	7
+#define L1_VALUE_LENGTH		6
+#define L1_NR_LENGTH		4
+#define L1_VELOCITY_LENGTH	10
+#define L1_ADDRESS_LENGTH	9
+#define L1_SID_LENGTH		5
+#define L1_MFXUID_LENGTH	8
+#define L1_SYMBOL_LENGTH	8
+#define L1_ICON_LENGTH		6
+#define L1_AV_LENGTH		4
+#define L1_BV_LENGTH		4
+#define L1_VOLUME_LENGTH	8
+#define L1_PROGMASK_LENGTH	10
+#define L1_VMIN_LENGTH		6
+#define L1_VMAX_LENGTH		6
+#define L1_XPROT_LENGTH		7
+#define L1_XPROTOCOL_LENGTH	12
+#define L1_LOCATION_LENGTH	7
+#define L1_JOURNEY_LENGTH	7
+#define L1_TMAX_LENGTH		10
+#define L1_SPM_LENGTH		5
+#define L1_FT_LENGTH		4
+#define L1_MFXTYPE_LENGTH	8
+#define L1_NAME_LENGTH		6
+#define L1_SURNAME_LENGTH	9
+#define L1_TYPE_LENGTH		5
+#define L1_ROTATION_LENGTH	9
+#define L1_ITEM_LENGTH		9
+#define L1_XOFFSET_LENGTH	9
+#define L1_YOFFSET_LENGTH	9
+#define L1_WIDTH_LENGTH		7
+#define L1_HEIGHT_LENGTH	8
+#define L1_TEXT_LENGTH		6
+#define L1_STATE_LENGTH		9
+#define L1_DEVICEID_LENGTH	10
+#define L1_INTRACTION_LENGTH	12
+#define L1_DECODER_LENGTH	9
+#define L1_DECODER_TYPE_LENGTH	8
+#define L1_SWITCHTIME_LENGTH	12
+#define L1_POSITION_LENGTH	10
+#define L1_ODD_LENGTH		10
 
 const char *track_types[] = {
     "leer",
@@ -398,43 +398,43 @@ enum {
 };
     
 const char *l2_token [] = {
-    " ..nr=",
-    " ..typ=",
-    " ..typ2=",
-    " ..dauer=",
-    " ..dauer2=",
-    " ..wert=",
-    " ..wert2=",
-    " ..target=",
-    " ..name",
-    " ..addr=",
-    " ..xcel=",
-    " ..speedtable=",
-    " ..volume=",
-    " ..numfunc=",
-    " ..func=",
-    " ..vorwaerts=",
-    " ..rueckwaerts=",
+    "..nr=",
+    "..typ=",
+    "..typ2=",
+    "..dauer=",
+    "..dauer2=",
+    "..wert=",
+    "..wert2=",
+    "..target=",
+    "..name",
+    "..addr=",
+    "..xcel=",
+    "..speedtable=",
+    "..volume=",
+    "..numfunc=",
+    "..func=",
+    "..vorwaerts=",
+    "..rueckwaerts=",
     "\0"
 };
 
 /* TODO : use strlen macro */
-#define L2_NUMBER_LENGTH	6
-#define L2_TYPE_LENGTH		7
-#define L2_TYPE2_LENGTH		8
-#define L2_DURATION_LENGTH	9
-#define L2_DURATION2_LENGTH	10
-#define L2_VALUE_LENGTH		8
-#define L2_VALUE2_LENGTH	9
-#define L2_TARGET_LENGTH	10
-#define L2_NAME_LENGTH		7
-#define L2_ADDRESS_LENGTH	8
-#define L2_XCEL_LENGTH		8
-#define L2_SPEEDTABLE_LENGTH	14
-#define L2_VOLUME_LENGTH	10
-#define L2_NUMFUNCTION_LENGTH	11
-#define L2_FUNCTION_LENGTH	8
-#define L2_FOWARD_LENGTH	13
-#define L2_BACKWARD_LENGTH	15
+#define L2_NUMBER_LENGTH	5
+#define L2_TYPE_LENGTH		6
+#define L2_TYPE2_LENGTH		7
+#define L2_DURATION_LENGTH	8
+#define L2_DURATION2_LENGTH	9
+#define L2_VALUE_LENGTH		7
+#define L2_VALUE2_LENGTH	8
+#define L2_TARGET_LENGTH	9
+#define L2_NAME_LENGTH		6
+#define L2_ADDRESS_LENGTH	7
+#define L2_XCEL_LENGTH		7
+#define L2_SPEEDTABLE_LENGTH	13
+#define L2_VOLUME_LENGTH	9
+#define L2_NUMFUNCTION_LENGTH	10
+#define L2_FUNCTION_LENGTH	7
+#define L2_FOWARD_LENGTH	12
+#define L2_BACKWARD_LENGTH	14
 
 #endif /* _CS2_TOKEN_H_ */
