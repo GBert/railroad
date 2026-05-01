@@ -97,25 +97,44 @@ char *berechne_messwert(struct messwert_t *c_messwert, uint16_t wert) {
     return s;
 }
 
-char *getLoco(uint8_t * data, char *s) {
+char *getDesc(uint8_t * data, char *s) {
     uint16_t locID = be16(&data[2]);
     char prot[32];
     int addrs;
 
+    if (data[0] || data[1]) {
+	    sprintf(s, "UID 0x%02X%02X%04X", data[0], data[1], locID);
+	    return s;
+    }
     memset(prot, 0, sizeof(prot));
 
-    if (locID <= 0x03ff) {
-	strncpy(prot, " mm-", sizeof(prot));
-	addrs = locID;
-    } else if (locID >= 0x4000 && locID < 0xC000) {
-	strncpy(prot, "mfx-", sizeof(prot));
+    if (locID >= 0x4000 && locID < 0x8000) {
+	strncpy(prot, "Lok mfx-", sizeof(prot));
 	addrs = locID - 0x4000;
+    } else if (locID >= 0x8000 && locID < 0xC000) {
+	strncpy(prot, "Lok SX2-", sizeof(prot));
+	addrs = locID - 0x8000;
     } else if (locID >= 0xC000) {
-	strncpy(prot, "dcc-", sizeof(prot));
+	strncpy(prot, "Lok dcc-", sizeof(prot));
 	addrs = locID - 0xC000;
-    } else {
+    } else switch (data[2] & 0xFC) {
+    case 0x00:		// MM1,2 Loks und Funktionsdecoder (20 & 40 kHz, 80 & 255 Adressen)
+	strncpy(prot, "Lok mm-", sizeof(prot));
+	addrs = locID;
+	break;
+    case 0x30:		// MM1,2 Zubehörartikeldecoder (40 kHz, 320 & 1024 Adressen)
+	strncpy(prot, "Zubehör mm-", sizeof(prot));
+	addrs = locID - 0x3000;
+	break;
+	// TODO: add an additional 2048 address block for Extended Accessory Decoders
+    case 0x38:
+    case 0x3C:		// DCC-Zubehörartikel (2048 Adressen)
+	strncpy(prot, "Zubehör dcc-", sizeof(prot));
+	addrs = locID - 0x3800;
+	break;
+    default:
 	strncpy(prot, "unbekannt-", sizeof(prot));
-	addrs = 0;
+	addrs = locID;
     }
 
     sprintf(s, "%s%d", prot, addrs);
@@ -273,7 +292,6 @@ void decode_cs2_can_channels(struct can_frame *frame) {
     uint16_t paket;
     uint8_t n_kanaele;
 
-    paket = 0;
     uid = be32(frame->data);
     if (frame->can_dlc == 5) {
 	kanal = frame->data[4];
@@ -389,6 +407,39 @@ void decode_cs2_config_data(struct can_frame *frame, int expconf) {
     }
 }
 
+static void decode_event(uint8_t type)
+{
+	    switch(type) {
+	    case 0x00:
+		printf("Pin ignorieren");
+		break;
+	    case 0x01:
+		printf("Pin lesen");
+		break;
+	    case 0x02:
+		printf("Pinänderung melden");
+		break;
+	    case 0x03:
+		printf("Pin 0->1 melden");
+		break;
+	    case 0x04:
+		printf("Pin 1->0 melden");
+		break;
+	    case 0x05:
+		printf("Pin 0->1 zählen");
+		break;
+	    case 0x06:
+		printf("Pin-Zeitmessung");
+		break;
+	    case 0xFE:
+		printf("Pinstatus rücksetzen");
+		break;
+	    default:
+		printf("Parameter %d", type);
+		break;
+	    }
+}
+
 void decode_cs2_s88(struct can_frame *frame) {
     uint16_t kenner, kontakt;
 
@@ -397,28 +448,19 @@ void decode_cs2_s88(struct can_frame *frame) {
 
     if (frame->can_id & 0x00010000) {
 	if (frame->can_dlc == 8)
-	    printf("S88 Event Kennung %d Kontakt %d Zustand alt %d Zustand neu %d Zeit %d",
+	    printf("S88 Event Kennung %d Kontakt %d Zustand alt %d, neu %d Zeit %d",
 		    kenner, kontakt, frame->data[4], frame->data[5], be16(&frame->data[6]));
 	printf("\n");
     } else {
 	if (frame->can_dlc == 4)
-	    printf("S88 Event Kennung %d Kontakt %d", kenner, kontakt);
-	else if (frame->can_dlc == 5)
-	    printf("S88 Event Kennung %d Kontakt %d Parameter %d", kenner, kontakt, frame->data[4]);
+	    printf("S88 Event Kennung %d Kontakt %d abfragen", kenner, kontakt);
+	else if (frame->can_dlc == 5) {
+	    printf("S88 Event Kennung %d Kontakt %d ", kenner, kontakt);
+	    decode_event(frame->data[4]);
+	}
 	else if (frame->can_dlc == 7) {
-	    printf("S88 Event Blockmodus Kennung %d Kontakt Start %d Kontakt Ende %d ", kenner, kontakt, be16(&frame->data[4]));
-	    /* TODO: Parameter */
-	    switch(frame->data[6]) {
-	    case 0x00:
-		printf("Pin zurück setzen");
-		break;
-	    case 0x01:
-		printf("Pin lesen");
-		break;
-	    default:
-		printf("Parameter %d", frame->data[6]);
-		break;
-	    }
+	    printf("S88 Event Blockmodus Kennung %d Kontakte %d bis %d ", kenner, kontakt, be16(&frame->data[4]));
+	    decode_event(frame->data[6]);
 	}
 	printf("\n");
     }
@@ -478,15 +520,15 @@ void decode_cs2_system(struct can_frame *frame) {
     case 0x03:
 	printf("System: ");
 	if (uid)
-	    printf("Lok %s Nothalt", getLoco(frame->data, s));
+	    printf("%s Nothalt", getDesc(frame->data, s));
 	else
 	    writeRed("Nothalt alle Loks");
 	break;
     case 0x04:
-	printf("System: Lok %s Zyklus Ende", getLoco(frame->data, s));
+	printf("System: %s Zyklus Ende", getDesc(frame->data, s));
 	break;
     case 0x05:
-	printf("System: Lok %s Gleisprotokoll: %d", getLoco(frame->data, s), frame->data[5]);
+	printf("System: %s Gleisunterprotokoll: %d", getDesc(frame->data, s), frame->data[5]);
 	break;
     case 0x06:
 	wert = be16(&frame->data[5]);
@@ -532,10 +574,10 @@ void decode_cs2_system(struct can_frame *frame) {
 		printf("System: Statusabfrage UID 0x%08X Kanal %d Messwert", uid, frame->data[5]);
 		struct messwert_t *c_messwert = suche_messwert(messwert_knoten, uid, frame->data[5]);
 		if (c_messwert) {
-		    char *s = berechne_messwert(c_messwert, wert);
-		    if (s) {
-			printf(" %s", s);
-			free(s);
+		    char *m = berechne_messwert(c_messwert, wert);
+		    if (m) {
+			printf(" %s", m);
+			free(m);
 		    }
 		} else {
 		    printf(" 0x%04X", wert);

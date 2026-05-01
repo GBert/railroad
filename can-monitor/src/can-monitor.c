@@ -75,7 +75,7 @@ void INThandler(int sig) {
 
 void print_usage(char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.21\n\n");
+    fprintf(stderr, "   Version 5.22\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -304,9 +304,9 @@ void decode_frame(struct can_frame *frame) {
 	v = be16(&frame->data[4]);
 	v = v / 10;
 	if (frame->can_dlc == 4)
-	    printf("Lok %s Abfrage Fahrstufe", getLoco(frame->data, s));
+	    printf("%s Abfrage Fahrstufe", getDesc(frame->data, s));
 	else if (frame->can_dlc == 6)
-	    printf("Lok %s Geschwindigkeit: %3.1f", getLoco(frame->data, s), v);
+	    printf("%s Geschwindigkeit: %3.1f", getDesc(frame->data, s), v);
 	printf("\n");
 	break;
     /* Lok Richtung */
@@ -314,7 +314,7 @@ void decode_frame(struct can_frame *frame) {
     case 0x0B:
 	memset(s, 0, sizeof(s));
 
-	printf("Lok %s ", getLoco(frame->data, s));
+	printf("%s ", getDesc(frame->data, s));
 	if (frame->can_dlc == 4) {
 	    printf("Richtung wird abgefragt");
 	} else if (frame->can_dlc == 5) {
@@ -342,12 +342,12 @@ void decode_frame(struct can_frame *frame) {
     case 0x0C:
     case 0x0D:
 	if (frame->can_dlc == 5)
-	    printf("Lok %s Funktion %d", getLoco(frame->data, s), frame->data[4]);
+	    printf("%s Funktion %d", getDesc(frame->data, s), frame->data[4]);
 	else if (frame->can_dlc == 6)
-	    printf("Lok %s Funktion %d Wert %d", getLoco(frame->data, s), frame->data[4], frame->data[5]);
+	    printf("%s Funktion %d Wert %d", getDesc(frame->data, s), frame->data[4], frame->data[5]);
 	else if (frame->can_dlc == 7)
-	    printf("Lok %s Funktion %d Wert %d Funktionswert %d",
-		   getLoco(frame->data, s), frame->data[4], frame->data[5], be16(&frame->data[6]));
+	    printf("%s Funktion %d Wert %d Funktionswert %d",
+		   getDesc(frame->data, s), frame->data[4], frame->data[5], be16(&frame->data[6]));
 	printf("\n");
 	break;
     /* Read Config */
@@ -355,8 +355,8 @@ void decode_frame(struct can_frame *frame) {
 	if (frame->can_dlc == 7) {
 	    cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	    cv_index = frame->data[4] >> 2;
-	    printf("Read Config Lok %s CV Nummer %u Index %u Anzahl %u",
-		   getLoco(frame->data, s), cv_number, cv_index, frame->data[6]);
+	    printf("Read Config %s CV Nummer %u Index %u Anzahl %u",
+		   getDesc(frame->data, s), cv_number, cv_index, frame->data[6]);
 	}
 	printf("\n");
 	break;
@@ -364,28 +364,46 @@ void decode_frame(struct can_frame *frame) {
 	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	cv_index = frame->data[4] >> 2;
 	if (frame->can_dlc == 6)
-	    printf("Read Config Lok %s CV Nummer %u Index %u", getLoco(frame->data, s), cv_number, cv_index);
+	    printf("Read Config %s CV Nummer %u Index %u fehlerhaft", getDesc(frame->data, s), cv_number, cv_index);
 	if (frame->can_dlc == 7)
-	    printf("Read Config Lok %s CV Nummer %u Index %u Wert %u",
-		   getLoco(frame->data, s), cv_number, cv_index, frame->data[6]);
+	    printf("Read Config %s CV Nummer %u Index %u Wert %u",
+		   getDesc(frame->data, s), cv_number, cv_index, frame->data[6]);
 	printf("\n");
 	break;
     /* Write Config */
     case 0x10:
-    case 0x11:
-	/* TODO */
 	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	cv_index = frame->data[4] >> 2;
-	if (frame->can_dlc == 8)
-	    printf("Write Config Lok %s CV Nummer %u Index %u Wert %u Ctrl 0x%02X\n", getLoco(frame->data, s),
+	if (frame->can_dlc == 8) {
+	    printf("Write Config %s CV Nummer %u Index %u Wert %u Ctrl 0x%02X:", getDesc(frame->data, s),
 		   cv_number, cv_index, frame->data[6], frame->data[7]);
+		if (frame->data[7] & 0x80) printf(" PRGL");
+		if (frame->data[7] & 0x40) printf(" MULTI");
+		if (frame->data[7] & 0x20) printf(" BIT");
+		if (frame->data[7] & 0x10) printf(" REG");
+	}
 	else
-	    printf("Write Config Lok %s Befehl unbekannt\n", getLoco(frame->data, s));
+	    printf("Write Config %s Befehl unbekannt\n", getDesc(frame->data, s));
+	printf("\n");
+	break;
+    case 0x11:
+	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
+	cv_index = frame->data[4] >> 2;
+	if (frame->can_dlc == 8) {
+	    printf("Write Config %s CV Nummer %u Index %u Wert %u Rslt 0x%02X:", getDesc(frame->data, s),
+		   cv_number, cv_index, frame->data[6], frame->data[7]);
+		if (frame->data[7] & 0x80) printf(" WR_OK");
+		if (frame->data[7] & 0x40) printf(" VER_OK");
+	}
+	else
+	    printf("Write Config %s Befehl unbekannt\n", getDesc(frame->data, s));
+	printf("\n");
 	break;
     /* Zubehör schalten */
     case 0x16:
     case 0x17:
 	uid = be32(frame->data);
+	// TODO: add an additional 2048 address block for Extended Accessory Decoders
 	if (frame->can_dlc >= 6) {
 	    if ((uid > 0x2FFF) && (uid < 0x3400))
 		printf("Magnetartikel MM1 ID %u Ausgang %u Strom %u", uid - 0x2FFF, frame->data[4], frame->data[5]);
@@ -543,8 +561,8 @@ void decode_frame(struct can_frame *frame) {
 	    kenner = be16(&frame->data[4]);
 	    printf("Connect6021 UID 0x%08X mit Kenner 0x%04X\n", uid, kenner);
 	} else if (frame->can_dlc == 5) {
-	    printf("Connect6021 Config: Lok %s gesteuert via Adresse %02u\n",
-			getLoco(frame->data, s), frame->data[4]);
+	    printf("Connect6021 Config: %s gesteuert via Adresse %02u\n",
+			getDesc(frame->data, s), frame->data[4]);
 	} else {
 	    cdb_extension_wc(frame);
 	}
@@ -558,8 +576,8 @@ void decode_frame(struct can_frame *frame) {
 	    printf("Automatik schalten: ID 0x%04X Funktion 0x%04X Stellung 0x%02X Parameter 0x%02X\n",
 		   kenner, function, frame->data[4], frame->data[5]);
 	if (frame->can_dlc == 8)
-	    printf("Automatik schalten: ID 0x%04X Funktion 0x%04X Lok %s\n", kenner, function,
-		   getLoco(&frame->data[4], s));
+	    printf("Automatik schalten: ID 0x%04X Funktion 0x%04X %s\n", kenner, function,
+		   getDesc(&frame->data[4], s));
 	break;
     /* Blocktext zuordnen */
     case 0x62:
@@ -569,7 +587,7 @@ void decode_frame(struct can_frame *frame) {
 	if (frame->can_dlc == 4)
 	    printf("Blocktext zuordnen: ID 0x%04X Funktion 0x%04X\n", kenner, function);
 	if (frame->can_dlc == 8)
-	    printf("Blocktext zuordnen: ID 0x%04X Funktion 0x%04X Lok %s\n", kenner, function, getLoco(&frame->data[4], s));
+	    printf("Blocktext zuordnen: ID 0x%04X Funktion 0x%04X %s\n", kenner, function, getDesc(&frame->data[4], s));
 	break;
     case 0x64:
     case 0x65:
