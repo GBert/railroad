@@ -34,13 +34,13 @@ struct messwert_t *a_messwert = NULL;
 struct knoten *messwert_knoten = NULL;
 unsigned char channel_buffer[MAX_PAKETE * 8];
 
-char *next_string(char *p) {
+static char *next_string(char *p) {
     /* TODO: range check */
     while (*p++) ;
     return p++;
 }
 
-int insert_right(struct knoten *liste, void *element) {
+static int insert_right(struct knoten *liste, void *element) {
     struct knoten *tmp = liste;
     struct knoten *node = calloc(1, sizeof(struct knoten));
     if (node == NULL) {
@@ -65,7 +65,7 @@ void print_llist(struct knoten *liste) {
     }
 }
 
-struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t index) {
+static struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t index) {
     struct knoten *tmp = liste;
     struct messwert_t *messwert_tmp;
 
@@ -86,7 +86,7 @@ struct messwert_t *suche_messwert(struct knoten *liste, uint32_t uid, uint8_t in
     return NULL;
 }
 
-char *berechne_messwert(struct messwert_t *c_messwert, uint16_t wert) {
+static char *berechne_messwert(struct messwert_t *c_messwert, uint16_t wert) {
     float value;
     char *s = NULL;
 
@@ -238,7 +238,7 @@ void print_measure_data(struct messwert_t *messwert) {
 }
 #endif
 
-void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int messwerte) {
+static void decode_cs2_channel_data(unsigned char *buffer, uint32_t uid, int kanal, int messwerte) {
     char *p;
 
     /* TODO: still not all values are kept */

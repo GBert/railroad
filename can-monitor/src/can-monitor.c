@@ -67,13 +67,13 @@ static char *F_N_UDP_FORMAT_STRG = "  UDP  0x%08X  [%d]";
 static char *F_N_TCP_FORMAT_STRG = "  TCP  0x%08X  [%d]";
 static char *F_N_SFF_FORMAT_STRG = "  CAN  <S>  0x%03X  [%d]";
 
-void INThandler(int sig) {
+static void INThandler(int sig) {
     signal(sig, SIG_IGN);
     fputs(RESET, stdout);
     exit(0);
 }
 
-void print_usage(char *prg) {
+static void print_usage(const char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
     fprintf(stderr, "   Version 5.22\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
@@ -87,9 +87,9 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -h                show this help\n\n");
 }
 
-struct timeval time_stamp(char *timestamp) {
+static struct timeval time_stamp(char *timestamp) {
     struct timeval tv;
-    struct tm *tm;
+    const struct tm *tm;
 
     gettimeofday(&tv, NULL);
     tm = localtime(&tv.tv_sec);
@@ -98,19 +98,19 @@ struct timeval time_stamp(char *timestamp) {
     return tv;
 }
 
-void frame_to_can(unsigned char *netframe, struct can_frame *frame) {
+static void frame_to_can(unsigned char *netframe, struct can_frame *frame) {
     frame->can_id = be32(netframe);
     frame->can_dlc = netframe[4];
     memcpy(&frame->data, &netframe[5], 8);
 }
 
-void canframe_to_can(unsigned char *netframe, struct can_frame *frame) {
+static void canframe_to_can(unsigned char *netframe, struct can_frame *frame) {
     frame->can_id = le32(netframe);
     frame->can_dlc = netframe[4];
     memcpy(&frame->data, &netframe[8], 8);
 }
 
-void ascii_to_can(char *s, struct can_frame *frame) {
+static void ascii_to_can(const char *s, struct can_frame *frame) {
     int i;
     unsigned char d[13];
 
@@ -120,7 +120,7 @@ void ascii_to_can(char *s, struct can_frame *frame) {
     frame_to_can(d, frame);
 }
 
-void slcan_to_can(char *s, struct can_frame *frame) {
+static void slcan_to_can(const char *s, struct can_frame *frame) {
     int i;
     unsigned int dat;
 
@@ -132,7 +132,7 @@ void slcan_to_can(char *s, struct can_frame *frame) {
     }
 }
 
-void candump_to_can(char *s, struct can_frame *frame) {
+static void candump_to_can(char *s, struct can_frame *frame) {
     unsigned int i, dat;
     char *candata;
 
@@ -156,7 +156,7 @@ void candump_to_can(char *s, struct can_frame *frame) {
     }
 }
 
-int print_can_frame(char *format_string, struct can_frame *frame) {
+static int print_can_frame(const char *format_string, const struct can_frame *frame) {
     int i;
     if (frame->can_dlc > 8) {
 	printf(RED " Invalid DLC %d found\n" RESET, frame->can_dlc);
@@ -189,7 +189,7 @@ int print_can_frame(char *format_string, struct can_frame *frame) {
     return 0;
 }
 
-void print_ascii_data(struct can_frame *frame) {
+static void print_ascii_data(const struct can_frame *frame) {
     int i;
 
     printf("  '");
@@ -202,7 +202,7 @@ void print_ascii_data(struct can_frame *frame) {
     printf("'\n");
 }
 
-void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame *frame) {
+static void write_candumpfile(FILE *fp, struct timeval tv, const char *name, const struct can_frame *frame) {
 
     fprintf(fp, "(%ld.%06ld) %s ", tv.tv_sec, tv.tv_usec, name);
     if (frame->can_id & (CAN_EFF_FLAG | CAN_ERR_FLAG)) {
@@ -220,7 +220,7 @@ void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame
     fprintf(fp, "\n");
 }
 
-void decode_frame(struct can_frame *frame) {
+static void decode_frame(struct can_frame *frame) {
     uint32_t function, uid, cv_number, cv_index;
     uint16_t kenner;
     char s[32];
@@ -609,7 +609,7 @@ void decode_frame(struct can_frame *frame) {
     }
 }
 
-void analyze_frame(struct can_frame *frame) {
+static void analyze_frame(struct can_frame *frame) {
     if (frame->can_id & CAN_EFF_FLAG) {	/* decode only EFF frames */
 	print_can_frame(F_N_CAN_FORMAT_STRG, frame);
 	if (check_cs1_frame(frame->can_id))
@@ -747,7 +747,7 @@ int main(int argc, char **argv) {
 	char can_string[MAXSIZE];
 	char datum[MAXSIZE];
 	size_t size = MAXSIZE;
-	char *pos_r, *pos_w, *pos_0;
+	const char *pos_r, *pos_w, *pos_0;
 	struct can_frame aframe;
 	int date, time, milli, slcan_format = 0;
 
@@ -814,7 +814,7 @@ int main(int argc, char **argv) {
 	const unsigned char *packet;
 	struct pcap_pkthdr header;
 	struct ip *ip_hdr;
-	struct tm *tm;
+	const struct tm *tm;
 	uint16_t sport, dport;
 	memset(timestamp, 0, sizeof(timestamp));
 
