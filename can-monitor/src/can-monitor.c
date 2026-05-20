@@ -375,12 +375,18 @@ static void decode_frame(struct can_frame *frame) {
 	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	cv_index = frame->data[4] >> 2;
 	if (frame->can_dlc == 8) {
-	    printf("Write Config %s CV Nummer %u Index %u Wert %u Ctrl 0x%02X:", getDesc(frame->data, s),
-		   cv_number, cv_index, frame->data[6], frame->data[7]);
-		if (frame->data[7] & 0x80) printf(" PRGL");
+		if (frame->data[7] & 0x10)
+			printf("Write Config %s REG Nummer %u Wert %u Ctrl 0x%02X",
+				getDesc(frame->data, s), cv_number, frame->data[6], frame->data[7]);
+		else {
+	    	printf("Write Config %s CV Nummer %u Index %u ", getDesc(frame->data, s), cv_number, cv_index);
+			if (frame->data[7] & 0x20)
+			printf("BIT %u -> %u", frame->data[6] & 7, (frame->data[6] >> 4) & 1);
+	    	else
+			printf("Wert %u Ctrl 0x%02X", frame->data[6], frame->data[7]);
+		}
+		if (frame->data[7] & 0x80) printf(" POM");
 		if (frame->data[7] & 0x40) printf(" MULTI");
-		if (frame->data[7] & 0x20) printf(" BIT");
-		if (frame->data[7] & 0x10) printf(" REG");
 	}
 	else
 	    printf("Write Config %s Befehl unbekannt\n", getDesc(frame->data, s));
@@ -390,7 +396,7 @@ static void decode_frame(struct can_frame *frame) {
 	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	cv_index = frame->data[4] >> 2;
 	if (frame->can_dlc == 8) {
-	    printf("Write Config %s CV Nummer %u Index %u Wert %u Rslt 0x%02X:", getDesc(frame->data, s),
+	    printf("Write Config %s CV Nummer %u Index %u Wert %u Rslt 0x%02X", getDesc(frame->data, s),
 		   cv_number, cv_index, frame->data[6], frame->data[7]);
 		if (frame->data[7] & 0x80) printf(" WR_OK");
 		if (frame->data[7] & 0x40) printf(" VER_OK");
