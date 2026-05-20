@@ -6,9 +6,9 @@
 #include "can-monitor.h"
 #include "tools.h"
 
-#define ADDR(x) (be16(&data[x]) & 0x3FFF)
+#define ADDR(x) ((unsigned) be16(&data[x]) & 0x3FFF)
 
-void z21_conf_info(unsigned char *data, int datsize) {
+void z21_conf_info(const unsigned char *data, int datsize) {
     int show = datsize;
     if (show > 16)
 	show = 16;
@@ -29,7 +29,7 @@ void z21_conf_info(unsigned char *data, int datsize) {
     printf("'\n");
 }
 
-void z21_comm_ext(char *timestamp, int source, unsigned char *data, int datsize) {
+void z21_comm_ext(const char *timestamp, int source, unsigned char *data, int datsize) {
     while (datsize >= 4) {
 	int datlen = le16(&data[0]);
 	int header = le16(&data[2]);

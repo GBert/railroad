@@ -46,7 +46,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#include <sys/socket.h> /* for sa_family_t */
 #include <linux/can.h>
 #include <linux/can/error.h>
 
@@ -125,7 +124,7 @@ unsigned char asc2nibble(char c) {
 
 int hexstring2data(char *arg, unsigned char *data, int maxdlen) {
 
-	int len = strlen(arg);
+	int len = (int) strlen(arg);
 	int i;
 	unsigned char tmp;
 
@@ -160,7 +159,7 @@ int parse_canframe(char *cs, struct canfd_frame *cf) {
 	int ret = CAN_MTU;
 	unsigned char tmp;
 
-	len = strlen(cs);
+	len = (int) strlen(cs);
 	//printf("'%s' len %d\n", cs, len);
 
 	memset(cf, 0, sizeof(*cf)); /* init CAN FD frame, e.g. LEN = 0 */
@@ -500,7 +499,7 @@ static const char *protocol_violation_locations[] = {
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
-static int snprintf_error_data(char *buf, size_t len, uint8_t err,
+static int snprintf_error_data(char *buf, int len, uint8_t err,
 			       const char **arr, int arr_len)
 {
 	int i, n = 0, count = 0;
@@ -520,14 +519,14 @@ static int snprintf_error_data(char *buf, size_t len, uint8_t err,
 	return n;
 }
 
-static int snprintf_error_lostarb(char *buf, size_t len, const struct canfd_frame *cf)
+static int snprintf_error_lostarb(char *buf, int len, const struct canfd_frame *cf)
 {
 	if (len <= 0)
 		return 0;
 	return snprintf(buf, len, "{at bit %d}", cf->data[0]);
 }
 
-static int snprintf_error_ctrl(char *buf, size_t len, const struct canfd_frame *cf)
+static int snprintf_error_ctrl(char *buf, int len, const struct canfd_frame *cf)
 {
 	int n = 0;
 
@@ -543,7 +542,7 @@ static int snprintf_error_ctrl(char *buf, size_t len, const struct canfd_frame *
 	return n;
 }
 
-static int snprintf_error_prot(char *buf, size_t len, const struct canfd_frame *cf)
+static int snprintf_error_prot(char *buf, int len, const struct canfd_frame *cf)
 {
 	int n = 0;
 
