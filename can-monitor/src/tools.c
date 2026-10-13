@@ -15,19 +15,19 @@
 #include "zlib.h"
 #include "can-monitor.h"
 
-uint16_t be16(uint8_t *u) {
+uint16_t be16(const uint8_t *u) {
     return (u[0] << 8) | u[1];
 }
 
-uint16_t le16(uint8_t *u) {
+uint16_t le16(const uint8_t *u) {
     return u[0] | (u[1] << 8);
 }
 
-uint32_t be32(uint8_t *u) {
+uint32_t be32(const uint8_t *u) {
     return (u[0] << 24) | (u[1] << 16) | (u[2] << 8) | u[3];
 }
 
-uint32_t le32(uint8_t *u) {
+uint32_t le32(const uint8_t *u) {
     return (u[3] << 24) | (u[2] << 16) | (u[1] << 8) | u[0];
 }
 

@@ -67,15 +67,15 @@ static char *F_N_UDP_FORMAT_STRG = "  UDP  0x%08X  [%d]";
 static char *F_N_TCP_FORMAT_STRG = "  TCP  0x%08X  [%d]";
 static char *F_N_SFF_FORMAT_STRG = "  CAN  <S>  0x%03X  [%d]";
 
-void INThandler(int sig) {
+static void INThandler(int sig) {
     signal(sig, SIG_IGN);
     fputs(RESET, stdout);
     exit(0);
 }
 
-void print_usage(char *prg) {
+static void print_usage(const char *prg) {
     fprintf(stderr, "\nUsage: %s -i <can|net interface>\n", prg);
-    fprintf(stderr, "   Version 5.21\n\n");
+    fprintf(stderr, "   Version 5.22\n\n");
     fprintf(stderr, "         -i <can|net int>  CAN or network interface - default can0\n");
     fprintf(stderr, "         -r <pcap file>    read PCAP file instead from CAN socket\n");
     fprintf(stderr, "         -s                select only network internal frames\n");
@@ -87,9 +87,9 @@ void print_usage(char *prg) {
     fprintf(stderr, "         -h                show this help\n\n");
 }
 
-struct timeval time_stamp(char *timestamp) {
+static struct timeval time_stamp(char *timestamp) {
     struct timeval tv;
-    struct tm *tm;
+    const struct tm *tm;
 
     gettimeofday(&tv, NULL);
     tm = localtime(&tv.tv_sec);
@@ -98,19 +98,19 @@ struct timeval time_stamp(char *timestamp) {
     return tv;
 }
 
-void frame_to_can(unsigned char *netframe, struct can_frame *frame) {
+static void frame_to_can(unsigned char *netframe, struct can_frame *frame) {
     frame->can_id = be32(netframe);
     frame->can_dlc = netframe[4];
     memcpy(&frame->data, &netframe[5], 8);
 }
 
-void canframe_to_can(unsigned char *netframe, struct can_frame *frame) {
+static void canframe_to_can(unsigned char *netframe, struct can_frame *frame) {
     frame->can_id = le32(netframe);
     frame->can_dlc = netframe[4];
     memcpy(&frame->data, &netframe[8], 8);
 }
 
-void ascii_to_can(char *s, struct can_frame *frame) {
+static void ascii_to_can(const char *s, struct can_frame *frame) {
     int i;
     unsigned char d[13];
 
@@ -120,7 +120,7 @@ void ascii_to_can(char *s, struct can_frame *frame) {
     frame_to_can(d, frame);
 }
 
-void slcan_to_can(char *s, struct can_frame *frame) {
+static void slcan_to_can(const char *s, struct can_frame *frame) {
     int i;
     unsigned int dat;
 
@@ -132,7 +132,7 @@ void slcan_to_can(char *s, struct can_frame *frame) {
     }
 }
 
-void candump_to_can(char *s, struct can_frame *frame) {
+static void candump_to_can(char *s, struct can_frame *frame) {
     unsigned int i, dat;
     char *candata;
 
@@ -156,7 +156,7 @@ void candump_to_can(char *s, struct can_frame *frame) {
     }
 }
 
-int print_can_frame(char *format_string, struct can_frame *frame) {
+static int print_can_frame(const char *format_string, const struct can_frame *frame) {
     int i;
     if (frame->can_dlc > 8) {
 	printf(RED " Invalid DLC %d found\n" RESET, frame->can_dlc);
@@ -189,7 +189,7 @@ int print_can_frame(char *format_string, struct can_frame *frame) {
     return 0;
 }
 
-void print_ascii_data(struct can_frame *frame) {
+static void print_ascii_data(const struct can_frame *frame) {
     int i;
 
     printf("  '");
@@ -202,7 +202,7 @@ void print_ascii_data(struct can_frame *frame) {
     printf("'\n");
 }
 
-void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame *frame) {
+static void write_candumpfile(FILE *fp, struct timeval tv, const char *name, const struct can_frame *frame) {
 
     fprintf(fp, "(%ld.%06ld) %s ", tv.tv_sec, tv.tv_usec, name);
     if (frame->can_id & (CAN_EFF_FLAG | CAN_ERR_FLAG)) {
@@ -220,7 +220,7 @@ void write_candumpfile(FILE *fp, struct timeval tv, char *name, struct can_frame
     fprintf(fp, "\n");
 }
 
-void decode_frame(struct can_frame *frame) {
+static void decode_frame(struct can_frame *frame) {
     uint32_t function, uid, cv_number, cv_index;
     uint16_t kenner;
     char s[32];
@@ -304,9 +304,9 @@ void decode_frame(struct can_frame *frame) {
 	v = be16(&frame->data[4]);
 	v = v / 10;
 	if (frame->can_dlc == 4)
-	    printf("Lok %s Abfrage Fahrstufe", getLoco(frame->data, s));
+	    printf("%s Abfrage Fahrstufe", getDesc(frame->data, s));
 	else if (frame->can_dlc == 6)
-	    printf("Lok %s Geschwindigkeit: %3.1f", getLoco(frame->data, s), v);
+	    printf("%s Geschwindigkeit: %3.1f", getDesc(frame->data, s), v);
 	printf("\n");
 	break;
     /* Lok Richtung */
@@ -314,7 +314,7 @@ void decode_frame(struct can_frame *frame) {
     case 0x0B:
 	memset(s, 0, sizeof(s));
 
-	printf("Lok %s ", getLoco(frame->data, s));
+	printf("%s ", getDesc(frame->data, s));
 	if (frame->can_dlc == 4) {
 	    printf("Richtung wird abgefragt");
 	} else if (frame->can_dlc == 5) {
@@ -342,12 +342,12 @@ void decode_frame(struct can_frame *frame) {
     case 0x0C:
     case 0x0D:
 	if (frame->can_dlc == 5)
-	    printf("Lok %s Funktion %d", getLoco(frame->data, s), frame->data[4]);
+	    printf("%s Funktion %d", getDesc(frame->data, s), frame->data[4]);
 	else if (frame->can_dlc == 6)
-	    printf("Lok %s Funktion %d Wert %d", getLoco(frame->data, s), frame->data[4], frame->data[5]);
+	    printf("%s Funktion %d Wert %d", getDesc(frame->data, s), frame->data[4], frame->data[5]);
 	else if (frame->can_dlc == 7)
-	    printf("Lok %s Funktion %d Wert %d Funktionswert %d",
-		   getLoco(frame->data, s), frame->data[4], frame->data[5], be16(&frame->data[6]));
+	    printf("%s Funktion %d Wert %d Funktionswert %d",
+		   getDesc(frame->data, s), frame->data[4], frame->data[5], be16(&frame->data[6]));
 	printf("\n");
 	break;
     /* Read Config */
@@ -355,8 +355,8 @@ void decode_frame(struct can_frame *frame) {
 	if (frame->can_dlc == 7) {
 	    cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	    cv_index = frame->data[4] >> 2;
-	    printf("Read Config Lok %s CV Nummer %u Index %u Anzahl %u",
-		   getLoco(frame->data, s), cv_number, cv_index, frame->data[6]);
+	    printf("Read Config %s CV Nummer %u Index %u Anzahl %u",
+		   getDesc(frame->data, s), cv_number, cv_index, frame->data[6]);
 	}
 	printf("\n");
 	break;
@@ -364,28 +364,52 @@ void decode_frame(struct can_frame *frame) {
 	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	cv_index = frame->data[4] >> 2;
 	if (frame->can_dlc == 6)
-	    printf("Read Config Lok %s CV Nummer %u Index %u", getLoco(frame->data, s), cv_number, cv_index);
+	    printf("Read Config %s CV Nummer %u Index %u fehlerhaft", getDesc(frame->data, s), cv_number, cv_index);
 	if (frame->can_dlc == 7)
-	    printf("Read Config Lok %s CV Nummer %u Index %u Wert %u",
-		   getLoco(frame->data, s), cv_number, cv_index, frame->data[6]);
+	    printf("Read Config %s CV Nummer %u Index %u Wert %u",
+		   getDesc(frame->data, s), cv_number, cv_index, frame->data[6]);
 	printf("\n");
 	break;
     /* Write Config */
     case 0x10:
-    case 0x11:
-	/* TODO */
 	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
 	cv_index = frame->data[4] >> 2;
-	if (frame->can_dlc == 8)
-	    printf("Write Config Lok %s CV Nummer %u Index %u Wert %u Ctrl 0x%02X\n", getLoco(frame->data, s),
-		   cv_number, cv_index, frame->data[6], frame->data[7]);
+	if (frame->can_dlc == 8) {
+		if (frame->data[7] & 0x10)
+			printf("Write Config %s REG Nummer %u Wert %u Ctrl 0x%02X",
+				getDesc(frame->data, s), cv_number, frame->data[6], frame->data[7]);
+		else {
+	    	printf("Write Config %s CV Nummer %u Index %u ", getDesc(frame->data, s), cv_number, cv_index);
+			if (frame->data[7] & 0x20)
+			printf("BIT %u -> %u", frame->data[6] & 7, (frame->data[6] >> 4) & 1);
+	    	else
+			printf("Wert %u Ctrl 0x%02X", frame->data[6], frame->data[7]);
+		}
+		if (frame->data[7] & 0x80) printf(" POM");
+		if (frame->data[7] & 0x40) printf(" MULTI");
+	}
 	else
-	    printf("Write Config Lok %s Befehl unbekannt\n", getLoco(frame->data, s));
+	    printf("Write Config %s Befehl unbekannt\n", getDesc(frame->data, s));
+	printf("\n");
+	break;
+    case 0x11:
+	cv_number = ((frame->data[4] & 0x3) << 8) + frame->data[5];
+	cv_index = frame->data[4] >> 2;
+	if (frame->can_dlc == 8) {
+	    printf("Write Config %s CV Nummer %u Index %u Wert %u Rslt 0x%02X", getDesc(frame->data, s),
+		   cv_number, cv_index, frame->data[6], frame->data[7]);
+		if (frame->data[7] & 0x80) printf(" WR_OK");
+		if (frame->data[7] & 0x40) printf(" VER_OK");
+	}
+	else
+	    printf("Write Config %s Befehl unbekannt\n", getDesc(frame->data, s));
+	printf("\n");
 	break;
     /* Zubehör schalten */
     case 0x16:
     case 0x17:
 	uid = be32(frame->data);
+	// TODO: add an additional 2048 address block for Extended Accessory Decoders
 	if (frame->can_dlc >= 6) {
 	    if ((uid > 0x2FFF) && (uid < 0x3400))
 		printf("Magnetartikel MM1 ID %u Ausgang %u Strom %u", uid - 0x2FFF, frame->data[4], frame->data[5]);
@@ -543,8 +567,8 @@ void decode_frame(struct can_frame *frame) {
 	    kenner = be16(&frame->data[4]);
 	    printf("Connect6021 UID 0x%08X mit Kenner 0x%04X\n", uid, kenner);
 	} else if (frame->can_dlc == 5) {
-	    printf("Connect6021 Config: Lok %s gesteuert via Adresse %02u\n",
-			getLoco(frame->data, s), frame->data[4]);
+	    printf("Connect6021 Config: %s gesteuert via Adresse %02u\n",
+			getDesc(frame->data, s), frame->data[4]);
 	} else {
 	    cdb_extension_wc(frame);
 	}
@@ -558,8 +582,8 @@ void decode_frame(struct can_frame *frame) {
 	    printf("Automatik schalten: ID 0x%04X Funktion 0x%04X Stellung 0x%02X Parameter 0x%02X\n",
 		   kenner, function, frame->data[4], frame->data[5]);
 	if (frame->can_dlc == 8)
-	    printf("Automatik schalten: ID 0x%04X Funktion 0x%04X Lok %s\n", kenner, function,
-		   getLoco(&frame->data[4], s));
+	    printf("Automatik schalten: ID 0x%04X Funktion 0x%04X %s\n", kenner, function,
+		   getDesc(&frame->data[4], s));
 	break;
     /* Blocktext zuordnen */
     case 0x62:
@@ -569,7 +593,7 @@ void decode_frame(struct can_frame *frame) {
 	if (frame->can_dlc == 4)
 	    printf("Blocktext zuordnen: ID 0x%04X Funktion 0x%04X\n", kenner, function);
 	if (frame->can_dlc == 8)
-	    printf("Blocktext zuordnen: ID 0x%04X Funktion 0x%04X Lok %s\n", kenner, function, getLoco(&frame->data[4], s));
+	    printf("Blocktext zuordnen: ID 0x%04X Funktion 0x%04X %s\n", kenner, function, getDesc(&frame->data[4], s));
 	break;
     case 0x64:
     case 0x65:
@@ -591,7 +615,7 @@ void decode_frame(struct can_frame *frame) {
     }
 }
 
-void analyze_frame(struct can_frame *frame) {
+static void analyze_frame(struct can_frame *frame) {
     if (frame->can_id & CAN_EFF_FLAG) {	/* decode only EFF frames */
 	print_can_frame(F_N_CAN_FORMAT_STRG, frame);
 	if (check_cs1_frame(frame->can_id))
@@ -729,7 +753,7 @@ int main(int argc, char **argv) {
 	char can_string[MAXSIZE];
 	char datum[MAXSIZE];
 	size_t size = MAXSIZE;
-	char *pos_r, *pos_w, *pos_0;
+	const char *pos_r, *pos_w, *pos_0;
 	struct can_frame aframe;
 	int date, time, milli, slcan_format = 0;
 
@@ -796,7 +820,7 @@ int main(int argc, char **argv) {
 	const unsigned char *packet;
 	struct pcap_pkthdr header;
 	struct ip *ip_hdr;
-	struct tm *tm;
+	const struct tm *tm;
 	uint16_t sport, dport;
 	memset(timestamp, 0, sizeof(timestamp));
 
